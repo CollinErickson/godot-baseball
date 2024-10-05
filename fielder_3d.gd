@@ -5,6 +5,7 @@ const SPEED = 7.0
 
 var assignment
 var assignment_pos
+var holding_ball
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -48,4 +49,5 @@ func _physics_process(delta: float) -> void:
 		position = assignment_pos
 		assignment = null
 		ball_fielded.emit()
+		holding_ball = true
 	

@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://cpobb8pjdcvp4"]
+
+[ext_resource type="Texture2D" uid="uid://clwmy5p04a1je" path="res://batter.png" id="1_f7x4o"]
+[ext_resource type="Script" path="res://runner_3d.gd" id="1_lpabj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spjb0"]
+atlas = ExtResource("1_f7x4o")
+region = Rect2(0, 0, 320, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jwoye"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_spjb0")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Runner3D" type="CharacterBody3D"]
+script = ExtResource("1_lpabj")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+offset = Vector2(0, 160)
+pixel_size = 0.006
+sprite_frames = SubResource("SpriteFrames_jwoye")

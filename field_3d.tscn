@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=44 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://5wu7ixh2ku7q" path="res://catchers_mitt.tscn" id="5_kcgmt"]
 [ext_resource type="PackedScene" uid="uid://c6yokfan7mlg7" path="res://bat_3d.tscn" id="6_i5fsa"]
 [ext_resource type="PackedScene" uid="uid://d2u5xg584fowv" path="res://test_mesh_sprite_3d.tscn" id="7_6vvt6"]
+[ext_resource type="PackedScene" uid="uid://cpobb8pjdcvp4" path="res://runner_3d.tscn" id="8_eblru"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -19,11 +20,14 @@ subsurf_scatter_strength = 1.0
 material = SubResource("StandardMaterial3D_tww2n")
 size = Vector3(300, 2, 300)
 
+[sub_resource type="BoxMesh" id="BoxMesh_s3y8d"]
+size = Vector3(0.35, 0.01, 0.35)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6mnrb"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ehdc6"]
 material = SubResource("StandardMaterial3D_6mnrb")
-size = Vector3(0.33, 0.01, 0.33)
+size = Vector3(0.5, 0.01, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t4cn5"]
 albedo_color = Color(0.27451, 0, 0.529412, 1)
@@ -37,12 +41,12 @@ size = Vector3(50, 15, 0.1)
 [sub_resource type="QuadMesh" id="QuadMesh_m8866"]
 material = SubResource("StandardMaterial3D_ql0xs")
 size = Vector2(0.06, 100)
-center_offset = Vector3(0.03, 0.01, 51.5)
+center_offset = Vector3(0.03, 0.002, 51.5)
 orientation = 1
 
 [sub_resource type="QuadMesh" id="QuadMesh_mt18i"]
 size = Vector2(100, 0.06)
-center_offset = Vector3(51.5, 0.001, 0)
+center_offset = Vector3(51.5, 0.002, 0)
 orientation = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7incl"]
@@ -61,6 +65,43 @@ albedo_color = Color(1, 0, 1, 1)
 material = SubResource("StandardMaterial3D_0ub3u")
 size = Vector2(50, 10)
 orientation = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2l12r"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_1ele2"]
+material = SubResource("StandardMaterial3D_2l12r")
+size = Vector2(2, 32)
+center_offset = Vector3(0, 0.001, 15)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wajhj"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_s7hxx"]
+material = SubResource("StandardMaterial3D_wajhj")
+size = Vector2(32, 2)
+center_offset = Vector3(15, 0.001, 0)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_phlfu"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_hc8md"]
+material = SubResource("StandardMaterial3D_phlfu")
+size = Vector2(32, 2)
+center_offset = Vector3(15, 0.001, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_27klc"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_qubo7"]
+material = SubResource("StandardMaterial3D_27klc")
+size = Vector2(2, 32)
+center_offset = Vector3(30, 0.001, 15)
+orientation = 1
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_whjik"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n67bh"]
 
@@ -117,22 +158,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 mesh = SubResource("BoxMesh_i5ps3")
 
 [node name="HomePlate" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 0.25)
-mesh = SubResource("BoxMesh_ehdc6")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.175, 0.01, 0.175)
+mesh = SubResource("BoxMesh_s3y8d")
 skeleton = NodePath("../GreenGround")
 
 [node name="FirstBase" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25, 0.01, 0.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.75, 0.01, 0.25)
 mesh = SubResource("BoxMesh_ehdc6")
 skeleton = NodePath("../GreenGround")
 
 [node name="SecondBase" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25, 0.01, 30.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.01, 30)
 mesh = SubResource("BoxMesh_ehdc6")
 skeleton = NodePath("../GreenGround")
 
 [node name="ThirdBase" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 30.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 29.75)
 mesh = SubResource("BoxMesh_ehdc6")
 skeleton = NodePath("../GreenGround")
 
@@ -155,6 +196,21 @@ mesh = SubResource("CylinderMesh_rjcmf")
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 100, 0, 0)
 mesh = SubResource("QuadMesh_e183p")
 skeleton = NodePath("../../Headon")
+
+[node name="DirtHomeToFirst" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("QuadMesh_1ele2")
+
+[node name="DirtThirdToHome" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("QuadMesh_s7hxx")
+
+[node name="DirtFirstToSecond" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_hc8md")
+
+[node name="DirtSecondToThird" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("QuadMesh_qubo7")
+
+[node name="testarraymeshdelete" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("ArrayMesh_whjik")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, 0, 3, 0)
@@ -248,6 +304,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 [node name="TestMeshSprite3D" parent="Headon" instance=ExtResource("7_6vvt6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 1)
 
+[node name="Runner3DHome" parent="Headon" instance=ExtResource("8_eblru")]
+visible = false
+
 [node name="TimerCameraChange" type="Timer" parent="."]
 
+[connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]

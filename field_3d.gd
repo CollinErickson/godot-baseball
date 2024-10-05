@@ -7,8 +7,62 @@ var ball_in_play_state_time = 0
 const sz_z = 0.6
 
 func _on_ball_fielded_by_fielder():
-	print("FIELDDDDDEDFDFEFDFDFDDDDD")
 	get_node("Headon/Ball3D").ball_fielded()
+
+func test_mesh_array():
+	var surface_array = []
+	surface_array.resize(Mesh.ARRAY_MAX)
+	
+	var verts = PackedVector3Array()
+	var uvs = PackedVector2Array()
+	var normals = PackedVector3Array()
+	#var indices = PackedInt32Array()
+	var colors = PackedColorArray()
+	
+	# Vertices
+	verts.push_back(Vector3(0,0,0))
+	verts.push_back(Vector3(2,0,0))
+	verts.push_back(Vector3(2,2,0))
+	verts.push_back(Vector3(2,2,0))
+	verts.push_back(Vector3(4,2,0))
+	verts.push_back(Vector3(4,4,0))
+	
+	#uvs.push_back(Vector2(.3,.4))
+	#uvs.push_back(Vector2(.3,.4))
+	#uvs.push_back(Vector2(.3,.4))
+	
+	#normals.push_back(Vector3(0,0,1))
+	#normals.push_back(Vector3(0,0,1))
+	#normals.push_back(Vector3(0,0,1))
+	
+	# Colors
+	#colors.push_back(Color("red"))
+	#colors.push_back(Color("red"))
+	colors.push_back(Color(0,1,0,1))
+	colors.push_back(Color(0,1,0,1))
+	colors.push_back(Color(0,1,0,1))
+	colors.push_back(Color(0,1,0,1))
+	colors.push_back(Color(0,1,0,1))
+	colors.push_back(Color(0,1,0,1))
+	
+	surface_array[Mesh.ARRAY_VERTEX] = verts
+	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
+	#surface_array[Mesh.ARRAY_NORMAL] = normals
+	#surface_array[Mesh.ARRAY_INDEX] = indices
+	surface_array[Mesh.ARRAY_COLOR] = colors
+	#printt('new mesh is', surface_array)
+
+	# No blendshapes, lods, or compression used.
+	var meshnode = get_node("Ground/testarraymeshdelete")
+	meshnode.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
+	
+	#meshnode.mesh
+	#printt("printing dir?")
+	#print((meshnode.mesh.get_method_list()))
+	var your_material = StandardMaterial3D.new()
+	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
+	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -16,11 +70,16 @@ func _ready() -> void:
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
 	
-	get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(1,0,0,1)
+	get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
 	
 	# Set up signals from fielders
 	for enemy in get_tree().get_nodes_in_group('fielders'):  
 		enemy.connect("ball_fielded", _on_ball_fielded_by_fielder)
+	
+	# Test mesh array
+	test_mesh_array()
+
+	
 
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()
@@ -33,7 +92,7 @@ func get_mouse_sz_pos():
 	return cross_sz
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	#printt('get_mouse_z', get_mouse_sz_pos())
 	
 	# R key reloads
@@ -70,6 +129,12 @@ func _process(_delta: float) -> void:
 					print('velo vec is')
 					print(ball3d.velocity)
 					
+					# Start running after .5 seconds
+					var batter = get_node("Headon/Batter3D")
+					batter.timer_action = "start_running_after_hit"
+					batter.get_node("Timer").wait_time = 0.5
+					batter.get_node("Timer").start()
+					
 					
 					# Change camera
 					$TimerCameraChange.wait_time = .3
@@ -83,7 +148,7 @@ func _process(_delta: float) -> void:
 				else:
 					pass #print('MISSED')
 	if ball_in_play:
-		ball_in_play_state_time += _delta
+		ball_in_play_state_time += delta
 		
 		if ball_in_play_state == "prereflex" and ball_in_play_state_time > .4:
 			printt("REACT NOW")
@@ -92,18 +157,55 @@ func _process(_delta: float) -> void:
 			var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 			printt('fielder nodes', fielder_nodes)
 			assign_fielders_after_hit()
+	
+	# Adjust camera
+	if get_viewport():
+		var cam = get_viewport().get_camera_3d()
+		var cam_move_speed = 10
+		var cam_rotate_speed = 0.3
+		if Input.is_key_pressed(KEY_5):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_y(delta*cam_rotate_speed)
+			else:
+				cam.position.x += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_6):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_y(-delta*cam_rotate_speed)
+			else:
+				cam.position.x -= delta * cam_move_speed
+		if Input.is_key_pressed(KEY_7):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_x(delta*cam_rotate_speed)
+			else:
+				cam.position.y += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_8):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_x(-delta*cam_rotate_speed)
+			else:
+				cam.position.y -= delta * cam_move_speed
+		if Input.is_key_pressed(KEY_9):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_z(delta*cam_rotate_speed)
+			else:
+				cam.position.z += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_0):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_z(-delta*cam_rotate_speed)
+			else:
+				cam.position.z -= delta * cam_move_speed
+		
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
 func assign_fielders_after_hit():
-	printt("Starting assign_fielders_after_hit !!")
+	#printt("Starting assign_fielders_after_hit !!")
 	var fielder_nodes = get_tree().get_nodes_in_group('fielders')
-	printt('fielder nodes', fielder_nodes)
+	#printt('fielder nodes', fielder_nodes)
 	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball"
 	get_node("Headon").add_child(tmp_ball)
-	printt('tmp_ball', tmp_ball)
+	#printt('tmp_ball', tmp_ball)
 	tmp_ball.position = ball.position
 	#printt('balls global pos', tmp_ball.global_position, ball.global_position)
 	tmp_ball.velocity = ball.velocity
@@ -163,3 +265,16 @@ func _on_timer_camera_change_timeout() -> void:
 		
 		$Headon/Ball3D.scale=11*Vector3(1,1,1)
 	$TimerCameraChange.stop()
+
+
+func _on_batter_3d_start_runner() -> void:
+	# Start runner
+	var runner_node = get_node("Headon/Runner3DHome")
+	runner_node.set_process(true)
+	runner_node.visible = true
+	runner_node.is_running = true
+	runner_node.running_progress = .04
+	
+	# Turn off batter
+	get_node("Headon/Batter3D").visible = false
+	get_node("Headon/Batter3D").set_process(false)
