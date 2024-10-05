@@ -1,0 +1,253 @@
+[gd_scene load_steps=33 format=3 uid="uid://cvloyxg0g0o58"]
+
+[ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
+[ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
+[ext_resource type="PackedScene" uid="uid://c7xao527v2us8" path="res://pitcher_3d.tscn" id="2_57wgl"]
+[ext_resource type="PackedScene" uid="uid://d3vo8o7aa5kqp" path="res://fielder_3d.tscn" id="4_386e5"]
+[ext_resource type="PackedScene" uid="uid://5wu7ixh2ku7q" path="res://catchers_mitt.tscn" id="5_kcgmt"]
+[ext_resource type="PackedScene" uid="uid://c6yokfan7mlg7" path="res://bat_3d.tscn" id="6_i5fsa"]
+[ext_resource type="PackedScene" uid="uid://d2u5xg584fowv" path="res://test_mesh_sprite_3d.tscn" id="7_6vvt6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
+size = Vector3(60, 2, 60)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tww2n"]
+albedo_color = Color(0.0980392, 0.533333, 0.0862745, 1)
+subsurf_scatter_strength = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_i5ps3"]
+material = SubResource("StandardMaterial3D_tww2n")
+size = Vector3(300, 2, 300)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6mnrb"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ehdc6"]
+material = SubResource("StandardMaterial3D_6mnrb")
+size = Vector3(0.33, 0.01, 0.33)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_t4cn5"]
+albedo_color = Color(0.27451, 0, 0.529412, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j3njs"]
+material = SubResource("StandardMaterial3D_t4cn5")
+size = Vector3(50, 15, 0.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ql0xs"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_m8866"]
+material = SubResource("StandardMaterial3D_ql0xs")
+size = Vector2(0.06, 100)
+center_offset = Vector3(0.03, 0.01, 51.5)
+orientation = 1
+
+[sub_resource type="QuadMesh" id="QuadMesh_mt18i"]
+size = Vector2(100, 0.06)
+center_offset = Vector3(51.5, 0.001, 0)
+orientation = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7incl"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_rjcmf"]
+material = SubResource("StandardMaterial3D_7incl")
+top_radius = 3.0
+bottom_radius = 3.0
+height = 0.001
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ub3u"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_e183p"]
+material = SubResource("StandardMaterial3D_0ub3u")
+size = Vector2(50, 10)
+orientation = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n67bh"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_v6v7y"]
+material = SubResource("StandardMaterial3D_n67bh")
+size = Vector3(0.5, 0.01, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_twceg"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_7m2dq"]
+material = SubResource("StandardMaterial3D_twceg")
+size = Vector3(0.03, 0.6, 0.001)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2e5l4"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_yxmap"]
+material = SubResource("StandardMaterial3D_2e5l4")
+size = Vector3(0.5, 0.03, 0.001)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y7r17"]
+albedo_color = Color(0.396078, 0.388235, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8r3k2"]
+material = SubResource("StandardMaterial3D_y7r17")
+top_radius = 3.0
+bottom_radius = 3.0
+height = 0.01
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4sot4"]
+sky_top_color = Color(0.502941, 0.808117, 0.92521, 1)
+sky_horizon_color = Color(0.34483, 0.706547, 0.84805, 1)
+
+[sub_resource type="Sky" id="Sky_7b5f2"]
+sky_material = SubResource("ProceduralSkyMaterial_4sot4")
+
+[sub_resource type="Environment" id="Environment_k40ms"]
+background_mode = 2
+background_color = Color(0.610982, 1, 0.916553, 1)
+sky = SubResource("Sky_7b5f2")
+
+[node name="Field3D" type="Node3D"]
+script = ExtResource("1_pctx6")
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+shape = SubResource("BoxShape3D_yxhqg")
+
+[node name="GreenGround" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+mesh = SubResource("BoxMesh_i5ps3")
+
+[node name="HomePlate" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 0.25)
+mesh = SubResource("BoxMesh_ehdc6")
+skeleton = NodePath("../GreenGround")
+
+[node name="FirstBase" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25, 0.01, 0.25)
+mesh = SubResource("BoxMesh_ehdc6")
+skeleton = NodePath("../GreenGround")
+
+[node name="SecondBase" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.25, 0.01, 30.25)
+mesh = SubResource("BoxMesh_ehdc6")
+skeleton = NodePath("../GreenGround")
+
+[node name="ThirdBase" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 30.25)
+mesh = SubResource("BoxMesh_ehdc6")
+skeleton = NodePath("../GreenGround")
+
+[node name="WallCenter" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 70, 0, 70)
+mesh = SubResource("BoxMesh_j3njs")
+skeleton = NodePath("../..")
+
+[node name="FoulLineRight" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("QuadMesh_m8866")
+
+[node name="FoulLineLeft" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("QuadMesh_mt18i")
+
+[node name="DirtHome" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0, 0.4)
+mesh = SubResource("CylinderMesh_rjcmf")
+
+[node name="WallLeft" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 100, 0, 0)
+mesh = SubResource("QuadMesh_e183p")
+skeleton = NodePath("../../Headon")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, 0, 3, 0)
+shadow_enabled = true
+
+[node name="Headon" type="Node3D" parent="."]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0)
+
+[node name="HomePlate2" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.6)
+mesh = SubResource("BoxMesh_v6v7y")
+skeleton = NodePath("../../Ground/GreenGround")
+
+[node name="Batter3D" parent="Headon" instance=ExtResource("1_f3rg8")]
+transform = Transform3D(-1, 2.10734e-08, 1.49012e-07, -7.8232e-09, 1, 2.98023e-08, 0, 2.10734e-08, -1, 1, 0, 0.5)
+
+[node name="CameraPivot" type="Marker3D" parent="Headon"]
+transform = Transform3D(-1, -1.21669e-08, 8.6572e-08, 0, 0.990268, 0.139173, -8.74228e-08, 0.139173, -0.990268, 0, 0, 0)
+visible = false
+
+[node name="Pitcher3D" parent="Headon" instance=ExtResource("2_57wgl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
+
+[node name="StrikeZoneLeft" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.75, 0.6)
+mesh = SubResource("BoxMesh_7m2dq")
+
+[node name="StrikeZoneRight" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.75, 0.6)
+mesh = SubResource("BoxMesh_7m2dq")
+
+[node name="StrikeZoneTop" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0.6)
+mesh = SubResource("BoxMesh_yxmap")
+
+[node name="StrikeZoneBottom" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.6)
+mesh = SubResource("BoxMesh_yxmap")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Headon"]
+transform = Transform3D(1, 0, 0, 0, -0.25038, 0.968148, 0, -0.968148, -0.25038, 0, 10, -10)
+
+[node name="Camera3DHighHome" type="Camera3D" parent="Headon"]
+transform = Transform3D(-1, -1.51808e-08, 8.60946e-08, 0, 0.984808, 0.173648, -8.74228e-08, 0.173648, -0.984808, 0, 10, -35)
+fov = 18.9
+
+[node name="Mound" type="MeshInstance3D" parent="Headon"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 20)
+mesh = SubResource("CylinderMesh_8r3k2")
+skeleton = NodePath("../../Ground")
+
+[node name="Camera3DPitcherShoulderRight" type="Camera3D" parent="Headon"]
+transform = Transform3D(0.992546, 0.00425318, -0.121795, 0, 0.999391, 0.0348995, 0.121869, -0.0346394, 0.991942, -5, 2, 50)
+fov = 5.7
+
+[node name="Camera3DBatting" type="Camera3D" parent="Headon"]
+transform = Transform3D(-1, 4.57535e-09, -8.73029e-08, 0, 0.99863, 0.0523359, 8.74228e-08, 0.052336, -0.998629, 0, 1.5, -10)
+environment = SubResource("Environment_k40ms")
+current = true
+fov = 12.0
+
+[node name="Defense" type="Node3D" parent="Headon"]
+
+[node name="Fielder3D2B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 42)
+
+[node name="Fielder3D1B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 29)
+
+[node name="Fielder3D3B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 29)
+
+[node name="Fielder3DSS" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 42)
+
+[node name="Fielder3DCF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 70)
+
+[node name="Fielder3DLF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 60)
+
+[node name="Fielder3DRF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 60)
+
+[node name="CatchersMitt" parent="Headon" instance=ExtResource("5_kcgmt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
+
+[node name="Bat3D" parent="Headon" instance=ExtResource("6_i5fsa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
+
+[node name="TestMeshSprite3D" parent="Headon" instance=ExtResource("7_6vvt6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 1)
+
+[node name="TimerCameraChange" type="Timer" parent="."]
+
+[connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]

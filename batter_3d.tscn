@@ -1,0 +1,78 @@
+[gd_scene load_steps=11 format=3 uid="uid://cluomdr4nxc7v"]
+
+[ext_resource type="Script" path="res://batter_3d.gd" id="1_ot85n"]
+[ext_resource type="Texture2D" uid="uid://dxwya6fx8fjq7" path="res://batter4.png" id="3_tbrdd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgvy5"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 0, 480, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xjpro"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 320, 480, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m4lle"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 640, 480, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwoag"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 960, 480, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yjum4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgvy5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xjpro")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m4lle")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uwoag")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mm2qc"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 0, 480, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxk76"]
+atlas = ExtResource("3_tbrdd")
+region = Rect2(0, 960, 480, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rsy1c"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mm2qc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxk76")
+}],
+"loop": true,
+"name": &"default",
+"speed": 2.0
+}]
+
+[node name="Batter3D" type="CharacterBody3D"]
+script = ExtResource("1_ot85n")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+visible = false
+offset = Vector2(80, 160)
+pixel_size = 0.006
+sprite_frames = SubResource("SpriteFrames_yjum4")
+
+[node name="AnimatedSprite3DIdle" type="AnimatedSprite3D" parent="."]
+offset = Vector2(80, 160)
+pixel_size = 0.006
+sprite_frames = SubResource("SpriteFrames_rsy1c")
+autoplay = "default"
+frame_progress = 0.192211

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1nmpc4es4kye"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g00y1"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_hia70"]
+material = SubResource("ShaderMaterial_g00y1")
+
+[node name="Test3DFromSubViewport" type="CharacterBody3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_hia70")

@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3 uid="uid://br2475i6g7pb"]
+
+[ext_resource type="Script" path="res://ball.gd" id="1_82dee"]
+[ext_resource type="Texture2D" uid="uid://bpr3vl4kyoed1" path="res://baseball320x4.png" id="1_omhk3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ac1hr"]
+atlas = ExtResource("1_omhk3")
+region = Rect2(0, 0, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nu4qe"]
+atlas = ExtResource("1_omhk3")
+region = Rect2(0, 320, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hrb0i"]
+atlas = ExtResource("1_omhk3")
+region = Rect2(0, 640, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4vi84"]
+atlas = ExtResource("1_omhk3")
+region = Rect2(0, 960, 320, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_85mva"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ac1hr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nu4qe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hrb0i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4vi84")
+}],
+"loop": true,
+"name": &"default",
+"speed": 15.0
+}]
+
+[node name="ball" type="Node2D"]
+script = ExtResource("1_82dee")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+
+[node name="Baseball320" type="AnimatedSprite2D" parent="CharacterBody2D"]
+position = Vector2(-1, -2)
+sprite_frames = SubResource("SpriteFrames_85mva")
+autoplay = "default"

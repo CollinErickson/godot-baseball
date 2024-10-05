@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://d2u5xg584fowv"]
+
+[ext_resource type="Texture2D" uid="uid://clwmy5p04a1je" path="res://batter.png" id="1_q23fb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_80nxt"]
+albedo_texture = ExtResource("1_q23fb")
+billboard_mode = 1
+
+[sub_resource type="QuadMesh" id="QuadMesh_puls6"]
+material = SubResource("StandardMaterial3D_80nxt")
+orientation = 0
+
+[node name="TestMeshSprite3D" type="CharacterBody3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_puls6")

@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://c7xao527v2us8"]
+
+[ext_resource type="Script" path="res://pitcher_3d.gd" id="1_druss"]
+[ext_resource type="Texture2D" uid="uid://d3ly37owqny11" path="res://pitcher.png" id="1_ms3pr"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0jxoa"]
+atlas = ExtResource("1_ms3pr")
+region = Rect2(0, 0, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_13iue"]
+atlas = ExtResource("1_ms3pr")
+region = Rect2(0, 320, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jbd71"]
+atlas = ExtResource("1_ms3pr")
+region = Rect2(0, 640, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7gl8h"]
+atlas = ExtResource("1_ms3pr")
+region = Rect2(0, 960, 320, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rpjyj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0jxoa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_13iue")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jbd71")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7gl8h")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Pitcher3D" type="CharacterBody3D"]
+script = ExtResource("1_druss")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+offset = Vector2(0, 160)
+pixel_size = 0.006
+sprite_frames = SubResource("SpriteFrames_rpjyj")

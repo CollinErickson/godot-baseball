@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6yokfan7mlg7"]
+
+[ext_resource type="Texture2D" uid="uid://iv0v8pk502fw" path="res://bat.png" id="1_en7wj"]
+
+[node name="Bat3D" type="Node3D"]
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+pixel_size = 0.001
+texture = ExtResource("1_en7wj")

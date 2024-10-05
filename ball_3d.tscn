@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3 uid="uid://dsb1e4kc4120x"]
+
+[ext_resource type="Texture2D" uid="uid://bpr3vl4kyoed1" path="res://baseball320x4.png" id="1_hl1al"]
+[ext_resource type="Script" path="res://ball_3d.gd" id="1_royqy"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_3v07e"]
+radius = 0.042
+height = 0.083
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jyyr6"]
+atlas = ExtResource("1_hl1al")
+region = Rect2(0, 0, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_44kqj"]
+atlas = ExtResource("1_hl1al")
+region = Rect2(0, 320, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cp5gy"]
+atlas = ExtResource("1_hl1al")
+region = Rect2(0, 640, 320, 320)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ss7t4"]
+atlas = ExtResource("1_hl1al")
+region = Rect2(0, 960, 320, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hdlku"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jyyr6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_44kqj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cp5gy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ss7t4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Ball3D" type="CharacterBody3D"]
+script = ExtResource("1_royqy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+cast_shadow = 3
+mesh = SubResource("SphereMesh_3v07e")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+pixel_size = 0.0002
+sprite_frames = SubResource("SpriteFrames_hdlku")

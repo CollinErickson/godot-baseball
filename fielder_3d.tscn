@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://d3vo8o7aa5kqp"]
+
+[ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
+[ext_resource type="Texture2D" uid="uid://d3ly37owqny11" path="res://pitcher.png" id="1_h8fc2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0lqec"]
+atlas = ExtResource("1_h8fc2")
+region = Rect2(0, 960, 320, 320)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8dfmq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0lqec")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Fielder3D" type="CharacterBody3D"]
+script = ExtResource("1_bfowq")
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+offset = Vector2(0, 160)
+pixel_size = 0.006
+sprite_frames = SubResource("SpriteFrames_8dfmq")
