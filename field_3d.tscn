@@ -1,8 +1,9 @@
-[gd_scene load_steps=44 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=45 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
 [ext_resource type="PackedScene" uid="uid://c7xao527v2us8" path="res://pitcher_3d.tscn" id="2_57wgl"]
+[ext_resource type="PackedScene" uid="uid://dmcetu0b5itrl" path="res://wall.tscn" id="2_hfxba"]
 [ext_resource type="PackedScene" uid="uid://d3vo8o7aa5kqp" path="res://fielder_3d.tscn" id="4_386e5"]
 [ext_resource type="PackedScene" uid="uid://5wu7ixh2ku7q" path="res://catchers_mitt.tscn" id="5_kcgmt"]
 [ext_resource type="PackedScene" uid="uid://c6yokfan7mlg7" path="res://bat_3d.tscn" id="6_i5fsa"]
@@ -179,6 +180,7 @@ skeleton = NodePath("../GreenGround")
 
 [node name="WallCenter" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 70, 0, 70)
+visible = false
 mesh = SubResource("BoxMesh_j3njs")
 skeleton = NodePath("../..")
 
@@ -194,6 +196,7 @@ mesh = SubResource("CylinderMesh_rjcmf")
 
 [node name="WallLeft" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 100, 0, 0)
+visible = false
 mesh = SubResource("QuadMesh_e183p")
 skeleton = NodePath("../../Headon")
 
@@ -210,7 +213,10 @@ mesh = SubResource("PlaneMesh_hc8md")
 mesh = SubResource("QuadMesh_qubo7")
 
 [node name="testarraymeshdelete" type="MeshInstance3D" parent="Ground"]
+visible = false
 mesh = SubResource("ArrayMesh_whjik")
+
+[node name="Wall" parent="Ground" instance=ExtResource("2_hfxba")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, 0, 3, 0)
@@ -255,6 +261,10 @@ transform = Transform3D(1, 0, 0, 0, -0.25038, 0.968148, 0, -0.968148, -0.25038, 
 
 [node name="Camera3DHighHome" type="Camera3D" parent="Headon"]
 transform = Transform3D(-1, -1.51808e-08, 8.60946e-08, 0, 0.984808, 0.173648, -8.74228e-08, 0.173648, -0.984808, 0, 10, -35)
+fov = 18.9
+
+[node name="Camera3DAll22" type="Camera3D" parent="Headon"]
+transform = Transform3D(-1, 1.51808e-08, -8.60946e-08, 0, 0.984808, 0.173648, 8.74228e-08, 0.173648, -0.984808, 0, 20, -100)
 fov = 18.9
 
 [node name="Mound" type="MeshInstance3D" parent="Headon"]
@@ -303,6 +313,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 
 [node name="TestMeshSprite3D" parent="Headon" instance=ExtResource("7_6vvt6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 1)
+visible = false
 
 [node name="Runner3DHome" parent="Headon" instance=ExtResource("8_eblru")]
 visible = false

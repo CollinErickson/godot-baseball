@@ -1,5 +1,6 @@
 extends Node2D
 
+@export var test_inspect_var: String
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

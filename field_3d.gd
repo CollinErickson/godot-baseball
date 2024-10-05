@@ -24,8 +24,8 @@ func test_mesh_array():
 	verts.push_back(Vector3(2,0,0))
 	verts.push_back(Vector3(2,2,0))
 	verts.push_back(Vector3(2,2,0))
-	verts.push_back(Vector3(4,2,0))
 	verts.push_back(Vector3(4,4,0))
+	verts.push_back(Vector3(4,2,0))
 	
 	#uvs.push_back(Vector2(.3,.4))
 	#uvs.push_back(Vector2(.3,.4))
@@ -36,14 +36,8 @@ func test_mesh_array():
 	#normals.push_back(Vector3(0,0,1))
 	
 	# Colors
-	#colors.push_back(Color("red"))
-	#colors.push_back(Color("red"))
-	colors.push_back(Color(0,1,0,1))
-	colors.push_back(Color(0,1,0,1))
-	colors.push_back(Color(0,1,0,1))
-	colors.push_back(Color(0,1,0,1))
-	colors.push_back(Color(0,1,0,1))
-	colors.push_back(Color(0,1,0,1))
+	for i in range(len(verts)):
+		colors.push_back(Color(0,0,1,1))
 	
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
@@ -115,14 +109,14 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 40#randf_range(10,50)
-					var vla = randf_range(-1,1)*20
+					var exitvelo = 60#randf_range(10,50)
+					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
 					ball3d.velocity.z = exitvelo
-					print('velo vec before rot is')
+					#print('velo vec before rot is')
 					print(ball3d.velocity)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
@@ -161,6 +155,7 @@ func _process(delta: float) -> void:
 	# Adjust camera
 	if get_viewport():
 		var cam = get_viewport().get_camera_3d()
+		# Move current camera
 		var cam_move_speed = 10
 		var cam_rotate_speed = 0.3
 		if Input.is_key_pressed(KEY_5):
@@ -194,6 +189,15 @@ func _process(delta: float) -> void:
 			else:
 				cam.position.z -= delta * cam_move_speed
 		
+		# Set different camera
+		if Input.is_key_pressed(KEY_1):
+			get_node("Headon/Camera3DBatting").current = true
+		elif Input.is_key_pressed(KEY_2):
+			get_node("Headon/Camera3DHighHome").current = true
+		elif Input.is_key_pressed(KEY_3):
+			get_node("Headon/Camera3DPitcherShoulderRight").current = true
+		elif Input.is_key_pressed(KEY_4):
+			get_node("Headon/Camera3DAll22").current = true
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
