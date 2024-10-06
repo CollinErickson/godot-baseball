@@ -53,6 +53,8 @@ func _physics_process(delta: float) -> void:
 		#prev_position = position
 		velocity += delta * acceleration
 		position += delta * velocity - 0.5 * delta**2 * acceleration
+		for wallnode in get_tree().get_nodes_in_group("walls"):
+			wallnode.check_ball_cross(global_position, to_global(velocity), restitution_coef)
 	#if position.z < 10:
 	#	velocity = Vector3()
 	

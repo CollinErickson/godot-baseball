@@ -11,7 +11,9 @@ func _ready() -> void:
 	printt('ab', a, b)
 	var accel = Vector3(1,2,3)
 	#print(pow(accel, 2)
-	nearest_point_on_plane(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,0), Vector3(1,2,5))
+	#nearest_point_on_plane(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,0), Vector3(1,2,5))
+	
+	printt('fmod', fposmod(720+15- 30, 360.), fposmod(46- 30, 360.), fposmod(15- 30, 360.) <= fposmod(46- 30, 360.))
 	
 func nearest_point_on_plane(v0, v1, v2, x):
 	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/
