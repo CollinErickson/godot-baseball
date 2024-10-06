@@ -9,6 +9,7 @@
 
 [node name="pitchview" type="Node2D"]
 script = ExtResource("1_4jhrc")
+metadata/movie_file = "videos/demos/demo_2D_prototype.avi"
 
 [node name="Sky" type="ColorRect" parent="."]
 offset_left = -3.0
