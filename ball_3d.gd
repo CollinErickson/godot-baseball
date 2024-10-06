@@ -67,8 +67,15 @@ func _physics_process(delta: float) -> void:
 		for wallnode in get_tree().get_nodes_in_group("walls"):
 			var wallout = wallnode.check_ball_cross(global_position, velocity, restitution_coef,
 			prev_global_position, prev_velocity, is_sim)
-			if wallout[0] and not is_sim:
-				assert(false)
+			#if wallout[0] and not is_sim:
+			#	assert(false)
+			if wallout[0] and not wallout[1]:
+				global_position = wallout[2]
+				#printt('velo before and after', velocity, wallout[3])
+				#printt("In ball, hit wall at ball coords", position)
+				velocity = wallout[3]
+				#if not is_sim:
+					#assert(false)
 	#if position.z < 10:
 	#	velocity = Vector3()
 	

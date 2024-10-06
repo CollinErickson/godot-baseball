@@ -15,6 +15,14 @@ func _ready() -> void:
 	
 	printt('fmod', fposmod(720+15- 30, 360.), fposmod(46- 30, 360.), fposmod(15- 30, 360.) <= fposmod(46- 30, 360.))
 	
+	printt('intertwolinseg', 
+	intersect_two_line_segments(
+		Vector2(0,0),
+		Vector2(1,1),
+		Vector2(1,0),
+		Vector2(0,1.999)
+	))
+	
 func nearest_point_on_plane(v0, v1, v2, x):
 	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/
 	#var v0 = Vector3(0,0,0)
@@ -39,6 +47,28 @@ func nearest_point_on_plane(v0, v1, v2, x):
 	printt('nearest point is', nearest_point)
 	return nearest_point
 	
+
+
+func intersect_two_lines(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> Vector2:
+	# u1 and u2 form one line, v1 and v2 form second. All in 2D.
+	var mu = (u2.y - u1.y) / (u2.x - u1.x)
+	var mv = (v2.y - v1.y) / (v2.x - v1.x)
+	assert(mu != mv)
+	var bu = u2.y - mu * u2.x
+	var bv = v2.y - mv * v2.x
+	var x = -(bv - bu) / (mv - mu)
+	var y = mu*x + bu
+	return Vector2(x, y)
+
+func intersect_two_line_segments(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> Array:
+	# u1 and u2 form one line, v1 and v2 form second. All in 2D.
+	var w = intersect_two_lines(u1, u2, v1, v2)
+	if sign((u1 - w).dot(u2 - w)) >= 0:
+		return [false]
+	if sign((v1 - w).dot(v2 - w)) >= 0:
+		return [false]
+	return [true, w]
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta: float) -> void:

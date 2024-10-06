@@ -64,7 +64,7 @@ func _ready() -> void:
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
 	
-	get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
+	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
 	
 	# Set up signals from fielders
 	for enemy in get_tree().get_nodes_in_group('fielders'):  
@@ -110,7 +110,7 @@ func _process(delta: float) -> void:
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
 					var exitvelo = 80#randf_range(10,50)
-					var vla = 4+0*randf_range(-1,1)*20+20
+					var vla = -6+0*randf_range(-1,1)*20+20
 					var hla = 2+0*randf_range(-1,1)*20
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
