@@ -112,7 +112,7 @@ func make_wall():
 	print("Finished make wall")
 
 var restitution_coef = .8 # multiplied by ball restituion_coefv
-func check_ball_cross(pos, vel, cor):
+func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
 	#printt('ball pos is', pos)
 	if pos.x**2 + pos.z**2 < mindist/3:
 		return [false]
@@ -123,51 +123,109 @@ func check_ball_cross(pos, vel, cor):
 		ball_angle -= 360
 	#printt('in check_ball_cross ball_angle is', ball_angle)
 	for i in range(len(wall_array) - 1):
-		# Find if between two points and at least as far as the closer
-		if (#ball_angle >= wall_array[i][0] and 
-			#ball_angle <= wall_array[i+1][0] and
+		# Find if between two points and at least as far as the closest point on that section
+		if (
 			fposmod(ball_angle - wall_array[i][0], 360.) <=
 				 fposmod(wall_array[i+1][0] - wall_array[i][0], 360.) and
 			 sqrt(pos.x**2 + pos.z**2) >= mindists[i]/3.
 			):
-			#printt('check pos??', sqrt(pos.x**2 + pos.z**2), min(wall_array[i][1], wall_array[i+1][1])/3.)
-			#print("maybe collision")
-			#printt("WALL check:", pos, ball_angle, wall_array[i][0], wall_array[i+1][0],
-			#
-			#fposmod(720.+ball_angle - wall_array[i][0], 360.) ,
-			#	 fposmod(wall_array[i+1][0] - wall_array[i][0], 360.) ,
-			# sqrt(pos.x**2 + pos.z**2) >= mindists[i]/3.,
-			# sqrt(pos.x**2 + pos.z**2) , wall_array[i][1]/3., wall_array[i+1][1]/3.)
 			# Check if beyond that wall
 			# This math was complicated, but essentially you find the intersection of two lines
+			# Fit line z=mx+k (since walls are vertical, y is always 0), using points of wall
+			var wall_left_z =  wall_array[i][1]*cosd(wall_array[i][0])
+			var wall_left_x =  wall_array[i][1]*sind(wall_array[i][0])
+			var wall_right_z =  wall_array[i+1][1]*cosd(wall_array[i+1][0])
+			var wall_right_x =  wall_array[i+1][1]*sind(wall_array[i+1][0])
 			var m = (
-				(wall_array[i+1][1]*cosd(wall_array[i+1][0]) - wall_array[i][1]*cosd(wall_array[i][0])) /
-				(wall_array[i+1][1]*sind(wall_array[i+1][0]) - wall_array[i][1]*sind(wall_array[i][0]))
+				(wall_left_z - wall_right_z) /
+				(wall_left_x - wall_right_x)
 			)
-			var z = wall_array[i+1][1]*cosd(wall_array[i+1][0]) - m*wall_array[i+1][1]*sind(wall_array[i+1][0])
-			var x_intersect = -z / (m - 1/tan(ball_angle*PI/180))
-			var y_intersect = m*x_intersect + z
-			var v_intersect = Vector2(x_intersect, y_intersect)
+			#var z = wall_array[i+1][1]*cosd(wall_array[i+1][0]) - m*wall_array[i+1][1]*sind(wall_array[i+1][0])
+			var k = wall_right_z - m * wall_right_x
+			var x_intersect = -k / (m - 1/tan(ball_angle*PI/180))
+			var z_intersect = m*x_intersect + k
+			var v_intersect = Vector2(x_intersect, z_intersect)
 			#printt("Wall check:", sqrt(pos.x**2 + pos.z**2) , v_intersect.length()/3.)
 			if sqrt(pos.x**2 + pos.z**2) >= v_intersect.length()/3.:
 				var wall_length_to_left = v_intersect.distance_to(
-					Vector2(wall_array[i][1]*sind(wall_array[i][0]), wall_array[i][1]*cosd(wall_array[i][0])))
+					Vector2(wall_left_x, wall_left_z))
 				var wall_length_to_right = v_intersect.distance_to(
-					Vector2(wall_array[i+1][1]*sind(wall_array[i+1][0]), wall_array[i+1][1]*cosd(wall_array[i+1][0])))
+					Vector2(wall_right_x, wall_right_z))
 				var weight = wall_length_to_right / (wall_length_to_right + wall_length_to_left)
 				var wall_dist = v_intersect.length() #weight * wall_array[i][1] + (1 - weight) * wall_array[i+1][1]
 				var wall_height = weight * wall_array[i][2] + (1 - weight) * wall_array[i+1][2]
 				var is_over = pos.y > wall_height / 3.
 				if is_over:
+					print("OVER wall")
 					return [true, is_over]
+				print('HIT wall')
 				# Bounce it off the vel
 				var new_pos = pos
 				var new_vel = vel
-				# Reflect position vector across wall, dampen with cor
-				# Reflect velocity vector across wall, dampen with cor
+				# TODO pos.y shouldn't be used here, interpolate
+				var v3_intersect = Vector3(x_intersect, pos.y*3, z_intersect)
+				# Reflect position vector across wall, dampen with cor proportionally
+				var diff_pos_to_wall = v3_intersect/3 - prev_pos
+				var diff_pos_after_wall = pos - v3_intersect/3
+				if not is_sim:
+					printt("Checking diff pos", pos, v3_intersect/3, prev_pos,
+						diff_pos_to_wall, diff_pos_after_wall)
+					printt('intersect two lines:',
+					intersect_two_lines(
+						Vector2(wall_left_x, wall_left_z)/3,
+						Vector2(wall_right_x, wall_right_z)/3,
+						Vector2(prev_pos.x, prev_pos.z), 
+						Vector2(pos.x, pos.z)
+					))
+				# Reflect velocity vector across wall, dampen with cor fully
 				return [true, is_over, new_pos, new_vel]
 	# Found no contact
 	return [false]
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta: float) -> void:
 #	pass
+
+
+func nearest_point_on_plane(v0, v1, v2, x):
+	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/
+	#var v0 = Vector3(0,0,0)
+	#var v1 = Vector3(1,0,0)
+	#var v2 = Vector3(0,-1,0)
+	if v2.length_squared() <= 0:
+		var tmp = v2
+		v2 = v0
+		v0 = tmp
+	if v1.length_squared() <= 0:
+		var tmp = v1
+		v1 = v0
+		v0 = tmp
+	var cross = v1.cross(v2)
+	printt('CROSS', cross)
+	# Find closest point to x on plane
+	#var v3 = Vector3(1,1,4)
+	var t = -(cross[0]*(x[0]-v0[0]) + cross[1]*(x[1]-v0[1]) + cross[2]*(x[2]-v0[2])
+				) / (cross[0]**2 + cross[1]**2 + cross[2]**2)
+	printt('t is', t)
+	var nearest_point = x + Vector3(cross[0]*t, cross[1]*t, cross[2]*t)
+	printt('nearest point is', nearest_point)
+	return nearest_point
+	
+func intersect_two_lines(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> Vector2:
+	# u1 and u2 form one line, v1 and v2 form second. All in 2D.
+	var mu = (u2.y - u1.y) / (u2.x - u1.x)
+	var mv = (v2.y - v1.y) / (v2.x - v1.x)
+	assert(mu != mv)
+	var bu = u2.y - mu * u2.x
+	var bv = v2.y - mv * v2.x
+	var x = -(bv - bu) / (mv - mu)
+	var y = mu*x + bu
+	return Vector2(x, y)
+
+func intersect_two_line_segments(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> Array:
+	# u1 and u2 form one line, v1 and v2 form second. All in 2D.
+	var w = intersect_two_lines(u1, u2, v1, v2)
+	if sign((u1 - w).dot(u2 - w)) >= 0:
+		return [false]
+	if sign((v1 - w).dot(v2 - w)) >= 0:
+		return [false]
+	return [true, w]

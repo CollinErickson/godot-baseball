@@ -109,9 +109,9 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 60#randf_range(10,50)
-					var vla = randf_range(-1,1)*20+20
-					var hla = randf_range(-1,1)*20
+					var exitvelo = 80#randf_range(10,50)
+					var vla = 4+0*randf_range(-1,1)*20+20
+					var hla = 2+0*randf_range(-1,1)*20
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -208,6 +208,7 @@ func assign_fielders_after_hit():
 	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball"
+	tmp_ball.is_sim = true
 	get_node("Headon").add_child(tmp_ball)
 	#printt('tmp_ball', tmp_ball)
 	tmp_ball.position = ball.position
@@ -257,6 +258,9 @@ func assign_fielders_after_hit():
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)
 	tmp_ball.queue_free()
+	
+	for i in range(10):
+		print('------- done with tmp_ball')
 
 
 var next_camera = null

@@ -18,9 +18,13 @@ var ball_radius = 0.042
 var delivery_bounced = false
 
 var is_frozen = false
+var is_sim = false # simulation
 
 
-#var prev_position
+var prev_position
+var prev_velocity
+var prev_global_position
+var prev_global_velocity
 
 func pow_vec_components(x, a=2) :
 	var y = Vector3()
@@ -38,6 +42,12 @@ func _physics_process(delta: float) -> void:
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)
 	#print('in ball pp globalpos, ', global_position)
+	#printt('ball is sim', is_sim)
+	prev_position = position
+	prev_velocity = velocity
+	prev_global_position = global_position
+	#printt(' check prev pos', position, prev_position, global_position, to_global(position), to_global(prev_position), prev_global_position)
+	#printt(' check prev vel', position, prev_position, global_position, prev_global_position, velocity, prev_velocity, to_global(velocity))
 	if velocity.length_squared() > 0:
 		pass
 		#print('in ball pp, velo is: ', velocity.length())
@@ -52,9 +62,13 @@ func _physics_process(delta: float) -> void:
 			acceleration -= drag_coef * velocity.length_squared() * velocity.normalized()
 		#prev_position = position
 		velocity += delta * acceleration
+		# If you do velocity first, then subtract accel, more accurate
 		position += delta * velocity - 0.5 * delta**2 * acceleration
 		for wallnode in get_tree().get_nodes_in_group("walls"):
-			wallnode.check_ball_cross(global_position, to_global(velocity), restitution_coef)
+			var wallout = wallnode.check_ball_cross(global_position, velocity, restitution_coef,
+			prev_global_position, prev_velocity, is_sim)
+			if wallout[0] and not is_sim:
+				assert(false)
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
