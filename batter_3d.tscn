@@ -75,7 +75,7 @@ offset = Vector2(80, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_rsy1c")
 autoplay = "default"
-frame_progress = 0.438431
+frame_progress = 0.00390523
 
 [node name="Timer" type="Timer" parent="."]
 

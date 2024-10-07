@@ -16,10 +16,12 @@ var pitch_in_progress = false
 var pitch_already_done = false
 var ball_radius = 0.042
 var delivery_bounced = false
+var hit_bounced = false
 
 var is_frozen = false
 var is_sim = false # simulation
 
+var state = 'prepitch'
 
 var prev_position
 var prev_velocity

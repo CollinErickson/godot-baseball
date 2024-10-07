@@ -8,14 +8,15 @@ const sz_z = 0.6
 
 func _on_ball_fielded_by_fielder():
 	get_node("Headon/Ball3D").ball_fielded()
+	
 
 func test_mesh_array():
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	
 	var verts = PackedVector3Array()
-	var uvs = PackedVector2Array()
-	var normals = PackedVector3Array()
+	#var uvs = PackedVector2Array()
+	#var normals = PackedVector3Array()
 	#var indices = PackedInt32Array()
 	var colors = PackedColorArray()
 	
@@ -218,9 +219,9 @@ func assign_fielders_after_hit():
 	#printt('pos before', tmp_ball.position)
 	#tmp_ball._physics_process(1)
 	#printt('pos after', tmp_ball.position)
-	var take_steps = func(nsteps, delta):
+	var take_steps = func(nsteps, delta_):
 		for istep in range(nsteps):
-			tmp_ball._physics_process(delta)
+			tmp_ball._physics_process(delta_)
 	# Check every ~.5 second to see if each fielder can reach the ball
 	var iii = 0
 	var numsteps = 5

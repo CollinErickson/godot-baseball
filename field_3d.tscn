@@ -147,6 +147,7 @@ sky = SubResource("Sky_7b5f2")
 
 [node name="Field3D" type="Node3D"]
 script = ExtResource("1_pctx6")
+metadata/movie_file = "videos/demos/demo_3D_2024-10-06.avi"
 
 [node name="Ground" type="StaticBody3D" parent="."]
 
@@ -319,6 +320,12 @@ visible = false
 visible = false
 
 [node name="TimerCameraChange" type="Timer" parent="."]
+
+[node name="Label" type="Label" parent="."]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Home run!"
 
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]

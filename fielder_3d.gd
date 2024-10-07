@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 
-const SPEED = 7.0
+const SPEED = 8.0
 
 var assignment
 var assignment_pos

@@ -3,18 +3,19 @@ extends Node3D
 @export var Type: String
 
 # (angle: 0 is LF, 90 is RF, distance from home in FT, height in FT)
-var col = "Red"
-#var wall_array = [
-	#[-15, 270, 20],
-	#[0, 320, 10],
-	#[30, 370, 15],
-	#[45, 408, 16],
-	#[60, 350, 15],
-	#[90, 310, 8],
-	#[105, 250, 20]
-	##[0,400,10],
-	##[90,600,90]
-#]
+#var wall_color = "Red"
+var wall_color = Color(0,0,1,1)
+var wall_array = [
+	[-15, 270, 20],
+	[0, 320, 10],
+	[30, 370, 15],
+	[45, 408, 16],
+	[60, 350, 15],
+	[90, 310, 8],
+	[105, 250, 20]
+	#[0,400,10],
+	#[90,600,90]
+]
 # Aligned with coordinates, for testing
 #var wall_array = [
 	#[0, 400*sqrt(3)/2., 100],
@@ -22,11 +23,11 @@ var col = "Red"
 	#[90, 200, 100]
 #]
 # Aligned with coordinates, for testing
-var wall_array = [
-	[0, 200, 100],
-	[60, 400, 100],
-	[90, 400*sqrt(3)/2., 100]
-]
+#var wall_array = [
+	#[0, 200, 100],
+	#[60, 400, 100],
+	#[90, 400*sqrt(3)/2., 100]
+#]
 
 var mindist = 1e9
 var mindists = Array()
@@ -102,7 +103,7 @@ func make_wall():
 	# Colors
 	for i in range(len(verts)):
 		#colors.push_back(Color(0,0,1,1))
-		colors.push_back(col)
+		colors.push_back(wall_color)
 	
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
@@ -123,8 +124,8 @@ func make_wall():
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
 	print("Finished make wall")
 
-var restitution_coef = .8 # multiplied by ball restituion_coefv
-func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
+var restitution_coef = .6 # multiplied by ball restituion_coefv
+func check_ball_cross(pos, vel, cor, prev_pos, _prev_vel, is_sim):
 	#printt('ball pos is', pos)
 	if pos.x**2 + pos.z**2 < mindist/3:
 		return [false]
@@ -201,10 +202,10 @@ func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
 			print('HIT wall')
 
 			# Reflect position vector across wall for part after intersection point, dampen with cor proportionally
-			var diff_pos_to_wall = intersect_v - prev_pos
+			#var diff_pos_to_wall = intersect_v - prev_pos
 			var diff_pos_after_wall = pos - intersect_v
 			if not is_sim:
-				1#printt("Checking diff pos", pos, intersect_v, prev_pos,
+				pass#printt("Checking diff pos", pos, intersect_v, prev_pos,
 				#	diff_pos_to_wall, diff_pos_after_wall)
 				#printt('intersect two lines:',
 				#intersect_two_lines(
@@ -213,7 +214,7 @@ func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
 					#Vector2(prev_pos.x, prev_pos.z), 
 					#Vector2(pos.x, pos.z)
 				#))
-			var weight_to_wall = 1/(1 + diff_pos_to_wall.length() / diff_pos_after_wall.length())
+			#var weight_to_wall = 1/(1 + diff_pos_to_wall.length() / diff_pos_after_wall.length())
 			var mirrored_diff_pos_after_wall = mirror_vector_across_plane(
 				diff_pos_after_wall,
 				Vector3(wall_left_x, 10, wall_left_z),
@@ -225,7 +226,7 @@ func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
 			#var reflect_pos = intersect_v + mirrored_diff_pos_after_wall
 			#printt('weight to wall', weight_to_wall)
 			#printt('mirror', diff_pos_after_wall, mirrored_diff_pos_after_wall)
-			var new_pos = intersect_v + mirrored_diff_pos_after_wall
+			#var new_pos = intersect_v + mirrored_diff_pos_after_wall
 			#printt('check new pos', prev_pos, intersect_v, pos, reflect_pos)
 			
 			# Reflect velocity vector across wall, dampen with cor fully
@@ -246,10 +247,10 @@ func check_ball_cross(pos, vel, cor, prev_pos, prev_vel, is_sim):
 				Vector3(wall_left_x, 0, wall_left_z).rotated(Vector3(0,1,0), -45*PI/180),
 				Vector3(wall_right_x, 0, wall_right_z).rotated(Vector3(0,1,0), -45*PI/180)
 			)
-			#var new_vel = reflect_vel#.rotated(Vector3(0,1,0), 0*PI/180)
+			var new_vel = cor * restitution_coef * reflect_vel#.rotated(Vector3(0,1,0), 0*PI/180)
 			#printt('check reflect vel', vel, rotated_vel, reflect_vel, new_vel)
 			
-			return [true, is_over, new_pos, reflect_vel]
+			return [true, is_over, reflect_pos, new_vel]
 			
 			#var m = (
 			#	(wall_left_z - wall_right_z) /
