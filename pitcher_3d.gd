@@ -36,20 +36,39 @@ func _physics_process(delta: float) -> void:
 		ball.position.x = -.5 # put in lefty hand
 		ball.position.y=position.y + 1.5 # 1.5 yards higher than ground of pitcher
 		ball.position.z= position.z - 2 # 2 yards closer than pitcher
-		ball.velocity.z = -40*.75 # about 90 mph
-		ball.velocity.x=1 # to get over home plate
-		ball.velocity.y = .62+1.6 # downward throw
+		#ball.velocity.z = -40*.75 # 40 is about about 90 mph
+		#ball.velocity.x=1 # to get over home plate
+		#ball.velocity.y = .62+1.6 # downward throw
 		#ball.acceleration.y = -9.8*.6 # gravity
 		ball.spin_acceleration.y = randf_range(-3,1)
 		ball.spin_acceleration.x = randf_range(-3,3) # Side movement
 		var pitchspeed = 40
 		var catchers_mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
 		
-		var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
-			catchers_mitt.position.x, catchers_mitt.position.y)
+		#var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
+		#	catchers_mitt.position.x, catchers_mitt.position.y)
+		
+		
+		# Test my parabola solution
+		#printt('test parabola solution')
+		#printt('velo from optimization', velo_vec)
+		var parabola_approx_velo = ball.fit_approx_parabola_to_trajectory(
+			ball.position,
+			Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z),
+			pitchspeed, false
+		)
+		#print('velo from parabola approx', parabola_approx_velo)
+		#printt('from optimization', ball.simulate_delivery(ball.position, velo_vec))
+		#printt('from approx', ball.simulate_delivery(ball.position, parabola_approx_velo))
+		#printt('target was', Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z))
+		#printt('now find start velo with good starting point')
+		var velo_vec_with_start = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
+			catchers_mitt.position.x, catchers_mitt.position.y, 1./36/36, parabola_approx_velo)
+		#printt('is this better? (fewer steps?)', velo_vec_with_start)
+		
 		catchers_mitt.get_node("Sprite3D").visible=false
 		catchers_mitt.set_process(false)
-		ball.velocity = velo_vec
+		ball.velocity = velo_vec_with_start
 		
 		#ball.acceleration.z = 10 # drag
 		print(ball)

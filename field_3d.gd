@@ -88,6 +88,8 @@ func get_mouse_sz_pos():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if randf_range(0,1) < 1./1000:
+		printt('in field_3d, frame rate', (1./delta))
 	#printt('get_mouse_z', get_mouse_sz_pos())
 	
 	# R key reloads

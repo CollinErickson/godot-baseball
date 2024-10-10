@@ -2,11 +2,11 @@ extends CharacterBody3D
 
 var acceleration = Vector3()
 
-const drag_coef = .01 # .3 took pitch from 40 at start to 34.8 at end
-const gravity = -9.8*1.09361 # Full gravity seemed high
+const drag_coef = 0*.01 # .3 took pitch from 40 at start to 34.8 at end
+const gravity = 9.8*1.09361 # Full gravity seemed high
 const restitution_coef = 0.546 # MLB rules
 
-var spin_acceleration = Vector3() # Acceleration from pitch type
+var spin_acceleration = Vector3(0,0,0) # Acceleration from pitch type
 
 var ball_sz_dot_scene = load("res://ball_sz_dot.tscn")
 const sz_z = 0.6
@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 	#move_and_slide()
 	if not is_frozen:
 		acceleration = Vector3()
-		acceleration.y = gravity
+		acceleration.y = -gravity
 		acceleration += spin_acceleration
 		if velocity.length_squared() > 0:
 			acceleration -= drag_coef * velocity.length_squared() * velocity.normalized()
@@ -118,27 +118,33 @@ func _physics_process(delta: float) -> void:
 		if velocity.length_squared() < .5**2:
 			velocity = Vector3()
 
-func simulate_delivery(pos, vel, delta=1./30):
+func simulate_delivery(pos, vel, delta=1./60):
 	# Find position where the ball will cross the strike zone
 	#print('starting simulate_Delivery inside ball_3d')
 	# Simulate forward in time
 	var accel
 	var nsteps = 0
-	while pos.z > sz_z and nsteps < 30*4:
+	while pos.z > sz_z and nsteps < 1e6:
 		#printt('sd step:', nsteps)
 		nsteps += 1
 		accel = Vector3()
-		accel.y = gravity
+		accel.y = -gravity
 		accel += spin_acceleration
 		if vel.length_squared() > 0:
 			accel -= drag_coef * vel.length_squared() * vel.normalized()
 		vel += delta * accel
 		pos += delta * vel - 0.5 * delta**2 * accel
-		
+		#if nsteps % 10 ==0:
+		#	printt('  \tSimulate delivery step', nsteps, pos, vel)
+		if vel.z >= 0:
+			printt('vel.z not less than 0', vel.z)
+		assert(vel.z < 0)
+	#printt('pos before going back', pos)
 	# Go back in trajectory to where it cross sz_z
 	vel -= delta * accel
 	var sz_t = (sz_z - pos.z) / vel.z
 	pos += sz_t * vel
+	#printt('pos AFTER going back', pos)
 	#printt('simulate delivery found', pos)
 	return pos
 
@@ -148,7 +154,7 @@ func secant_step(x0, x1, f0, f1, step_size = 1):
 
 var best_dist2 = 1e9
 var best_v
-func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36):
+func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, vel0=null):
 	printt('starting find_starting_velocity_vector, tol is', tol)
 	#return
 	
@@ -159,7 +165,7 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36):
 	#var best_v
 	var eval = func(v):
 		#printt("\t\t", "Evaluating", v)
-		var pf = simulate_delivery(pos0, v)
+		var pf = simulate_delivery(pos0, v, .001)
 		#printt("\t\t", "Sim del gave", pf)
 		#last_pf = pf
 		#printt('in eval pf is', pf)
@@ -172,9 +178,19 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36):
 		return out
 	
 	# Starting points
-	var v0 = Vector3(0,0,-1) * speed0
-	var x0 = 0
-	var y0 = 0
+	var v0
+	var x0
+	var y0
+	if vel0 and vel0.length_squared() > 0 :
+		vel0 = vel0.normalized() * speed0
+		v0 = vel0
+		x0 = vel0.normalized().x
+		y0 = vel0.normalized().y
+		#print('NEW PARS', v0, x0, y0)
+	else:		
+		v0 = Vector3(0,0,-1) * speed0
+		x0 = 0
+		y0 = 0
 	#var v1 = Vector3(0,.01,-1).normalized() * speed0
 	var eval0 = eval.call(v0)
 	var v1
@@ -310,7 +326,84 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36):
 			
 	printt('couldnt find good solution, returning', best_v, best_dist2, nsteps)
 	return best_v
+
+func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
+	# Fit parabola starting from pos1 going to pos2 with speed1
+	# Return velocity vector at pos1
+	var p1 = Vector3(0,0,0)
+	var p2 = pos2 - pos1
+	# Rotate so that 3rd dim is 0
+	var anglep2
+	if p2.z != 0:
+		anglep2 = atan(p2.z / p2.x)
+		p2 = p2.rotated(Vector3(0,1,0), anglep2)
+	else:
+		anglep2 = 0
+	#printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
+	var t
+	var vel1
+	var vy1
+	if use_drag:
+		assert(false)
+		var a 
+		var b 
+		var c 
+		var quadratic_t_sq
+		
+	else: # no drag
+		var a = .25 * gravity**2
+		var b = gravity * (p2.y) - speed1**2
+		var c = (p2.x)**2 + (p2.y)**2
+		var quadratic_t_sq = quadratic(a, b, c)
+		if quadratic_t_sq[0] < .5: # No solution
+			return null
+		elif quadratic_t_sq[1] < 1.5: # One solution, linear
+			t = sqrt(quadratic_t_sq[1])
+		else:
+			t = sqrt(min(quadratic_t_sq[1], quadratic_t_sq[2]))
+		var vx1 = (p2.x) / t
+		vy1 = (p2.y + .5 * gravity * t**2) / t
+		vel1 = Vector3(vx1, vy1, 0)
+		#printt('check eqn vx1', vx1)
+		#printt('check eqn t', t, a*t**4 + b*t**2 + c)
+		#printt('check eqn x2', p2.x, p1.x +t*vx1)
+		#printt('check eqn y2', p2.y, p1.y +t*vy1 - .5*gravity*t**2)
+	# Rotate it back to original direction
+	#printt('check result 1', p2, t, vel1)
+	vel1 = vel1.rotated(Vector3(0,1,0), -anglep2)
 	
+	#printt('check result', vel1, vel1.length())
+	#printt('endpoint given was', pos2)
+	#printt('simulate endpoint is', simulate_delivery(pos1, vel1, 1./60))
+	#printt('calculate endpoint x', pos1.x + t*vel1.x)
+	#printt('calculate endpoint y', pos1.y + t*vy1 - .5*gravity*t**2)
+	#printt('calculate endpoint z', pos1.z + t*vel1.z)
+	#printt('DO THESE MATCH??')
+	#printt('simtraj2', simtraj2(pos1, vel1))
+	#printt('simulate inputs is', pos1, vel1)
+	
+	return vel1
+
+func simtraj2(pos, vel):
+	var dt = 1e-3
+	while pos.z > sz_z:
+		pos += dt * vel
+		vel += dt*Vector3(0,-gravity, 0)
+		
+	return pos
+
+func quadratic(a, b, c) -> Array:
+	var t1 = b**2 - 4*a*c
+	if t1 < 0:
+		return [0, null, null]
+	if t1 == 0:
+		return [1, -b / (2*a)]
+	else:
+		return [2, (-b + sqrt(t1)) / (2*a), (-b - sqrt(t1)) / (2*a)]
+
+func _ready() -> void:
+	pass
+	#fit_approx_parabola_to_trajectory(Vector3(1,2,20), Vector3(3,.5,.6), 80, false)
 
 func ball_fielded():
 	visible = false
