@@ -56,3 +56,22 @@ while (ttt < t) {
   # yyy <- vy1*ttt + -.5*g*ttt^2
 }
 c(ttt, xxx, yyy)
+
+
+x <- 1
+y <- 2
+z <- 20
+sz_z <- .6
+vx <- 4.10156
+vy <- .5622
+vz <- -39.785
+g <- 9.8*1.09361
+dt <- 1e-3
+while(z > sz_z) {
+  x <- x +dt*vx
+  y <- y +dt*vy
+  z <- z +dt*vz
+  vy <- vy - g*dt
+
+}
+c(x, y, z)

@@ -39,6 +39,7 @@ func _physics_process(delta: float) -> void:
 	var distance_from_target = sqrt((position.x - assignment_pos.x)**2 +
 									(position.z - assignment_pos.z)**2)
 	var distance_can_move = delta * SPEED
+	#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 	if distance_can_move < distance_from_target:
 		# Can't reach it, move full distance. Don't move vertically
 		var direction_unit_vec = (assignment_pos - position).normalized()
@@ -46,6 +47,7 @@ func _physics_process(delta: float) -> void:
 		position.z += delta * SPEED * direction_unit_vec.z
 	else:
 		# Can reach it, go to that point and stop
+		printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 		position = assignment_pos
 		assignment = null
 		ball_fielded.emit()

@@ -81,33 +81,34 @@ func _physics_process(delta: float) -> void:
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
-	# Cross strikezone
-	if not already_crossed_sz and position.z < sz_z:
-		already_crossed_sz = true
-		var dot = ball_sz_dot_scene.instantiate()
-		#var cur_weight = 1 - (sz_z - position.z) / (prev_position.z - position.z)
-		#printt('prev pos is', prev_position)
-		#printt('pos is', position)
-		#printt('cur weight is', cur_weight)
-		#dot.position = cur_weight * position + (1 - cur_weight) * prev_position
-		var delta_cross_sz = (sz_z - position.z) / velocity.z
-		dot.position = position + delta_cross_sz * velocity
-		#print("MESHDOTCOLOR")
-		var color
-		if is_strike():
-			color = Color(1,0,0,1)
-		else:
-			color = Color(0,0,1,1)
-		dot.get_node('MeshInstance3D').mesh.material.albedo_color = color
-		get_parent().add_child(dot)
-		#print("global dot: ", dot.global_position)
-		#print("local dot: ", dot.position)
-		
-	# Stop movement when reaches 0
-	if position.z < 0:
-		is_frozen = true
-		velocity = Vector3()
-		get_node("AnimatedSprite3D").stop()
+	if pitch_in_progress:
+		# Cross strikezone
+		if not already_crossed_sz and position.z < sz_z:
+			already_crossed_sz = true
+			var dot = ball_sz_dot_scene.instantiate()
+			#var cur_weight = 1 - (sz_z - position.z) / (prev_position.z - position.z)
+			#printt('prev pos is', prev_position)
+			#printt('pos is', position)
+			#printt('cur weight is', cur_weight)
+			#dot.position = cur_weight * position + (1 - cur_weight) * prev_position
+			var delta_cross_sz = (sz_z - position.z) / velocity.z
+			dot.position = position + delta_cross_sz * velocity
+			#print("MESHDOTCOLOR")
+			var color
+			if is_strike():
+				color = Color(1,0,0,1)
+			else:
+				color = Color(0,0,1,1)
+			dot.get_node('MeshInstance3D').mesh.material.albedo_color = color
+			get_parent().add_child(dot)
+			#print("global dot: ", dot.global_position)
+			#print("local dot: ", dot.position)
+			
+		# Stop movement when reaches 0
+		if position.z < 0:
+			is_frozen = true
+			velocity = Vector3()
+			get_node("AnimatedSprite3D").stop()
 	
 	# Bounce
 	if position.y < 0.042:
@@ -117,6 +118,10 @@ func _physics_process(delta: float) -> void:
 		# Stop it if slow enough to avoid infinite bounce
 		if velocity.length_squared() < .5**2:
 			velocity = Vector3()
+		if pitch_in_progress:
+			delivery_bounced = true
+		if state == "ball_in_play":
+			hit_bounced = true
 
 func simulate_delivery(pos, vel, delta=1./60):
 	# Find position where the ball will cross the strike zone
@@ -330,7 +335,7 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 	# Fit parabola starting from pos1 going to pos2 with speed1
 	# Return velocity vector at pos1
-	var p1 = Vector3(0,0,0)
+	#var p1 = Vector3(0,0,0)
 	var p2 = pos2 - pos1
 	# Rotate so that 3rd dim is 0
 	var anglep2
@@ -407,4 +412,7 @@ func _ready() -> void:
 
 func ball_fielded():
 	visible = false
+	velocity = Vector3()
+	is_frozen = true
+	state = "fielded"
 	set_process(false)

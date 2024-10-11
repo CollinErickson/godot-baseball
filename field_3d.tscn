@@ -327,5 +327,15 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Home run!"
 
+[node name="FlashText" type="Label" parent="."]
+offset_left = 1060.0
+offset_top = 731.0
+offset_right = 1234.0
+offset_bottom = 754.0
+text = "Home run!"
+horizontal_alignment = 2
+
+[node name="Timer" type="Timer" parent="FlashText"]
+
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]

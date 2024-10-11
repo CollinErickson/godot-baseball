@@ -69,6 +69,8 @@ func _physics_process(delta: float) -> void:
 		catchers_mitt.get_node("Sprite3D").visible=false
 		catchers_mitt.set_process(false)
 		ball.velocity = velo_vec_with_start
+		ball.pitch_in_progress = true
+		ball.state = "pitch"
 		
 		#ball.acceleration.z = 10 # drag
 		print(ball)

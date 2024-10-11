@@ -6,8 +6,13 @@ var ball_in_play_state = null
 var ball_in_play_state_time = 0
 const sz_z = 0.6
 
+var outs_on_play = 0
+
 func _on_ball_fielded_by_fielder():
-	get_node("Headon/Ball3D").ball_fielded()
+	var ball = get_node("Headon/Ball3D")
+	ball.ball_fielded()
+	if ball.state == "ball_in_play" and not ball.hit_bounced:
+		outs_on_play += 1
 	
 
 func test_mesh_array():
@@ -112,9 +117,9 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 80#randf_range(10,50)
-					var vla = -6+0*randf_range(-1,1)*20+20
-					var hla = 2+0*randf_range(-1,1)*20
+					var exitvelo = 40 #randf_range(10,50)
+					var vla = randf_range(-1,1)*20+10
+					var hla = randf_range(-1,1)*20
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
