@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://iv0v8pk502fw"
-path.s3tc="res://.godot/imported/bat.png-8c5f11e0110a5921c6efd8f18e634996.s3tc.ctex"
+uid="uid://d3wwuyrku58cp"
+path.s3tc="res://.godot/imported/bat.png-f35ea6e08900225396e1651c4634dc8f.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://bat.png"
-dest_files=["res://.godot/imported/bat.png-8c5f11e0110a5921c6efd8f18e634996.s3tc.ctex"]
+source_file="res://sprites/bat.png"
+dest_files=["res://.godot/imported/bat.png-f35ea6e08900225396e1651c4634dc8f.s3tc.ctex"]
 
 [params]
 

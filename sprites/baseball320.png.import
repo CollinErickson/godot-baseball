@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dalyf3mp05bqt"
-path="res://.godot/imported/baseball320.png-84b6f5b694cf4e98eac38b647fb1c722.ctex"
+uid="uid://bk56gldhalnup"
+path="res://.godot/imported/baseball320.png-cad2412fcb74b8d98a791823e9558d47.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://baseball320.png"
-dest_files=["res://.godot/imported/baseball320.png-84b6f5b694cf4e98eac38b647fb1c722.ctex"]
+source_file="res://sprites/baseball320.png"
+dest_files=["res://.godot/imported/baseball320.png-cad2412fcb74b8d98a791823e9558d47.ctex"]
 
 [params]
 

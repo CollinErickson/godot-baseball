@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnbqujr4s5yen"
-path.s3tc="res://.godot/imported/batter3.png-0d09d829776b410526bd8ebf7a5ae959.s3tc.ctex"
+uid="uid://b1em3xy0pbuq5"
+path.s3tc="res://.godot/imported/batter4.png-e91cfdc1e5f481957e8e32c80017a04a.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://batter3.png"
-dest_files=["res://.godot/imported/batter3.png-0d09d829776b410526bd8ebf7a5ae959.s3tc.ctex"]
+source_file="res://sprites/batter4.png"
+dest_files=["res://.godot/imported/batter4.png-e91cfdc1e5f481957e8e32c80017a04a.s3tc.ctex"]
 
 [params]
 

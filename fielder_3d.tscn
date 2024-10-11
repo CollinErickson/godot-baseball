@@ -1,17 +1,17 @@
 [gd_scene load_steps=5 format=3 uid="uid://d3vo8o7aa5kqp"]
 
 [ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
-[ext_resource type="Texture2D" uid="uid://d3ly37owqny11" path="res://pitcher.png" id="1_h8fc2"]
+[ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_0lqec"]
-atlas = ExtResource("1_h8fc2")
+[sub_resource type="AtlasTexture" id="AtlasTexture_util4"]
+atlas = ExtResource("2_sqr5y")
 region = Rect2(0, 960, 320, 320)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_8dfmq"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0lqec")
+"texture": SubResource("AtlasTexture_util4")
 }],
 "loop": true,
 "name": &"default",

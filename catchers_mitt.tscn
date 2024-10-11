@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://5wu7ixh2ku7q"]
 
-[ext_resource type="Texture2D" uid="uid://cyi2kcdexosuf" path="res://catchers_mitt.png" id="1_fqbb0"]
+[ext_resource type="Texture2D" uid="uid://ygou5fhc7img" path="res://sprites/catchers_mitt.png" id="1_iipbv"]
 
 [node name="CatchersMitt" type="Node3D"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
-texture = ExtResource("1_fqbb0")
+texture = ExtResource("1_iipbv")

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://clwmy5p04a1je"
-path.s3tc="res://.godot/imported/batter.png-15c6e9f55c942d53794aa61a52ae68cb.s3tc.ctex"
+uid="uid://ygou5fhc7img"
+path.s3tc="res://.godot/imported/catchers_mitt.png-a35d72ccf33dc9e92202ecce15422120.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://batter.png"
-dest_files=["res://.godot/imported/batter.png-15c6e9f55c942d53794aa61a52ae68cb.s3tc.ctex"]
+source_file="res://sprites/catchers_mitt.png"
+dest_files=["res://.godot/imported/catchers_mitt.png-a35d72ccf33dc9e92202ecce15422120.s3tc.ctex"]
 
 [params]
 
