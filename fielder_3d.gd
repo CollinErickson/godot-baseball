@@ -1,11 +1,14 @@
 extends CharacterBody3D
 
+@export_group("Baseball")
+@export var posname: String
 
 const SPEED = 8.0
+const max_throw_speed = 30
 
 var assignment
 var assignment_pos
-var holding_ball
+var holding_ball = false
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -36,20 +39,29 @@ func _physics_process(delta: float) -> void:
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
-	var distance_from_target = sqrt((position.x - assignment_pos.x)**2 +
-									(position.z - assignment_pos.z)**2)
-	var distance_can_move = delta * SPEED
-	#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
-	if distance_can_move < distance_from_target:
-		# Can't reach it, move full distance. Don't move vertically
-		var direction_unit_vec = (assignment_pos - position).normalized()
-		position.x += delta * SPEED * direction_unit_vec.x
-		position.z += delta * SPEED * direction_unit_vec.z
-	else:
-		# Can reach it, go to that point and stop
-		printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
-		position = assignment_pos
-		assignment = null
-		ball_fielded.emit()
-		holding_ball = true
-	
+	if assignment == "ball":
+		var distance_from_target = sqrt((position.x - assignment_pos.x)**2 +
+										(position.z - assignment_pos.z)**2)
+		var distance_can_move = delta * SPEED
+		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
+		if distance_can_move < distance_from_target:
+			# Can't reach it, move full distance. Don't move vertically
+			var direction_unit_vec = (assignment_pos - position).normalized()
+			position.x += delta * SPEED * direction_unit_vec.x
+			position.z += delta * SPEED * direction_unit_vec.z
+		else:
+			# Can reach it, go to that point and stop
+			printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
+			position = assignment_pos
+			assignment = "holding_ball"
+			ball_fielded.emit()
+			holding_ball = true
+		
+	if holding_ball:
+		#print("Holding ball!")
+		if Input.is_action_just_pressed("throwfirst"):
+			#print("Pressed L, throw to first")
+			throw_ball.emit(1, self)
+		#if Input.is_key_pressed(KEY_L):
+		#	print("second version Pressed L, throw to first")
+signal throw_ball

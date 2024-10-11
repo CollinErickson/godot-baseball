@@ -13,7 +13,18 @@ func _on_ball_fielded_by_fielder():
 	ball.ball_fielded()
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
 		outs_on_play += 1
+
+func _on_throw_ball_by_fielder(base, fielder):
+	printt('In field_3d, throwing ball to:', base, fielder)
+	# Set new assignments
 	
+	# Set ball throw
+	var ball = get_node("Headon/Ball3D")
+	var target
+	if base == 1:
+		target = Vector3(-1,0,1)*20/sqrt(2)
+	var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
+	ball.throw_to_base(1, velo_vec)
 
 func test_mesh_array():
 	var surface_array = []
@@ -71,13 +82,14 @@ func _ready() -> void:
 	get_tree().call_group('fielders', 'align_sprite')
 	
 	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
-	
+	var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	# Set up signals from fielders
-	for enemy in get_tree().get_nodes_in_group('fielders'):  
-		enemy.connect("ball_fielded", _on_ball_fielded_by_fielder)
+	for fielder in fielder_nodes:  
+		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
+		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 	
 	# Test mesh array
-	test_mesh_array()
+	#test_mesh_array()
 
 	
 
@@ -117,8 +129,8 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 40 #randf_range(10,50)
-					var vla = randf_range(-1,1)*20+10
+					var exitvelo = 30 #randf_range(10,50)
+					var vla = randf_range(-1,1)*20-10
 					var hla = randf_range(-1,1)*20
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
@@ -140,7 +152,7 @@ func _process(delta: float) -> void:
 					
 					# Change camera
 					$TimerCameraChange.wait_time = .3
-					next_camera = $Headon/Camera3DHighHome
+					next_camera = $Headon/Cameras/Camera3DHighHome
 					$TimerCameraChange.start()
 					#$Headon/Camera3DHighHome.current = true
 					# Make ball bigger
@@ -199,13 +211,13 @@ func _process(delta: float) -> void:
 		
 		# Set different camera
 		if Input.is_key_pressed(KEY_1):
-			get_node("Headon/Camera3DBatting").current = true
+			get_node("Headon/Cameras/Camera3DBatting").current = true
 		elif Input.is_key_pressed(KEY_2):
-			get_node("Headon/Camera3DHighHome").current = true
+			get_node("Headon/Cameras/Camera3DHighHome").current = true
 		elif Input.is_key_pressed(KEY_3):
-			get_node("Headon/Camera3DPitcherShoulderRight").current = true
+			get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 		elif Input.is_key_pressed(KEY_4):
-			get_node("Headon/Camera3DAll22").current = true
+			get_node("Headon/Cameras/Camera3DAll22").current = true
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
@@ -262,6 +274,10 @@ func assign_fielders_after_hit():
 			break
 	if not found_someone:
 		print('no fielder found')
+	if found_someone:
+		# Assign someone to cover base
+		pass
+		printt('fielder assigned name:', fielder_nodes[min_ifielder].name)
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)

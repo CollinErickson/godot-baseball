@@ -416,3 +416,10 @@ func ball_fielded():
 	is_frozen = true
 	state = "fielded"
 	set_process(false)
+
+func throw_to_base(base, velo_vec):
+	visible = true
+	is_frozen = false
+	velocity = velo_vec
+	state = "thrown"
+	set_process(true)

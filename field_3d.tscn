@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=46 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -7,8 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://d3vo8o7aa5kqp" path="res://fielder_3d.tscn" id="4_386e5"]
 [ext_resource type="PackedScene" uid="uid://5wu7ixh2ku7q" path="res://catchers_mitt.tscn" id="5_kcgmt"]
 [ext_resource type="PackedScene" uid="uid://c6yokfan7mlg7" path="res://bat_3d.tscn" id="6_i5fsa"]
-[ext_resource type="PackedScene" uid="uid://d2u5xg584fowv" path="res://test_mesh_sprite_3d.tscn" id="7_6vvt6"]
 [ext_resource type="PackedScene" uid="uid://cpobb8pjdcvp4" path="res://runner_3d.tscn" id="8_eblru"]
+[ext_resource type="PackedScene" uid="uid://bph0v6lfhfc07" path="res://camera_3d_custom.tscn" id="9_hy03x"]
+[ext_resource type="Environment" uid="uid://dc33a2etlsbtn" path="res://camera_3d_custom_environment.tres" id="10_t8ph7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -260,51 +261,40 @@ mesh = SubResource("BoxMesh_yxmap")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Headon"]
 transform = Transform3D(1, 0, 0, 0, -0.25038, 0.968148, 0, -0.968148, -0.25038, 0, 10, -10)
 
-[node name="Camera3DHighHome" type="Camera3D" parent="Headon"]
-transform = Transform3D(-1, -1.51808e-08, 8.60946e-08, 0, 0.984808, 0.173648, -8.74228e-08, 0.173648, -0.984808, 0, 10, -35)
-fov = 18.9
-
-[node name="Camera3DAll22" type="Camera3D" parent="Headon"]
-transform = Transform3D(-1, 1.51808e-08, -8.60946e-08, 0, 0.984808, 0.173648, 8.74228e-08, 0.173648, -0.984808, 0, 20, -100)
-fov = 18.9
-
 [node name="Mound" type="MeshInstance3D" parent="Headon"]
 transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 20)
 mesh = SubResource("CylinderMesh_8r3k2")
 skeleton = NodePath("../../Ground")
 
-[node name="Camera3DPitcherShoulderRight" type="Camera3D" parent="Headon"]
-transform = Transform3D(0.992546, 0.00425318, -0.121795, 0, 0.999391, 0.0348995, 0.121869, -0.0346394, 0.991942, -5, 2, 50)
-fov = 5.7
-
-[node name="Camera3DBatting" type="Camera3D" parent="Headon"]
-transform = Transform3D(-1, 4.57535e-09, -8.73029e-08, 0, 0.99863, 0.0523359, 8.74228e-08, 0.052336, -0.998629, 0, 1.5, -10)
-environment = SubResource("Environment_k40ms")
-current = true
-fov = 12.0
-
 [node name="Defense" type="Node3D" parent="Headon"]
 
 [node name="Fielder3D2B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 42)
+posname = "2B"
 
 [node name="Fielder3D1B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 29)
+posname = "1B"
 
 [node name="Fielder3D3B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 29)
+posname = "3B"
 
 [node name="Fielder3DSS" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 42)
+posname = "SS"
 
 [node name="Fielder3DCF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 70)
+posname = "CF"
 
 [node name="Fielder3DLF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 60)
+posname = "LF"
 
 [node name="Fielder3DRF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 60)
+posname = "RF"
 
 [node name="CatchersMitt" parent="Headon" instance=ExtResource("5_kcgmt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
@@ -312,12 +302,33 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 [node name="Bat3D" parent="Headon" instance=ExtResource("6_i5fsa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 
-[node name="TestMeshSprite3D" parent="Headon" instance=ExtResource("7_6vvt6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 1)
-visible = false
-
 [node name="Runner3DHome" parent="Headon" instance=ExtResource("8_eblru")]
 visible = false
+
+[node name="Camera3DCustom" parent="Headon" instance=ExtResource("9_hy03x")]
+
+[node name="Cameras" type="Node3D" parent="Headon"]
+
+[node name="Camera3DHighHome" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-1, -7.45058e-09, 5.96046e-08, 0, 0.984808, 0.173648, -8.9407e-08, 0.173648, -0.984808, 0, 10, -35)
+environment = ExtResource("10_t8ph7")
+fov = 18.9
+
+[node name="Camera3DAll22" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-1, 7.45058e-09, -5.96046e-08, 0, 0.984808, 0.173648, 8.9407e-08, 0.173648, -0.984808, 0, 20, -100)
+environment = ExtResource("10_t8ph7")
+fov = 18.9
+
+[node name="Camera3DPitcherShoulderRight" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(0.992546, 0.00425317, -0.121795, 0, 0.999391, 0.0348995, 0.121869, -0.0346394, 0.991941, -5, 2, 50)
+environment = ExtResource("10_t8ph7")
+fov = 5.7
+
+[node name="Camera3DBatting" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-1, 5.58794e-09, -8.9407e-08, 0, 0.99863, 0.052336, 8.9407e-08, 0.052336, -0.998629, 0, 1.5, -10)
+environment = SubResource("Environment_k40ms")
+current = true
+fov = 12.0
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 

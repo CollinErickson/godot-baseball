@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bph0v6lfhfc07"]
+
+[ext_resource type="Environment" uid="uid://dc33a2etlsbtn" path="res://camera_3d_custom_environment.tres" id="1_o11q1"]
+
+[node name="Camera3DCustom" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="." groups=["Camera3DCustom"]]
+environment = ExtResource("1_o11q1")
