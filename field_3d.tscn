@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=50 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -10,12 +10,26 @@
 [ext_resource type="PackedScene" uid="uid://cpobb8pjdcvp4" path="res://runner_3d.tscn" id="8_eblru"]
 [ext_resource type="PackedScene" uid="uid://bph0v6lfhfc07" path="res://camera_3d_custom.tscn" id="9_hy03x"]
 [ext_resource type="Environment" uid="uid://dc33a2etlsbtn" path="res://camera_3d_custom_environment.tres" id="10_t8ph7"]
+[ext_resource type="PackedScene" uid="uid://dsb1e4kc4120x" path="res://ball_3d.tscn" id="11_faris"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
 
+[sub_resource type="Gradient" id="Gradient_8rhyr"]
+offsets = PackedFloat32Array(0, 0.52381, 1)
+colors = PackedColorArray(0, 0.768935, 0, 1, 0, 0.90773, 0, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gcaba"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_s72fw"]
+width = 1024
+height = 1024
+color_ramp = SubResource("Gradient_8rhyr")
+noise = SubResource("FastNoiseLite_gcaba")
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tww2n"]
 albedo_color = Color(0.0980392, 0.533333, 0.0862745, 1)
+albedo_texture = SubResource("NoiseTexture2D_s72fw")
 subsurf_scatter_strength = 1.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_i5ps3"]
@@ -314,6 +328,11 @@ transform = Transform3D(-1, -7.45058e-09, 5.96046e-08, 0, 0.984808, 0.173648, -8
 environment = ExtResource("10_t8ph7")
 fov = 18.9
 
+[node name="Camera3DHigherHome" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-1, -7.45058e-09, 5.96046e-08, 0, 0.984808, 0.173648, -8.9407e-08, 0.173648, -0.984808, 0, 15, -60)
+environment = ExtResource("10_t8ph7")
+fov = 18.9
+
 [node name="Camera3DAll22" type="Camera3D" parent="Headon/Cameras"]
 transform = Transform3D(-1, 7.45058e-09, -5.96046e-08, 0, 0.984808, 0.173648, 8.9407e-08, 0.173648, -0.984808, 0, 20, -100)
 environment = ExtResource("10_t8ph7")
@@ -329,6 +348,13 @@ transform = Transform3D(-1, 5.58794e-09, -8.9407e-08, 0, 0.99863, 0.052336, 8.94
 environment = SubResource("Environment_k40ms")
 current = true
 fov = 12.0
+
+[node name="Camera3DPitchSideView" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-4.37114e-08, 0.173648, -0.984808, 0, 0.984808, 0.173648, 1, 7.5904e-09, -4.30473e-08, -22, 3, 11)
+fov = 37.7
+
+[node name="Ball3D" parent="Headon" groups=["ball"] instance=ExtResource("11_faris")]
+visible = false
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 

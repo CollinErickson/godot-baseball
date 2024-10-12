@@ -24,6 +24,19 @@ func assign_to_field_ball(pos):
 	assignment_pos = pos
 	assignment_pos.y = 0
 
+func assign_to_cover_base(base):
+	assignment = 'cover'
+	if base == 1:
+		assignment_pos = Vector3(-1,0,1) * 30/sqrt(2)
+	elif base == 2:
+		assignment_pos = Vector3(0,0,1) * 30/sqrt(2) * 2
+	elif base == 3:
+		assignment_pos = Vector3(1,0,1) * 30/sqrt(2)
+	elif base == 4:
+		assignment_pos = Vector3(0,0,0)
+	else:
+		assert(false)
+
 func begin_chase():
 	pass
 
@@ -39,7 +52,7 @@ func _physics_process(delta: float) -> void:
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
-	if assignment == "ball":
+	if assignment in ["ball", "cover"]:
 		var distance_from_target = sqrt((position.x - assignment_pos.x)**2 +
 										(position.z - assignment_pos.z)**2)
 		var distance_can_move = delta * SPEED
@@ -53,15 +66,36 @@ func _physics_process(delta: float) -> void:
 			# Can reach it, go to that point and stop
 			printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 			position = assignment_pos
-			assignment = "holding_ball"
-			ball_fielded.emit()
+			if assignment == "ball":
+				#assignment = "holding_ball"
+				#ball_fielded.emit()
+				#holding_ball = true
+				assignment = "wait_to_receive"
+			elif assignment == "cover":
+				assignment = "wait_to_receive"
+	
+	# Check if they caught the ball
+	if assignment in ["cover", "wait_to_receive"]:
+		var ball = get_tree().get_first_node_in_group("ball")
+		var distance_from_ball = sqrt((position.x - ball.position.x)**2 +
+										(position.z - ball.position.z)**2)
+		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
+		Time.get_ticks_msec() - ball.time_last_thrown > 300):
+			ball.position = position
+			ball.position.y = 1.4
 			holding_ball = true
-		
+			ball_fielded.emit()
+
+	# If holding, check if they throw it
 	if holding_ball:
 		#print("Holding ball!")
 		if Input.is_action_just_pressed("throwfirst"):
-			#print("Pressed L, throw to first")
 			throw_ball.emit(1, self)
-		#if Input.is_key_pressed(KEY_L):
-		#	print("second version Pressed L, throw to first")
+		elif Input.is_action_just_pressed("throwsecond"):
+			throw_ball.emit(2, self)
+		elif Input.is_action_just_pressed("throwthird"):
+			throw_ball.emit(3, self)
+		elif Input.is_action_just_pressed("throwhome"):
+			throw_ball.emit(4, self)
+
 signal throw_ball

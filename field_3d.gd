@@ -22,9 +22,17 @@ func _on_throw_ball_by_fielder(base, fielder):
 	var ball = get_node("Headon/Ball3D")
 	var target
 	if base == 1:
-		target = Vector3(-1,0,1)*20/sqrt(2)
+		target = Vector3(-1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
+	elif base == 2:
+		target = Vector3(0,0,1)*30*sqrt(2) + Vector3(0,1.4,0)
+	elif base == 3:
+		target = Vector3(1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
+	elif base == 4:
+		target = Vector3(0,0,0) + Vector3(0,1.4,0)
+	else:
+		assert(false)
 	var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
-	ball.throw_to_base(1, velo_vec)
+	ball.throw_to_base(base, velo_vec)
 
 func test_mesh_array():
 	var surface_array = []
@@ -152,7 +160,7 @@ func _process(delta: float) -> void:
 					
 					# Change camera
 					$TimerCameraChange.wait_time = .3
-					next_camera = $Headon/Cameras/Camera3DHighHome
+					next_camera = $Headon/Cameras/Camera3DHigherHome
 					$TimerCameraChange.start()
 					#$Headon/Camera3DHighHome.current = true
 					# Make ball bigger
@@ -211,9 +219,15 @@ func _process(delta: float) -> void:
 		
 		# Set different camera
 		if Input.is_key_pressed(KEY_1):
-			get_node("Headon/Cameras/Camera3DBatting").current = true
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DPitchSideView").current = true
+			else:
+				get_node("Headon/Cameras/Camera3DBatting").current = true
 		elif Input.is_key_pressed(KEY_2):
-			get_node("Headon/Cameras/Camera3DHighHome").current = true
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DHigherHome").current = true
+			else:
+				get_node("Headon/Cameras/Camera3DHighHome").current = true
 		elif Input.is_key_pressed(KEY_3):
 			get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 		elif Input.is_key_pressed(KEY_4):
@@ -277,7 +291,25 @@ func assign_fielders_after_hit():
 	if found_someone:
 		# Assign someone to cover base
 		pass
-		printt('fielder assigned name:', fielder_nodes[min_ifielder].name)
+		printt('fielder assigned name:', fielder_nodes[min_ifielder].name, fielder_nodes[min_ifielder].posname)
+		#for ifielder in fielder_nodes:
+		if fielder_nodes[min_ifielder].posname == "2B":
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+		elif fielder_nodes[min_ifielder].posname == "SS":
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+		elif fielder_nodes[min_ifielder].posname == "1B":
+			#get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+		elif fielder_nodes[min_ifielder].posname == "3B":
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
+			#get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)
@@ -286,6 +318,12 @@ func assign_fielders_after_hit():
 	for i in range(10):
 		print('------- done with tmp_ball')
 
+func get_fielder_with_posname(fielders, posname):
+	var f1 = fielders.filter(func(f): return f.posname == posname)
+	printt('in get_fielders_with_posname',
+	fielders, posname, f1)
+	assert(len(f1)== 1)
+	return f1[0]
 
 var next_camera = null
 func _on_timer_camera_change_timeout() -> void:

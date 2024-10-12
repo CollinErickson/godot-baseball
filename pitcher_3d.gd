@@ -5,17 +5,50 @@ var pitch_in_progress = false
 var pitch_done = false
 var time_since_pitch_start = 0
 var pitch_frame = 0
+var pitch_type = "FB"
+var max_pitch_speed = 40
+var pitch_hand = "L"
 
 var ball_3d_scene = load("res://ball_3d.tscn")
+
+func get_spin_acceleration_and_speed():
+	var sign_
+	if pitch_hand == "L":
+		sign_ = 1
+	else:
+		sign_ = -1
+	if pitch_type == 'FB':
+		return [Vector3(0,3,0)*sign_, max_pitch_speed]
+	elif pitch_type == '2SFB':
+		return [Vector3(-3,1,0)*sign_, .95*max_pitch_speed]
+	elif pitch_type == 'SL':
+		return [Vector3(4,0,0)*sign_, .85*max_pitch_speed]
+	elif pitch_type == 'CB':
+		return [Vector3(0,-4,0)*sign_, .7*max_pitch_speed]
+	print("BAD PITCH TYPE")
+	return [Vector3(0,3,0)*sign_, max_pitch_speed]
+	
 
 func _physics_process(delta: float) -> void:
 	if pitch_in_progress:
 		time_since_pitch_start += delta
-	if not pitch_done and not pitch_in_progress and Input.is_action_just_pressed("ui_select"):
+	# Pre-pitch
+	if not pitch_done and not pitch_in_progress: 
+		# Pitch type
+		if Input.is_action_just_pressed("throwhome"):
+			pitch_type = "FB"
+		elif Input.is_action_just_pressed("throwfirst"):
+			pitch_type = "2SFB"
+		elif Input.is_action_just_pressed("throwthird"):
+			pitch_type = "SL"
+		elif Input.is_action_just_pressed("throwsecond"):
+			pitch_type = "CB"
 		# Begin pitch
-		pitch_in_progress = true
-		pitch_frame = 1
-		$AnimatedSprite3D.set_frame(1)
+		if Input.is_action_just_pressed("ui_select"):
+			pitch_in_progress = true
+			pitch_frame = 1
+			$AnimatedSprite3D.set_frame(1)
+		
 	if not pitch_done and pitch_in_progress and pitch_frame == 1 and time_since_pitch_start > .25:
 		# Advance delivery animation
 		pitch_frame = 2
@@ -27,7 +60,9 @@ func _physics_process(delta: float) -> void:
 		pitch_frame = 3
 		$AnimatedSprite3D.set_frame(3)
 		# Create ball
-		var ball = ball_3d_scene.instantiate()
+		#var ball = ball_3d_scene.instantiate()
+		var ball = get_parent().get_node("Ball3D")
+		ball.visible = true
 		#print('ball basis'); print(ball.basis)
 		#print('basis'); print(basis)
 		#print('headon basis'); print($Headon)
@@ -42,7 +77,10 @@ func _physics_process(delta: float) -> void:
 		#ball.acceleration.y = -9.8*.6 # gravity
 		ball.spin_acceleration.y = randf_range(-3,1)
 		ball.spin_acceleration.x = randf_range(-3,3) # Side movement
-		var pitchspeed = 40
+		var spin_and_speed = get_spin_acceleration_and_speed()
+		ball.spin_acceleration = spin_and_speed[0]
+		#var pitchspeed = 40
+		var pitchspeed = spin_and_speed[1]
 		var catchers_mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
 		
 		#var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
@@ -57,6 +95,15 @@ func _physics_process(delta: float) -> void:
 			Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z),
 			pitchspeed, false
 		)
+		printt("Now fit with drag")
+		
+		var parabola_approx_velo_with_drag = ball.fit_approx_parabola_to_trajectory(
+			ball.position,
+			Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z),
+			pitchspeed, true
+		)
+		printt("compare drag", parabola_approx_velo_with_drag,
+		" to", parabola_approx_velo)
 		#print('velo from parabola approx', parabola_approx_velo)
 		#printt('from optimization', ball.simulate_delivery(ball.position, velo_vec))
 		#printt('from approx', ball.simulate_delivery(ball.position, parabola_approx_velo))
@@ -65,7 +112,7 @@ func _physics_process(delta: float) -> void:
 		var velo_vec_with_start = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
 			catchers_mitt.position.x, catchers_mitt.position.y, 1./36/36, parabola_approx_velo)
 		#printt('is this better? (fewer steps?)', velo_vec_with_start)
-		
+		printt("Pitch start velo is", velo_vec_with_start)
 		catchers_mitt.get_node("Sprite3D").visible=false
 		catchers_mitt.set_process(false)
 		ball.velocity = velo_vec_with_start
@@ -73,11 +120,11 @@ func _physics_process(delta: float) -> void:
 		ball.state = "pitch"
 		
 		#ball.acceleration.z = 10 # drag
-		print(ball)
+		#print(ball)
 		ball.get_node("AnimatedSprite3D").play()
 		#get_tree().current_scene.get_node('Headon').add_child(ball)
 		# Put ball under Headon node
-		get_parent().add_child(ball)
+		#get_parent().add_child(ball)
 		print(ball.position)
 		print(ball.global_position)
 		print(position)

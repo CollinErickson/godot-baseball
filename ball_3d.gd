@@ -5,6 +5,7 @@ var acceleration = Vector3()
 const drag_coef = 0*.01 # .3 took pitch from 40 at start to 34.8 at end
 const gravity = 9.8*1.09361 # Full gravity seemed high
 const restitution_coef = 0.546 # MLB rules
+var time_last_thrown = Time.get_ticks_msec()
 
 var spin_acceleration = Vector3(0,0,0) # Acceleration from pitch type
 
@@ -106,6 +107,8 @@ func _physics_process(delta: float) -> void:
 			
 		# Stop movement when reaches 0
 		if position.z < 0:
+			pitch_in_progress = false
+			pitch_already_done = true
 			is_frozen = true
 			velocity = Vector3()
 			get_node("AnimatedSprite3D").stop()
@@ -342,19 +345,45 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 	if p2.z != 0:
 		anglep2 = atan(p2.z / p2.x)
 		p2 = p2.rotated(Vector3(0,1,0), anglep2)
+		# Make sure x is positive
+		if p2.x < 0:
+			anglep2 += PI
+			p2 = p2.rotated(Vector3(0,1,0), PI)
 	else:
 		anglep2 = 0
-	#printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
+	printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
 	var t
 	var vel1
 	var vy1
 	if use_drag:
-		assert(false)
-		var a 
-		var b 
-		var c 
-		var quadratic_t_sq
-		
+		#assert(false)
+		printt('FITTING WITH DRAG, speed1', speed1)
+		var d = drag_coef * 1
+		var m = p2.x * (1 + .5 * d * p2.x)
+		printt('m is', m)
+		var a = m**2 + p2.y**2
+		var b = p2.y * gravity * m**2 - m**2 * speed1**2
+		var c = 0.25 * gravity**2 + m**4
+		var quadratic_vx1_sq = quadratic(a, b, c)
+		printt("quadratic_vx1_sq", quadratic_vx1_sq)
+		var vx1
+		if p2.x > 0:
+			vx1 = sqrt(quadratic_vx1_sq[1])
+		else:
+			vx1 = sqrt(quadratic_vx1_sq[1])
+		#assert(vx1)
+		vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
+		t = m / vx1
+		printt('assert t > 0', t, m, vx1)
+		assert(t > 0)
+		var k = d * (p2.x / t)**2
+		vel1 = Vector3(vx1, vy1, 0)
+		printt('check t', t)
+		printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
+		printt('check dx eqn', p2.x, vx1*t-.5*k*t**2)
+		printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
+		printt('check drag eqn', k, d, p2.x)
+		printt('drag velo vec before rotation', vel1)
 	else: # no drag
 		var a = .25 * gravity**2
 		var b = gravity * (p2.y) - speed1**2
@@ -417,9 +446,10 @@ func ball_fielded():
 	state = "fielded"
 	set_process(false)
 
-func throw_to_base(base, velo_vec):
+func throw_to_base(_base, velo_vec):
 	visible = true
 	is_frozen = false
 	velocity = velo_vec
 	state = "thrown"
+	time_last_thrown = Time.get_ticks_msec()
 	set_process(true)
