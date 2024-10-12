@@ -42,6 +42,7 @@ func is_strike():
 		not delivery_bounced)
 
 func _physics_process(delta: float) -> void:
+	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)
 	#print('in ball pp globalpos, ', global_position)
@@ -446,10 +447,14 @@ func ball_fielded():
 	state = "fielded"
 	set_process(false)
 
-func throw_to_base(_base, velo_vec):
+var throw_start_pos
+var throw_target
+func throw_to_base(_base, velo_vec, start_pos, target):
 	visible = true
 	is_frozen = false
 	velocity = velo_vec
+	throw_start_pos = start_pos
+	throw_target = target
 	state = "thrown"
 	time_last_thrown = Time.get_ticks_msec()
 	set_process(true)

@@ -31,8 +31,10 @@ func _on_throw_ball_by_fielder(base, fielder):
 		target = Vector3(0,0,0) + Vector3(0,1.4,0)
 	else:
 		assert(false)
+	target.y = 1
+	printt('target is', target, 'fielder pos is', fielder.position)
 	var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
-	ball.throw_to_base(base, velo_vec)
+	ball.throw_to_base(base, velo_vec, fielder.position, target)
 
 func test_mesh_array():
 	var surface_array = []
@@ -133,13 +135,17 @@ func _process(delta: float) -> void:
 					print('CONTACT')
 					contact_done = true
 					ball_in_play = true
+					ball3d.pitch_in_progress = false
+					ball3d.pitch_already_done = true
 					ball_in_play_state = "prereflex"
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 30 #randf_range(10,50)
+					var exitvelo = 30-4 #randf_range(10,50)
 					var vla = randf_range(-1,1)*20-10
 					var hla = randf_range(-1,1)*20
+					vla = 0
+					hla = 10
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0

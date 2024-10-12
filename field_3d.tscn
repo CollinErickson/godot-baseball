@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=52 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -71,8 +71,8 @@ albedo_color = Color(0.396078, 0.388235, 0, 1)
 [sub_resource type="CylinderMesh" id="CylinderMesh_rjcmf"]
 material = SubResource("StandardMaterial3D_7incl")
 top_radius = 3.0
-bottom_radius = 3.0
-height = 0.001
+bottom_radius = 4.0
+height = 0.002
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ub3u"]
 albedo_color = Color(1, 0, 1, 1)
@@ -145,8 +145,15 @@ albedo_color = Color(0.396078, 0.388235, 0, 1)
 [sub_resource type="CylinderMesh" id="CylinderMesh_8r3k2"]
 material = SubResource("StandardMaterial3D_y7r17")
 top_radius = 3.0
-bottom_radius = 3.0
-height = 0.01
+bottom_radius = 4.0
+height = 0.003
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2xu1d"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_5r354"]
+material = SubResource("StandardMaterial3D_2xu1d")
+size = Vector2(0.2, 1)
+orientation = 1
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4sot4"]
 sky_top_color = Color(0.502941, 0.808117, 0.92521, 1)
@@ -276,9 +283,13 @@ mesh = SubResource("BoxMesh_yxmap")
 transform = Transform3D(1, 0, 0, 0, -0.25038, 0.968148, 0, -0.968148, -0.25038, 0, 10, -10)
 
 [node name="Mound" type="MeshInstance3D" parent="Headon"]
-transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 20)
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, -0.001, 20)
 mesh = SubResource("CylinderMesh_8r3k2")
 skeleton = NodePath("../../Ground")
+
+[node name="MoundRubber" type="MeshInstance3D" parent="Headon/Mound"]
+transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, 0, 0.005, 0)
+mesh = SubResource("QuadMesh_5r354")
 
 [node name="Defense" type="Node3D" parent="Headon"]
 

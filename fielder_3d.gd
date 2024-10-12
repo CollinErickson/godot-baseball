@@ -79,8 +79,17 @@ func _physics_process(delta: float) -> void:
 		var ball = get_tree().get_first_node_in_group("ball")
 		var distance_from_ball = sqrt((position.x - ball.position.x)**2 +
 										(position.z - ball.position.z)**2)
+		var throw_progress = 1
+		if ball.throw_start_pos:
+			throw_progress = (sqrt((ball.throw_start_pos.x - ball.position.x)**2 +
+				(ball.throw_start_pos.z - ball.position.z)**2) /
+				sqrt((ball.throw_target.x - ball.throw_start_pos.x)**2 +
+				(ball.throw_target.z - ball.throw_start_pos.z)**2))
+			#if randf_range(0,1) < .03:
+			#	printt('throw progress', throw_progress, ball.position.y)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
-		Time.get_ticks_msec() - ball.time_last_thrown > 300):
+			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
+			throw_progress >= .9):
 			ball.position = position
 			ball.position.y = 1.4
 			holding_ball = true
@@ -91,11 +100,15 @@ func _physics_process(delta: float) -> void:
 		#print("Holding ball!")
 		if Input.is_action_just_pressed("throwfirst"):
 			throw_ball.emit(1, self)
+			holding_ball = false
 		elif Input.is_action_just_pressed("throwsecond"):
 			throw_ball.emit(2, self)
+			holding_ball = false
 		elif Input.is_action_just_pressed("throwthird"):
 			throw_ball.emit(3, self)
+			holding_ball = false
 		elif Input.is_action_just_pressed("throwhome"):
 			throw_ball.emit(4, self)
+			holding_ball = false
 
 signal throw_ball
