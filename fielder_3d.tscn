@@ -25,3 +25,7 @@ script = ExtResource("1_bfowq")
 offset = Vector2(0, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_8dfmq")
+
+[node name="Timer" type="Timer" parent="."]
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

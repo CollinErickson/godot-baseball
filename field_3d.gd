@@ -106,6 +106,18 @@ func _ready() -> void:
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()
 	var mousepos = get_viewport().get_mouse_position()
+	# depth is distance from cam to strike zone: +.6 for sz_z, +10 is arbitrary
+	#  distance to project forward, will then be used to trace back to intersection
+	var ppos = cam.project_position(mousepos, -cam.position.z +.6 + 10)
+	ppos = $Headon.to_local(ppos)
+	var prop_ppos = (sz_z - cam.position.z) / (ppos.z - cam.position.z)
+	var cross_sz = prop_ppos * ppos + (1 - prop_ppos) * cam.position
+	#printt('TEST POSITION MOUSE', mousepos,ppos, cross_sz, cam.position)
+	return cross_sz
+
+func get_mouse_y0_pos():
+	var cam = get_viewport().get_camera_3d()
+	var mousepos = get_viewport().get_mouse_position()
 	var ppos = cam.project_position(mousepos, -cam.position.z +.6 + 10)
 	ppos = $Headon.to_local(ppos)
 	var prop_ppos = (sz_z - cam.position.z) / (ppos.z - cam.position.z)
@@ -145,7 +157,7 @@ func _process(delta: float) -> void:
 					var vla = randf_range(-1,1)*20-10
 					var hla = randf_range(-1,1)*20
 					vla = 0
-					hla = 10
+					hla = 0
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -171,6 +183,13 @@ func _process(delta: float) -> void:
 					#$Headon/Camera3DHighHome.current = true
 					# Make ball bigger
 					#ball3d.scale=11*Vector3(1,1,1)
+					
+					# Make catcher visible
+					var catcher = get_node("Headon/Defense/Fielder3DC")
+					get_node("Headon/Defense/Fielder3DC")
+					catcher.get_node("Timer").wait_time = .5
+					catcher.timer_action = "set_visible_true"
+					catcher.get_node("Timer").start()
 					
 					
 				else:
@@ -303,18 +322,32 @@ func assign_fielders_after_hit():
 			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
 			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
 		elif fielder_nodes[min_ifielder].posname == "SS":
 			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
 			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
 		elif fielder_nodes[min_ifielder].posname == "1B":
 			#get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
 			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
 		elif fielder_nodes[min_ifielder].posname == "3B":
 			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
 			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
 			#get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
+		elif fielder_nodes[min_ifielder].posname in ["P", "LF", "CF", "RF"]:
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
+		elif fielder_nodes[min_ifielder].posname == "C":
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			#get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
 			
 	# Delete object at end
 	tmp_ball.velocity = Vector3()

@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 var acceleration = Vector3()
 
-const drag_coef = 0*.01 # .3 took pitch from 40 at start to 34.8 at end
+const drag_coef = .01 # .3 took pitch from 40 at start to 34.8 at end
 const gravity = 9.8*1.09361 # Full gravity seemed high
 const restitution_coef = 0.546 # MLB rules
 var time_last_thrown = Time.get_ticks_msec()
@@ -146,7 +146,7 @@ func simulate_delivery(pos, vel, delta=1./60):
 		#if nsteps % 10 ==0:
 		#	printt('  \tSimulate delivery step', nsteps, pos, vel)
 		if vel.z >= 0:
-			printt('vel.z not less than 0', vel.z)
+			printt('vel.z not less than 0', vel.z, vel, accel)
 		assert(vel.z < 0)
 	#printt('pos before going back', pos)
 	# Go back in trajectory to where it cross sz_z
@@ -352,39 +352,47 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 			p2 = p2.rotated(Vector3(0,1,0), PI)
 	else:
 		anglep2 = 0
-	printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
+	#printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
 	var t
 	var vel1
 	var vy1
 	if use_drag:
 		#assert(false)
-		printt('FITTING WITH DRAG, speed1', speed1)
+		#printt('FITTING WITH DRAG, speed1', speed1)
 		var d = drag_coef * 1
 		var m = p2.x * (1 + .5 * d * p2.x)
-		printt('m is', m)
+		#printt('m is', m)
 		var a = m**2 + p2.y**2
 		var b = p2.y * gravity * m**2 - m**2 * speed1**2
-		var c = 0.25 * gravity**2 + m**4
-		var quadratic_vx1_sq = quadratic(a, b, c)
-		printt("quadratic_vx1_sq", quadratic_vx1_sq)
+		var c = 0.25 * gravity**2 * m**4
+		#var quadratic_vx1_sq = quadratic(a, b, c)
+		var quadratic_vx1_sq = quadratic(1, b/a, c/a)
+		#printt("quadratic_vx1_sq", quadratic_vx1_sq)
+		#printt("quadratic_vx1_sq v2", quadratic(a/b, 1, c/b))
 		var vx1
 		if p2.x > 0:
 			vx1 = sqrt(quadratic_vx1_sq[1])
 		else:
 			vx1 = sqrt(quadratic_vx1_sq[1])
+		#printt('check quadratic', a*quadratic_vx1_sq[1]**2 + b*quadratic_vx1_sq[1]+c, 0,a,b,c, 1, b/a, c/a)
+		#printt('check before quadratic', m**2*vx1**4+p2.y**2*m**4+p2.y*gravity*m**2*vx1**2+.25*gravity**2*m**4, m**2*speed1**2*vx1**2)
+		#printt('check s1 terms', vx1**2, ((p2.y*vx1**2+.5*gravity*m**2)/(m*vx1))**2, speed1**2)
+		#printt('all terms', gravity, m, speed1, p2.y)
 		#assert(vx1)
 		vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
 		t = m / vx1
-		printt('assert t > 0', t, m, vx1)
+		#printt('assert t > 0', t, m, vx1)
 		assert(t > 0)
 		var k = d * (p2.x / t)**2
 		vel1 = Vector3(vx1, vy1, 0)
-		printt('check t', t)
-		printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
-		printt('check dx eqn', p2.x, vx1*t-.5*k*t**2)
-		printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
-		printt('check drag eqn', k, d, p2.x)
-		printt('drag velo vec before rotation', vel1)
+		#printt('check t', t)
+		#printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
+		#printt('check dx eqn', p2.x, vx1*t-.5*k*t**2)
+		#printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
+		#printt('check drag eqn', k, d, p2.x)
+		#printt('drag velo vec before rotation', vel1)
+		var endvelo = Vector2(vx1 - k*t, vy1 - gravity*t)
+		#printt('with drag, start speed', Vector2(vx1, vy1), Vector2(vx1,vy1).length(), speed1, 'end speed', endvelo, endvelo.length())
 	else: # no drag
 		var a = .25 * gravity**2
 		var b = gravity * (p2.y) - speed1**2
@@ -434,7 +442,10 @@ func quadratic(a, b, c) -> Array:
 	if t1 == 0:
 		return [1, -b / (2*a)]
 	else:
-		return [2, (-b + sqrt(t1)) / (2*a), (-b - sqrt(t1)) / (2*a)]
+		var out = [2, (-b + sqrt(t1)) / (2*a), (-b - sqrt(t1)) / (2*a)]
+		if out[1] < out[2]:
+			out = [out[0], out[2], out[1]]
+		return out
 
 func _ready() -> void:
 	pass
@@ -450,6 +461,7 @@ func ball_fielded():
 var throw_start_pos
 var throw_target
 func throw_to_base(_base, velo_vec, start_pos, target):
+	printt('setting throw_to_base', _base)
 	visible = true
 	is_frozen = false
 	velocity = velo_vec

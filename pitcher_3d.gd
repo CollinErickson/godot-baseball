@@ -138,6 +138,14 @@ func _physics_process(delta: float) -> void:
 		# Testing find_starting_velocity_vector
 		#print("Testing find_starting_velocity_vector")
 		#print(ball.find_starting_velocity_vector(40, ball.position, 0, 1))
+		
+		# Hide pitcher and activate Fielder3DP
+		visible = false
+		set_physics_process(false)
+		set_process(false)
+		var fielderP = get_parent().get_node("Defense/Fielder3DP")
+		fielderP.visible = true
+		fielderP.position = position
 	
 	# Place catcher's mitt for pitch target
 	if not pitch_done and not pitch_in_progress:
