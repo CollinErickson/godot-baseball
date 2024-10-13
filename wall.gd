@@ -49,14 +49,14 @@ func _ready() -> void:
 		var proj_u1_on_w = u1.dot(w) / w.dot(w) * w
 		var u1_norm = u1 - proj_u1_on_w
 		mindists.push_back(u1_norm.length())
-	printt('mindists', mindists)
+	#printt('mindists', mindists)
 	#for i in wall_array:
 	#	mindist = min(mindist, i[1])
 	mindist = mindists.min()
 	#printt("Min wall dist is", mindist)
 
 func make_wall():
-	print("Running make_wall")
+	#print("Running make_wall")
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	
@@ -122,7 +122,7 @@ func make_wall():
 	var your_material = StandardMaterial3D.new()
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
-	print("Finished make wall")
+	#print("Finished make wall")
 
 var restitution_coef = .6 # multiplied by ball restituion_coefv
 func check_ball_cross(pos, vel, cor, prev_pos, _prev_vel, is_sim):

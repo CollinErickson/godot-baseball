@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=54 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -12,6 +12,7 @@
 [ext_resource type="Environment" uid="uid://dc33a2etlsbtn" path="res://camera_3d_custom_environment.tres" id="10_t8ph7"]
 [ext_resource type="PackedScene" uid="uid://dsb1e4kc4120x" path="res://ball_3d.tscn" id="11_faris"]
 [ext_resource type="PackedScene" uid="uid://c8pe2ur7pkpbb" path="res://mouse_ground_location.tscn" id="12_ah4ma"]
+[ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="13_rbd7b"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -380,6 +381,12 @@ visible = false
 
 [node name="MouseGroundLocation" parent="Headon" instance=ExtResource("12_ah4ma")]
 visible = false
+
+[node name="MeshInstance3DAnnulus" parent="Headon" instance=ExtResource("13_rbd7b")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.002, 0)
+inner_radius = 1.0
+outer_radius = 1.2
+color = Color(1.34766e-05, 0.888755, 0.933133, 1)
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 
