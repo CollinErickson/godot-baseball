@@ -116,20 +116,26 @@ func get_mouse_sz_pos():
 	return cross_sz
 
 func get_mouse_y0_pos():
+	# Find where mouse cross ground y==0
 	var cam = get_viewport().get_camera_3d()
 	var mousepos = get_viewport().get_mouse_position()
-	var ppos = cam.project_position(mousepos, -cam.position.z +.6 + 10)
+	# Find projection arbitrary z_depth
+	var z_depth = 20
+	var ppos = cam.project_position(mousepos, z_depth)
 	ppos = $Headon.to_local(ppos)
-	var prop_ppos = (sz_z - cam.position.z) / (ppos.z - cam.position.z)
-	var cross_sz = prop_ppos * ppos + (1 - prop_ppos) * cam.position
+	# Two points in line of camera view: camera.position and ppos
+	var prop_ppos = (0 - cam.position.y) / (ppos.y - cam.position.y)
+	var cross_y0 = prop_ppos * ppos + (1 - prop_ppos) * cam.position
 	#printt('TEST POSITION MOUSE', mousepos,ppos, cross_sz, cam.position)
-	return cross_sz
+	return cross_y0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if randf_range(0,1) < 1./1000:
 		printt('in field_3d, frame rate', (1./delta))
 	#printt('get_mouse_z', get_mouse_sz_pos())
+	#printt('get_mouse_y0', get_mouse_y0_pos())
+	
 	
 	# R key reloads
 	if Input.is_action_just_pressed("reload"):
@@ -186,10 +192,14 @@ func _process(delta: float) -> void:
 					
 					# Make catcher visible
 					var catcher = get_node("Headon/Defense/Fielder3DC")
-					get_node("Headon/Defense/Fielder3DC")
 					catcher.get_node("Timer").wait_time = .5
 					catcher.timer_action = "set_visible_true"
 					catcher.get_node("Timer").start()
+					
+					# Make mouse circle on ground visible
+					var mgl = get_node("Headon/MouseGroundLocation")
+					mgl.visible = true
+					mgl.set_process(true)
 					
 					
 				else:

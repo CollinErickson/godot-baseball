@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8pe2ur7pkpbb"]
+
+[ext_resource type="Script" path="res://mouse_ground_location.gd" id="1_i0bkm"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v014m"]
+albedo_color = Color(0, 1, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hlxea"]
+material = SubResource("StandardMaterial3D_v014m")
+top_radius = 0.33
+bottom_radius = 0.33
+height = 0.01
+
+[node name="MouseGroundLocation" type="Node3D"]
+script = ExtResource("1_i0bkm")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_hlxea")

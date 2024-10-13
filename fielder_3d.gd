@@ -85,8 +85,8 @@ func _physics_process(delta: float) -> void:
 				(ball.throw_start_pos.z - ball.position.z)**2) /
 				sqrt((ball.throw_target.x - ball.throw_start_pos.x)**2 +
 				(ball.throw_target.z - ball.throw_start_pos.z)**2))
-		if randf_range(0,1) < .3:
-			printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
+		#if randf_range(0,1) < .3:
+		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 			throw_progress >= .9):
