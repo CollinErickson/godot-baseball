@@ -245,6 +245,23 @@ func _process(delta: float) -> void:
 			printt('fielder nodes', fielder_nodes)
 			assign_fielders_after_hit()
 	
+	# Move baserunners
+	if Input.is_action_just_pressed("throwfirst"):
+		#
+		pass
+	elif Input.is_action_just_pressed("throwsecond"):
+		# Move all forward
+		var runners = get_tree().get_nodes_in_group("runners")
+		for runner in runners:
+			runner.send_runner(1)
+	elif Input.is_action_just_pressed("throwthird"):
+		pass
+	elif Input.is_action_just_pressed("throwhome"):
+		# Move all forward
+		var runners = get_tree().get_nodes_in_group("runners")
+		for runner in runners:
+			runner.send_runner(-1)
+	
 	# Adjust camera
 	if get_viewport():
 		var cam = get_viewport().get_camera_3d()

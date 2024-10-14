@@ -100,7 +100,7 @@ func _physics_process(delta: float) -> void:
 
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
-		#print("Holding ball!")
+		# Check for throwing ball
 		if Input.is_action_just_pressed("throwfirst"):
 			throw_ball_func(1)
 		elif Input.is_action_just_pressed("throwsecond"):
@@ -110,12 +110,23 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_pressed("throwhome"):
 			throw_ball_func(4)
 		
+		# Check for movement
+		if Input.is_action_pressed("moveleft"):
+			position.x += delta * SPEED
+		if Input.is_action_pressed("moveright"):
+			position.x -= delta * SPEED
+		if Input.is_action_pressed("moveup"):
+			position.z += delta * SPEED
+		if Input.is_action_pressed("movedown"):
+			position.z -= delta * SPEED
+		
+		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()
 		#printt(posname, step_on_base)
 		if step_on_base[0]:
 			if not stepping_on_base_with_ball:
-				print("STEPPING ON BASE!!!", posname, step_on_base)
+				#print("STEPPING ON BASE!!!", posname, step_on_base)
 				stepped_on_base_with_ball.emit(self, step_on_base[1])
 				stepping_on_base_with_ball = true
 		elif not step_on_base[0]: # Not holding ball
