@@ -93,9 +93,12 @@ func _physics_process(delta: float) -> void:
 			ball.position = position
 			ball.position.y = 1.4
 			holding_ball = true
+			assignment = "holding_ball"
+			assignment_pos = null
+			#printt('fielder emiting ball_fielded')
 			ball_fielded.emit()
 
-	# If holding, check if they throw it
+	# If holding, check if they throw it or step on base or move
 	if holding_ball:
 		#print("Holding ball!")
 		if Input.is_action_just_pressed("throwfirst"):
@@ -106,6 +109,35 @@ func _physics_process(delta: float) -> void:
 			throw_ball_func(3)
 		elif Input.is_action_just_pressed("throwhome"):
 			throw_ball_func(4)
+		
+		# Check if step on base
+		var step_on_base = is_stepping_on_base()
+		#printt(posname, step_on_base)
+		if step_on_base[0]:
+			if not stepping_on_base_with_ball:
+				print("STEPPING ON BASE!!!", posname, step_on_base)
+				stepped_on_base_with_ball.emit(self, step_on_base[1])
+				stepping_on_base_with_ball = true
+		elif not step_on_base[0]: # Not holding ball
+				stepping_on_base_with_ball = false
+	else:
+		stepping_on_base_with_ball = false
+var stepping_on_base_with_ball = false
+func is_stepping_on_base() -> Array:
+	var bases = [
+		Vector3(-1,0,1)*30/sqrt(2),
+		Vector3(0,0,1)*30*sqrt(2),
+		Vector3(1,0,1)*30/sqrt(2),
+		Vector3(0,0,0)
+	]
+	#printt('is_stepping_on_base', posname, bases[0], position)
+	for i in range(4):
+		if sqrt((position.x - bases[i].x)**2 +
+				(position.z - bases[i].z)**2) < 1:
+			return [true, i + 1]
+	return [false]
+
+signal stepped_on_base_with_ball
 
 signal throw_ball
 func throw_ball_func(base):

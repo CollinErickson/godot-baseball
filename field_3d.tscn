@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=55 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://dsb1e4kc4120x" path="res://ball_3d.tscn" id="11_faris"]
 [ext_resource type="PackedScene" uid="uid://c8pe2ur7pkpbb" path="res://mouse_ground_location.tscn" id="12_ah4ma"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="13_rbd7b"]
+[ext_resource type="Script" path="res://flash_text.gd" id="14_g2qjr"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -339,9 +340,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 [node name="Bat3D" parent="Headon" instance=ExtResource("6_i5fsa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 
-[node name="Runner3DHome" parent="Headon" instance=ExtResource("8_eblru")]
-visible = false
-
 [node name="Camera3DCustom" parent="Headon" instance=ExtResource("9_hy03x")]
 
 [node name="Cameras" type="Node3D" parent="Headon"]
@@ -388,6 +386,23 @@ inner_radius = 1.0
 outer_radius = 1.2
 color = Color(1.34766e-05, 0.888755, 0.933133, 1)
 
+[node name="Runners" type="Node3D" parent="Headon"]
+
+[node name="Runner3DHome" parent="Headon/Runners" instance=ExtResource("8_eblru")]
+visible = false
+
+[node name="Runner3D1B" parent="Headon/Runners" instance=ExtResource("8_eblru")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 0, 21)
+start_base = 1
+
+[node name="Runner3D2B" parent="Headon/Runners" instance=ExtResource("8_eblru")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 40)
+start_base = 2
+
+[node name="Runner3D3B" parent="Headon/Runners" instance=ExtResource("8_eblru")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 0, 21)
+start_base = 3
+
 [node name="TimerCameraChange" type="Timer" parent="."]
 
 [node name="Label" type="Label" parent="."]
@@ -397,14 +412,21 @@ offset_bottom = 23.0
 text = "Home run!"
 
 [node name="FlashText" type="Label" parent="."]
-offset_left = 1060.0
-offset_top = 731.0
-offset_right = 1234.0
-offset_bottom = 754.0
-text = "Home run!"
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -390.0
+offset_top = -129.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 100
 horizontal_alignment = 2
+script = ExtResource("14_g2qjr")
 
 [node name="Timer" type="Timer" parent="FlashText"]
 
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]
+[connection signal="timeout" from="FlashText/Timer" to="FlashText" method="_on_timer_timeout"]

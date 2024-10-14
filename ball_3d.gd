@@ -383,7 +383,7 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		t = m / vx1
 		#printt('assert t > 0', t, m, vx1)
 		assert(t > 0)
-		var k = d * (p2.x / t)**2
+		#var k = d * (p2.x / t)**2
 		vel1 = Vector3(vx1, vy1, 0)
 		#printt('check t', t)
 		#printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
@@ -391,7 +391,7 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		#printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
 		#printt('check drag eqn', k, d, p2.x)
 		#printt('drag velo vec before rotation', vel1)
-		var endvelo = Vector2(vx1 - k*t, vy1 - gravity*t)
+		#var endvelo = Vector2(vx1 - k*t, vy1 - gravity*t)
 		#printt('with drag, start speed', Vector2(vx1, vy1), Vector2(vx1,vy1).length(), speed1, 'end speed', endvelo, endvelo.length())
 	else: # no drag
 		var a = .25 * gravity**2
@@ -452,6 +452,7 @@ func _ready() -> void:
 	#fit_approx_parabola_to_trajectory(Vector3(1,2,20), Vector3(3,.5,.6), 80, false)
 
 func ball_fielded():
+	#printt('running ball ball_fielded, state will be fielded')
 	visible = false
 	velocity = Vector3()
 	is_frozen = true

@@ -56,7 +56,3 @@ func make_annulus():
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
 	#print("Finished make annulua")
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass

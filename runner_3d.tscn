@@ -18,7 +18,7 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="Runner3D" type="CharacterBody3D"]
+[node name="Runner3D" type="CharacterBody3D" groups=["runners"]]
 script = ExtResource("1_lpabj")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]

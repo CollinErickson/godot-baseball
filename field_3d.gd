@@ -8,11 +8,22 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
+#func record_out(type : String):
+#	outs_on_play += 1
+
 func _on_ball_fielded_by_fielder():
+	# TODO pass in which fielder, to check their location and if stepping on base
 	var ball = get_node("Headon/Ball3D")
-	ball.ball_fielded()
+	printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
+		printt("fly Out recorded!!!")
 		outs_on_play += 1
+		get_node("FlashText").new_text("Fly out!", 3)
+		get_node("Headon/Runners/Runner3DHome").runner_is_out()
+	# TODO check for force out
+	
+	# Do this last so that the type of out can be determined
+	ball.ball_fielded()
 
 func _on_throw_ball_by_fielder(base, fielder):
 	printt('In field_3d, throwing ball to:', base, fielder)
@@ -35,6 +46,23 @@ func _on_throw_ball_by_fielder(base, fielder):
 	printt('target is', target, 'fielder pos is', fielder.position)
 	var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
 	ball.throw_to_base(base, velo_vec, fielder.position, target)
+
+func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
+	# Check for force out
+	printt('in field3D, stepped on base with ball!!!!')
+	# TODO if runner before is out on play, then it's no longer force out
+	var runners = get_tree().get_nodes_in_group("runners")
+	for runner in runners:
+		if (runner.exists_at_start and
+			runner.start_base == base - 1 and not
+			runner.out_on_play and 
+			runner.max_running_progress < base):
+			runner.runner_is_out()
+			printt("force Out recorded!!!", runner.start_base, base, runner.running_progress)
+			outs_on_play += 1
+			get_node("FlashText").new_text("force out!", 3)
+			runner.runner_is_out()
+	return
 
 func test_mesh_array():
 	var surface_array = []
@@ -97,6 +125,7 @@ func _ready() -> void:
 	for fielder in fielder_nodes:  
 		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
+		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
 	
 	# Test mesh array
 	#test_mesh_array()
@@ -160,9 +189,9 @@ func _process(delta: float) -> void:
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
 					var exitvelo = 30-4 #randf_range(10,50)
-					var vla = randf_range(-1,1)*20-10
+					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
-					vla = 0
+					vla = -10
 					hla = 0
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
@@ -174,6 +203,7 @@ func _process(delta: float) -> void:
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
 					print('velo vec is')
 					print(ball3d.velocity)
+					ball3d.state = "ball_in_play"
 					
 					# Start running after .5 seconds
 					var batter = get_node("Headon/Batter3D")
@@ -388,11 +418,12 @@ func _on_timer_camera_change_timeout() -> void:
 
 func _on_batter_3d_start_runner() -> void:
 	# Start runner
-	var runner_node = get_node("Headon/Runner3DHome")
+	var runner_node = get_node("Headon/Runners/Runner3DHome")
 	runner_node.set_process(true)
 	runner_node.visible = true
 	runner_node.is_running = true
-	runner_node.running_progress = .04
+	runner_node.running_progress = 0.04
+	runner_node.max_running_progress = 0.04
 	
 	# Turn off batter
 	get_node("Headon/Batter3D").visible = false
