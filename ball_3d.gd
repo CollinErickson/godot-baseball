@@ -116,7 +116,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Bounce
 	if position.y < 0.042:
-		#print('BOUNCE')
+		#printt('BOUNCE', state)
 		position.y = 0.042 + (0.042 - position.y)* restitution_coef
 		velocity.y *= -1*restitution_coef # coef restitution
 		# Stop it if slow enough to avoid infinite bounce
@@ -125,6 +125,7 @@ func _physics_process(delta: float) -> void:
 		if pitch_in_progress:
 			delivery_bounced = true
 		if state == "ball_in_play":
+			#printt('setting hit_bounced = true')
 			hit_bounced = true
 
 func simulate_delivery(pos, vel, delta=1./60):

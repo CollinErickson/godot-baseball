@@ -13,7 +13,7 @@ var out_on_play = false
 var scored_on_play = false # TODO use this
 var tagged_up_after_catch
 var max_running_progress
-var target_base = start_base + 1
+var target_base
 
 func runner_is_out() -> void:
 	out_on_play = true
@@ -24,6 +24,7 @@ func runner_is_out() -> void:
 func _ready() -> void:
 	running_progress = start_base*1.
 	max_running_progress = running_progress
+	target_base = start_base + 1
 
 func _physics_process(delta: float) -> void:
 	
@@ -39,6 +40,7 @@ func _physics_process(delta: float) -> void:
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			running_progress = target_base
+			max_running_progress = running_progress
 			is_running = false
 		else: # Not crossing base
 			# Update progress
