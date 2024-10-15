@@ -181,7 +181,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
 shape = SubResource("BoxShape3D_yxhqg")
 
 [node name="GreenGround" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, -1, 70)
 mesh = SubResource("BoxMesh_i5ps3")
 
 [node name="HomePlate" type="MeshInstance3D" parent="Ground"]
@@ -358,6 +358,11 @@ fov = 18.9
 transform = Transform3D(-1, 7.45058e-09, -5.96046e-08, 0, 0.984808, 0.173648, 8.9407e-08, 0.173648, -0.984808, 0, 20, -100)
 environment = ExtResource("10_t8ph7")
 fov = 18.9
+
+[node name="Camera3DOverhead" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(-1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 200, 65)
+environment = ExtResource("10_t8ph7")
+fov = 39.2
 
 [node name="Camera3DPitcherShoulderRight" type="Camera3D" parent="Headon/Cameras"]
 transform = Transform3D(0.992546, 0.00425317, -0.121795, 0, 0.999391, 0.0348995, 0.121869, -0.0346394, 0.991941, -5, 2, 50)

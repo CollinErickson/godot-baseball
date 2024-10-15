@@ -104,6 +104,7 @@ func _physics_process(delta: float) -> void:
 	if holding_ball:
 		# Check for throwing ball
 		if Input.is_action_just_pressed("throwfirst"):
+			#printt('throw to first')
 			throw_ball_func(1)
 		elif Input.is_action_just_pressed("throwsecond"):
 			throw_ball_func(2)
@@ -113,26 +114,36 @@ func _physics_process(delta: float) -> void:
 			throw_ball_func(4)
 		
 		# Check for click that throws ball
-		var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
-		printt('in fielder, mgl pos is', mgl, mgl.position)
+		if Input.is_action_just_pressed("click"):
+			var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
+			#printt('in fielder, mgl pos is', mgl, mgl.position)
+			for i in range(4):
+				if distance_xz(mgl.position, base_positions[i]) < 2:
+					throw_ball_func(i+1)
+				#else:
+				#	printt('click not near base')
 		
 		# Check for movement
 		var anymovement = false
+		var move = Vector3()
 		if Input.is_action_pressed("moveleft"):
-			position.x += delta * SPEED
+			move.x += delta * SPEED
 			anymovement = true
 		if Input.is_action_pressed("moveright"):
-			position.x -= delta * SPEED
+			move.x -= delta * SPEED
 			anymovement = true
 		if Input.is_action_pressed("moveup"):
-			position.z += delta * SPEED
+			move.z += delta * SPEED
 			anymovement = true
 		if Input.is_action_pressed("movedown"):
-			position.z -= delta * SPEED
+			move.z -= delta * SPEED
 			anymovement = true
 		if anymovement:
-			var ball = get_tree().get_first_node_in_group("ball")
-			ball.position = position
+			if move.length() > 0:
+				move = move.normalized() * delta * SPEED
+				position += move
+				var ball = get_tree().get_first_node_in_group("ball")
+				ball.position = position
 		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()
@@ -169,12 +180,14 @@ signal stepped_on_base_with_ball
 
 signal throw_ball
 func throw_ball_func(base):
-	holding_ball = false
-	var ball = get_tree().get_first_node_in_group("ball")
-	ball.throw_start_pos = null
-	ball.throw_target = null
-	throw_ball.emit(base, self)
-	assignment = 'wait_to_receive' # Not the best name for it
+	# Only throw if not close to that base
+	if distance_xz(position, base_positions[base-1]) > 3:
+		holding_ball = false
+		var ball = get_tree().get_first_node_in_group("ball")
+		ball.throw_start_pos = null
+		ball.throw_target = null
+		throw_ball.emit(base, self)
+		assignment = 'wait_to_receive' # Not the best name for it
 
 
 var timer_action
