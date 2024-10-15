@@ -49,12 +49,13 @@ func _ready():
 signal ball_fielded
 
 func _physics_process(delta: float) -> void:
+	#if posname == 'C':
+	#	printt('catcher fielder', assignment)
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
 	if assignment in ["ball", "cover"]:
-		var distance_from_target = sqrt((position.x - assignment_pos.x)**2 +
-										(position.z - assignment_pos.z)**2)
+		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 		if distance_can_move < distance_from_target:
@@ -64,7 +65,7 @@ func _physics_process(delta: float) -> void:
 			position.z += delta * SPEED * direction_unit_vec.z
 		else:
 			# Can reach it, go to that point and stop
-			printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
+			#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 			position = assignment_pos
 			if assignment == "ball":
 				#assignment = "holding_ball"
@@ -77,14 +78,15 @@ func _physics_process(delta: float) -> void:
 	# Check if they caught the ball
 	if assignment in ["cover", "wait_to_receive"]:
 		var ball = get_tree().get_first_node_in_group("ball")
-		var distance_from_ball = sqrt((position.x - ball.position.x)**2 +
-										(position.z - ball.position.z)**2)
+		var distance_from_ball = distance_xz(position, ball.position)
 		var throw_progress = 1
 		if ball.throw_start_pos != null:
-			throw_progress = (sqrt((ball.throw_start_pos.x - ball.position.x)**2 +
-				(ball.throw_start_pos.z - ball.position.z)**2) /
-				sqrt((ball.throw_target.x - ball.throw_start_pos.x)**2 +
-				(ball.throw_target.z - ball.throw_start_pos.z)**2))
+			throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
+				distance_xz(ball.throw_target, ball.throw_start_pos))
+			# Fix when throw distance is very small
+			var throw_target_distance = distance_xz(ball.throw_target, ball.throw_start_pos)
+			if throw_target_distance < 1:
+				throw_progress = 1
 		#if randf_range(0,1) < .3:
 		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
@@ -110,16 +112,27 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_action_just_pressed("throwhome"):
 			throw_ball_func(4)
 		
+		# Check for click that throws ball
+		var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
+		printt('in fielder, mgl pos is', mgl, mgl.position)
+		
 		# Check for movement
+		var anymovement = false
 		if Input.is_action_pressed("moveleft"):
 			position.x += delta * SPEED
+			anymovement = true
 		if Input.is_action_pressed("moveright"):
 			position.x -= delta * SPEED
+			anymovement = true
 		if Input.is_action_pressed("moveup"):
 			position.z += delta * SPEED
+			anymovement = true
 		if Input.is_action_pressed("movedown"):
 			position.z -= delta * SPEED
-		
+			anymovement = true
+		if anymovement:
+			var ball = get_tree().get_first_node_in_group("ball")
+			ball.position = position
 		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()
@@ -134,17 +147,21 @@ func _physics_process(delta: float) -> void:
 	else:
 		stepping_on_base_with_ball = false
 var stepping_on_base_with_ball = false
+
+func distance_xz(a:Vector3, b:Vector3) -> float:
+	return sqrt((a.x - b.x)**2 +
+				(a.z - b.z)**2)
+
+var base_positions = [
+	Vector3(-1,0,1)*30/sqrt(2),
+	Vector3(0,0,1)*30*sqrt(2),
+	Vector3(1,0,1)*30/sqrt(2),
+	Vector3(0,0,0)
+]
 func is_stepping_on_base() -> Array:
-	var bases = [
-		Vector3(-1,0,1)*30/sqrt(2),
-		Vector3(0,0,1)*30*sqrt(2),
-		Vector3(1,0,1)*30/sqrt(2),
-		Vector3(0,0,0)
-	]
 	#printt('is_stepping_on_base', posname, bases[0], position)
 	for i in range(4):
-		if sqrt((position.x - bases[i].x)**2 +
-				(position.z - bases[i].z)**2) < 1:
+		if distance_xz(position, base_positions[i]) < 1:
 			return [true, i + 1]
 	return [false]
 
@@ -157,6 +174,7 @@ func throw_ball_func(base):
 	ball.throw_start_pos = null
 	ball.throw_target = null
 	throw_ball.emit(base, self)
+	assignment = 'wait_to_receive' # Not the best name for it
 
 
 var timer_action

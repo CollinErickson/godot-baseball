@@ -8,6 +8,9 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
+var user_is_pitching_team = true
+var user_is_batting_team = true
+
 #func record_out(type : String):
 #	outs_on_play += 1
 
@@ -170,6 +173,16 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("reload"):
 		print('reload')
 		get_tree().reload_current_scene()
+	
+	# Pause game
+	if Input.is_action_just_pressed("startbutton"):
+		print('start button pressed')
+		if get_tree().paused:
+			_on_resume_button_pressed()
+		else:
+			_on_pause_button_pressed()
+	if Input.is_key_pressed(KEY_P):
+		Engine.time_scale = randf_range(.1,10)
 	
 	# Check for contact on swing
 	if not contact_done and get_node_or_null("Headon/Ball3D"):
@@ -445,3 +458,10 @@ func _on_batter_3d_start_runner() -> void:
 	# Turn off batter
 	get_node("Headon/Batter3D").visible = false
 	get_node("Headon/Batter3D").set_process(false)
+
+func _on_pause_button_pressed():
+	get_tree().paused = true
+	#show()
+
+func _on_resume_button_pressed():
+	get_tree().paused = false

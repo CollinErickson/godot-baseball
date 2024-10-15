@@ -29,13 +29,18 @@ func _physics_process(delta: float) -> void:
 	
 	# Base running
 	if is_running:
+		#printt('running progress', running_progress, start_base, target_base)
 		# Check if they will cross target_base
-		var next_running_progress = running_progress + delta*SPEED/30
+		var dir = 1
+		if target_base < running_progress:
+			dir = -1
+		var next_running_progress = running_progress + delta*SPEED/30 * dir
+		
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			running_progress = target_base
 			is_running = false
-		else:
+		else: # Not crossing base
 			# Update progress
 			running_progress = next_running_progress
 			if running_progress >= 4:
@@ -59,11 +64,13 @@ func _physics_process(delta: float) -> void:
 		
 func send_runner(direction: int) -> void:
 	if direction == 1:
-		if running_progress-1e-8 - floor(running_progress-1e-8) > .5:
+		#printt('sending forward!!!')
+		if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
 			target_base = floor(running_progress) + 1
 			is_running = true 
 	elif direction == -1:
-		if running_progress > 1 or running_progress == start_base: # Can't go back to home
+		#print('sending backward!!!')
+		if running_progress > 1 and running_progress > start_base + 1e-8: # Can't go back to home
 			# Standing on base, go to previous
 			if running_progress == floor(running_progress):
 				# Go to previous base
@@ -71,6 +78,7 @@ func send_runner(direction: int) -> void:
 				is_running = true
 			else:
 				# In between bases, go back
+				printt('going back?', running_progress, target_base)
 				target_base = floor(running_progress)
 				is_running = true
 	else:
