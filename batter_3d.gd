@@ -9,20 +9,26 @@ var input_click = false
 var swingx = false
 var swingy = false
 
+var user_is_batting_team
+
+func begin_swing():
+	print('Starting swing in batter_3d:_process')
+	swing_started = true
+	# Change which sprite is visible
+	get_node("AnimatedSprite3D").visible = true
+	get_node("AnimatedSprite3DIdle").visible = false
+	get_node("AnimatedSprite3DIdle").set_process(false)
+	
+	# Move to next frame
+	get_node('AnimatedSprite3D').set_frame(1)
+	swing_elapsed_sec = 0
+	swing_state = 'inzone'
+
 func _process(delta: float) -> void:
-	#print(1)
-	if not swing_started and not swing_done and Input.is_action_just_pressed("swing"):
-		print('Starting swing in batter_3d:_process')
-		swing_started = true
-		# Change which sprite is visible
-		get_node("AnimatedSprite3D").visible = true
-		get_node("AnimatedSprite3DIdle").visible = false
-		get_node("AnimatedSprite3DIdle").set_process(false)
-		
-		# Move to next frame
-		get_node('AnimatedSprite3D').set_frame(1)
-		swing_elapsed_sec = 0
-		swing_state = 'inzone'
+	if (not swing_started and not swing_done and 
+		user_is_batting_team and 
+		Input.is_action_just_pressed("swing")):
+		begin_swing()
 	if swing_started and not swing_done:
 		swing_elapsed_sec += delta
 		if swing_state == 'inzone' and swing_elapsed_sec > .15:
@@ -59,5 +65,7 @@ func _on_timer_timeout() -> void:
 	if timer_action == "start_running_after_hit":
 		# Create Runner, place near 0, set to run
 		start_runner.emit()
+	elif timer_action == "begin_swing":
+		begin_swing()
 	else:
 		printerr('bad 9012412')

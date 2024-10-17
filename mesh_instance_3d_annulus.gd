@@ -11,7 +11,7 @@ func _ready() -> void:
 
 
 func make_annulus():
-	print("Running make_annulus")
+	#print("Running make_annulus")
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	

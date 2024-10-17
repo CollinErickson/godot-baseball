@@ -29,10 +29,14 @@ func get_spin_acceleration_and_speed():
 	print("BAD PITCH TYPE")
 	return [Vector3(0,3,0)*sign_, max_pitch_speed]
 
+signal pitch_started#(pitch_x, pitch_y)
 func begin_pitch():
 	pitch_in_progress = true
 	pitch_frame = 1
 	$AnimatedSprite3D.set_frame(1)
+	printt('BEGINNING PITCH IN PITCHER')
+	pitch_started.emit(pitch_x, pitch_y)
+	printt('signal was emitted.......')
 
 func _physics_process(delta: float) -> void:
 	if pitch_in_progress:

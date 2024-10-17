@@ -9,7 +9,7 @@ const sz_z = 0.6
 var outs_on_play = 0
 
 var user_is_pitching_team = !false
-var user_is_batting_team = true
+var user_is_batting_team = false
 
 #func record_out(type : String):
 #	outs_on_play += 1
@@ -145,6 +145,7 @@ func _ready() -> void:
 		fielder.user_is_pitching_team = user_is_pitching_team
 	if not user_is_pitching_team:
 		$Headon/CatchersMitt.visible = false
+	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
 
 	
 
@@ -280,21 +281,22 @@ func _process(delta: float) -> void:
 				pass #printt("hit won't bounce, don't send runners!!")
 	
 	# Move baserunners
-	if Input.is_action_just_pressed("throwfirst"):
-		#
-		pass
-	elif Input.is_action_just_pressed("throwsecond"):
-		# Move all forward
-		var runners = get_tree().get_nodes_in_group("runners")
-		for runner in runners:
-			runner.send_runner(1)
-	elif Input.is_action_just_pressed("throwthird"):
-		pass
-	elif Input.is_action_just_pressed("throwhome"):
-		# Move all forward
-		var runners = get_tree().get_nodes_in_group("runners")
-		for runner in runners:
-			runner.send_runner(-1)
+	if user_is_batting_team:
+		if Input.is_action_just_pressed("throwfirst"):
+			#
+			pass
+		elif Input.is_action_just_pressed("throwsecond"):
+			# Move all forward
+			var runners = get_tree().get_nodes_in_group("runners")
+			for runner in runners:
+				runner.send_runner(1)
+		elif Input.is_action_just_pressed("throwthird"):
+			pass
+		elif Input.is_action_just_pressed("throwhome"):
+			# Move all forward
+			var runners = get_tree().get_nodes_in_group("runners")
+			for runner in runners:
+				runner.send_runner(-1)
 	
 	# Adjust camera
 	if get_viewport():
@@ -491,3 +493,11 @@ func _on_pause_button_pressed():
 
 func _on_resume_button_pressed():
 	get_tree().paused = false
+
+
+func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y) -> void:
+	printt('in field, pitch started!!!!!!!!!!!!!!!!!')
+	if not user_is_batting_team:
+		get_node("Headon/Batter3D").timer_action = 'begin_swing'
+		get_node("Headon/Batter3D/Timer").wait_time = .95
+		get_node("Headon/Batter3D/Timer").start()
