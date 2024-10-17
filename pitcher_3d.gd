@@ -8,6 +8,7 @@ var pitch_frame = 0
 var pitch_type = "FB"
 var max_pitch_speed = 40
 var pitch_hand = "L"
+var user_is_pitching_team
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 
@@ -27,27 +28,39 @@ func get_spin_acceleration_and_speed():
 		return [Vector3(0,-4,0)*sign_, .7*max_pitch_speed]
 	print("BAD PITCH TYPE")
 	return [Vector3(0,3,0)*sign_, max_pitch_speed]
-	
+
+func begin_pitch():
+	pitch_in_progress = true
+	pitch_frame = 1
+	$AnimatedSprite3D.set_frame(1)
 
 func _physics_process(delta: float) -> void:
 	if pitch_in_progress:
 		time_since_pitch_start += delta
 	# Pre-pitch
 	if not pitch_done and not pitch_in_progress: 
-		# Pitch type
-		if Input.is_action_just_pressed("throwhome"):
-			pitch_type = "FB"
-		elif Input.is_action_just_pressed("throwfirst"):
-			pitch_type = "2SFB"
-		elif Input.is_action_just_pressed("throwthird"):
-			pitch_type = "SL"
-		elif Input.is_action_just_pressed("throwsecond"):
-			pitch_type = "CB"
-		# Begin pitch
-		if Input.is_action_just_pressed("ui_select"):
-			pitch_in_progress = true
-			pitch_frame = 1
-			$AnimatedSprite3D.set_frame(1)
+		if user_is_pitching_team:
+			# Pitch type
+			if Input.is_action_just_pressed("throwhome"):
+				pitch_type = "FB"
+			elif Input.is_action_just_pressed("throwfirst"):
+				pitch_type = "2SFB"
+			elif Input.is_action_just_pressed("throwthird"):
+				pitch_type = "SL"
+			elif Input.is_action_just_pressed("throwsecond"):
+				pitch_type = "CB"
+			# Begin pitch
+			if Input.is_action_just_pressed("ui_select") or Input.is_action_just_pressed("click"):
+				begin_pitch()
+		else:
+			if timer_action == null:
+				# Start pitch
+				pitch_type = ["FB", "2SFB", "SL", "CB"].pick_random()
+				select_pitch_location()
+				timer_action = 'begin_pitch'
+				printt('starting timer')
+				$Timer.wait_time = 1.3
+				$Timer.start()
 		
 	if not pitch_done and pitch_in_progress and pitch_frame == 1 and time_since_pitch_start > .25:
 		# Advance delivery animation
@@ -84,7 +97,10 @@ func _physics_process(delta: float) -> void:
 		var catchers_mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
 		
 		#var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
-		#	catchers_mitt.position.x, catchers_mitt.position.y)
+		#	pitch_x, pitch_y)
+		if user_is_pitching_team:
+			pitch_x = catchers_mitt.position.x
+			pitch_y = catchers_mitt.position.y
 		
 		
 		# Test my parabola solution
@@ -92,14 +108,14 @@ func _physics_process(delta: float) -> void:
 		#printt('velo from optimization', velo_vec)
 		var parabola_approx_velo = ball.fit_approx_parabola_to_trajectory(
 			ball.position,
-			Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z),
+			Vector3(pitch_x, pitch_y, ball.sz_z),
 			pitchspeed, false
 		)
 		printt("Now fit with drag")
 		
 		var parabola_approx_velo_with_drag = ball.fit_approx_parabola_to_trajectory(
 			ball.position,
-			Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z),
+			Vector3(pitch_x, pitch_y, ball.sz_z),
 			pitchspeed, true
 		)
 		printt("compare drag", parabola_approx_velo_with_drag,
@@ -107,10 +123,10 @@ func _physics_process(delta: float) -> void:
 		#print('velo from parabola approx', parabola_approx_velo)
 		#printt('from optimization', ball.simulate_delivery(ball.position, velo_vec))
 		#printt('from approx', ball.simulate_delivery(ball.position, parabola_approx_velo))
-		#printt('target was', Vector3(catchers_mitt.position.x, catchers_mitt.position.y, ball.sz_z))
+		#printt('target was', Vector3(pitch_x, pitch_y, ball.sz_z))
 		#printt('now find start velo with good starting point')
 		var velo_vec_with_start = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
-			catchers_mitt.position.x, catchers_mitt.position.y, 1./36/36, parabola_approx_velo)
+			pitch_x, pitch_y, 1./36/36, parabola_approx_velo)
 		#printt('is this better? (fewer steps?)', velo_vec_with_start)
 		printt("Pitch start velo is", velo_vec_with_start)
 		catchers_mitt.get_node("Sprite3D").visible=false
@@ -154,3 +170,18 @@ func _physics_process(delta: float) -> void:
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001
 		get_tree().root.get_node("Field3D/Headon/CatchersMitt").position = mouse_sz_pos
+
+
+var timer_action
+
+func _on_timer_timeout() -> void:
+	printt("Pitcher timeout is done")
+	$Timer.stop()
+	if timer_action == "begin_pitch":
+		begin_pitch()
+
+var pitch_x
+var pitch_y
+func select_pitch_location():
+	pitch_x = randf_range(-9,9)/12/3
+	pitch_y = randf_range(0.5,1.2)

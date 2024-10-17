@@ -8,7 +8,7 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
-var user_is_pitching_team = true
+var user_is_pitching_team = !false
 var user_is_batting_team = true
 
 #func record_out(type : String):
@@ -65,8 +65,12 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			#       runner.running_progress, runner.max_running_progress)
 			outs_on_play += 1
 			get_node("FlashText").new_text("force out!", 3)
-			runner.runner_is_out()
+			#runner.runner_is_out()
 	return
+
+func _on_tag_out_by_fielder():
+	outs_on_play += 1
+	get_node("FlashText").new_text("tag out!", 3)
 
 func test_mesh_array():
 	var surface_array = []
@@ -130,9 +134,17 @@ func _ready() -> void:
 		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
+		fielder.connect("tag_out", _on_tag_out_by_fielder)
 	
 	# Test mesh array
 	#test_mesh_array()
+	
+	# Set variables in children
+	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
+	for fielder in fielder_nodes:
+		fielder.user_is_pitching_team = user_is_pitching_team
+	if not user_is_pitching_team:
+		$Headon/CatchersMitt.visible = false
 
 	
 

@@ -9,6 +9,7 @@ const max_throw_speed = 30
 var assignment
 var assignment_pos
 var holding_ball = false
+var user_is_pitching_team
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -47,6 +48,7 @@ func _ready():
 	change_color()
 
 signal ball_fielded
+signal tag_out
 
 func _physics_process(delta: float) -> void:
 	#if posname == 'C':
@@ -102,48 +104,58 @@ func _physics_process(delta: float) -> void:
 
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
-		# Check for throwing ball
-		if Input.is_action_just_pressed("throwfirst"):
-			#printt('throw to first')
-			throw_ball_func(1)
-		elif Input.is_action_just_pressed("throwsecond"):
-			throw_ball_func(2)
-		elif Input.is_action_just_pressed("throwthird"):
-			throw_ball_func(3)
-		elif Input.is_action_just_pressed("throwhome"):
-			throw_ball_func(4)
+		# Check if tagging runner
+		var runners = get_tree().get_nodes_in_group("runners")
+		for runner in runners:
+			if (runner.exists_at_start and not runner.out_on_play and
+				abs(runner.running_progress - round(runner.running_progress)) > 1e-4 and
+				distance_xz(position, runner.position) < 1):
+				runner.runner_is_out()
+				tag_out.emit()
 		
-		# Check for click that throws ball
-		if Input.is_action_just_pressed("click"):
-			var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
-			#printt('in fielder, mgl pos is', mgl, mgl.position)
-			for i in range(4):
-				if distance_xz(mgl.position, base_positions[i]) < 2:
-					throw_ball_func(i+1)
-				#else:
-				#	printt('click not near base')
-		
-		# Check for movement
-		var anymovement = false
-		var move = Vector3()
-		if Input.is_action_pressed("moveleft"):
-			move.x += delta * SPEED
-			anymovement = true
-		if Input.is_action_pressed("moveright"):
-			move.x -= delta * SPEED
-			anymovement = true
-		if Input.is_action_pressed("moveup"):
-			move.z += delta * SPEED
-			anymovement = true
-		if Input.is_action_pressed("movedown"):
-			move.z -= delta * SPEED
-			anymovement = true
-		if anymovement:
-			if move.length() > 0:
-				move = move.normalized() * delta * SPEED
-				position += move
-				var ball = get_tree().get_first_node_in_group("ball")
-				ball.position = position
+		if user_is_pitching_team:
+			# Check for throwing ball
+			if Input.is_action_just_pressed("throwfirst"):
+				#printt('throw to first')
+				throw_ball_func(1)
+			elif Input.is_action_just_pressed("throwsecond"):
+				throw_ball_func(2)
+			elif Input.is_action_just_pressed("throwthird"):
+				throw_ball_func(3)
+			elif Input.is_action_just_pressed("throwhome"):
+				throw_ball_func(4)
+			
+			# Check for click that throws ball
+			if Input.is_action_just_pressed("click"):
+				var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
+				#printt('in fielder, mgl pos is', mgl, mgl.position)
+				for i in range(4):
+					if distance_xz(mgl.position, base_positions[i]) < 2:
+						throw_ball_func(i+1)
+					#else:
+					#	printt('click not near base')
+			
+			# Check for movement
+			var anymovement = false
+			var move = Vector3()
+			if Input.is_action_pressed("moveleft"):
+				move.x += delta * SPEED
+				anymovement = true
+			if Input.is_action_pressed("moveright"):
+				move.x -= delta * SPEED
+				anymovement = true
+			if Input.is_action_pressed("moveup"):
+				move.z += delta * SPEED
+				anymovement = true
+			if Input.is_action_pressed("movedown"):
+				move.z -= delta * SPEED
+				anymovement = true
+			if anymovement:
+				if move.length() > 0:
+					move = move.normalized() * delta * SPEED
+					position += move
+					var ball = get_tree().get_first_node_in_group("ball")
+					ball.position = position
 		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()
