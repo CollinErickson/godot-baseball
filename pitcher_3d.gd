@@ -34,9 +34,9 @@ func begin_pitch():
 	pitch_in_progress = true
 	pitch_frame = 1
 	$AnimatedSprite3D.set_frame(1)
-	printt('BEGINNING PITCH IN PITCHER')
+	#printt('BEGINNING PITCH IN PITCHER')
 	pitch_started.emit(pitch_x, pitch_y)
-	printt('signal was emitted.......')
+	#printt('signal was emitted.......')
 
 func _physics_process(delta: float) -> void:
 	if pitch_in_progress:

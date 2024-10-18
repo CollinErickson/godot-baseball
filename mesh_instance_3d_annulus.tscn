@@ -1,11 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7sdkylsmikjw"]
+[gd_scene load_steps=2 format=3 uid="uid://b7sdkylsmikjw"]
 
 [ext_resource type="Script" path="res://mesh_instance_3d_annulus.gd" id="1_43gt4"]
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_gyu10"]
-
 [node name="MeshInstance3DAnnulus" type="Node3D"]
 script = ExtResource("1_43gt4")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("ArrayMesh_gyu10")

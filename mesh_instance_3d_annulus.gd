@@ -12,6 +12,9 @@ func _ready() -> void:
 
 func make_annulus():
 	#print("Running make_annulus")
+	assert(outer_radius > inner_radius)
+	assert(inner_radius > 0)
+	
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	
@@ -49,7 +52,11 @@ func make_annulus():
 	surface_array[Mesh.ARRAY_COLOR] = colors
 
 	# No blendshapes, lods, or compression used.
-	var meshnode = get_node("MeshInstance3D")
+	#var meshnode = get_node("MeshInstance3D")
+	var meshnode = MeshInstance3D.new()
+	meshnode.mesh = ArrayMesh.new()
+	add_child(meshnode)
+	#meshnode.mesh.local_to_scene
 	meshnode.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	
 	var your_material = StandardMaterial3D.new()

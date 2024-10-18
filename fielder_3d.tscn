@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://d3vo8o7aa5kqp"]
+[gd_scene load_steps=6 format=3 uid="uid://d3vo8o7aa5kqp"]
 
 [ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
+[ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="3_mscjq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_util4"]
 atlas = ExtResource("2_sqr5y")
@@ -27,5 +28,12 @@ pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_8dfmq")
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="Annulus" parent="." instance=ExtResource("3_mscjq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.002, 0)
+visible = false
+inner_radius = 1.3
+outer_radius = 1.5
+color = Color(1, 1, 1, 1)
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

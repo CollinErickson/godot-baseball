@@ -23,7 +23,6 @@ func _on_ball_fielded_by_fielder():
 		outs_on_play += 1
 		get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
-	# TODO check for force out
 	
 	# Do this last so that the type of out can be determined
 	ball.ball_fielded()
@@ -52,7 +51,7 @@ func _on_throw_ball_by_fielder(base, fielder):
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	# Check for force out
-	printt('in field3D, stepped on base with ball!!!!')
+	#printt('in field3D, stepped on base with ball!!!!')
 	# TODO if runner before is out on play, then it's no longer force out
 	var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
@@ -60,12 +59,20 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			runner.start_base == base - 1 and
 			not runner.out_on_play and 
 			runner.max_running_progress < base - 1e-8):
-			runner.runner_is_out()
-			#printt("force Out recorded!!!", runner.start_base, base,
-			#       runner.running_progress, runner.max_running_progress)
-			outs_on_play += 1
-			get_node("FlashText").new_text("force out!", 3)
-			#runner.runner_is_out()
+			# Would be out, need to make sure that all previous runners are still active
+			var prev_runner_out = false
+			for otherrunner in runners:
+				if otherrunner.start_base < runner.start_base-.5 and not otherrunner.is_active():
+					prev_runner_out = true
+			if not prev_runner_out:
+				runner.runner_is_out()
+				#printt("force Out recorded!!!", runner.start_base, base,
+				#       runner.running_progress, runner.max_running_progress)
+				outs_on_play += 1
+				get_node("FlashText").new_text("force out!", 3)
+				#runner.runner_is_out()
+			#else:
+			#	printt('not force out, prev runner not there')
 	return
 
 func _on_tag_out_by_fielder():
@@ -350,6 +357,18 @@ func _process(delta: float) -> void:
 			get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 		elif Input.is_key_pressed(KEY_4):
 			get_node("Headon/Cameras/Camera3DAll22").current = true
+	
+	# Check if play is done, but not every time
+	time_since_check_if_play_done_checked += delta
+	if time_since_check_if_play_done_checked > .5:
+		if check_if_play_done():
+			time_since_play_done_consecutive += .5
+			if time_since_play_done_consecutive > .6:
+				play_done_fully = true
+				get_node("FlashText").new_text("Play is done!", 3)
+				get_tree().reload_current_scene()
+		else:
+			time_since_play_done_consecutive = 0
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
@@ -494,10 +513,42 @@ func _on_pause_button_pressed():
 func _on_resume_button_pressed():
 	get_tree().paused = false
 
-
 func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y) -> void:
-	printt('in field, pitch started!!!!!!!!!!!!!!!!!')
+	#printt('in field, pitch started!!!!!!!!!!!!!!!!!')
 	if not user_is_batting_team:
 		get_node("Headon/Batter3D").timer_action = 'begin_swing'
 		get_node("Headon/Batter3D/Timer").wait_time = .95
 		get_node("Headon/Batter3D/Timer").start()
+
+var time_since_check_if_play_done_checked = 0
+var time_since_play_done_consecutive = 0
+var play_done_fully = false
+func check_if_play_done():
+	time_since_check_if_play_done_checked = 0
+	# Check if runners aren't running and are near base
+	var runners = get_tree().get_nodes_in_group("runners")
+	for runner in runners:
+		if runner.is_running:
+			return false
+		if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
+			return false
+	# None are running, all are near base
+	# Check if fielder is holding ball
+	var fielders = get_tree().get_nodes_in_group("fielders")
+	var holding_ball = false
+	var ball_pos
+	#printt('checking for holdin gball now')
+	for fielder in fielders:
+		if fielder.holding_ball:
+			holding_ball = true
+			ball_pos = fielder.position
+			break
+	if not holding_ball:
+		return false
+	# Someone is holding ball, check if they are close to infield
+	var near_infield = sqrt((ball_pos.x-0)**2 + (ball_pos.z-20)**2) < 25
+	#if near_infield:
+	#	printt('NEAR INFIELD, PLAY IS OVER', time_since_play_done_consecutive, time_since_check_if_play_done_checked)
+	#else:
+	#	printt('not play over')
+	return near_infield

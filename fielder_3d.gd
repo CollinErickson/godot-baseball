@@ -78,7 +78,7 @@ func _physics_process(delta: float) -> void:
 				assignment = "wait_to_receive"
 	
 	# Check if they caught the ball
-	if assignment in ["cover", "wait_to_receive"]:
+	if assignment in ["ball", "cover", "wait_to_receive"]:
 		var ball = get_tree().get_first_node_in_group("ball")
 		var distance_from_ball = distance_xz(position, ball.position)
 		var throw_progress = 1
@@ -101,6 +101,8 @@ func _physics_process(delta: float) -> void:
 			assignment_pos = null
 			#printt('fielder emiting ball_fielded')
 			ball_fielded.emit()
+			if user_is_pitching_team:
+				set_selected_fielder()
 
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
@@ -200,10 +202,21 @@ func throw_ball_func(base):
 		ball.throw_target = null
 		throw_ball.emit(base, self)
 		assignment = 'wait_to_receive' # Not the best name for it
-
+		if user_is_pitching_team:
+			set_not_selected_fielder()
 
 var timer_action
 func _on_timer_timeout() -> void:
 	get_node("Timer").stop()
 	if timer_action == "set_visible_true":
 		visible = true
+
+var is_selected_fielder = false
+func set_selected_fielder():
+	add_to_group("selected_fielder")
+	is_selected_fielder = true
+	get_node("Annulus").visible = true
+func set_not_selected_fielder():
+	remove_from_group("selected_fielder")
+	is_selected_fielder = false
+	get_node("Annulus").visible = false

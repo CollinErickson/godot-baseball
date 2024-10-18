@@ -15,6 +15,9 @@ var tagged_up_after_catch
 var max_running_progress
 var target_base
 
+func is_active():
+	return exists_at_start and not out_on_play
+
 func runner_is_out() -> void:
 	out_on_play = true
 	set_physics_process(false)

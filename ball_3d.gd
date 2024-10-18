@@ -463,7 +463,7 @@ func ball_fielded():
 var throw_start_pos
 var throw_target
 func throw_to_base(_base, velo_vec, start_pos, target):
-	printt('setting throw_to_base', _base)
+	#printt('setting throw_to_base', _base)
 	visible = true
 	is_frozen = false
 	velocity = velo_vec
