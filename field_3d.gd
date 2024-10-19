@@ -8,8 +8,8 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
-var user_is_pitching_team = !false
-var user_is_batting_team = false
+var user_is_pitching_team = true
+var user_is_batting_team = !true
 
 #func record_out(type : String):
 #	outs_on_play += 1
@@ -46,7 +46,8 @@ func _on_throw_ball_by_fielder(base, fielder):
 		assert(false)
 	target.y = 1
 	printt('target is', target, 'fielder pos is', fielder.position)
-	var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
+	#var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
+	var velo_vec = ball.fit_approx_parabola_to_trajectory(fielder.position, target, fielder.max_throw_speed, true)
 	ball.throw_to_base(base, velo_vec, fielder.position, target)
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
@@ -552,3 +553,8 @@ func check_if_play_done():
 	#else:
 	#	printt('not play over')
 	return near_infield
+
+
+func _on_ball_3d_ball_overthrown() -> void:
+	pass # Replace with function body.
+	assign_fielders_after_hit()

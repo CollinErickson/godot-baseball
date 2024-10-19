@@ -9,6 +9,8 @@ var pitch_type = "FB"
 var max_pitch_speed = 40
 var pitch_hand = "L"
 var user_is_pitching_team
+var prev_mouse_sz_pos
+var catchermitt_speed = 0.5 # non-mouse movement
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 
@@ -172,8 +174,21 @@ func _physics_process(delta: float) -> void:
 		var mouse_sz_pos = get_tree().root.get_node("Field3D").get_mouse_sz_pos()
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
-		mouse_sz_pos.z -= .001
-		get_tree().root.get_node("Field3D/Headon/CatchersMitt").position = mouse_sz_pos
+		mouse_sz_pos.z -= .001 # Move so it is behind the strike zone
+		if prev_mouse_sz_pos!=null and prev_mouse_sz_pos != mouse_sz_pos:
+			get_tree().root.get_node("Field3D/Headon/CatchersMitt").position = mouse_sz_pos
+		else: # No mouse movement
+			var mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
+			if Input.is_action_pressed("movedown"):
+				mitt.position.y -= delta*catchermitt_speed
+			if Input.is_action_pressed("moveup"):
+				mitt.position.y += delta*catchermitt_speed
+			if Input.is_action_pressed("moveleft"):
+				mitt.position.x += delta*catchermitt_speed
+			if Input.is_action_pressed("moveright"):
+				mitt.position.x -= delta*catchermitt_speed
+		
+		prev_mouse_sz_pos = mouse_sz_pos
 
 
 var timer_action

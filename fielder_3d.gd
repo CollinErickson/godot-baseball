@@ -80,20 +80,21 @@ func _physics_process(delta: float) -> void:
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive"]:
 		var ball = get_tree().get_first_node_in_group("ball")
+		#if ball.state =='thrown'
 		var distance_from_ball = distance_xz(position, ball.position)
-		var throw_progress = 1
-		if ball.throw_start_pos != null:
-			throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
-				distance_xz(ball.throw_target, ball.throw_start_pos))
-			# Fix when throw distance is very small
-			var throw_target_distance = distance_xz(ball.throw_target, ball.throw_start_pos)
-			if throw_target_distance < 1:
-				throw_progress = 1
+		#var throw_progress = 1
+		#if ball.throw_start_pos != null:
+			#throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
+				#distance_xz(ball.throw_target, ball.throw_start_pos))
+			## Fix when throw distance is very small
+			#var throw_target_distance = distance_xz(ball.throw_target, ball.throw_start_pos)
+			#if throw_target_distance < 1:
+				#throw_progress = 1
 		#if randf_range(0,1) < .3:
 		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
-			throw_progress >= .9):
+			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
 			ball.position = position
 			ball.position.y = 1.4
 			holding_ball = true

@@ -28,6 +28,9 @@ var prev_position
 var prev_velocity
 var prev_global_position
 var prev_global_velocity
+var throw_progress
+
+signal ball_overthrown
 
 func pow_vec_components(x, a=2) :
 	var y = Vector3()
@@ -58,9 +61,13 @@ func _physics_process(delta: float) -> void:
 	#print('in ball pp, velo is: ', velocity.)
 	#position.x = 0
 	#move_and_slide()
-	if not is_frozen:
+	if not is_frozen and state != "prepitch":
 		acceleration = Vector3()
-		acceleration.y = -gravity
+		if abs(velocity.y) < 1e-8 and abs(position.y) < 1e-8:
+			# No accel if on ground and stopped
+			acceleration.y = 0
+		else: 
+			acceleration.y = -gravity
 		acceleration += spin_acceleration
 		if velocity.length_squared() > 0:
 			acceleration -= drag_coef * velocity.length_squared() * velocity.normalized()
@@ -80,6 +87,21 @@ func _physics_process(delta: float) -> void:
 				velocity = wallout[3]
 				#if not is_sim:
 					#assert(false)
+		if state == "thrown":
+			throw_progress = 1
+			if throw_start_pos != null:
+				throw_progress = (distance_xz(throw_start_pos, position) /
+					distance_xz(throw_target, throw_start_pos))
+				# Fix when throw distance is very small
+				var throw_target_distance = distance_xz(throw_target, throw_start_pos)
+				if throw_target_distance < 1:
+					throw_progress = 1
+				if throw_progress > 1.05 or velocity.length() < .5:
+					printt('ball throw prog over 1', throw_progress)
+					state = 'ball_in_play'
+					throw_start_pos = null
+					throw_target = null
+					ball_overthrown.emit()
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
@@ -116,9 +138,11 @@ func _physics_process(delta: float) -> void:
 	
 	# Bounce
 	if position.y < 0.042:
-		#printt('BOUNCE', state)
+		printt('BOUNCE', state, velocity.length(), velocity)
 		position.y = 0.042 + (0.042 - position.y)* restitution_coef
-		velocity.y *= -1*restitution_coef # coef restitution
+		#velocity.y *= -1*restitution_coef # coef restitution
+		velocity.y *= -1 # bounce up
+		velocity *= restitution_coef
 		# Stop it if slow enough to avoid infinite bounce
 		if velocity.length_squared() < .5**2:
 			velocity = Vector3()
@@ -371,6 +395,9 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		#printt("quadratic_vx1_sq", quadratic_vx1_sq)
 		#printt("quadratic_vx1_sq v2", quadratic(a/b, 1, c/b))
 		var vx1
+		if quadratic_vx1_sq[0] < .5 or quadratic_vx1_sq[1] < 0:
+			printt('approx parabola will give error', quadratic_vx1_sq)
+			#return ???
 		if p2.x > 0:
 			vx1 = sqrt(quadratic_vx1_sq[1])
 		else:
@@ -472,3 +499,8 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 	state = "thrown"
 	time_last_thrown = Time.get_ticks_msec()
 	set_process(true)
+
+
+func distance_xz(a:Vector3, b:Vector3) -> float:
+	return sqrt((a.x - b.x)**2 +
+				(a.z - b.z)**2)
