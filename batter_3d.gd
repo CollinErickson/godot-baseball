@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 	
 	# Make bat move with mouse
 	# Place bat for swing target
-	if not swing_started and not swing_done:
+	if not swing_started and not swing_done and user_is_batting_team:
 		var mouse_sz_pos = get_tree().root.get_node("Field3D").get_mouse_sz_pos()
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))

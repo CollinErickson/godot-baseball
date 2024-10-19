@@ -156,6 +156,10 @@ func _physics_process(delta: float) -> void:
 			if anymovement:
 				if move.length() > 0:
 					move = move.normalized() * delta * SPEED
+					# Rotate move based on camera angle
+					var cam = get_viewport().get_camera_3d()
+					#printt('cam fielder movement', cam.rotation)
+					move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
 					position += move
 					var ball = get_tree().get_first_node_in_group("ball")
 					ball.position = position

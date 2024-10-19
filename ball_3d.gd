@@ -44,6 +44,7 @@ func is_strike():
 		position.y < 1.05 + ball_radius and position.y > 0.45 - ball_radius and
 		not delivery_bounced)
 
+signal pitch_completed_unhit
 func _physics_process(delta: float) -> void:
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
@@ -135,6 +136,7 @@ func _physics_process(delta: float) -> void:
 			is_frozen = true
 			velocity = Vector3()
 			get_node("AnimatedSprite3D").stop()
+			pitch_completed_unhit.emit()
 	
 	# Bounce
 	if position.y < 0.042:

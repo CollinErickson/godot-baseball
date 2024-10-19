@@ -154,8 +154,8 @@ func _ready() -> void:
 	if not user_is_pitching_team:
 		$Headon/CatchersMitt.visible = false
 	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
-
-	
+	if not user_is_batting_team:
+		$Headon/Bat3D.visible = false
 
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()
@@ -556,5 +556,16 @@ func check_if_play_done():
 
 
 func _on_ball_3d_ball_overthrown() -> void:
-	pass # Replace with function body.
 	assign_fielders_after_hit()
+
+
+func _on_ball_3d_pitch_completed_unhit() -> void:
+	pass # Replace with function body.
+	$PlayOverTimer.wait_time = 1
+	$PlayOverTimer.start()
+
+
+func _on_play_over_timer_timeout() -> void:
+	play_done_fully = true
+	get_node("FlashText").new_text("Play is done!", 3)
+	get_tree().reload_current_scene()

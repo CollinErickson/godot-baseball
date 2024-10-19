@@ -175,7 +175,7 @@ func _physics_process(delta: float) -> void:
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001 # Move so it is behind the strike zone
-		if prev_mouse_sz_pos!=null and prev_mouse_sz_pos != mouse_sz_pos:
+		if prev_mouse_sz_pos==null or prev_mouse_sz_pos != mouse_sz_pos:
 			get_tree().root.get_node("Field3D/Headon/CatchersMitt").position = mouse_sz_pos
 		else: # No mouse movement
 			var mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")

@@ -432,9 +432,13 @@ script = ExtResource("14_g2qjr")
 
 [node name="Timer" type="Timer" parent="FlashText"]
 
+[node name="PlayOverTimer" type="Timer" parent="."]
+
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="pitch_started" from="Headon/Pitcher3D" to="." method="_on_pitcher_3d_pitch_started2"]
 [connection signal="pitch_started" from="Headon/Pitcher3D" to="." method="_on_pitcher_3d_pitch_started"]
 [connection signal="ball_overthrown" from="Headon/Ball3D" to="." method="_on_ball_3d_ball_overthrown"]
+[connection signal="pitch_completed_unhit" from="Headon/Ball3D" to="." method="_on_ball_3d_pitch_completed_unhit"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]
 [connection signal="timeout" from="FlashText/Timer" to="FlashText" method="_on_timer_timeout"]
+[connection signal="timeout" from="PlayOverTimer" to="." method="_on_play_over_timer_timeout"]
