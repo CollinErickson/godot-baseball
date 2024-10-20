@@ -24,6 +24,8 @@ func assign_to_field_ball(pos):
 	assignment = 'ball'
 	assignment_pos = pos
 	assignment_pos.y = 0
+	if user_is_pitching_team:
+		set_selected_fielder()
 
 func assign_to_cover_base(base):
 	assignment = 'cover'
@@ -56,7 +58,8 @@ func _physics_process(delta: float) -> void:
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
-	if assignment in ["ball", "cover"]:
+	#if assignment in ["ball", "cover"]:
+	if (assignment == "cover") or (assignment == 'ball' and not user_is_pitching_team):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
@@ -70,6 +73,9 @@ func _physics_process(delta: float) -> void:
 			#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 			position = assignment_pos
 			if assignment == "ball":
+				printt('pitcher made it to ball assignment')
+				if posname == 'P':
+					pass
 				#assignment = "holding_ball"
 				#ball_fielded.emit()
 				#holding_ball = true
@@ -92,11 +98,15 @@ func _physics_process(delta: float) -> void:
 				#throw_progress = 1
 		#if randf_range(0,1) < .3:
 		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
+		if posname=='P':
+			printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
+			printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 			ball.position = position
 			ball.position.y = 1.4
+			printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 			holding_ball = true
 			assignment = "holding_ball"
 			assignment_pos = null
@@ -105,6 +115,35 @@ func _physics_process(delta: float) -> void:
 			if user_is_pitching_team:
 				set_selected_fielder()
 
+	# Check if user moves
+	if user_is_pitching_team and (holding_ball or assignment=="ball"):
+		# Check for movement
+		var anymovement = false
+		var move = Vector3()
+		if Input.is_action_pressed("moveleft"):
+			move.x += delta * SPEED
+			anymovement = true
+		if Input.is_action_pressed("moveright"):
+			move.x -= delta * SPEED
+			anymovement = true
+		if Input.is_action_pressed("moveup"):
+			move.z += delta * SPEED
+			anymovement = true
+		if Input.is_action_pressed("movedown"):
+			move.z -= delta * SPEED
+			anymovement = true
+		if anymovement:
+			if move.length() > 0:
+				move = move.normalized() * delta * SPEED
+				# Rotate move based on camera angle
+				var cam = get_viewport().get_camera_3d()
+				#printt('cam fielder movement', cam.rotation)
+				move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
+				position += move
+				var ball = get_tree().get_first_node_in_group("ball")
+				#ball.position = position
+		
+	
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
 		# Check if tagging runner
@@ -138,32 +177,6 @@ func _physics_process(delta: float) -> void:
 					#else:
 					#	printt('click not near base')
 			
-			# Check for movement
-			var anymovement = false
-			var move = Vector3()
-			if Input.is_action_pressed("moveleft"):
-				move.x += delta * SPEED
-				anymovement = true
-			if Input.is_action_pressed("moveright"):
-				move.x -= delta * SPEED
-				anymovement = true
-			if Input.is_action_pressed("moveup"):
-				move.z += delta * SPEED
-				anymovement = true
-			if Input.is_action_pressed("movedown"):
-				move.z -= delta * SPEED
-				anymovement = true
-			if anymovement:
-				if move.length() > 0:
-					move = move.normalized() * delta * SPEED
-					# Rotate move based on camera angle
-					var cam = get_viewport().get_camera_3d()
-					#printt('cam fielder movement', cam.rotation)
-					move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
-					position += move
-					var ball = get_tree().get_first_node_in_group("ball")
-					ball.position = position
-		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()
 		#printt(posname, step_on_base)
@@ -203,6 +216,8 @@ func throw_ball_func(base):
 	if distance_xz(position, base_positions[base-1]) > 3:
 		holding_ball = false
 		var ball = get_tree().get_first_node_in_group("ball")
+		ball.position = position
+		ball.position.y = 1.4
 		ball.throw_start_pos = null
 		ball.throw_target = null
 		throw_ball.emit(base, self)

@@ -8,8 +8,8 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
-var user_is_pitching_team = true
-var user_is_batting_team = !true
+var user_is_pitching_team = !true
+var user_is_batting_team = true
 
 #func record_out(type : String):
 #	outs_on_play += 1
@@ -227,7 +227,7 @@ func _process(delta: float) -> void:
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
 					vla = -20
-					hla = 0
+					hla = 10
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0

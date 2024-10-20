@@ -16,7 +16,7 @@ var max_running_progress
 var target_base
 
 func is_active():
-	return exists_at_start and not out_on_play
+	return exists_at_start and not out_on_play and not scored_on_play
 
 func runner_is_out() -> void:
 	out_on_play = true
@@ -45,14 +45,16 @@ func _physics_process(delta: float) -> void:
 			running_progress = target_base
 			max_running_progress = running_progress
 			is_running = false
-		else: # Not crossing base
-			# Update progress
-			running_progress = next_running_progress
+			# Scored run
 			if running_progress >= 4:
 				is_running = false
 				running_progress = 4
 				scored_on_play = true
 				visible = false
+				print('SCORED, SHOULDNT BE VISIBLE')
+		else: # Not crossing base
+			# Update progress
+			running_progress = next_running_progress
 			max_running_progress = max(running_progress, max_running_progress)
 			# Update location
 			if running_progress < 1:
@@ -64,10 +66,12 @@ func _physics_process(delta: float) -> void:
 			elif running_progress <= 4:
 				position = Vector3(1,0,1).normalized() * ((4 - running_progress) * 30)
 			else:
-				printerr('bad 0941029')
+				printerr('bad 0941029: ', running_progress, ' , ', start_base)
 			#printt('RUN', is_running, running_progress, position)
 		
 func send_runner(direction: int) -> void:
+	if not is_active():
+		return
 	if direction == 1:
 		#printt('sending forward!!!')
 		if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:

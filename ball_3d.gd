@@ -62,7 +62,7 @@ func _physics_process(delta: float) -> void:
 	#print('in ball pp, velo is: ', velocity.)
 	#position.x = 0
 	#move_and_slide()
-	if not is_frozen and state != "prepitch":
+	if not is_frozen and state not in ["prepitch", "fielded"]:
 		acceleration = Vector3()
 		if abs(velocity.y) < 1e-8 and abs(position.y) < 1e-8:
 			# No accel if on ground and stopped
@@ -103,6 +103,22 @@ func _physics_process(delta: float) -> void:
 					throw_start_pos = null
 					throw_target = null
 					ball_overthrown.emit()
+		
+		# Bounce
+		if position.y < 0.042:
+			printt('BOUNCE', state, velocity.length(), velocity)
+			position.y = 0.042 + (0.042 - position.y)* restitution_coef
+			#velocity.y *= -1*restitution_coef # coef restitution
+			velocity.y *= -1 # bounce up
+			velocity *= restitution_coef
+			# Stop it if slow enough to avoid infinite bounce
+			if velocity.length_squared() < .5**2:
+				velocity = Vector3()
+			if pitch_in_progress:
+				delivery_bounced = true
+			if state == "ball_in_play":
+				#printt('setting hit_bounced = true')
+				hit_bounced = true
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
@@ -138,21 +154,6 @@ func _physics_process(delta: float) -> void:
 			get_node("AnimatedSprite3D").stop()
 			pitch_completed_unhit.emit()
 	
-	# Bounce
-	if position.y < 0.042:
-		printt('BOUNCE', state, velocity.length(), velocity)
-		position.y = 0.042 + (0.042 - position.y)* restitution_coef
-		#velocity.y *= -1*restitution_coef # coef restitution
-		velocity.y *= -1 # bounce up
-		velocity *= restitution_coef
-		# Stop it if slow enough to avoid infinite bounce
-		if velocity.length_squared() < .5**2:
-			velocity = Vector3()
-		if pitch_in_progress:
-			delivery_bounced = true
-		if state == "ball_in_play":
-			#printt('setting hit_bounced = true')
-			hit_bounced = true
 
 func simulate_delivery(pos, vel, delta=1./60):
 	# Find position where the ball will cross the strike zone
