@@ -51,7 +51,7 @@ func _physics_process(delta: float) -> void:
 				running_progress = 4
 				scored_on_play = true
 				visible = false
-				print('SCORED, SHOULDNT BE VISIBLE')
+				#print('SCORED, SHOULDNT BE VISIBLE')
 		else: # Not crossing base
 			# Update progress
 			running_progress = next_running_progress
@@ -87,7 +87,7 @@ func send_runner(direction: int) -> void:
 				is_running = true
 			else:
 				# In between bases, go back
-				printt('going back?', running_progress, target_base)
+				#printt('going back?', running_progress, target_base)
 				target_base = floor(running_progress)
 				is_running = true
 	else:

@@ -98,15 +98,15 @@ func _physics_process(delta: float) -> void:
 				#throw_progress = 1
 		#if randf_range(0,1) < .3:
 		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
-		if posname=='P':
-			printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
+		#if posname=='P':
+		#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-			printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
+			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 			ball.position = position
 			ball.position.y = 1.4
-			printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
+			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 			holding_ball = true
 			assignment = "holding_ball"
 			assignment_pos = null
@@ -140,7 +140,7 @@ func _physics_process(delta: float) -> void:
 				#printt('cam fielder movement', cam.rotation)
 				move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
 				position += move
-				var ball = get_tree().get_first_node_in_group("ball")
+				#var ball = get_tree().get_first_node_in_group("ball")
 				#ball.position = position
 		
 	

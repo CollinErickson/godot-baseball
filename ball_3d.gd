@@ -29,6 +29,7 @@ var prev_velocity
 var prev_global_position
 var prev_global_velocity
 var throw_progress
+var bounced_previous_frame = false
 
 signal ball_overthrown
 
@@ -64,18 +65,21 @@ func _physics_process(delta: float) -> void:
 	#move_and_slide()
 	if not is_frozen and state not in ["prepitch", "fielded"]:
 		acceleration = Vector3()
-		if abs(velocity.y) < 1e-8 and abs(position.y) < 1e-8:
+		if abs(velocity.y) < 1e-8 and abs(position.y - ball_radius) < 1e-8:
 			# No accel if on ground and stopped
 			acceleration.y = 0
+			#printt('actually is on ground, no gravity', spin_acceleration, velocity)
 		else: 
 			acceleration.y = -gravity
 		acceleration += spin_acceleration
 		if velocity.length_squared() > 0:
 			acceleration -= drag_coef * velocity.length_squared() * velocity.normalized()
 		#prev_position = position
+		#printt('accel', acceleration, velocity, position)
 		velocity += delta * acceleration
 		# If you do velocity first, then subtract accel, more accurate
 		position += delta * velocity - 0.5 * delta**2 * acceleration
+		#printt('new ball pos', position)
 		for wallnode in get_tree().get_nodes_in_group("walls"):
 			var wallout = wallnode.check_ball_cross(global_position, velocity, restitution_coef,
 			prev_global_position, prev_velocity, is_sim)
@@ -88,6 +92,7 @@ func _physics_process(delta: float) -> void:
 				velocity = wallout[3]
 				#if not is_sim:
 					#assert(false)
+		# Move a throw
 		if state == "thrown":
 			throw_progress = 1
 			if throw_start_pos != null:
@@ -105,12 +110,21 @@ func _physics_process(delta: float) -> void:
 					ball_overthrown.emit()
 		
 		# Bounce
-		if position.y < 0.042:
-			printt('BOUNCE', state, velocity.length(), velocity)
-			position.y = 0.042 + (0.042 - position.y)* restitution_coef
+		if position.y < ball_radius:
+			#printt('BOUNCE', state, velocity.length(), velocity, position, bounced_previous_frame, ball_radius - position.y)
+			position.y = ball_radius + (ball_radius - position.y)* restitution_coef
 			#velocity.y *= -1*restitution_coef # coef restitution
 			velocity.y *= -1 # bounce up
 			velocity *= restitution_coef
+			# If it would bounce next frame, stop it
+			#var next_pos_y = position.y + (1./60)*(velocity.y - .5*gravity*(1./60)) + .5*gravity*(1./60)**2
+			#if position.y + 1./60*velocity.y - .5*gravity*(1./60)**2 < ball_radius:
+			if bounced_previous_frame:
+				#printt('ball stopped on ground')
+				velocity.y = 0
+				position.y = ball_radius
+			#else:
+			#	printt('bounced up, not stopped', position, velocity, position.y + 1./60*velocity.y - .5*gravity*(1./60)**2, ball_radius, next_pos_y)
 			# Stop it if slow enough to avoid infinite bounce
 			if velocity.length_squared() < .5**2:
 				velocity = Vector3()
@@ -119,6 +133,10 @@ func _physics_process(delta: float) -> void:
 			if state == "ball_in_play":
 				#printt('setting hit_bounced = true')
 				hit_bounced = true
+			bounced_previous_frame = true
+		else:
+			#printt('NOT bounce', delta)
+			bounced_previous_frame = false
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
@@ -185,9 +203,20 @@ func simulate_delivery(pos, vel, delta=1./60):
 	#printt('simulate delivery found', pos)
 	return pos
 
-func secant_step(x0, x1, f0, f1, step_size = 1):
+func secant_step(x0, x1, f0, f1, step_size = 1, max_mult=10) -> float:
 	# https://en.wikipedia.org/wiki/Secant_method
-	return x1 - f1 * (x1 - x0) / (f1 - f0) * step_size
+	var x2 =  x1 - f1 * (x1 - x0) / (f1 - f0) * step_size
+	if max_mult != null:
+		assert(max_mult >= 1)
+		var xL = min(x0, x1)
+		var xR = max(x0, x1)
+		if x2 > xR:
+			if x2 - xR > max_mult * (xR - xL):
+				x2 = xR + max_mult * (xR - xL)
+		if x2 < xL:
+			if xL - x2 > max_mult * (xR - xL):
+				x2 = xL - max_mult * (xR - xL)
+	return x2
 
 var best_dist2 = 1e9
 var best_v
@@ -257,6 +286,7 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 				#v1 = (v0.normalized() + Vector3(0,.01,0)).normalized() * speed0
 				y1 = y0  + randf_range(-1,1) * 1e-2
 				v1 = make_v.call(x0, y1)
+				printt("Starting with y", y0, y1)
 			#printt('evaluating v1', v1)
 			eval1 = eval.call(v1)
 			
@@ -284,9 +314,11 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 				if idim == 0:
 					x2 = secant_step(x0, x1, eval0, eval1, secant_step_size)
 					v2 = make_v.call(x2, y0)
+					printt('secant step x:', x0, x1, x2)
 				else:
 					y2 = secant_step(y0, y1, eval0, eval1, secant_step_size)
 					v2 = make_v.call(x0, y2)
+					printt('secant step y:', y0, y1, y2)
 				# Eval new point
 				eval2 = eval.call(v2)
 				
@@ -316,6 +348,7 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 					secant_step_size = max(min(1, secant_step_size*1.05), .1)
 				else:
 					# New one is worst, reject, pick new point between existing
+					printt('REJECTED!', eval0, eval1, eval2)
 					if idim == 0:
 						x2 = .5*(x0 + x1)
 						v2 = make_v.call(x2, y0)

@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://b0bfhb6hwd41"]
+
+[node name="Scorebug" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TeamNames" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="AwayName" type="Label" parent="HBoxContainer/TeamNames"]
+layout_mode = 2
+text = "AWA	"
+
+[node name="HomeName" type="Label" parent="HBoxContainer/TeamNames"]
+layout_mode = 2
+text = "HOM"
+
+[node name="Scores" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="AwayScore" type="Label" parent="HBoxContainer/Scores"]
+layout_mode = 2
+text = "8	"
+
+[node name="HomeScore" type="Label" parent="HBoxContainer/Scores"]
+layout_mode = 2
+text = "12"
+
+[node name="Inning" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "▲3"
+
+[node name="Outs" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "◉ ○ ○"
+
+[node name="Balls" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "3"
+
+[node name="BallStrikeSeparator" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "-"
+
+[node name="Strikes" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "2"
+
+[node name="Baserunners" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "<^>"
