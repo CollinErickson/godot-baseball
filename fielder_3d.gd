@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 		return
 	#print("Moving fielder to ball!!!!!!")
 	#if assignment in ["ball", "cover"]:
-	if (assignment == "cover") or (assignment == 'ball' and not user_is_pitching_team):
+	if (assignment in ["cover", "ball_click"]) or (assignment == 'ball' and not user_is_pitching_team):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
@@ -84,7 +84,7 @@ func _physics_process(delta: float) -> void:
 				assignment = "wait_to_receive"
 	
 	# Check if they caught the ball
-	if assignment in ["ball", "cover", "wait_to_receive"]:
+	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
 		var ball = get_tree().get_first_node_in_group("ball")
 		#if ball.state =='thrown'
 		var distance_from_ball = distance_xz(position, ball.position)
@@ -143,7 +143,7 @@ func _physics_process(delta: float) -> void:
 				#var ball = get_tree().get_first_node_in_group("ball")
 				#ball.position = position
 		
-	
+	var click_used = false
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
 		# Check if tagging runner
@@ -174,6 +174,7 @@ func _physics_process(delta: float) -> void:
 				for i in range(4):
 					if distance_xz(mgl.position, base_positions[i]) < 2:
 						throw_ball_func(i+1)
+						click_used = true
 					#else:
 					#	printt('click not near base')
 			
@@ -189,6 +190,13 @@ func _physics_process(delta: float) -> void:
 				stepping_on_base_with_ball = false
 	else:
 		stepping_on_base_with_ball = false
+	
+	# Check for click to move selected player or change selected player
+	if user_is_pitching_team and not click_used and Input.is_action_just_pressed("click") and is_selected_fielder:
+		printt('unused click')
+		assignment = "ball_click"
+		assignment_pos = get_parent().get_parent().get_parent().get_mouse_y0_pos()
+	
 var stepping_on_base_with_ball = false
 
 func distance_xz(a:Vector3, b:Vector3) -> float:
