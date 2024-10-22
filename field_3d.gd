@@ -8,14 +8,13 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
-var user_is_pitching_team = true
-var user_is_batting_team = !true
+var user_is_pitching_team = !true
+var user_is_batting_team = true
 
 #func record_out(type : String):
 #	outs_on_play += 1
 
 func _on_ball_fielded_by_fielder():
-	# TODO pass in which fielder, to check their location and if stepping on base
 	var ball = get_node("Headon/Ball3D")
 	printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -23,6 +22,10 @@ func _on_ball_fielded_by_fielder():
 		outs_on_play += 1
 		get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
+	
+	# TODO: If CPU is defense, decide where to throw
+	if not user_is_pitching_team:
+		print('CPU decide what to do with ball now')
 	
 	# Do this last so that the type of out can be determined
 	ball.ball_fielded()
@@ -153,6 +156,7 @@ func _ready() -> void:
 		fielder.user_is_pitching_team = user_is_pitching_team
 	if not user_is_pitching_team:
 		$Headon/CatchersMitt.visible = false
+		$Headon/Pitcher3D/PitchSelectKeyboard.visible = false
 	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
 	if not user_is_batting_team:
 		$Headon/Bat3D.visible = false
@@ -213,7 +217,8 @@ func _process(delta: float) -> void:
 		# pitch is active
 		if ball3d.velocity.length() > 0:
 			if $Headon/Batter3D.swing_state == "inzone":
-				if (sz_z - ball3d.position.z)**2 < 1**2:
+				#if (sz_z - ball3d.position.z)**2 < 1**2:
+				if ball3d.position.z <= sz_z and ball3d.prev_position.z > sz_z:
 					print('CONTACT')
 					contact_done = true
 					ball_in_play = true
@@ -223,11 +228,13 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 30-4 #randf_range(10,50)
+					var exitvelo = 40 #randf_range(10,50)
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
+					var inzone_prop = $Headon/Batter3D.swing_elapsed_sec / $Headon/Batter3D.swing_inzone_duration
 					vla = -20
-					hla = 10
+					vla = randf_range(-1,1)*40
+					hla = -45 + 90 * inzone_prop
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0

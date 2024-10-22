@@ -72,6 +72,7 @@ func _physics_process(delta: float) -> void:
 		# Advance delivery animation
 		pitch_frame = 2
 		$AnimatedSprite3D.set_frame(2)
+		$PitchSelectKeyboard.visible = false
 	if not pitch_done and pitch_in_progress and pitch_frame == 2 and time_since_pitch_start > .5:
 		# Begin pitch
 		pitch_in_progress = false

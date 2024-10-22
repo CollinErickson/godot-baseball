@@ -193,7 +193,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Check for click to move selected player or change selected player
 	if user_is_pitching_team and not click_used and Input.is_action_just_pressed("click") and is_selected_fielder:
-		printt('unused click')
+		#printt('unused click')
 		assignment = "ball_click"
 		assignment_pos = get_parent().get_parent().get_parent().get_mouse_y0_pos()
 	

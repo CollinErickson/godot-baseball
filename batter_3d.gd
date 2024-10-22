@@ -8,6 +8,7 @@ var swing_elapsed_sec = 0
 var input_click = false
 var swingx = false
 var swingy = false
+var swing_inzone_duration = 0.15
 
 var user_is_batting_team
 
@@ -31,7 +32,7 @@ func _process(delta: float) -> void:
 		begin_swing()
 	if swing_started and not swing_done:
 		swing_elapsed_sec += delta
-		if swing_state == 'inzone' and swing_elapsed_sec > .15:
+		if swing_state == 'inzone' and swing_elapsed_sec > swing_inzone_duration:
 			# Finish swing
 			swing_state = 'backswing'
 			swing_done = true

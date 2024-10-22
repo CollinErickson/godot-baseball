@@ -1,0 +1,175 @@
+[gd_scene format=3 uid="uid://diqf8my6ywrki"]
+
+[node name="PitchSelectKeyboard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="P1" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 50.0
+offset_right = 90.0
+offset_bottom = 40.0
+
+[node name="ButtonRect" type="ColorRect" parent="P1"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="P1/ButtonRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 21
+text = "I"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameRect" type="ColorRect" parent="P1"]
+layout_mode = 0
+offset_top = -28.0
+offset_right = 40.0
+color = Color(0.466181, 0.466181, 0.466181, 1)
+
+[node name="Label" type="Label" parent="P1/NameRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "CB"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="P2" type="Control" parent="."]
+anchors_preset = 0
+offset_top = 75.0
+offset_right = 40.0
+offset_bottom = 115.0
+
+[node name="ButtonRect" type="ColorRect" parent="P2"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="P2/ButtonRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 21
+text = "J"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameRect" type="ColorRect" parent="P2"]
+layout_mode = 0
+offset_top = -28.0
+offset_right = 40.0
+color = Color(0.466181, 0.466181, 0.466181, 1)
+
+[node name="Label" type="Label" parent="P2/NameRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "SL"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="P3" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 50.0
+offset_top = 75.0
+offset_right = 90.0
+offset_bottom = 115.0
+
+[node name="ButtonRect" type="ColorRect" parent="P3"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="P3/ButtonRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 21
+text = "K"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameRect" type="ColorRect" parent="P3"]
+layout_mode = 0
+offset_top = -28.0
+offset_right = 40.0
+color = Color(0.466181, 0.466181, 0.466181, 1)
+
+[node name="Label" type="Label" parent="P3/NameRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "4FB"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="P4" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 100.0
+offset_top = 75.0
+offset_right = 140.0
+offset_bottom = 115.0
+
+[node name="ButtonRect" type="ColorRect" parent="P4"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="P4/ButtonRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 21
+text = "L	"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameRect" type="ColorRect" parent="P4"]
+layout_mode = 0
+offset_top = -28.0
+offset_right = 40.0
+color = Color(0.466181, 0.466181, 0.466181, 1)
+
+[node name="Label" type="Label" parent="P4/NameRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "2FB"
+horizontal_alignment = 1
+vertical_alignment = 1

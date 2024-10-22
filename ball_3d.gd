@@ -445,7 +445,8 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		#assert(vx1)
 		vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
 		t = m / vx1
-		#printt('assert t > 0', t, m, vx1)
+		if t <= 0:
+			printt('assert t > 0', t, m, vx1)
 		assert(t > 0)
 		#var k = d * (p2.x / t)**2
 		vel1 = Vector3(vx1, vy1, 0)
