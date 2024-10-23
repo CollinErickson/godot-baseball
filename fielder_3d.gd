@@ -10,6 +10,7 @@ var assignment
 var assignment_pos
 var holding_ball = false
 var user_is_pitching_team
+var time_last_began_holding_ball
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -86,6 +87,7 @@ func _physics_process(delta: float) -> void:
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
 		var ball = get_tree().get_first_node_in_group("ball")
+		#printt('ball here', ball.position)
 		#if ball.state =='thrown'
 		var distance_from_ball = distance_xz(position, ball.position)
 		#var throw_progress = 1
@@ -100,18 +102,20 @@ func _physics_process(delta: float) -> void:
 		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
 		#if posname=='P':
 		#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
+		#printt('fielder check next', distance_from_ball, ball.position.y, ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
+			printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown)
 			ball.position = position
 			ball.position.y = 1.4
 			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 			holding_ball = true
 			assignment = "holding_ball"
 			assignment_pos = null
+			time_last_began_holding_ball = Time.get_ticks_msec()
 			#printt('fielder emiting ball_fielded')
-			ball_fielded.emit()
+			ball_fielded.emit(self)
 			if user_is_pitching_team:
 				set_selected_fielder()
 
@@ -155,6 +159,18 @@ func _physics_process(delta: float) -> void:
 				runner.runner_is_out()
 				tag_out.emit()
 		
+		# Check if step on base
+		var step_on_base = is_stepping_on_base()
+		#printt(posname, step_on_base)
+		if step_on_base[0]:
+			if not stepping_on_base_with_ball:
+				#print("STEPPING ON BASE!!!", posname, step_on_base)
+				stepped_on_base_with_ball.emit(self, step_on_base[1])
+				stepping_on_base_with_ball = true
+		elif not step_on_base[0]: # Not holding ball
+				stepping_on_base_with_ball = false
+				
+		# Check for throw
 		if user_is_pitching_team:
 			# Check for throwing ball
 			if Input.is_action_just_pressed("throwfirst"):
@@ -177,17 +193,25 @@ func _physics_process(delta: float) -> void:
 						click_used = true
 					#else:
 					#	printt('click not near base')
-			
-		# Check if step on base
-		var step_on_base = is_stepping_on_base()
-		#printt(posname, step_on_base)
-		if step_on_base[0]:
-			if not stepping_on_base_with_ball:
-				#print("STEPPING ON BASE!!!", posname, step_on_base)
-				stepped_on_base_with_ball.emit(self, step_on_base[1])
-				stepping_on_base_with_ball = true
-		elif not step_on_base[0]: # Not holding ball
-				stepping_on_base_with_ball = false
+		else: # CPU defense
+			# Make sure that some frames passed while holding
+			if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
+				# Decide what to do with ball
+				# TODO: If CPU is defense, decide where to throw
+				var throw_to = -1
+				if not user_is_pitching_team:
+					print('CPU decide what to do with ball now')
+					# Check for active runners
+					#var runners = get_tree().get_nodes_in_group("runners")
+					for runner in runners:
+						if runner.is_active():
+							#printt('fielder is', fielder)
+							if runner.is_running and runner.target_base > runner.running_progress:
+								throw_to = max(throw_to, runner.target_base)
+								printt('could throw out runner', runner.target_base, runner.out_on_play)
+					printt("in field: ball will be thrown to", throw_to)
+					if throw_to > -0.5:
+						throw_ball_func(throw_to)
 	else:
 		stepping_on_base_with_ball = false
 	
@@ -220,6 +244,7 @@ signal stepped_on_base_with_ball
 
 signal throw_ball
 func throw_ball_func(base):
+	printt('throw_ball_func', base)
 	# Only throw if not close to that base
 	if distance_xz(position, base_positions[base-1]) > 3:
 		holding_ball = false

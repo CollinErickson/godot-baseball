@@ -47,6 +47,7 @@ func is_strike():
 
 signal pitch_completed_unhit
 func _physics_process(delta: float) -> void:
+	#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress)
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)
@@ -94,6 +95,7 @@ func _physics_process(delta: float) -> void:
 					#assert(false)
 		# Move a throw
 		if state == "thrown":
+			printt('in ball: state is thrown')
 			throw_progress = 1
 			if throw_start_pos != null:
 				throw_progress = (distance_xz(throw_start_pos, position) /
@@ -517,7 +519,7 @@ func _ready() -> void:
 	#fit_approx_parabola_to_trajectory(Vector3(1,2,20), Vector3(3,.5,.6), 80, false)
 
 func ball_fielded():
-	#printt('running ball ball_fielded, state will be fielded')
+	printt('running ball ball_fielded, state will be fielded')
 	visible = false
 	velocity = Vector3()
 	is_frozen = true
@@ -527,7 +529,7 @@ func ball_fielded():
 var throw_start_pos
 var throw_target
 func throw_to_base(_base, velo_vec, start_pos, target):
-	#printt('setting throw_to_base', _base)
+	#printt('in ball: setting throw_to_base', _base, 'target is', target)
 	visible = true
 	is_frozen = false
 	velocity = velo_vec
@@ -535,6 +537,7 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 	throw_target = target
 	state = "thrown"
 	time_last_thrown = Time.get_ticks_msec()
+	throw_progress = 0
 	set_process(true)
 
 

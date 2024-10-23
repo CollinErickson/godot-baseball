@@ -14,7 +14,7 @@ var user_is_batting_team = true
 #func record_out(type : String):
 #	outs_on_play += 1
 
-func _on_ball_fielded_by_fielder():
+func _on_ball_fielded_by_fielder(fielder):
 	var ball = get_node("Headon/Ball3D")
 	printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -23,12 +23,28 @@ func _on_ball_fielded_by_fielder():
 		get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
 	
-	# TODO: If CPU is defense, decide where to throw
-	if not user_is_pitching_team:
-		print('CPU decide what to do with ball now')
+		
 	
 	# Do this last so that the type of out can be determined
 	ball.ball_fielded()
+#
+	## TODO: If CPU is defense, decide where to throw
+	#var throw_to = -1
+	#if not user_is_pitching_team:
+		#print('CPU decide what to do with ball now')
+		## Check for active runners
+		#var runners = get_tree().get_nodes_in_group("runners")
+		#for runner in runners:
+			#if runner.is_active():
+				##printt('fielder is', fielder)
+				#if runner.is_running and runner.target_base > runner.running_progress:
+					#throw_to = max(throw_to, runner.target_base)
+					#printt('could throw out runner', runner.target_base, runner.out_on_play)
+		#printt("in field: ball will be thrown to", throw_to)
+		#if throw_to > -0.5:
+			#fielder.throw_ball_func(throw_to)
+
+
 
 func _on_throw_ball_by_fielder(base, fielder):
 	printt('In field_3d, throwing ball to:', base, fielder)
@@ -56,7 +72,6 @@ func _on_throw_ball_by_fielder(base, fielder):
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	# Check for force out
 	#printt('in field3D, stepped on base with ball!!!!')
-	# TODO if runner before is out on play, then it's no longer force out
 	var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
 		if (runner.exists_at_start and
@@ -533,6 +548,11 @@ var time_since_play_done_consecutive = 0
 var play_done_fully = false
 func check_if_play_done():
 	time_since_check_if_play_done_checked = 0
+	
+	# Check if 3 outs
+	if outs_on_play > 2.5:
+		return true
+	
 	# Check if runners aren't running and are near base
 	var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:

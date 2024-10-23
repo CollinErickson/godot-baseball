@@ -10,7 +10,7 @@ var is_running = false
 var running_progress
 var exists_at_start = true
 var out_on_play = false
-var scored_on_play = false # TODO use this
+var scored_on_play = false
 var tagged_up_after_catch
 var max_running_progress
 var target_base
