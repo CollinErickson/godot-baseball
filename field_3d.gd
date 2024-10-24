@@ -14,7 +14,7 @@ var user_is_batting_team = true
 #func record_out(type : String):
 #	outs_on_play += 1
 
-func _on_ball_fielded_by_fielder(fielder):
+func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
 	printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -22,8 +22,11 @@ func _on_ball_fielded_by_fielder(fielder):
 		outs_on_play += 1
 		get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
-	
 		
+		var runners = get_tree().get_nodes_in_group('runners')
+		for runner in runners:
+			runner.needs_to_tag_up = true
+			runner.tagged_up_after_catch = runner.running_progress - runner.start_base < 1e-8
 	
 	# Do this last so that the type of out can be determined
 	ball.ball_fielded()
@@ -74,9 +77,18 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	#printt('in field3D, stepped on base with ball!!!!')
 	var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
+		# Check for tag up force outs
+		if base == runner.start_base and runner.exists_at_start and runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
+			runner.runner_is_out()
+			outs_on_play += 1
+			get_node("FlashText").new_text("force out, didn't tag up!", 3)
+			continue
+		
+		# Force out
 		if (runner.exists_at_start and
 			runner.start_base == base - 1 and
 			not runner.out_on_play and 
+			runner.is_active() and 
 			runner.max_running_progress < base - 1e-8):
 			# Would be out, need to make sure that all previous runners are still active
 			var prev_runner_out = false
@@ -243,13 +255,16 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 40 #randf_range(10,50)
+					var exitvelo = 10 #randf_range(10,50)
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
 					var inzone_prop = $Headon/Batter3D.swing_elapsed_sec / $Headon/Batter3D.swing_inzone_duration
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
+					vla=-10
+					hla=0
+					exitvelo=14
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -550,8 +565,11 @@ func check_if_play_done():
 	time_since_check_if_play_done_checked = 0
 	
 	# Check if 3 outs
+	# TODO: play should immediately end, no one else should get out, but scene shouldn't immediately reset
 	if outs_on_play > 2.5:
 		return true
+	
+	# TODO: check if no active runners
 	
 	# Check if runners aren't running and are near base
 	var runners = get_tree().get_nodes_in_group("runners")

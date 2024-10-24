@@ -11,9 +11,10 @@ var running_progress
 var exists_at_start = true
 var out_on_play = false
 var scored_on_play = false
-var tagged_up_after_catch
+var tagged_up_after_catch = true
 var max_running_progress
 var target_base
+var needs_to_tag_up = false
 
 func is_active():
 	return exists_at_start and not out_on_play and not scored_on_play
@@ -30,7 +31,10 @@ func _ready() -> void:
 	target_base = start_base + 1
 
 func _physics_process(delta: float) -> void:
-	
+	#print('running needs to tag', needs_to_tag_up, start_base)
+	# Tag up
+	if needs_to_tag_up and running_progress - start_base < 1e-8:
+		tagged_up_after_catch = true
 	# Base running
 	if is_running:
 		#printt('running progress', running_progress, start_base, target_base)

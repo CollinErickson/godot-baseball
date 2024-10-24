@@ -6,7 +6,7 @@ extends CharacterBody3D
 const SPEED = 8.0
 const max_throw_speed = 30
 
-var assignment
+var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos
 var holding_ball = false
 var user_is_pitching_team
@@ -59,8 +59,9 @@ func _physics_process(delta: float) -> void:
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
+	# Move fielder
 	#if assignment in ["ball", "cover"]:
-	if (assignment in ["cover", "ball_click"]) or (assignment == 'ball' and not user_is_pitching_team):
+	if (assignment in ["cover", "ball_click", "ball_carry"]) or (assignment == 'ball' and not user_is_pitching_team):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
@@ -74,15 +75,17 @@ func _physics_process(delta: float) -> void:
 			#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 			position = assignment_pos
 			if assignment == "ball":
-				printt('pitcher made it to ball assignment')
-				if posname == 'P':
-					pass
+				#printt('pitcher made it to ball assignment')
+				#if posname == 'P':
+				#	pass
 				#assignment = "holding_ball"
 				#ball_fielded.emit()
 				#holding_ball = true
 				assignment = "wait_to_receive"
 			elif assignment == "cover":
 				assignment = "wait_to_receive"
+			elif assignment == "ball_carry":
+				assignment = 'holding_ball'
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
@@ -106,7 +109,7 @@ func _physics_process(delta: float) -> void:
 		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
 			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-			printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown)
+			printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
 			ball.position = position
 			ball.position.y = 1.4
 			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
@@ -194,24 +197,55 @@ func _physics_process(delta: float) -> void:
 					#else:
 					#	printt('click not near base')
 		else: # CPU defense
-			# Make sure that some frames passed while holding
-			if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
-				# Decide what to do with ball
-				# TODO: If CPU is defense, decide where to throw
-				var throw_to = -1
-				if not user_is_pitching_team:
-					print('CPU decide what to do with ball now')
-					# Check for active runners
-					#var runners = get_tree().get_nodes_in_group("runners")
-					for runner in runners:
-						if runner.is_active():
-							#printt('fielder is', fielder)
-							if runner.is_running and runner.target_base > runner.running_progress:
-								throw_to = max(throw_to, runner.target_base)
-								printt('could throw out runner', runner.target_base, runner.out_on_play)
-					printt("in field: ball will be thrown to", throw_to)
-					if throw_to > -0.5:
-						throw_ball_func(throw_to)
+			if assignment != "ball_carry":
+				printt('TRYING TO CPU THROW NOW')
+				# Make sure that some frames passed while holding
+				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
+					# Decide what to do with ball
+					# TODO: Run to near base
+					# TODO: Don't throw if the throw won't beat them
+					# TODO: Throw to better base for double play.
+					# TODO: Throw to better base for force out.
+					# TODO: Baserunners running backward
+					var throw_to = -1
+					var max_running_progress = -1
+					var run_it = false
+					if not user_is_pitching_team:
+						#print('CPU decide what to do with ball now')
+						# Check for active runners that need to tag up, throw at lead
+						if throw_to < -0.5:
+							#printt('CHECKING THROW OUT TAG UP')
+							for runner in runners:
+								#printt('CHECKING THROW OUT TAG UP', runner.needs_to_tag_up, runner.tagged_up_after_catch)
+								if runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
+									throw_to = max(throw_to, runner.start_base)
+									#printt('CAN THROW OUT TAG UP')
+						# Check for active runners, throw in front of lead
+						#var runners = get_tree().get_nodes_in_group("runners")
+						if throw_to < -0.5:
+							for runner in runners:
+								if runner.is_active():
+									max_running_progress = max(max_running_progress, runner.running_progress)
+									#printt('fielder is', fielder)
+									if runner.is_running and runner.target_base > runner.running_progress:
+										throw_to = max(throw_to, runner.target_base)
+										#printt('could throw out runner', runner.target_base, runner.out_on_play)
+									
+						# If OF, throw to IF
+						if throw_to < -0.5:
+							if distance_xz(position, Vector3(0,0,20)) > 25 and max_running_progress > -0.5:
+								throw_to = ceil(max_running_progress)
+						if distance_xz(position, base_positions[throw_to-1]) < 10:
+							run_it = true
+							assignment_pos = base_positions[throw_to-1]
+							assignment = "ball_carry"
+						
+						if run_it:
+							printt('fielder running to base', throw_to, posname)
+						else:
+							printt("in field: ball will be thrown to", throw_to)
+							if throw_to > -0.5:
+								throw_ball_func(throw_to)
 	else:
 		stepping_on_base_with_ball = false
 	
@@ -228,10 +262,10 @@ func distance_xz(a:Vector3, b:Vector3) -> float:
 				(a.z - b.z)**2)
 
 var base_positions = [
-	Vector3(-1,0,1)*30/sqrt(2),
-	Vector3(0,0,1)*30*sqrt(2),
-	Vector3(1,0,1)*30/sqrt(2),
-	Vector3(0,0,0)
+	Vector3(-1,0,1)*30/sqrt(2), # 1
+	Vector3(0,0,1)*30*sqrt(2), # 2
+	Vector3(1,0,1)*30/sqrt(2), # 3
+	Vector3(0,0,0) # Home
 ]
 func is_stepping_on_base() -> Array:
 	#printt('is_stepping_on_base', posname, bases[0], position)

@@ -95,7 +95,7 @@ func _physics_process(delta: float) -> void:
 					#assert(false)
 		# Move a throw
 		if state == "thrown":
-			printt('in ball: state is thrown')
+			#printt('in ball: state is thrown')
 			throw_progress = 1
 			if throw_start_pos != null:
 				throw_progress = (distance_xz(throw_start_pos, position) /
@@ -434,6 +434,7 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		#printt("quadratic_vx1_sq v2", quadratic(a/b, 1, c/b))
 		var vx1
 		if quadratic_vx1_sq[0] < .5 or quadratic_vx1_sq[1] < 0:
+			# TODO: fix bad throws
 			printt('approx parabola will give error', quadratic_vx1_sq)
 			#return ???
 		if p2.x > 0:
