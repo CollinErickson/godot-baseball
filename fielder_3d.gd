@@ -90,37 +90,38 @@ func _physics_process(delta: float) -> void:
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
 		var ball = get_tree().get_first_node_in_group("ball")
-		#printt('ball here', ball.position)
-		#if ball.state =='thrown'
-		var distance_from_ball = distance_xz(position, ball.position)
-		#var throw_progress = 1
-		#if ball.throw_start_pos != null:
-			#throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
-				#distance_xz(ball.throw_target, ball.throw_start_pos))
-			## Fix when throw distance is very small
-			#var throw_target_distance = distance_xz(ball.throw_target, ball.throw_start_pos)
-			#if throw_target_distance < 1:
-				#throw_progress = 1
-		#if randf_range(0,1) < .3:
-		#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
-		#if posname=='P':
-		#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
-		#printt('fielder check next', distance_from_ball, ball.position.y, ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
-		if (distance_from_ball < 2 and ball.position.y < 2.5 and 
-			Time.get_ticks_msec() - ball.time_last_thrown > 300 and
-			(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-			printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
-			ball.position = position
-			ball.position.y = 1.4
-			#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
-			holding_ball = true
-			assignment = "holding_ball"
-			assignment_pos = null
-			time_last_began_holding_ball = Time.get_ticks_msec()
-			#printt('fielder emiting ball_fielded')
-			ball_fielded.emit(self)
-			if user_is_pitching_team:
-				set_selected_fielder()
+		if ball.state in ["ball_in_play", "thrown"]:
+			#printt('ball here', ball.position)
+			#if ball.state =='thrown'
+			var distance_from_ball = distance_xz(position, ball.position)
+			#var throw_progress = 1
+			#if ball.throw_start_pos != null:
+				#throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
+					#distance_xz(ball.throw_target, ball.throw_start_pos))
+				## Fix when throw distance is very small
+				#var throw_target_distance = distance_xz(ball.throw_target, ball.throw_start_pos)
+				#if throw_target_distance < 1:
+					#throw_progress = 1
+			#if randf_range(0,1) < .3:
+			#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
+			#if posname=='P':
+			#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
+			#printt('fielder check next', distance_from_ball, ball.position.y, ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
+			if (distance_from_ball < 2 and ball.position.y < 2.5 and 
+				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
+				(ball.throw_start_pos==null or ball.throw_progress >= .9)):
+				printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
+				ball.position = position
+				ball.position.y = 1.4
+				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
+				holding_ball = true
+				assignment = "holding_ball"
+				assignment_pos = null
+				time_last_began_holding_ball = Time.get_ticks_msec()
+				#printt('fielder emiting ball_fielded')
+				ball_fielded.emit(self)
+				if user_is_pitching_team:
+					set_selected_fielder()
 
 	# Check if user moves
 	if user_is_pitching_team and (holding_ball or assignment=="ball"):
@@ -198,11 +199,10 @@ func _physics_process(delta: float) -> void:
 					#	printt('click not near base')
 		else: # CPU defense
 			if assignment != "ball_carry":
-				printt('TRYING TO CPU THROW NOW')
 				# Make sure that some frames passed while holding
 				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
+					#printt('TRYING TO CPU THROW NOW', posname)
 					# Decide what to do with ball
-					# TODO: Run to near base
 					# TODO: Don't throw if the throw won't beat them
 					# TODO: Throw to better base for double play.
 					# TODO: Throw to better base for force out.
@@ -243,9 +243,12 @@ func _physics_process(delta: float) -> void:
 						if run_it:
 							printt('fielder running to base', throw_to, posname)
 						else:
-							printt("in field: ball will be thrown to", throw_to)
+							
 							if throw_to > -0.5:
+								printt("in field: ball will be thrown to", throw_to)
 								throw_ball_func(throw_to)
+							else:
+								pass #printt('deciding not to throw', posname)
 	else:
 		stepping_on_base_with_ball = false
 	

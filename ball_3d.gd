@@ -22,7 +22,7 @@ var hit_bounced = false
 var is_frozen = false
 var is_sim = false # simulation
 
-var state = 'prepitch'
+var state = 'prepitch' # prepitch, ball_in_play, thrown, fielded
 
 var prev_position
 var prev_velocity
@@ -520,7 +520,7 @@ func _ready() -> void:
 	#fit_approx_parabola_to_trajectory(Vector3(1,2,20), Vector3(3,.5,.6), 80, false)
 
 func ball_fielded():
-	printt('running ball ball_fielded, state will be fielded')
+	printt('In ball: in func ball_fielded, state will be fielded')
 	visible = false
 	velocity = Vector3()
 	is_frozen = true

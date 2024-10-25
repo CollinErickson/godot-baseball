@@ -16,7 +16,7 @@ var user_is_batting_team = true
 
 func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
-	printt("in field: Ball fielded", ball.state, ball.hit_bounced)
+	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
 		printt("fly Out recorded!!!")
 		outs_on_play += 1
@@ -67,7 +67,7 @@ func _on_throw_ball_by_fielder(base, fielder):
 	else:
 		assert(false)
 	target.y = 1
-	printt('target is', target, 'fielder pos is', fielder.position)
+	#printt('target is', target, 'fielder pos is', fielder.position)
 	#var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
 	var velo_vec = ball.fit_approx_parabola_to_trajectory(fielder.position, target, fielder.max_throw_speed, true)
 	ball.throw_to_base(base, velo_vec, fielder.position, target)
@@ -264,7 +264,7 @@ func _process(delta: float) -> void:
 					hla = -45 + 90 * inzone_prop
 					vla=-10
 					hla=0
-					exitvelo=14
+					exitvelo=13
 					printt(exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
