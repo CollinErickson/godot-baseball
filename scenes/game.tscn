@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://5d25lmj2aoqh"]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_62u1t"]
+[ext_resource type="PackedScene" uid="uid://cvloyxg0g0o58" path="res://field_3d.tscn" id="2_f7g2t"]
+
+[node name="Game" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_62u1t")
+
+[node name="Field3D" parent="." instance=ExtResource("2_f7g2t")]

@@ -4,7 +4,8 @@ extends CharacterBody3D
 @export var posname: String
 
 const SPEED = 8.0
-const max_throw_speed = 30
+const MAX_ACCEL = 100.0
+const max_throw_speed = 30.0
 
 var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos
@@ -124,30 +125,36 @@ func _physics_process(delta: float) -> void:
 					set_selected_fielder()
 
 	# Check if user moves
-	if user_is_pitching_team and (holding_ball or assignment=="ball"):
+	if user_is_pitching_team and (holding_ball or assignment=="ball") and is_selected_fielder:
 		# Check for movement
 		var anymovement = false
 		var move = Vector3()
 		if Input.is_action_pressed("moveleft"):
-			move.x += delta * SPEED
+			move.x += 1
 			anymovement = true
 		if Input.is_action_pressed("moveright"):
-			move.x -= delta * SPEED
+			move.x -= 1
 			anymovement = true
 		if Input.is_action_pressed("moveup"):
-			move.z += delta * SPEED
+			move.z += 1
 			anymovement = true
 		if Input.is_action_pressed("movedown"):
-			move.z -= delta * SPEED
+			move.z -= 1
 			anymovement = true
 		if anymovement:
 			if move.length() > 0:
-				move = move.normalized() * delta * SPEED
+				#move = move.normalized() * delta * SPEED
+				# move is the move direction
+				move = move.normalized()
 				# Rotate move based on camera angle
 				var cam = get_viewport().get_camera_3d()
-				#printt('cam fielder movement', cam.rotation)
 				move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
-				position += move
+				# Update velocity with acceleration, but keep under max
+				velocity += delta * MAX_ACCEL * move
+				if velocity.length() > SPEED:
+					velocity = velocity.normalized() * SPEED
+				#printt('cam fielder movement', cam.rotation)
+				position += delta * velocity
 				#var ball = get_tree().get_first_node_in_group("ball")
 				#ball.position = position
 		
@@ -303,6 +310,11 @@ func _on_timer_timeout() -> void:
 
 var is_selected_fielder = false
 func set_selected_fielder():
+	# Unselect all other players
+	var selected_fielders = get_tree().get_nodes_in_group("selected_fielder")
+	for fielder in selected_fielders:
+		fielder.set_not_selected_fielder()
+	# Select this player
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
 	get_node("Annulus").visible = true

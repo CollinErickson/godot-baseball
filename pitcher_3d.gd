@@ -172,7 +172,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Place catcher's mitt for pitch target
 	if not pitch_done and not pitch_in_progress:
-		var mouse_sz_pos = get_tree().root.get_node("Field3D").get_mouse_sz_pos()
+		var mouse_sz_pos = get_parent().get_parent().get_mouse_sz_pos()
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001 # Move so it is behind the strike zone

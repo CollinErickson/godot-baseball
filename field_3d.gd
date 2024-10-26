@@ -8,8 +8,8 @@ const sz_z = 0.6
 
 var outs_on_play = 0
 
-var user_is_pitching_team = !true
-var user_is_batting_team = true
+var user_is_pitching_team = true
+var user_is_batting_team = !true
 
 #func record_out(type : String):
 #	outs_on_play += 1
