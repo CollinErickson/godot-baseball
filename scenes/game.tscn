@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://5d25lmj2aoqh"]
+[gd_scene load_steps=4 format=3 uid="uid://5d25lmj2aoqh"]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_62u1t"]
 [ext_resource type="PackedScene" uid="uid://cvloyxg0g0o58" path="res://field_3d.tscn" id="2_f7g2t"]
+[ext_resource type="PackedScene" uid="uid://b0bfhb6hwd41" path="res://scorebug.tscn" id="3_6tnba"]
 
 [node name="Game" type="Control"]
 layout_mode = 3
@@ -13,3 +14,8 @@ grow_vertical = 2
 script = ExtResource("1_62u1t")
 
 [node name="Field3D" parent="." instance=ExtResource("2_f7g2t")]
+
+[node name="Scorebug" parent="." instance=ExtResource("3_6tnba")]
+layout_mode = 1
+
+[connection signal="signal_play_done" from="Field3D" to="." method="_on_field_3d_signal_play_done"]

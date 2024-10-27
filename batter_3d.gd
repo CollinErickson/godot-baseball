@@ -11,6 +11,30 @@ var swingy = false
 var swing_inzone_duration = 0.15
 
 var user_is_batting_team
+var is_frozen:bool = false
+
+func freeze() -> void:
+	is_frozen = true
+	visible = false
+	set_process(false)
+
+func reset() -> void:
+	is_frozen = false
+	visible = true
+	set_process(true)
+	
+	swing_started = false
+	swing_done = false
+	swing_state = 'notstarted'
+	swing_elapsed_sec = 0
+	input_click = false
+	swingx = false
+	swingy = false
+	
+	get_node('AnimatedSprite3D').set_frame(0)
+	get_node('AnimatedSprite3D').visible = false
+	get_node('AnimatedSprite3DIdle').visible = true
+	
 
 func begin_swing():
 	print('Starting swing in batter_3d:_process')
@@ -26,6 +50,8 @@ func begin_swing():
 	swing_state = 'inzone'
 
 func _process(delta: float) -> void:
+	if is_frozen:
+		return
 	if (not swing_started and not swing_done and 
 		user_is_batting_team and 
 		Input.is_action_just_pressed("swing")):
@@ -39,7 +65,7 @@ func _process(delta: float) -> void:
 			# next animation
 			get_node('AnimatedSprite3D').set_frame(2)
 			# Turn off mini bat for aiming
-			var minibat = get_tree().root.get_node("Field3D/Headon/Bat3D")
+			var minibat = get_parent().get_node("Bat3D")
 			minibat.get_node("Sprite3D").visible = false
 			minibat.set_process(false)
 			# Start running after .5 seconds
@@ -51,11 +77,11 @@ func _process(delta: float) -> void:
 	# Make bat move with mouse
 	# Place bat for swing target
 	if not swing_started and not swing_done and user_is_batting_team:
-		var mouse_sz_pos = get_tree().root.get_node("Field3D").get_mouse_sz_pos()
+		var mouse_sz_pos = get_parent().get_parent().get_mouse_sz_pos()
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001
-		get_tree().root.get_node("Field3D/Headon/Bat3D").position = mouse_sz_pos
+		get_parent().get_node("Bat3D").position = mouse_sz_pos
 
 var timer_action
 signal start_runner

@@ -30,8 +30,52 @@ var prev_global_position
 var prev_global_velocity
 var throw_progress
 var bounced_previous_frame = false
+var pitch_is_strike:bool = false
+var pitch_is_ball:bool = false
 
 signal ball_overthrown
+
+func freeze() -> void:
+	is_frozen = true
+	visible = false
+	set_physics_process(false)
+
+func reset() -> void:
+	is_frozen = false
+	visible = true
+	set_physics_process(true)
+	# Reset vars
+	position = Vector3()
+	velocity = Vector3()
+	spin_acceleration = Vector3()
+	
+	already_crossed_sz = false
+
+	pitch_in_progress = false
+	pitch_already_done = false
+	delivery_bounced = false
+	hit_bounced = false
+
+	is_sim = false # simulation
+
+	state = 'prepitch' # prepitch, ball_in_play, thrown, fielded
+
+	prev_position = null
+	prev_velocity = null
+	prev_global_position = null
+	prev_global_velocity = null
+	throw_progress = null
+	bounced_previous_frame = false
+	pitch_is_strike = false
+	pitch_is_ball = false
+	scale = 1*Vector3.ONE
+	visible = false
+	throw_start_pos = null
+	throw_target = null
+	
+	
+	var dot = get_parent().get_node('SZ_DOT')
+	get_parent().remove_child(dot)
 
 func pow_vec_components(x, a=2) :
 	var y = Vector3()
@@ -40,13 +84,15 @@ func pow_vec_components(x, a=2) :
 	y.z = x.z ** a
 	return y
 
-func is_strike():
-	return (abs(position.x) < .25 + ball_radius and 
-		position.y < 1.05 + ball_radius and position.y > 0.45 - ball_radius and
+func is_strike(pos):
+	return (abs(pos.x) < .25 + ball_radius and 
+		pos.y < 1.05 + ball_radius and position.y > 0.45 - ball_radius and
 		not delivery_bounced)
 
 signal pitch_completed_unhit
 func _physics_process(delta: float) -> void:
+	if is_frozen:
+		return
 	#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress)
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
@@ -154,13 +200,15 @@ func _physics_process(delta: float) -> void:
 			#dot.position = cur_weight * position + (1 - cur_weight) * prev_position
 			var delta_cross_sz = (sz_z - position.z) / velocity.z
 			dot.position = position + delta_cross_sz * velocity
-			#print("MESHDOTCOLOR")
 			var color
-			if is_strike():
+			if is_strike(dot.position):
+				pitch_is_strike = true
 				color = Color(1,0,0,1)
 			else:
+				pitch_is_ball = true
 				color = Color(0,0,1,1)
 			dot.get_node('MeshInstance3D').mesh.material.albedo_color = color
+			dot.name = 'SZ_DOT'
 			get_parent().add_child(dot)
 			#print("global dot: ", dot.global_position)
 			#print("local dot: ", dot.position)
@@ -172,7 +220,7 @@ func _physics_process(delta: float) -> void:
 			is_frozen = true
 			velocity = Vector3()
 			get_node("AnimatedSprite3D").stop()
-			pitch_completed_unhit.emit()
+			pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
 	
 
 func simulate_delivery(pos, vel, delta=1./60):

@@ -7,12 +7,79 @@ var ball_in_play_state_time = 0
 const sz_z = 0.6
 
 var outs_on_play = 0
+var runs_on_play = 0
 
 var user_is_pitching_team = true
 var user_is_batting_team = !true
 
+var is_frozen: bool = false
+
 #func record_out(type : String):
 #	outs_on_play += 1
+
+func freeze() -> void:
+	# Set children to be frozen
+	$Headon/Ball3D.freeze()
+	var fielders = get_tree().get_nodes_in_group('fielders')
+	for fielder in fielders:
+		fielder.freeze()
+	for runner in get_tree().get_nodes_in_group('runners'):
+		runner.freeze()
+	# Freeze this
+	is_frozen = true
+	visible = false
+	set_process(false)
+
+func reset():
+	# Reset children
+	$Headon/Ball3D.reset()
+	var fielders = get_tree().get_nodes_in_group('fielders')
+	for fielder in fielders:
+		fielder.reset()
+		#printt('fielder posname is', fielder.posname)
+		if fielder.posname in ["C", "P"]:
+			fielder.visible = false
+			#printt('INVISIBLE CATCHER')
+	for runner in get_tree().get_nodes_in_group('runners'):
+		runner.reset()
+		if runner.start_base == 0:
+			runner.visible = false
+			#printt('INVISIBLE RUNNER 0')
+	$Headon/Batter3D.reset()
+	$Headon/Pitcher3D.reset()
+	$Headon/Cameras/Camera3DBatting.current = true
+	var mgl = get_node("Headon/MouseGroundLocation")
+	mgl.visible = false
+	mgl.set_process(false)
+	if not user_is_batting_team:
+		$Headon/Bat3D.visible = false
+		$Headon/Bat3D.get_node("Sprite3D").visible = true
+		$Headon/Bat3D.set_process(true)
+	if user_is_pitching_team:
+		$Headon/CatchersMitt.visible = true
+		$Headon/CatchersMitt.get_node("Sprite3D").visible=true
+		$Headon/CatchersMitt.set_process(true)
+
+
+
+
+	# Reset this
+	is_frozen = false
+	printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
+	visible = true
+	set_process(true)
+	# Reset vars
+	time_since_check_if_play_done_checked = 0
+	time_since_play_done_consecutive = 0
+	contact_done = false
+	ball_in_play = false
+	ball_in_play_state = null
+	ball_in_play_state_time = 0
+	outs_on_play = 0
+	runs_on_play = 0
+	
+	printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
+
 
 func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
@@ -161,7 +228,7 @@ func test_mesh_array():
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	#print('in field_3d ready')
+	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
 	
@@ -173,6 +240,11 @@ func _ready() -> void:
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
+
+	var runners = get_tree().get_nodes_in_group('runners')
+	# Set up signals from runners
+	for runner in runners:  
+		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
 	
 	# Test mesh array
 	#test_mesh_array()
@@ -216,6 +288,9 @@ func get_mouse_y0_pos():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if is_frozen:
+		return
+
 	if randf_range(0,1) < 1./1000:
 		printt('in field_3d, frame rate', (1./delta))
 	#printt('get_mouse_z', get_mouse_sz_pos())
@@ -397,16 +472,18 @@ func _process(delta: float) -> void:
 			get_node("Headon/Cameras/Camera3DAll22").current = true
 	
 	# Check if play is done, but not every time
-	time_since_check_if_play_done_checked += delta
-	if time_since_check_if_play_done_checked > .5:
-		if check_if_play_done():
-			time_since_play_done_consecutive += .5
-			if time_since_play_done_consecutive > .6:
-				play_done_fully = true
-				get_node("FlashText").new_text("Play is done!", 3)
-				get_tree().reload_current_scene()
-		else:
-			time_since_play_done_consecutive = 0
+	if ball_in_play:
+		time_since_check_if_play_done_checked += delta
+		if time_since_check_if_play_done_checked > .5:
+			if check_if_play_done():
+				time_since_play_done_consecutive += .5
+				if time_since_play_done_consecutive > .6:
+					#play_done_fully = true
+					#get_node("FlashText").new_text("Play is done!", 3)
+					#get_tree().reload_current_scene()
+					play_done()
+			else:
+				time_since_play_done_consecutive = 0
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
@@ -451,7 +528,10 @@ func assign_fielders_after_hit():
 				var fielderi = fielder_nodes[ifielder]
 				var ballgrounddist = sqrt((fielderi.position.x - tmp_ball.position.x)**2 +
 					(fielderi.position.z - tmp_ball.position.z)**2)
+				# TODO: fielders don't run at constant speed
 				var timetoreach = ballgrounddist / fielderi.SPEED
+				#if fielderi.posname == 'C':
+				#	print('checking fielder time', timetoreach, fielderi.time_to_reach_point(tmp_ball.position))
 				
 				if timetoreach <= elapsed_time:
 					#printt('found fielder to field', elapsed_time, fielderi.position, tmp_ball.position)
@@ -560,13 +640,14 @@ func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y) -> void:
 
 var time_since_check_if_play_done_checked = 0
 var time_since_play_done_consecutive = 0
-var play_done_fully = false
+#var play_done_fully = false
 func check_if_play_done():
 	time_since_check_if_play_done_checked = 0
 	
 	# Check if 3 outs
 	# TODO: play should immediately end, no one else should get out, but scene shouldn't immediately reset
 	if outs_on_play > 2.5:
+		play_done()
 		return true
 	
 	# TODO: check if no active runners
@@ -599,18 +680,32 @@ func check_if_play_done():
 	#	printt('not play over')
 	return near_infield
 
+signal signal_play_done(is_ball: bool, is_strike: bool, outs_on_play: int, runs_on_play: int)
+func play_done():
+	#play_done_fully = true
+	get_node("FlashText").new_text("Play is done!", 3)
+	#get_tree().reload_current_scene()
+	# TODO: return what happened to runners
+	freeze()
+	signal_play_done.emit(pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play)
+
+func _on_play_over_timer_timeout() -> void:
+	play_done()
 
 func _on_ball_3d_ball_overthrown() -> void:
 	assign_fielders_after_hit()
 
 
-func _on_ball_3d_pitch_completed_unhit() -> void:
-	pass # Replace with function body.
+var pitch_is_ball:bool = false
+var pitch_is_strike:bool = false
+func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:bool) -> void:
+	pitch_is_ball = pitch_is_ball_
+	pitch_is_strike = pitch_is_strike_
+	assert(int(pitch_is_ball_) + int(pitch_is_strike_) == 1)
 	$PlayOverTimer.wait_time = 1
 	$PlayOverTimer.start()
+	
 
-
-func _on_play_over_timer_timeout() -> void:
-	play_done_fully = true
-	get_node("FlashText").new_text("Play is done!", 3)
-	get_tree().reload_current_scene()
+func _on_signal_scored_on_play_by_runner() -> void:
+	runs_on_play += 1
+	get_node("FlashText").new_text("Run scored!", 3)

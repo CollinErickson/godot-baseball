@@ -14,6 +14,24 @@ var catchermitt_speed = 0.5 # non-mouse movement
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 
+var is_frozen:bool = false
+func freeze() -> void:
+	is_frozen = true
+	visible = false
+	set_physics_process(false)
+
+func reset() -> void:
+	is_frozen = false
+	visible = true
+	set_physics_process(true)
+	# Reset vars
+	pitch_in_progress = false
+	pitch_done = false
+	time_since_pitch_start = 0
+	pitch_frame = 0
+	$AnimatedSprite3D.set_frame(0)
+
+
 func get_spin_acceleration_and_speed():
 	var sign_
 	if pitch_hand == "L":
@@ -41,6 +59,9 @@ func begin_pitch():
 	#printt('signal was emitted.......')
 
 func _physics_process(delta: float) -> void:
+	if is_frozen:
+		return
+	
 	if pitch_in_progress:
 		time_since_pitch_start += delta
 	# Pre-pitch
@@ -101,7 +122,7 @@ func _physics_process(delta: float) -> void:
 		ball.spin_acceleration = spin_and_speed[0]
 		#var pitchspeed = 40
 		var pitchspeed = spin_and_speed[1]
-		var catchers_mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
+		var catchers_mitt = get_parent().get_node("CatchersMitt")
 		
 		#var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
 		#	pitch_x, pitch_y)
@@ -177,9 +198,9 @@ func _physics_process(delta: float) -> void:
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001 # Move so it is behind the strike zone
 		if prev_mouse_sz_pos==null or prev_mouse_sz_pos != mouse_sz_pos:
-			get_tree().root.get_node("Field3D/Headon/CatchersMitt").position = mouse_sz_pos
+			get_parent().get_node("CatchersMitt").position = mouse_sz_pos
 		else: # No mouse movement
-			var mitt = get_tree().root.get_node("Field3D/Headon/CatchersMitt")
+			var mitt = get_parent().get_node("CatchersMitt")
 			if Input.is_action_pressed("movedown"):
 				mitt.position.y -= delta*catchermitt_speed
 			if Input.is_action_pressed("moveup"):

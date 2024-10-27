@@ -16,6 +16,34 @@ var max_running_progress
 var target_base
 var needs_to_tag_up = false
 
+signal signal_scored_on_play
+
+var is_frozen:bool = false
+func freeze() -> void:
+	is_frozen = true
+	visible = false
+	set_physics_process(false)
+
+func reset() -> void:
+	print('RESET RUNNER', start_base)
+	is_frozen = false
+	visible = true
+	set_physics_process(true)
+	
+	is_running = false
+	running_progress = start_base*1.
+	exists_at_start = true
+	out_on_play = false
+	scored_on_play = false
+	tagged_up_after_catch = true
+	max_running_progress = null
+	target_base = null
+	needs_to_tag_up = false
+	max_running_progress = running_progress
+	target_base = start_base + 1
+	
+	update_position()
+
 func is_active():
 	return exists_at_start and not out_on_play and not scored_on_play
 
@@ -31,6 +59,9 @@ func _ready() -> void:
 	target_base = start_base + 1
 
 func _physics_process(delta: float) -> void:
+	if is_frozen:
+		return
+	
 	#print('running needs to tag', needs_to_tag_up, start_base)
 	# Tag up
 	if needs_to_tag_up and running_progress - start_base < 1e-8:
@@ -55,23 +86,27 @@ func _physics_process(delta: float) -> void:
 				running_progress = 4
 				scored_on_play = true
 				visible = false
+				signal_scored_on_play.emit()
 				#print('SCORED, SHOULDNT BE VISIBLE')
 		else: # Not crossing base
 			# Update progress
 			running_progress = next_running_progress
 			max_running_progress = max(running_progress, max_running_progress)
-			# Update location
-			if running_progress < 1:
-				position = Vector3(-1,0,1).normalized() * (running_progress * 30)
-			elif running_progress < 2:
-				position = Vector3(-1,0,1).normalized() * (30) + Vector3(1,0,1).normalized() * ((running_progress-1) * 30)
-			elif running_progress < 3:
-				position = Vector3(1,0,1).normalized() * (30) + Vector3(-1,0,1).normalized() * ((3 - running_progress) * 30)
-			elif running_progress <= 4:
-				position = Vector3(1,0,1).normalized() * ((4 - running_progress) * 30)
-			else:
-				printerr('bad 0941029: ', running_progress, ' , ', start_base)
-			#printt('RUN', is_running, running_progress, position)
+			update_position()
+
+func update_position():
+	# Update location
+	if running_progress < 1:
+		position = Vector3(-1,0,1).normalized() * (running_progress * 30)
+	elif running_progress < 2:
+		position = Vector3(-1,0,1).normalized() * (30) + Vector3(1,0,1).normalized() * ((running_progress-1) * 30)
+	elif running_progress < 3:
+		position = Vector3(1,0,1).normalized() * (30) + Vector3(-1,0,1).normalized() * ((3 - running_progress) * 30)
+	elif running_progress <= 4:
+		position = Vector3(1,0,1).normalized() * ((4 - running_progress) * 30)
+	else:
+		printerr('bad 0941029: ', running_progress, ' , ', start_base)
+	#printt('RUN', is_running, running_progress, position)
 		
 func send_runner(direction: int) -> void:
 	if not is_active():

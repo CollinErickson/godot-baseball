@@ -96,7 +96,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if get_parent() == get_tree().root:
-		# Only done when this is the main
+		# Only done when this is the main for testing purposes
 		1 #print('ball is main')
 		if Input.is_key_pressed(KEY_SPACE) and not pitch_in_progress and not pitch_done:
 			position.x=400

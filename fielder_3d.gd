@@ -12,6 +12,29 @@ var assignment_pos
 var holding_ball = false
 var user_is_pitching_team
 var time_last_began_holding_ball
+var start_position = Vector3()
+
+var is_frozen:bool = false
+func freeze() -> void:
+	set_not_selected_fielder()
+	is_frozen = true
+	visible = false
+	set_physics_process(false)
+
+func reset() -> void:
+	is_frozen = false
+	visible = true
+	set_physics_process(true)
+	# Reset vars
+	position = start_position
+	velocity = Vector3()
+	
+	assignment = null
+	assignment_pos = null
+	holding_ball = false
+	time_last_began_holding_ball = null
+	
+	
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -23,6 +46,7 @@ func align_sprite():
 	rotation.y = atan(tantheta)
 
 func assign_to_field_ball(pos):
+	printt('in fielder, assign_to_field_ball', posname, pos)
 	assignment = 'ball'
 	assignment_pos = pos
 	assignment_pos.y = 0
@@ -49,12 +73,17 @@ func change_color():
 	pass #var image = get_node("AnimatedSprite3D")#.texture.get_data()
 
 func _ready():
+	start_position = position
 	change_color()
 
 signal ball_fielded
 signal tag_out
 
 func _physics_process(delta: float) -> void:
+	#if randf_range(0,1)<.01:
+	#	printt('fielder user pit team', posname, user_is_pitching_team)
+	if is_frozen:
+		return
 	#if posname == 'C':
 	#	printt('catcher fielder', assignment)
 	if not assignment:
@@ -310,6 +339,7 @@ func _on_timer_timeout() -> void:
 
 var is_selected_fielder = false
 func set_selected_fielder():
+	printt('in fielder, set_selected_fielder', posname)
 	# Unselect all other players
 	var selected_fielders = get_tree().get_nodes_in_group("selected_fielder")
 	for fielder in selected_fielders:
@@ -318,7 +348,40 @@ func set_selected_fielder():
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
 	get_node("Annulus").visible = true
+	printt('annulus should be on')
 func set_not_selected_fielder():
 	remove_from_group("selected_fielder")
 	is_selected_fielder = false
 	get_node("Annulus").visible = false
+
+func time_to_reach_point(to:Vector3):
+	# Simulate how long it will take to get to a point. 
+	var time_to_full_speed
+	var pos = position
+	to.y = 0
+	pos.y = 0
+	var vel = velocity
+	vel.y = 0
+	var delta = 1./60
+	var time = 0.
+	var iii=0
+	while true:
+		iii += 1
+		if iii > 995:
+			printt('prob error in time_to_reach_point', posname, pos, to, (to-pos).length())
+		if iii > 1e3:
+			printt('error in time_to_reach_point', posname, pos, to, (to-pos).length())
+			return time
+		# Check if close enough to reach point
+		if (to - pos).length() < 1e-4:
+			return time
+		
+		# Update position
+		var move = (to - pos)
+		move = move.normalized()
+		vel += delta * MAX_ACCEL * move
+		if vel.length() > SPEED:
+			vel = vel.normalized() * SPEED
+		#printt('cam fielder movement', cam.rotation)
+		pos += delta * vel
+		time += delta
