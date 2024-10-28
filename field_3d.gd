@@ -30,7 +30,8 @@ func freeze() -> void:
 	visible = false
 	set_process(false)
 
-func reset():
+func reset(user_is_batting_team_, user_is_pitching_team_):
+	printt('--------\n---- in field_3d reset')
 	# Reset children
 	$Headon/Ball3D.reset()
 	var fielders = get_tree().get_nodes_in_group('fielders')
@@ -60,9 +61,6 @@ func reset():
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=true
 		$Headon/CatchersMitt.set_process(true)
 
-
-
-
 	# Reset this
 	is_frozen = false
 	printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
@@ -77,8 +75,22 @@ func reset():
 	ball_in_play_state_time = 0
 	outs_on_play = 0
 	runs_on_play = 0
+	user_is_batting_team = user_is_batting_team_
+	user_is_pitching_team = user_is_pitching_team_
+	#_ready()
+	# Align fielders with the camera
+	get_tree().call_group('fielders', 'align_sprite')
 	
-	printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
+	# Set variables in children
+	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
+	for fielder in fielders:
+		fielder.user_is_pitching_team = user_is_pitching_team
+	if not user_is_pitching_team:
+		$Headon/CatchersMitt.visible = false
+		$Headon/Pitcher3D/PitchSelectKeyboard.visible = false
+	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
+	if not user_is_batting_team:
+		$Headon/Bat3D.visible = false
 
 
 func _on_ball_fielded_by_fielder(_fielder):
@@ -229,8 +241,6 @@ func test_mesh_array():
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
-	# Align fielders with the camera
-	get_tree().call_group('fielders', 'align_sprite')
 	
 	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
 	var fielder_nodes = get_tree().get_nodes_in_group('fielders')
@@ -249,16 +259,6 @@ func _ready() -> void:
 	# Test mesh array
 	#test_mesh_array()
 	
-	# Set variables in children
-	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
-	for fielder in fielder_nodes:
-		fielder.user_is_pitching_team = user_is_pitching_team
-	if not user_is_pitching_team:
-		$Headon/CatchersMitt.visible = false
-		$Headon/Pitcher3D/PitchSelectKeyboard.visible = false
-	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
-	if not user_is_batting_team:
-		$Headon/Bat3D.visible = false
 
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()
@@ -476,6 +476,7 @@ func _process(delta: float) -> void:
 		time_since_check_if_play_done_checked += delta
 		if time_since_check_if_play_done_checked > .5:
 			if check_if_play_done():
+				printt('ball in play and play is done')
 				time_since_play_done_consecutive += .5
 				if time_since_play_done_consecutive > .6:
 					#play_done_fully = true
@@ -682,14 +683,21 @@ func check_if_play_done():
 
 signal signal_play_done(is_ball: bool, is_strike: bool, outs_on_play: int, runs_on_play: int)
 func play_done():
+	printt('in field: running play_done()')
 	#play_done_fully = true
 	get_node("FlashText").new_text("Play is done!", 3)
 	#get_tree().reload_current_scene()
 	# TODO: return what happened to runners
 	freeze()
-	signal_play_done.emit(pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play)
+	# Check for swing and miss
+	if pitch_is_ball:
+		if $Headon/Batter3D.swing_started:
+			pitch_is_ball = false
+			pitch_is_strike = true
+	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play)
 
 func _on_play_over_timer_timeout() -> void:
+	$PlayOverTimer.stop()
 	play_done()
 
 func _on_ball_3d_ball_overthrown() -> void:

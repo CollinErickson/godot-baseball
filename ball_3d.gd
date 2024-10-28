@@ -74,8 +74,9 @@ func reset() -> void:
 	throw_target = null
 	
 	
-	var dot = get_parent().get_node('SZ_DOT')
-	get_parent().remove_child(dot)
+	var dot = get_parent().get_node_or_null('SZ_DOT')
+	if dot:
+		get_parent().remove_child(dot)
 
 func pow_vec_components(x, a=2) :
 	var y = Vector3()
@@ -220,6 +221,7 @@ func _physics_process(delta: float) -> void:
 			is_frozen = true
 			velocity = Vector3()
 			get_node("AnimatedSprite3D").stop()
+			print('in ball: emitting that pitch completed without hit')
 			pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
 	
 

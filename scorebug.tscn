@@ -11,6 +11,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_kehoy")
 
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 236.0
+offset_bottom = 54.0
+color = Color(0.203922, 0.258824, 0.266667, 1)
+
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_right = 40.0
@@ -38,9 +44,13 @@ text = "8	"
 layout_mode = 2
 text = "12"
 
+[node name="TopBottom" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "▲"
+
 [node name="Inning" type="Label" parent="HBoxContainer"]
 layout_mode = 2
-text = "▲3"
+text = "3"
 
 [node name="Outs" type="Label" parent="HBoxContainer"]
 layout_mode = 2

@@ -356,7 +356,7 @@ func set_not_selected_fielder():
 
 func time_to_reach_point(to:Vector3):
 	# Simulate how long it will take to get to a point. 
-	var time_to_full_speed
+	#var time_to_full_speed
 	var pos = position
 	to.y = 0
 	pos.y = 0

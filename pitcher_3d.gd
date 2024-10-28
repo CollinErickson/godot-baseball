@@ -220,6 +220,7 @@ func _on_timer_timeout() -> void:
 	$Timer.stop()
 	if timer_action == "begin_pitch":
 		begin_pitch()
+	timer_action = null
 
 var pitch_x
 var pitch_y

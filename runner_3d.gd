@@ -25,7 +25,7 @@ func freeze() -> void:
 	set_physics_process(false)
 
 func reset() -> void:
-	print('RESET RUNNER', start_base)
+	#print('RESET RUNNER', start_base)
 	is_frozen = false
 	visible = true
 	set_physics_process(true)

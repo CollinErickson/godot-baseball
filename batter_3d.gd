@@ -3,7 +3,7 @@ extends CharacterBody3D
 var SPEED = 25
 var swing_started = false
 var swing_done = false
-var swing_state = 'notstarted'
+var swing_state = 'notstarted' # ['notstarted', 'inzone', 'backswing'
 var swing_elapsed_sec = 0
 var input_click = false
 var swingx = false
