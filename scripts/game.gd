@@ -18,7 +18,7 @@ var runner3:Player = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	printt('test create player:', get_player())
+	#printt('test create player:', get_player())
 	batter = get_player()
 	reset_field()
 	update_scorebug()

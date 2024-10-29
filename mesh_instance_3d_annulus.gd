@@ -20,6 +20,7 @@ func make_annulus():
 	
 	var verts = PackedVector3Array()
 	var colors = PackedColorArray()
+	var normals = PackedVector3Array()
 	
 	# Vertices
 	var delta_angle = 2*PI/segments
@@ -45,9 +46,13 @@ func make_annulus():
 	for i in range(len(verts)):
 		colors.push_back(color)
 	
+	# Normals
+	for i in range(len(verts)):
+		normals.push_back(Vector3(0,1,0))
+	
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
-	#surface_array[Mesh.ARRAY_NORMAL] = normals
+	surface_array[Mesh.ARRAY_NORMAL] = normals
 	#surface_array[Mesh.ARRAY_INDEX] = indices
 	surface_array[Mesh.ARRAY_COLOR] = colors
 
@@ -56,10 +61,11 @@ func make_annulus():
 	var meshnode = MeshInstance3D.new()
 	meshnode.mesh = ArrayMesh.new()
 	add_child(meshnode)
+	#printt('annulus color is', color)
 	#meshnode.mesh.local_to_scene
 	meshnode.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	
 	var your_material = StandardMaterial3D.new()
-	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
+	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	#print("Finished make annulua")

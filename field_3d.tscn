@@ -397,7 +397,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.002, 0)
 visible = false
 inner_radius = 1.0
 outer_radius = 1.2
-color = Color(1.34766e-05, 0.888755, 0.933133, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="Runners" type="Node3D" parent="Headon"]
 

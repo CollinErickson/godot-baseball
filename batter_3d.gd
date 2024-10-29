@@ -55,7 +55,9 @@ func _process(delta: float) -> void:
 	if (not swing_started and not swing_done and 
 		user_is_batting_team and 
 		Input.is_action_just_pressed("swing")):
-		begin_swing()
+		# Make sure pitch hasn't started yet
+		if get_parent().get_node('Ball3D').pitch_in_progress:
+			begin_swing()
 	if swing_started and not swing_done:
 		swing_elapsed_sec += delta
 		if swing_state == 'inzone' and swing_elapsed_sec > swing_inzone_duration:

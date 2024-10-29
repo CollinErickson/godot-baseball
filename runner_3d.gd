@@ -133,14 +133,14 @@ func send_runner(direction: int) -> void:
 		printerr("bad in send_runner", direction)
 
 func end_state() -> String:
-	printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
+	#printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
 	if not exists_at_start:
 		return ''
 	if scored_on_play:
 		return "scored"
 	if out_on_play:
 		return "out"
-	printt('runner end_state', start_base, str(round(running_progress)))
+	#printt('runner end_state', start_base, str(round(running_progress)))
 	return str(round(running_progress))
 
 func set_runner(x):
