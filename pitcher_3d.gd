@@ -29,6 +29,7 @@ func reset() -> void:
 	pitch_done = false
 	time_since_pitch_start = 0
 	pitch_frame = 0
+	pitch_type = "FB"
 	$AnimatedSprite3D.set_frame(0)
 
 

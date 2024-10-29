@@ -87,7 +87,7 @@ func pow_vec_components(x, a=2) :
 
 func is_strike(pos):
 	return (abs(pos.x) < .25 + ball_radius and 
-		pos.y < 1.05 + ball_radius and position.y > 0.45 - ball_radius and
+		pos.y < 1.05 + ball_radius and pos.y > 0.45 - ball_radius and
 		not delivery_bounced)
 
 signal pitch_completed_unhit
@@ -201,13 +201,14 @@ func _physics_process(delta: float) -> void:
 			#dot.position = cur_weight * position + (1 - cur_weight) * prev_position
 			var delta_cross_sz = (sz_z - position.z) / velocity.z
 			dot.position = position + delta_cross_sz * velocity
+			#printt('ball sz check:', prev_position, position, delta_cross_sz, dot.position)
 			var color
 			if is_strike(dot.position):
 				pitch_is_strike = true
-				color = Color(1,0,0,1)
+				color = Color(1,0,0,1) # Red
 			else:
 				pitch_is_ball = true
-				color = Color(0,0,1,1)
+				color = Color(0,0,1,1) # Blue
 			dot.get_node('MeshInstance3D').mesh.material.albedo_color = color
 			dot.name = 'SZ_DOT'
 			get_parent().add_child(dot)
