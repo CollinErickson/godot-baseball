@@ -30,7 +30,8 @@ func freeze() -> void:
 	visible = false
 	set_process(false)
 
-func reset(user_is_batting_team_, user_is_pitching_team_):
+func reset(user_is_batting_team_, user_is_pitching_team_,
+			batter, runner1, runner2, runner3):
 	printt('--------\n---- in field_3d reset')
 	# Reset children
 	$Headon/Ball3D.reset()
@@ -46,20 +47,37 @@ func reset(user_is_batting_team_, user_is_pitching_team_):
 		if runner.start_base == 0:
 			runner.visible = false
 			#printt('INVISIBLE RUNNER 0')
+		if runner.start_base == 1:
+			runner.set_runner(runner1)
+		elif runner.start_base == 2:
+			runner.set_runner(runner2)
+		elif runner.start_base == 3:
+			runner.set_runner(runner3)
+		else:
+			assert(runner.start_base == 0)
 	$Headon/Batter3D.reset()
 	$Headon/Pitcher3D.reset()
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
 	mgl.set_process(false)
-	if not user_is_batting_team:
-		$Headon/Bat3D.visible = false
+	if user_is_batting_team:
+		$Headon/Bat3D.visible = true
 		$Headon/Bat3D.get_node("Sprite3D").visible = true
 		$Headon/Bat3D.set_process(true)
+	else:
+		$Headon/Bat3D.visible = false
+		$Headon/Bat3D.get_node("Sprite3D").visible = false
+		$Headon/Bat3D.set_process(false)
 	if user_is_pitching_team:
 		$Headon/CatchersMitt.visible = true
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=true
 		$Headon/CatchersMitt.set_process(true)
+	else:
+		$Headon/CatchersMitt.visible = false
+		$Headon/CatchersMitt.get_node("Sprite3D").visible=false
+		$Headon/CatchersMitt.set_process(false)
+		
 
 	# Reset this
 	is_frozen = false
@@ -91,7 +109,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_):
 	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
 	if not user_is_batting_team:
 		$Headon/Bat3D.visible = false
-
+	
+	print('in field reset: printing batter')
+	batter.print_()
 
 func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
@@ -656,10 +676,11 @@ func check_if_play_done():
 	# Check if runners aren't running and are near base
 	var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
-		if runner.is_running:
-			return false
-		if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
-			return false
+		if runner.exists_at_start:
+			if runner.is_running:
+				return false
+			if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
+				return false
 	# None are running, all are near base
 	# Check if fielder is holding ball
 	var fielders = get_tree().get_nodes_in_group("fielders")
@@ -694,7 +715,11 @@ func play_done():
 		if $Headon/Batter3D.swing_started:
 			pitch_is_ball = false
 			pitch_is_strike = true
-	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play)
+	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play,
+	$Headon/Runners/Runner3DHome.end_state(),
+	$Headon/Runners/Runner3D1B.end_state(),
+	$Headon/Runners/Runner3D2B.end_state(),
+	$Headon/Runners/Runner3D3B.end_state())
 
 func _on_play_over_timer_timeout() -> void:
 	$PlayOverTimer.stop()

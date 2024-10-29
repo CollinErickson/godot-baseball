@@ -131,3 +131,22 @@ func send_runner(direction: int) -> void:
 				is_running = true
 	else:
 		printerr("bad in send_runner", direction)
+
+func end_state() -> String:
+	printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
+	if not exists_at_start:
+		return ''
+	if scored_on_play:
+		return "scored"
+	if out_on_play:
+		return "out"
+	printt('runner end_state', start_base, str(round(running_progress)))
+	return str(round(running_progress))
+
+func set_runner(x):
+	if x:
+		exists_at_start = true
+	else:
+		exists_at_start = false
+		set_physics_process(false)
+		visible = false
