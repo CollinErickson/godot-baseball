@@ -171,7 +171,7 @@ func _physics_process(delta: float) -> void:
 			move.z -= 1
 			anymovement = true
 		if anymovement:
-			if move.length() > 0:
+			if move.length() > 0: # Could press opposite directions
 				#move = move.normalized() * delta * SPEED
 				# move is the move direction
 				move = move.normalized()
@@ -182,10 +182,19 @@ func _physics_process(delta: float) -> void:
 				velocity += delta * MAX_ACCEL * move
 				if velocity.length() > SPEED:
 					velocity = velocity.normalized() * SPEED
-				#printt('cam fielder movement', cam.rotation)
-				position += delta * velocity
-				#var ball = get_tree().get_first_node_in_group("ball")
-				#ball.position = position
+		else: # No movement -> stop
+			if velocity.length() > 1e-12:
+				move = Vector3(-velocity.x, 0, -velocity.z)
+				move = move.normalized()
+				var dvel = delta * MAX_ACCEL * move
+				if dvel.length() > velocity.length(): # Cancel to 0
+					velocity = Vector3.ZERO
+				else:
+					velocity += dvel
+		#printt('cam fielder movement', cam.rotation)
+		position += delta * velocity
+		#var ball = get_tree().get_first_node_in_group("ball")
+		#ball.position = position
 		
 	var click_used = false
 	# If holding, check if they throw it or step on base or move
