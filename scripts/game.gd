@@ -20,6 +20,7 @@ var runner3:Player = null
 func _ready() -> void:
 	#printt('test create player:', get_player())
 	batter = get_player()
+	runner3 = get_player()
 	reset_field()
 	update_scorebug()
 

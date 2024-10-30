@@ -447,6 +447,7 @@ script = ExtResource("14_g2qjr")
 [connection signal="pitch_started" from="Headon/Pitcher3D" to="." method="_on_pitcher_3d_pitch_started2"]
 [connection signal="ball_overthrown" from="Headon/Ball3D" to="." method="_on_ball_3d_ball_overthrown"]
 [connection signal="foul_ball" from="Headon/Ball3D" to="." method="_on_ball_3d_foul_ball"]
+[connection signal="hit_bounced_signal" from="Headon/Ball3D" to="." method="_on_ball_3d_hit_bounced_signal"]
 [connection signal="pitch_completed_unhit" from="Headon/Ball3D" to="." method="_on_ball_3d_pitch_completed_unhit"]
 [connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]
 [connection signal="timeout" from="FlashText/Timer" to="FlashText" method="_on_timer_timeout"]

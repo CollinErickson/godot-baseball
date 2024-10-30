@@ -10,6 +10,8 @@ var is_foul_ball:bool = false
 var outs_on_play = 0
 var outs_before_play = 0
 var runs_on_play = 0
+var max_force_outs_at_start:int
+var max_force_outs_left:int
 
 var user_is_pitching_team = true
 var user_is_batting_team = !true
@@ -51,7 +53,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
 			#printt('INVISIBLE CATCHER')
-	for runner in get_tree().get_nodes_in_group('runners'):
+	var runners = get_tree().get_nodes_in_group('runners')
+	for runner in runners:
 		runner.reset()
 		if runner.start_base == 0:
 			runner.visible = false
@@ -101,6 +104,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_in_play = false
 	ball_in_play_state = null
 	ball_in_play_state_time = 0
+	ball_hit_bounced = true
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
 	runs_on_play = 0
@@ -109,6 +113,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#_ready()
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
+	
+	_on_reached_next_base_by_runner()
+	max_force_outs_at_start = max_force_outs_left
 	
 	# Set variables in children
 	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
@@ -287,6 +294,8 @@ func _ready() -> void:
 	# Set up signals from runners
 	for runner in runners:  
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
+		runner.connect("reached_next_base", _on_reached_next_base_by_runner)
+		
 	
 	# Test mesh array
 	#test_mesh_array()
@@ -369,9 +378,9 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla=20
-					hla=-50
-					exitvelo=35
+					vla = 70
+					hla = 0
+					exitvelo = 35
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -766,3 +775,28 @@ func _on_signal_scored_on_play_by_runner() -> void:
 func _on_ball_3d_foul_ball() -> void:
 	is_foul_ball = true
 	play_done('Foul ball!')
+
+var ball_hit_bounced:int = false
+func _on_ball_3d_hit_bounced_signal() -> void:
+	pass # Replace with function body.
+	ball_hit_bounced = true
+	check_runners_able_to_score()
+
+func _on_reached_next_base_by_runner():
+	# Only for first time they reached the base after start_base
+	# Recalculate max force outs left
+	max_force_outs_left = 1
+	if $Headon/Runners/Runner3D1B.exists_at_start:
+		max_force_outs_left += 1
+		if $Headon/Runners/Runner3D2B.exists_at_start:
+			max_force_outs_left += 1
+			if $Headon/Runners/Runner3D3B.exists_at_start:
+				max_force_outs_left += 1
+	assert(max_force_outs_left <= max_force_outs_at_start)
+	check_runners_able_to_score()
+
+func check_runners_able_to_score():
+	if outs_before_play + max_force_outs_left < 2.5 and ball_hit_bounced:
+		printt('RUNNERS CAN SCORE NOW')
+		for runner in get_tree().get_nodes_in_group('runners'):
+			runner.able_to_score = true

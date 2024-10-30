@@ -93,6 +93,7 @@ func is_strike(pos):
 		not delivery_bounced)
 
 signal pitch_completed_unhit
+signal hit_bounced_signal
 func _physics_process(delta: float) -> void:
 	if is_frozen:
 		return
@@ -154,7 +155,9 @@ func _physics_process(delta: float) -> void:
 					if check_if_foul():
 						# If foul, exit. Otherwise it returns later, or something weird.
 						return
-					hit_bounced = true
+					if not hit_bounced:
+						hit_bounced = true
+						hit_bounced_signal.emit()
 					#if not is_sim:
 						#assert(false)
 		# Move a throw
@@ -196,12 +199,13 @@ func _physics_process(delta: float) -> void:
 				velocity = Vector3()
 			if pitch_in_progress:
 				delivery_bounced = true
-			if state == "ball_in_play":
+			if state == "ball_in_play" and not hit_bounced:
 				printt('setting hit_bounced = true', hit_bounced, position)
 				if check_if_foul():
 					# If foul, exit. Otherwise it returns later, or something weird.
 					return
 				hit_bounced = true
+				hit_bounced_signal.emit()
 			bounced_previous_frame = true
 		else:
 			#printt('NOT bounce', delta)

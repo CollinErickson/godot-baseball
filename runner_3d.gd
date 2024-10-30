@@ -15,8 +15,10 @@ var tagged_up_after_catch = true
 var max_running_progress
 var target_base
 var needs_to_tag_up = false
+var able_to_score:bool = false
 
 signal signal_scored_on_play
+signal reached_next_base
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -31,7 +33,7 @@ func reset() -> void:
 	set_physics_process(true)
 	
 	is_running = false
-	running_progress = start_base*1.
+	running_progress = start_base*1. + 0.10 # Lead off
 	exists_at_start = true
 	out_on_play = false
 	scored_on_play = false
@@ -41,6 +43,7 @@ func reset() -> void:
 	needs_to_tag_up = false
 	max_running_progress = running_progress
 	target_base = start_base + 1
+	able_to_score = false
 	
 	update_position()
 
@@ -59,7 +62,7 @@ func _ready() -> void:
 	target_base = start_base + 1
 
 func _physics_process(delta: float) -> void:
-	if is_frozen:
+	if is_frozen or out_on_play or scored_on_play:
 		return
 	
 	#print('running needs to tag', needs_to_tag_up, start_base)
@@ -74,25 +77,30 @@ func _physics_process(delta: float) -> void:
 		if target_base < running_progress:
 			dir = -1
 		var next_running_progress = running_progress + delta*SPEED/30 * dir
+		if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
+			reached_next_base.emit()
 		
+		# Check if they will reach the target base, if yes, stop them there
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			running_progress = target_base
 			max_running_progress = running_progress
 			is_running = false
-			# Scored run
-			if running_progress >= 4:
-				is_running = false
-				running_progress = 4
-				scored_on_play = true
-				visible = false
-				signal_scored_on_play.emit()
-				#print('SCORED, SHOULDNT BE VISIBLE')
 		else: # Not crossing base
 			# Update progress
 			running_progress = next_running_progress
 			max_running_progress = max(running_progress, max_running_progress)
 			update_position()
+	
+	# Scored run. Can't do it when they first reach 4 since they may not be eligible then
+	if (running_progress >= 4 and not scored_on_play and able_to_score and
+			(not needs_to_tag_up or tagged_up_after_catch)):
+		is_running = false
+		running_progress = 4
+		scored_on_play = true
+		visible = false
+		signal_scored_on_play.emit()
+		#print('SCORED, SHOULDNT BE VISIBLE')
 
 func update_position():
 	# Update location
