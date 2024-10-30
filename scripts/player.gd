@@ -16,3 +16,4 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float):
 func print_():
 	print('Player object:')
 	print('\tName: ', first, ' ', last)
+	print('\tSpeed: ', speed)

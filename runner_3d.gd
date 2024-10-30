@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 
-const SPEED = 8.0
+var SPEED = 8.0 # 8 is avg
 
 @export_category("Baseball")
 @export var start_base : int
@@ -16,9 +16,10 @@ var max_running_progress
 var target_base
 var needs_to_tag_up = false
 var able_to_score:bool = false
+var reached_next_base:bool = false
 
 signal signal_scored_on_play
-signal reached_next_base
+signal reached_next_base_signal
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -78,7 +79,8 @@ func _physics_process(delta: float) -> void:
 			dir = -1
 		var next_running_progress = running_progress + delta*SPEED/30 * dir
 		if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
-			reached_next_base.emit()
+			reached_next_base = true
+			reached_next_base_signal.emit()
 		
 		# Check if they will reach the target base, if yes, stop them there
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
@@ -93,17 +95,21 @@ func _physics_process(delta: float) -> void:
 			update_position()
 	
 	# Scored run. Can't do it when they first reach 4 since they may not be eligible then
-	if (running_progress >= 4 and not scored_on_play and able_to_score and
+	if (running_progress >= 4 and not scored_on_play):
+		if (able_to_score and
 			(not needs_to_tag_up or tagged_up_after_catch)):
-		is_running = false
-		running_progress = 4
-		scored_on_play = true
-		visible = false
-		signal_scored_on_play.emit()
-		#print('SCORED, SHOULDNT BE VISIBLE')
+			is_running = false
+			running_progress = 4
+			scored_on_play = true
+			visible = false
+			signal_scored_on_play.emit()
+			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
+		else:
+			#printt("RUNNER IS WAITING TO SCORE", start_base, able_to_score, needs_to_tag_up, tagged_up_after_catch)
+			running_progress = 4
 
 func update_position():
-	# Update location
+	# Update location on field based on running_progress
 	if running_progress < 1:
 		position = Vector3(-1,0,1).normalized() * (running_progress * 30)
 	elif running_progress < 2:
@@ -154,7 +160,27 @@ func end_state() -> String:
 func set_runner(x):
 	if x:
 		exists_at_start = true
-	else:
+		SPEED = max(1e-8, x.speed / 10. + 3)
+		x.print_()
+		printt('runner speed is', SPEED, start_base)
+	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)
 		visible = false
+
+func is_done_for_play() -> bool:
+	if not exists_at_start:
+		return true
+	if out_on_play or scored_on_play:
+		return true
+	if needs_to_tag_up and not tagged_up_after_catch:
+		return false
+	if is_running:
+		return false
+	if abs(running_progress - round(running_progress)) > 1e-8:
+		return false
+	if running_progress > 3.5: # Can't be waiting for score at home
+		return false
+	# TODO: What if they are standing on a base but need to go to the next base?
+	# Otherwise, they should be standing on a base
+	return true

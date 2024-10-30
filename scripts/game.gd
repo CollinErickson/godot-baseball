@@ -19,8 +19,13 @@ var runner3:Player = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#printt('test create player:', get_player())
-	batter = get_player()
-	runner3 = get_player()
+	if !true:
+		user_is_away_team = true
+		user_is_home_team = false
+	batter = get_player(-1110)
+	#runner1 = get_player(50)
+	#runner2 = get_player(50)
+	runner3 = get_player(99)
 	reset_field()
 	update_scorebug()
 
@@ -109,6 +114,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	reset_field()
 
 func reset_field() -> void:
+	batter.print_()
 	$Field3D.reset(
 		(is_top and user_is_away_team) or (!is_top and user_is_home_team),
 		(is_top and user_is_home_team) or (!is_top and user_is_away_team),
@@ -118,10 +124,10 @@ func reset_field() -> void:
 		runner3,
 		outs)
 
-func get_player() -> Player:
+func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()
 	var f = ["Nick", "Britt", "Greg", "Troy"]
 	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
-	p.setup(f.pick_random(), l.pick_random(), 33, 39.)
+	p.setup(f.pick_random(), l.pick_random(), speed, 39.)
 	#p.print_()
 	return p

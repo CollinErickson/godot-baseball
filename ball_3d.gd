@@ -484,12 +484,12 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 	if p2.z != 0:
 		anglep2 = atan(p2.z / p2.x)
 		p2 = p2.rotated(Vector3(0,1,0), anglep2)
-		# Make sure x is positive
-		if p2.x < 0:
-			anglep2 += PI
-			p2 = p2.rotated(Vector3(0,1,0), PI)
 	else:
 		anglep2 = 0
+	# Make sure x is positive
+	if p2.x < 0:
+		anglep2 += PI
+		p2 = p2.rotated(Vector3(0,1,0), PI)
 	#printt('check rotate', pos1, pos2, pos2 - pos1, anglep2, 'rot1', p2)
 	var t
 	var vel1
@@ -525,7 +525,7 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 			vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
 			t = m / vx1
 			if t <= 0:
-				printt('assert t > 0', t, m, vx1)
+				printt('assert t > 0', t, m, vx1, p2)
 			assert(t > 0)
 			#var k = d * (p2.x / t)**2
 			vel1 = Vector3(vx1, vy1, 0)

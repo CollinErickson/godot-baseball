@@ -18,8 +18,10 @@ var user_is_batting_team = !true
 
 var is_frozen: bool = false
 
-#func record_out(type : String):
-#	outs_on_play += 1
+func record_out(desc : String, duration : float = 3) -> void:
+	outs_on_play += 1
+	get_node("FlashText").new_text(desc, duration)
+	update_max_force_outs_left()
 
 func freeze() -> void:
 	# Stop timers
@@ -41,7 +43,7 @@ func freeze() -> void:
 	set_process(false)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			_batter, runner1, runner2, runner3, outs_before_play_):
+			batter, runner1, runner2, runner3, outs_before_play_):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
@@ -58,6 +60,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		runner.reset()
 		if runner.start_base == 0:
 			runner.visible = false
+			runner.set_runner(batter)
 			#printt('INVISIBLE RUNNER 0')
 		if runner.start_base == 1:
 			runner.set_runner(runner1)
@@ -89,11 +92,11 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		$Headon/CatchersMitt.visible = false
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=false
 		$Headon/CatchersMitt.set_process(false)
-		
+	$Headon/Cameras.reset()
 
 	# Reset this
 	is_frozen = false
-	printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
+	#printt('in field_3d reset', $Headon/Defense/Fielder3DC.visible)
 	visible = true
 	set_process(true)
 	# Reset vars
@@ -104,7 +107,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_in_play = false
 	ball_in_play_state = null
 	ball_in_play_state_time = 0
-	ball_hit_bounced = true
+	ball_hit_bounced = false
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
 	runs_on_play = 0
@@ -114,8 +117,11 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
 	
-	_on_reached_next_base_by_runner()
+	# Calculate max force outs left
+	max_force_outs_at_start = 99
+	update_max_force_outs_left()
 	max_force_outs_at_start = max_force_outs_left
+	assert(max_force_outs_at_start <= 4)
 	
 	# Set variables in children
 	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
@@ -130,16 +136,17 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	
 	#print('in field reset: printing batter')
 	#batter.print_()
-	printt('after field full reset', $Headon/Ball3D.hit_bounced)
+	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
 
 func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
 		printt("fly Out recorded!!!")
-		outs_on_play += 1
-		get_node("FlashText").new_text("Fly out!", 3)
+		#outs_on_play += 1
+		#get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
+		record_out("Fly out!")
 		
 		var runners = get_tree().get_nodes_in_group('runners')
 		for runner in runners:
@@ -198,8 +205,9 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 		# Check for tag up force outs
 		if base == runner.start_base and runner.exists_at_start and runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
 			runner.runner_is_out()
-			outs_on_play += 1
-			get_node("FlashText").new_text("force out, didn't tag up!", 3)
+			#outs_on_play += 1
+			#get_node("FlashText").new_text("force out, didn't tag up!", 3)
+			record_out("Force out, didn't tag up!")
 			continue
 		
 		# Force out
@@ -217,16 +225,18 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 				runner.runner_is_out()
 				#printt("force Out recorded!!!", runner.start_base, base,
 				#       runner.running_progress, runner.max_running_progress)
-				outs_on_play += 1
-				get_node("FlashText").new_text("force out!", 3)
+				#outs_on_play += 1
+				#get_node("FlashText").new_text("force out!", 3)
+				record_out('Force out!')
 				#runner.runner_is_out()
 			#else:
 			#	printt('not force out, prev runner not there')
 	return
 
 func _on_tag_out_by_fielder():
-	outs_on_play += 1
-	get_node("FlashText").new_text("tag out!", 3)
+	#outs_on_play += 1
+	#get_node("FlashText").new_text("tag out!", 3)
+	record_out('Tag out!')
 
 func test_mesh_array():
 	var surface_array = []
@@ -294,7 +304,7 @@ func _ready() -> void:
 	# Set up signals from runners
 	for runner in runners:  
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
-		runner.connect("reached_next_base", _on_reached_next_base_by_runner)
+		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
 		
 	
 	# Test mesh array
@@ -380,7 +390,7 @@ func _process(delta: float) -> void:
 					hla = -45 + 90 * inzone_prop
 					vla = 70
 					hla = 0
-					exitvelo = 35
+					exitvelo = 32
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -431,7 +441,7 @@ func _process(delta: float) -> void:
 			#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 			#printt('fielder nodes', fielder_nodes)
 			var hit_will_bounce = assign_fielders_after_hit()
-			if hit_will_bounce:
+			if hit_will_bounce or true:
 				#printt("hit will bounce, send runners!!")
 				var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
@@ -701,16 +711,21 @@ func check_if_play_done():
 		play_done()
 		return true
 	
-	# TODO: check if no active runners
-	
 	# Check if runners aren't running and are near base
 	var runners = get_tree().get_nodes_in_group("runners")
+	var n_runners_active:int = 0
 	for runner in runners:
-		if runner.exists_at_start:
-			if runner.is_running:
-				return false
-			if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
-				return false
+		if not runner.is_done_for_play():
+			return false
+		if runner.is_active():
+			n_runners_active += 1
+		#if runner.exists_at_start:
+			#if runner.is_running:
+				#return false
+			#if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
+				#return false
+	if n_runners_active == 0:
+		return true
 	# None are running, all are near base
 	# Check if fielder is holding ball
 	var fielders = get_tree().get_nodes_in_group("fielders")
@@ -776,27 +791,49 @@ func _on_ball_3d_foul_ball() -> void:
 	is_foul_ball = true
 	play_done('Foul ball!')
 
-var ball_hit_bounced:int = false
+var ball_hit_bounced:bool = false
 func _on_ball_3d_hit_bounced_signal() -> void:
-	pass # Replace with function body.
+	printt('In field, _on_ball_3d_hit_bounced_signal, ball_hit_bounced = ', ball_hit_bounced)
 	ball_hit_bounced = true
-	check_runners_able_to_score()
+	#check_runners_able_to_score()
+	update_max_force_outs_left()
 
-func _on_reached_next_base_by_runner():
+func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base
 	# Recalculate max force outs left
-	max_force_outs_left = 1
-	if $Headon/Runners/Runner3D1B.exists_at_start:
-		max_force_outs_left += 1
-		if $Headon/Runners/Runner3D2B.exists_at_start:
-			max_force_outs_left += 1
-			if $Headon/Runners/Runner3D3B.exists_at_start:
+	update_max_force_outs_left()
+
+func update_max_force_outs_left() -> void:
+	printt('In update_max_force_outs_left...')
+	if ball_hit_bounced: # Force out each base if runner exists and all before it
+		max_force_outs_left = 0
+		if not $Headon/Runners/Runner3DHome.out_on_play:
+			if not $Headon/Runners/Runner3DHome.reached_next_base:
 				max_force_outs_left += 1
+			if $Headon/Runners/Runner3D1B.exists_at_start and not $Headon/Runners/Runner3D1B.out_on_play:
+				if not $Headon/Runners/Runner3D1B.reached_next_base:
+					max_force_outs_left += 1
+				if $Headon/Runners/Runner3D2B.exists_at_start and not $Headon/Runners/Runner3D2B.out_on_play:
+					if not $Headon/Runners/Runner3D2B.reached_next_base:
+						max_force_outs_left += 1
+					if $Headon/Runners/Runner3D3B.exists_at_start and not $Headon/Runners/Runner3D3B.out_on_play:
+						if not $Headon/Runners/Runner3D3B.reached_next_base:
+							max_force_outs_left += 1
+	else: # Possible to catch fly ball and get all runners before tagging
+		max_force_outs_left = (
+			1 + # Can catch ball to get hitter out
+			int($Headon/Runners/Runner3D1B.exists_at_start) +
+			int($Headon/Runners/Runner3D2B.exists_at_start) +
+			int($Headon/Runners/Runner3D3B.exists_at_start)
+		)
+	printt('Updated max_force_outs_left: ', max_force_outs_left, ball_hit_bounced)
 	assert(max_force_outs_left <= max_force_outs_at_start)
+	assert(max_force_outs_left <= 4)
 	check_runners_able_to_score()
 
 func check_runners_able_to_score():
-	if outs_before_play + max_force_outs_left < 2.5 and ball_hit_bounced:
+	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
+	if outs_before_play + outs_on_play + max_force_outs_left < 2.5 and ball_hit_bounced:
 		printt('RUNNERS CAN SCORE NOW')
 		for runner in get_tree().get_nodes_in_group('runners'):
 			runner.able_to_score = true

@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=57 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://c6yokfan7mlg7" path="res://bat_3d.tscn" id="6_i5fsa"]
 [ext_resource type="PackedScene" uid="uid://cpobb8pjdcvp4" path="res://runner_3d.tscn" id="8_eblru"]
 [ext_resource type="PackedScene" uid="uid://bph0v6lfhfc07" path="res://camera_3d_custom.tscn" id="9_hy03x"]
+[ext_resource type="Script" path="res://scripts/cameras.gd" id="10_cjt80"]
 [ext_resource type="Environment" uid="uid://dc33a2etlsbtn" path="res://camera_3d_custom_environment.tres" id="10_t8ph7"]
 [ext_resource type="PackedScene" uid="uid://dsb1e4kc4120x" path="res://ball_3d.tscn" id="11_faris"]
 [ext_resource type="PackedScene" uid="uid://c8pe2ur7pkpbb" path="res://mouse_ground_location.tscn" id="12_ah4ma"]
@@ -350,6 +351,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)
 [node name="Camera3DCustom" parent="Headon" instance=ExtResource("9_hy03x")]
 
 [node name="Cameras" type="Node3D" parent="Headon"]
+script = ExtResource("10_cjt80")
 
 [node name="Camera3DHighHome" type="Camera3D" parent="Headon/Cameras"]
 transform = Transform3D(-1, -7.45058e-09, 5.96046e-08, 0, 0.984808, 0.173648, -8.9407e-08, 0.173648, -0.984808, 0, 10, -35)

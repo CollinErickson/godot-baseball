@@ -201,11 +201,13 @@ func _physics_process(delta: float) -> void:
 	var click_used = false
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
-		# Check if tagging runner
+		# Check if tagging active runner not on base
 		var runners = get_tree().get_nodes_in_group("runners")
 		for runner in runners:
-			if (runner.exists_at_start and not runner.out_on_play and
-				abs(runner.running_progress - round(runner.running_progress)) > 1e-4 and
+			if (runner.is_active() and
+				(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
+					(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
+						runner.running_progress - runner.start_base > .15)) and
 				distance_xz(position, runner.position) < 1):
 				runner.runner_is_out()
 				tag_out.emit()
