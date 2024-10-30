@@ -53,7 +53,7 @@ func assign_to_field_ball(pos):
 	if user_is_pitching_team:
 		set_selected_fielder()
 
-func assign_to_cover_base(base):
+func assign_to_cover_base(base, ball_pos=null):
 	assignment = 'cover'
 	if base == 1:
 		assignment_pos = Vector3(-1,0,1) * 30/sqrt(2)
@@ -63,6 +63,8 @@ func assign_to_cover_base(base):
 		assignment_pos = Vector3(1,0,1) * 30/sqrt(2)
 	elif base == 4:
 		assignment_pos = Vector3(0,0,0)
+	elif base == 5:
+		assignment_pos = .5*(Vector3(0,0,1)*30*sqrt(2) + ball_pos)
 	else:
 		assert(false)
 
@@ -278,8 +280,11 @@ func _physics_process(delta: float) -> void:
 									
 						# If OF, throw to IF
 						if throw_to < -0.5:
-							if distance_xz(position, Vector3(0,0,20)) > 25 and max_running_progress > -0.5:
-								throw_to = ceil(max_running_progress)
+							if distance_xz(position, Vector3(0,0,20)) > 25:
+								if max_running_progress > -0.5:
+									throw_to = ceil(max_running_progress)
+								else:
+									throw_to = 2
 						if distance_xz(position, base_positions[throw_to-1]) < 10:
 							run_it = true
 							assignment_pos = base_positions[throw_to-1]

@@ -32,6 +32,7 @@ var throw_progress
 var bounced_previous_frame = false
 var pitch_is_strike:bool = false
 var pitch_is_ball:bool = false
+var touched_by_fielder:bool = false
 
 signal ball_overthrown
 
@@ -68,11 +69,12 @@ func reset() -> void:
 	bounced_previous_frame = false
 	pitch_is_strike = false
 	pitch_is_ball = false
+	touched_by_fielder = false
 	scale = 1*Vector3.ONE
 	visible = false
 	throw_start_pos = null
 	throw_target = null
-	
+	printt('finished ball reset, hit bounced', hit_bounced)
 	
 	var dot = get_parent().get_node_or_null('SZ_DOT')
 	if dot:
@@ -94,7 +96,8 @@ signal pitch_completed_unhit
 func _physics_process(delta: float) -> void:
 	if is_frozen:
 		return
-	#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress)
+	#if randf_range(0,1) < 1.1 and not is_sim:
+		#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress, hit_bounced)
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)
@@ -129,17 +132,31 @@ func _physics_process(delta: float) -> void:
 		position += delta * velocity - 0.5 * delta**2 * acceleration
 		#printt('new ball pos', position)
 		for wallnode in get_tree().get_nodes_in_group("walls"):
+			# check_ball_across returns array of 4 items:
+			# 0: Did it cross?
+			# 1: Was it over?
+			# 2: Reflected position
+			# 3: New velocity
 			var wallout = wallnode.check_ball_cross(global_position, velocity, restitution_coef,
 			prev_global_position, prev_velocity, is_sim)
 			#if wallout[0] and not is_sim:
 			#	assert(false)
-			if wallout[0] and not wallout[1]:
-				global_position = wallout[2]
-				#printt('velo before and after', velocity, wallout[3])
-				#printt("In ball, hit wall at ball coords", position)
-				velocity = wallout[3]
-				#if not is_sim:
-					#assert(false)
+			
+			if wallout[0]: # Crossed wall
+				if wallout[1]: # Over: home run or foul ball
+					pass
+					# TODO: Home run
+				else: # Hit wall: fair or foul
+					global_position = wallout[2]
+					#printt('velo before and after', velocity, wallout[3])
+					printt("In ball, hit wall at ball coords", position)
+					velocity = wallout[3]
+					if check_if_foul():
+						# If foul, exit. Otherwise it returns later, or something weird.
+						return
+					hit_bounced = true
+					#if not is_sim:
+						#assert(false)
 		# Move a throw
 		if state == "thrown":
 			#printt('in ball: state is thrown')
@@ -180,7 +197,10 @@ func _physics_process(delta: float) -> void:
 			if pitch_in_progress:
 				delivery_bounced = true
 			if state == "ball_in_play":
-				#printt('setting hit_bounced = true')
+				printt('setting hit_bounced = true', hit_bounced, position)
+				if check_if_foul():
+					# If foul, exit. Otherwise it returns later, or something weird.
+					return
 				hit_bounced = true
 			bounced_previous_frame = true
 		else:
@@ -484,34 +504,35 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 		#printt("quadratic_vx1_sq", quadratic_vx1_sq)
 		#printt("quadratic_vx1_sq v2", quadratic(a/b, 1, c/b))
 		var vx1
+		# Throw won't make it, return something
 		if quadratic_vx1_sq[0] < .5 or quadratic_vx1_sq[1] < 0:
 			# TODO: fix bad throws
 			printt('approx parabola will give error', quadratic_vx1_sq)
-			#return ???
-		if p2.x > 0:
-			vx1 = sqrt(quadratic_vx1_sq[1])
+			# 30 degree throw
+			vel1 = Vector3(1,.5,0).normalized() * speed1
 		else:
 			vx1 = sqrt(quadratic_vx1_sq[1])
-		#printt('check quadratic', a*quadratic_vx1_sq[1]**2 + b*quadratic_vx1_sq[1]+c, 0,a,b,c, 1, b/a, c/a)
-		#printt('check before quadratic', m**2*vx1**4+p2.y**2*m**4+p2.y*gravity*m**2*vx1**2+.25*gravity**2*m**4, m**2*speed1**2*vx1**2)
-		#printt('check s1 terms', vx1**2, ((p2.y*vx1**2+.5*gravity*m**2)/(m*vx1))**2, speed1**2)
-		#printt('all terms', gravity, m, speed1, p2.y)
-		#assert(vx1)
-		vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
-		t = m / vx1
-		if t <= 0:
-			printt('assert t > 0', t, m, vx1)
-		assert(t > 0)
-		#var k = d * (p2.x / t)**2
-		vel1 = Vector3(vx1, vy1, 0)
-		#printt('check t', t)
-		#printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
-		#printt('check dx eqn', p2.x, vx1*t-.5*k*t**2)
-		#printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
-		#printt('check drag eqn', k, d, p2.x)
-		#printt('drag velo vec before rotation', vel1)
-		#var endvelo = Vector2(vx1 - k*t, vy1 - gravity*t)
-		#printt('with drag, start speed', Vector2(vx1, vy1), Vector2(vx1,vy1).length(), speed1, 'end speed', endvelo, endvelo.length())
+			
+			#printt('check quadratic', a*quadratic_vx1_sq[1]**2 + b*quadratic_vx1_sq[1]+c, 0,a,b,c, 1, b/a, c/a)
+			#printt('check before quadratic', m**2*vx1**4+p2.y**2*m**4+p2.y*gravity*m**2*vx1**2+.25*gravity**2*m**4, m**2*speed1**2*vx1**2)
+			#printt('check s1 terms', vx1**2, ((p2.y*vx1**2+.5*gravity*m**2)/(m*vx1))**2, speed1**2)
+			#printt('all terms', gravity, m, speed1, p2.y)
+			#assert(vx1)
+			vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
+			t = m / vx1
+			if t <= 0:
+				printt('assert t > 0', t, m, vx1)
+			assert(t > 0)
+			#var k = d * (p2.x / t)**2
+			vel1 = Vector3(vx1, vy1, 0)
+			#printt('check t', t)
+			#printt('check speed1 eqn', vx1**2 + vy1**2, speed1**2)
+			#printt('check dx eqn', p2.x, vx1*t-.5*k*t**2)
+			#printt('check dy eqn', p2.y, vy1*t-.5*gravity*t**2)
+			#printt('check drag eqn', k, d, p2.x)
+			#printt('drag velo vec before rotation', vel1)
+			#var endvelo = Vector2(vx1 - k*t, vy1 - gravity*t)
+			#printt('with drag, start speed', Vector2(vx1, vy1), Vector2(vx1,vy1).length(), speed1, 'end speed', endvelo, endvelo.length())
 	else: # no drag
 		var a = .25 * gravity**2
 		var b = gravity * (p2.y) - speed1**2
@@ -577,6 +598,7 @@ func ball_fielded():
 	is_frozen = true
 	state = "fielded"
 	set_process(false)
+	touched_by_fielder = true
 
 var throw_start_pos
 var throw_target
@@ -596,3 +618,16 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 func distance_xz(a:Vector3, b:Vector3) -> float:
 	return sqrt((a.x - b.x)**2 +
 				(a.z - b.z)**2)
+
+signal foul_ball
+func check_if_foul():
+	if is_sim:
+		return false
+	printt('in check if foul', global_position, hit_bounced, touched_by_fielder)
+	if not hit_bounced and not touched_by_fielder:
+		#printt('in check if foul', global_position)
+		if global_position.x < 0 or global_position.z < 0:
+			printt('in ball, emitting signal FOUL BALL')
+			foul_ball.emit()
+			return true
+	return false

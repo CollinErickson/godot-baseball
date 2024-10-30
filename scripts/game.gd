@@ -30,9 +30,10 @@ func _process(_delta: float) -> void:
 
 func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
-					false, true, true)
+					runner1!=null, runner2!=null, runner3!=null)
 
 func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike: bool,
+									is_foul_ball: bool,
 									outs_on_play: int, runs_on_play: int,
 									runner0state: String, runner1state: String,
 									runner2state: String, runner3state: String) -> void:
@@ -42,8 +43,11 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	var new_batter = false
 	if ball_in_play:
 		# Ball must have been in play
-		# TODO: foul ball
-		new_batter = true
+		if is_foul_ball:
+			if strikes < 1.5:
+				strikes += 1
+		else:
+			new_batter = true
 	else:
 		if is_ball:
 			balls += 1
@@ -100,8 +104,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		batter = get_player()
 	#get_node('Field3D').freeze()
 	update_scorebug()
-	printt('in game, about to reset field')
-	
+	printt('\n\n\n\n\n\n\n\n\n\n\n\n\nin game, about to reset field')
 	reset_field()
 
 func reset_field() -> void:
@@ -111,7 +114,8 @@ func reset_field() -> void:
 		batter,
 		runner1,
 		runner2,
-		runner3)
+		runner3,
+		outs)
 
 func get_player() -> Player:
 	var p = player.instantiate()

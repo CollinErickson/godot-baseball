@@ -5,8 +5,10 @@ var ball_in_play = false
 var ball_in_play_state = null
 var ball_in_play_state_time = 0
 const sz_z = 0.6
+var is_foul_ball:bool = false
 
 var outs_on_play = 0
+var outs_before_play = 0
 var runs_on_play = 0
 
 var user_is_pitching_team = true
@@ -18,6 +20,12 @@ var is_frozen: bool = false
 #	outs_on_play += 1
 
 func freeze() -> void:
+	# Stop timers
+	$Headon/Batter3D/Timer.stop()
+	$TimerCameraChange.stop()
+	$Headon/Defense/Fielder3DC/Timer.stop()
+	$PlayOverTimer.stop()
+
 	# Set children to be frozen
 	$Headon/Ball3D.freeze()
 	var fielders = get_tree().get_nodes_in_group('fielders')
@@ -31,10 +39,11 @@ func freeze() -> void:
 	set_process(false)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter, runner1, runner2, runner3):
-	printt('--------\n---- in field_3d reset')
+			_batter, runner1, runner2, runner3, outs_before_play_):
+	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
+	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
 	var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
 		fielder.reset()
@@ -88,10 +97,12 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	time_since_check_if_play_done_checked = 0
 	time_since_play_done_consecutive = 0
 	contact_done = false
+	is_foul_ball = false
 	ball_in_play = false
 	ball_in_play_state = null
 	ball_in_play_state_time = 0
 	outs_on_play = 0
+	outs_before_play = outs_before_play_
 	runs_on_play = 0
 	user_is_batting_team = user_is_batting_team_
 	user_is_pitching_team = user_is_pitching_team_
@@ -110,8 +121,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	if not user_is_batting_team:
 		$Headon/Bat3D.visible = false
 	
-	print('in field reset: printing batter')
-	batter.print_()
+	#print('in field reset: printing batter')
+	#batter.print_()
+	printt('after field full reset', $Headon/Ball3D.hit_bounced)
 
 func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
@@ -357,19 +369,18 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla=-10
-					hla=0
-					exitvelo=13
-					printt(exitvelo, vla, hla)
+					vla=20
+					hla=-50
+					exitvelo=35
+					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
 					ball3d.velocity.z = exitvelo
 					#print('velo vec before rot is')
-					print(ball3d.velocity)
+					#print(ball3d.velocity)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
-					print('velo vec is')
-					print(ball3d.velocity)
+					printt('hit velo vec is', ball3d.velocity)
 					ball3d.state = "ball_in_play"
 					
 					# Start running after .5 seconds
@@ -519,7 +530,7 @@ func assign_fielders_after_hit():
 	tmp_ball.state = "ball_in_play"
 	tmp_ball.hit_bounced = ball.hit_bounced
 	get_node("Headon").add_child(tmp_ball)
-	#printt('tmp_ball', tmp_ball, tmp_ball.state, tmp_ball.hit_bounced)
+	printt('tmp_ball', tmp_ball, tmp_ball.state, tmp_ball.hit_bounced)
 	tmp_ball.position = ball.position
 	#printt('balls global pos', tmp_ball.global_position, ball.global_position)
 	tmp_ball.velocity = ball.velocity
@@ -591,7 +602,7 @@ func assign_fielders_after_hit():
 			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(3)
 			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname in ["P", "LF", "CF", "RF"]:
+		elif fielder_nodes[min_ifielder].posname == "P":
 			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
 			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
@@ -601,6 +612,16 @@ func assign_fielders_after_hit():
 			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
 			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
 			get_fielder_with_posname(fielder_nodes, "P").assign_to_cover_base(4)
+		elif fielder_nodes[min_ifielder].posname in ["LF", "CF", "RF"]:
+			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
+			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
+			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
+			if tmp_ball.position.x > 0:
+				get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
+				get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(5, tmp_ball.position)
+			else:
+				get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
+				get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(5, tmp_ball.position)
 			
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
@@ -608,7 +629,7 @@ func assign_fielders_after_hit():
 	var tmp_ball_bounced = tmp_ball.hit_bounced
 	tmp_ball.queue_free()
 	
-	for i in range(10):
+	for i in range(3):
 		print('------- done with tmp_ball')
 	
 	# Return whether the ball bounced. Will be used to determine if runners run.
@@ -667,7 +688,7 @@ func check_if_play_done():
 	
 	# Check if 3 outs
 	# TODO: play should immediately end, no one else should get out, but scene shouldn't immediately reset
-	if outs_on_play > 2.5:
+	if outs_before_play + outs_on_play > 2.5:
 		play_done()
 		return true
 	
@@ -703,19 +724,19 @@ func check_if_play_done():
 	return near_infield
 
 signal signal_play_done(is_ball: bool, is_strike: bool, outs_on_play: int, runs_on_play: int)
-func play_done():
+func play_done(flash='Play is done!'):
 	printt('in field: running play_done()')
 	#play_done_fully = true
-	get_node("FlashText").new_text("Play is done!", 3)
+	get_node("FlashText").new_text(flash, 3)
 	#get_tree().reload_current_scene()
-	# TODO: return what happened to runners
 	freeze()
 	# Check for swing and miss
 	if pitch_is_ball:
 		if $Headon/Batter3D.swing_started:
 			pitch_is_ball = false
 			pitch_is_strike = true
-	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, outs_on_play, runs_on_play,
+	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, is_foul_ball,
+	outs_on_play, runs_on_play,
 	$Headon/Runners/Runner3DHome.end_state(),
 	$Headon/Runners/Runner3D1B.end_state(),
 	$Headon/Runners/Runner3D2B.end_state(),
@@ -737,8 +758,11 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 	assert(int(pitch_is_ball_) + int(pitch_is_strike_) == 1)
 	$PlayOverTimer.wait_time = 1
 	$PlayOverTimer.start()
-	
 
 func _on_signal_scored_on_play_by_runner() -> void:
 	runs_on_play += 1
 	get_node("FlashText").new_text("Run scored!", 3)
+
+func _on_ball_3d_foul_ball() -> void:
+	is_foul_ball = true
+	play_done('Foul ball!')
