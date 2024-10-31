@@ -161,8 +161,8 @@ func set_runner(x):
 	if x:
 		exists_at_start = true
 		SPEED = max(1e-8, x.speed / 10. + 3)
-		x.print_()
-		printt('runner speed is', SPEED, start_base)
+		#x.print_()
+		#printt('runner speed is', SPEED, start_base)
 	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)

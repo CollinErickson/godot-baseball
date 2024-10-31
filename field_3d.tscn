@@ -254,7 +254,7 @@ shadow_enabled = true
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0)
 
 [node name="HomePlate2" type="MeshInstance3D" parent="Headon"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.5)
 mesh = SubResource("BoxMesh_v6v7y")
 skeleton = NodePath("../../Ground/GreenGround")
 
