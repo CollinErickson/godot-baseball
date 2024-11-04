@@ -364,7 +364,8 @@ func set_selected_fielder():
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
 	get_node("Annulus").visible = true
-	printt('annulus should be on')
+	#printt('annulus should be on')
+
 func set_not_selected_fielder():
 	remove_from_group("selected_fielder")
 	is_selected_fielder = false

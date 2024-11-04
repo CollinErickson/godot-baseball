@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cpobb8pjdcvp4"]
+[gd_scene load_steps=6 format=3 uid="uid://cpobb8pjdcvp4"]
 
 [ext_resource type="Script" path="res://runner_3d.gd" id="1_lpabj"]
 [ext_resource type="Texture2D" uid="uid://bqbwl8hnx3i8x" path="res://sprites/batter.png" id="2_cutj8"]
@@ -18,6 +18,9 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_8symy"]
+viewport_path = NodePath("SubViewport")
+
 [node name="Runner3D" type="CharacterBody3D" groups=["runners"]]
 script = ExtResource("1_lpabj")
 
@@ -25,3 +28,17 @@ script = ExtResource("1_lpabj")
 offset = Vector2(0, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_jwoye")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+size = Vector2i(120, 120)
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1, 1, 1)
+visible = false
+
+[node name="TextureRect" type="TextureRect" parent="."]
+visible = false
+offset_left = 1100.0
+offset_right = 1155.0
+offset_bottom = 55.0
+texture = SubResource("ViewportTexture_8symy")
