@@ -126,15 +126,27 @@ func send_runner(direction: int) -> void:
 	if not is_active():
 		return
 	if direction == 1:
-		#printt('sending forward!!!')
-		if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
-			target_base = floor(running_progress) + 1
-			is_running = true 
+		printt('sending forward!!!')
+		#if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
+			#target_base = floor(running_progress) + 1
+			#is_running = true 
+			#printt('actually send forward')
+		#else:
+			#printt('didnt actually send forward', running_progress, target_base)
+		is_running = true
+		if target_base < running_progress:
+			# If going backward, send forward to next
+			target_base = ceil(running_progress)
+		elif running_progress > target_base - .3:
+			# If already going forward and near next base, send to following base
+			target_base += 1
+		else:
+			pass
 	elif direction == -1:
 		#print('sending backward!!!')
-		if running_progress > 1 and running_progress > start_base + 1e-8: # Can't go back to home
+		if running_progress > 1 and running_progress > start_base: # Can't go back to home
 			# Standing on base, go to previous
-			if running_progress == floor(running_progress):
+			if abs(running_progress - floor(running_progress)) < 1e-16:
 				# Go to previous base
 				target_base = floor(running_progress) - 1
 				is_running = true

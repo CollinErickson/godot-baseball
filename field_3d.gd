@@ -408,11 +408,12 @@ func _process(delta: float) -> void:
 					batter.get_node("Timer").wait_time = 0.5
 					batter.get_node("Timer").start()
 					
-					
 					# Change camera
 					$TimerCameraChange.wait_time = .3
 					next_camera = $Headon/Cameras/Camera3DHigherHome
 					$TimerCameraChange.start()
+					# Hide strike zone dot at same time
+					ball3d.remove_dot(.3)
 					#$Headon/Camera3DHighHome.current = true
 					# Make ball bigger
 					#ball3d.scale=11*Vector3(1,1,1)
@@ -441,14 +442,18 @@ func _process(delta: float) -> void:
 			#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 			#printt('fielder nodes', fielder_nodes)
 			var hit_will_bounce = assign_fielders_after_hit()
-			if hit_will_bounce or true:
+			printt('Will hit bounce?', hit_will_bounce)
+			if hit_will_bounce:
 				#printt("hit will bounce, send runners!!")
 				var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
-					runner.is_running = true
+					#runner.is_running = true
+					runner.send_runner(1)
 					#printt('runner details', runner.target_base, runner.running_progress)
 			else:
-				pass #printt("hit won't bounce, don't send runners!!")
+				var runners = get_tree().get_nodes_in_group("runners")
+				for runner in runners:
+					runner.send_runner(-1)
 	
 	# Move baserunners
 	if user_is_batting_team:

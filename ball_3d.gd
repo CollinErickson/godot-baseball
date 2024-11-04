@@ -635,3 +635,12 @@ func check_if_foul():
 			foul_ball.emit()
 			return true
 	return false
+
+func remove_dot(seconds):
+	$Timer.wait_time = seconds
+	$Timer.start()
+
+func _on_timer_timeout() -> void:
+	var dot = get_parent().get_node_or_null('SZ_DOT')
+	if dot:
+		dot.visible = false

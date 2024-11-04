@@ -53,3 +53,7 @@ mesh = SubResource("SphereMesh_3v07e")
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
 pixel_size = 0.0002
 sprite_frames = SubResource("SpriteFrames_hdlku")
+
+[node name="Timer" type="Timer" parent="."]
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
