@@ -33,6 +33,8 @@ func reset() -> void:
 	assignment_pos = null
 	holding_ball = false
 	time_last_began_holding_ball = null
+	remove_from_group('selected_fielder')
+	remove_from_group('fielder_holding_ball')
 	
 	
 
@@ -147,6 +149,7 @@ func _physics_process(delta: float) -> void:
 				ball.position.y = 1.4
 				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
 				holding_ball = true
+				add_to_group('fielder_holding_ball')
 				assignment = "holding_ball"
 				assignment_pos = null
 				time_last_began_holding_ball = Time.get_ticks_msec()
@@ -337,6 +340,7 @@ func throw_ball_func(base):
 	# Only throw if not close to that base
 	if distance_xz(position, base_positions[base-1]) > 3:
 		holding_ball = false
+		remove_from_group('fielder_holding_ball')
 		var ball = get_tree().get_first_node_in_group("ball")
 		ball.position = position
 		ball.position.y = 1.4

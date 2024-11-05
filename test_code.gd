@@ -13,15 +13,17 @@ func _ready() -> void:
 	#print(pow(accel, 2)
 	#nearest_point_on_plane(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,0), Vector3(1,2,5))
 	
-	printt('fmod', fposmod(720+15- 30, 360.), fposmod(46- 30, 360.), fposmod(15- 30, 360.) <= fposmod(46- 30, 360.))
+	#printt('fmod', fposmod(720+15- 30, 360.), fposmod(46- 30, 360.), fposmod(15- 30, 360.) <= fposmod(46- 30, 360.))
 	
-	printt('intertwolinseg', 
-	intersect_two_line_segments(
-		Vector2(0,0),
-		Vector2(1,1),
-		Vector2(1,0),
-		Vector2(0,1.999)
-	))
+	#printt('intertwolinseg', 
+	#intersect_two_line_segments(
+		#Vector2(0,0),
+		#Vector2(1,1),
+		#Vector2(1,0),
+		#Vector2(0,1.999)
+	#))
+	
+	printt('null array test', [1, null, 3, null, null, 6])
 	
 func nearest_point_on_plane(v0, v1, v2, x):
 	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/

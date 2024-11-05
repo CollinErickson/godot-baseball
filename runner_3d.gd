@@ -122,7 +122,7 @@ func update_position():
 		printerr('bad 0941029: ', running_progress, ' , ', start_base)
 	#printt('RUN', is_running, running_progress, position)
 		
-func send_runner(direction: int) -> void:
+func send_runner(direction: int, can_go_past:bool=true) -> void:
 	if not is_active():
 		return
 	if direction == 1:
@@ -137,7 +137,7 @@ func send_runner(direction: int) -> void:
 		if target_base < running_progress:
 			# If going backward, send forward to next
 			target_base = ceil(running_progress)
-		elif running_progress > target_base - .3:
+		elif can_go_past and running_progress > target_base - .3:
 			# If already going forward and near next base, send to following base
 			target_base += 1
 		else:

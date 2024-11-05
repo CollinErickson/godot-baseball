@@ -18,6 +18,14 @@ var user_is_batting_team = !true
 
 var is_frozen: bool = false
 
+@onready var runners = [
+	get_node('Headon/Runners/Runner3DHome'),
+	get_node('Headon/Runners/Runner3D1B'),
+	get_node('Headon/Runners/Runner3D2B'),
+	get_node('Headon/Runners/Runner3D3B')
+]
+@onready var fielders = get_tree().get_nodes_in_group('fielders')
+
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
 	get_node("FlashText").new_text(desc, duration)
@@ -32,7 +40,7 @@ func freeze() -> void:
 
 	# Set children to be frozen
 	$Headon/Ball3D.freeze()
-	var fielders = get_tree().get_nodes_in_group('fielders')
+	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
 		fielder.freeze()
 	for runner in get_tree().get_nodes_in_group('runners'):
@@ -48,14 +56,14 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	# Reset children
 	$Headon/Ball3D.reset()
 	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
-	var fielders = get_tree().get_nodes_in_group('fielders')
+	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
 		fielder.reset()
 		#printt('fielder posname is', fielder.posname)
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
 			#printt('INVISIBLE CATCHER')
-	var runners = get_tree().get_nodes_in_group('runners')
+	#var runners = get_tree().get_nodes_in_group('runners')
 	for runner in runners:
 		runner.reset()
 		if runner.start_base == 0:
@@ -148,7 +156,7 @@ func _on_ball_fielded_by_fielder(_fielder):
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
 		record_out("Fly out!")
 		
-		var runners = get_tree().get_nodes_in_group('runners')
+		#var runners = get_tree().get_nodes_in_group('runners')
 		for runner in runners:
 			runner.needs_to_tag_up = true
 			runner.tagged_up_after_catch = runner.running_progress - runner.start_base < 1e-8
@@ -200,7 +208,7 @@ func _on_throw_ball_by_fielder(base, fielder):
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	# Check for force out
 	#printt('in field3D, stepped on base with ball!!!!')
-	var runners = get_tree().get_nodes_in_group("runners")
+	#var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
 		# Check for tag up force outs
 		if base == runner.start_base and runner.exists_at_start and runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
@@ -300,7 +308,7 @@ func _ready() -> void:
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
 
-	var runners = get_tree().get_nodes_in_group('runners')
+	#var runners = get_tree().get_nodes_in_group('runners')
 	# Set up signals from runners
 	for runner in runners:  
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
@@ -445,33 +453,37 @@ func _process(delta: float) -> void:
 			printt('Will hit bounce?', hit_will_bounce)
 			if hit_will_bounce:
 				#printt("hit will bounce, send runners!!")
-				var runners = get_tree().get_nodes_in_group("runners")
+				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					#runner.is_running = true
 					runner.send_runner(1)
 					#printt('runner details', runner.target_base, runner.running_progress)
 			else:
-				var runners = get_tree().get_nodes_in_group("runners")
+				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					runner.send_runner(-1)
 	
 	# Move baserunners
-	if user_is_batting_team:
-		if Input.is_action_just_pressed("throwfirst"):
-			#
-			pass
-		elif Input.is_action_just_pressed("throwsecond"):
-			# Move all forward
-			var runners = get_tree().get_nodes_in_group("runners")
-			for runner in runners:
-				runner.send_runner(1)
-		elif Input.is_action_just_pressed("throwthird"):
-			pass
-		elif Input.is_action_just_pressed("throwhome"):
-			# Move all forward
-			var runners = get_tree().get_nodes_in_group("runners")
-			for runner in runners:
-				runner.send_runner(-1)
+	if ball_in_play:
+		if user_is_batting_team:
+			if Input.is_action_just_pressed("throwfirst"):
+				#
+				pass
+			elif Input.is_action_just_pressed("throwsecond"):
+				# Move all forward
+				#var runners = get_tree().get_nodes_in_group("runners")
+				for runner in runners:
+					runner.send_runner(1)
+			elif Input.is_action_just_pressed("throwthird"):
+				pass
+			elif Input.is_action_just_pressed("throwhome"):
+				# Move all forward
+				#var runners = get_tree().get_nodes_in_group("runners")
+				for runner in runners:
+					runner.send_runner(-1)
+		else:
+			if randf_range(0,1) < .1:
+				decide_automatic_runners_actions()
 	
 	# Adjust camera
 	if get_viewport():
@@ -659,8 +671,8 @@ func assign_fielders_after_hit():
 	# Return whether the ball bounced. Will be used to determine if runners run.
 	return tmp_ball_bounced
 
-func get_fielder_with_posname(fielders, posname):
-	var f1 = fielders.filter(func(f): return f.posname == posname)
+func get_fielder_with_posname(fielders_, posname):
+	var f1 = fielders_.filter(func(f): return f.posname == posname)
 	#printt('in get_fielders_with_posname',fielders, posname, f1)
 	assert(len(f1)== 1)
 	return f1[0]
@@ -717,7 +729,7 @@ func check_if_play_done():
 		return true
 	
 	# Check if runners aren't running and are near base
-	var runners = get_tree().get_nodes_in_group("runners")
+	#var runners = get_tree().get_nodes_in_group("runners")
 	var n_runners_active:int = 0
 	for runner in runners:
 		if not runner.is_done_for_play():
@@ -733,7 +745,7 @@ func check_if_play_done():
 		return true
 	# None are running, all are near base
 	# Check if fielder is holding ball
-	var fielders = get_tree().get_nodes_in_group("fielders")
+	#var fielders = get_tree().get_nodes_in_group("fielders")
 	var holding_ball = false
 	var ball_pos
 	#printt('checking for holdin gball now')
@@ -837,8 +849,90 @@ func update_max_force_outs_left() -> void:
 	check_runners_able_to_score()
 
 func check_runners_able_to_score():
+	# Able to score means they won't have to return (ball has bounced) and the
+	#  max number of force outs left isn't enough to negate their scoring.
 	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
 	if outs_before_play + outs_on_play + max_force_outs_left < 2.5 and ball_hit_bounced:
 		printt('RUNNERS CAN SCORE NOW')
 		for runner in get_tree().get_nodes_in_group('runners'):
 			runner.able_to_score = true
+
+func coalesce_array(x:Array):
+	for i in range(len(x) - 1):
+		if x[i] != null:
+			return x[i]
+	return x[-1]
+
+func coalesce(x1, x2=null, x3=null, x4=null, x5=null, x6=null, x7=null, x8=null, x9=null, x10=null):
+	return coalesce_array([x1, x2, x3, x4, x5, x6, x7, x8, x9, x10])
+
+func decide_automatic_runners_actions():
+	#print("Running decide_automatic_runners_actions")
+	# If someone is holding ball:
+	#	If they need to tag up, go back.
+	#	If they need are a force out, go forward.
+	#	Calculate time for them to reach next base and previous base, and how
+	#		long it will take for the throw to reach there.
+	#	If they can reach their next base before throw will reach and all
+	#		runners in front will too (or have base between), go forward.
+	#	If not, choose between forward/backward based on time margin.
+	# If ball is in play:
+	#	Find time for ball to be fielded, check whether it will have bounced
+	#	If it won't have bounced, go back.
+	# 	Then follow same logic as above
+	# Rearrange those steps to share third step.
+	# Calculate with throw or run to base.
+	# Hard part may be getting all runners to "agree."
+	
+	var ball = get_node("Headon/Ball3D")
+	#var runners = get_tree().get_nodes_in_group('runners')
+	var fielders_with_ball = get_tree().get_nodes_in_group('fielder_holding_ball')
+	var decisions = [null, null, null, null]
+	assert(len(fielders_with_ball) < 1.5)
+	if len(fielders_with_ball) > 0.5:
+		# Fielder has ball
+		assert(ball.state == 'fielded')
+		# If need to tag up, do it
+		for i in range(len(runners)):
+			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
+				decisions[i] = coalesce(decisions[i], -1)
+		for i in range(len(runners)):
+			if runners[i].is_active():
+				# Margin to go to next base
+				var next_base = ceil(runners[i].running_progress + 1e-14)
+				var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
+				var time_throw_next_base = fielders_with_ball[0].distance_xz(
+					fielders_with_ball[0].position,
+					fielders_with_ball[0].base_positions[next_base-1]) / fielders_with_ball[0].max_throw_speed
+				if time_to_next_base < time_throw_next_base:
+					printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
+					decisions[i] = coalesce(decisions[i], 1)
+				elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
+					# Stay on current base
+					decisions[i] = coalesce(decisions[i], 0)
+				else:
+					# Not on base, can't make it to next base. Either go back or go to next
+					# Margin for previous base
+					var prev_base = ceil(runners[i].running_progress + 1e-14)
+					var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
+					var time_throw_prev_base = fielders_with_ball[0].distance_xz(
+						fielders_with_ball[0].position,
+						fielders_with_ball[0].base_positions[prev_base-1]) / fielders_with_ball[0].max_throw_speed
+					if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
+						decisions[i] = coalesce(decisions[i], 1)
+					else:
+						decisions[i] = coalesce(decisions[i], -1)
+	elif ball.state in ['thrown']:
+		# Ball is thrown
+		pass
+	elif ball.state in ['ball_in_play']:
+		# Ball in play
+		pass
+	else:
+		# Shouldn't happen
+		printerr('error')
+	#printt('Final decide_automatic_runners_actions:', decisions)
+	# Do the action
+	for i in range(len(runners)):
+		if runners[i].is_active() and decisions[i] and decisions[i] != 0:
+			runners[i].send_runner(decisions[i])
