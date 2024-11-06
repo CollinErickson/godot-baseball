@@ -78,7 +78,7 @@ func _physics_process(delta: float) -> void:
 			elif Input.is_action_just_pressed("throwsecond"):
 				pitch_type = "CB"
 			# Begin pitch
-			if Input.is_action_just_pressed("ui_select") or Input.is_action_just_pressed("click"):
+			if Input.is_action_just_pressed("begin_pitch"):
 				begin_pitch()
 		else:
 			if timer_action == null:
@@ -202,14 +202,19 @@ func _physics_process(delta: float) -> void:
 			get_parent().get_node("CatchersMitt").position = mouse_sz_pos
 		else: # No mouse movement
 			var mitt = get_parent().get_node("CatchersMitt")
-			if Input.is_action_pressed("movedown"):
-				mitt.position.y -= delta*catchermitt_speed
-			if Input.is_action_pressed("moveup"):
-				mitt.position.y += delta*catchermitt_speed
-			if Input.is_action_pressed("moveleft"):
-				mitt.position.x += delta*catchermitt_speed
-			if Input.is_action_pressed("moveright"):
-				mitt.position.x -= delta*catchermitt_speed
+			#if Input.is_action_pressed("movedown"):
+				#mitt.position.y -= delta*catchermitt_speed
+			#if Input.is_action_pressed("moveup"):
+				#mitt.position.y += delta*catchermitt_speed
+			#if Input.is_action_pressed("moveleft"):
+				#mitt.position.x += delta*catchermitt_speed
+			#if Input.is_action_pressed("moveright"):
+				#mitt.position.x -= delta*catchermitt_speed
+			var LR = Input.get_axis("moveleft", "moveright")
+			var DU = Input.get_axis("movedown", "moveup")
+			#printt('LR DU', LR, DU)
+			mitt.position.x += delta*catchermitt_speed * LR * (-1)
+			mitt.position.y += delta*catchermitt_speed * DU
 		
 		prev_mouse_sz_pos = mouse_sz_pos
 

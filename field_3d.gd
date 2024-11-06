@@ -900,28 +900,29 @@ func decide_automatic_runners_actions():
 			if runners[i].is_active():
 				# Margin to go to next base
 				var next_base = ceil(runners[i].running_progress + 1e-14)
-				var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
-				var time_throw_next_base = fielders_with_ball[0].distance_xz(
-					fielders_with_ball[0].position,
-					fielders_with_ball[0].base_positions[next_base-1]) / fielders_with_ball[0].max_throw_speed
-				if time_to_next_base < time_throw_next_base:
-					printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
-					decisions[i] = coalesce(decisions[i], 1)
-				elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
-					# Stay on current base
-					decisions[i] = coalesce(decisions[i], 0)
-				else:
-					# Not on base, can't make it to next base. Either go back or go to next
-					# Margin for previous base
-					var prev_base = ceil(runners[i].running_progress + 1e-14)
-					var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
-					var time_throw_prev_base = fielders_with_ball[0].distance_xz(
+				if next_base < 4.5:
+					var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
+					var time_throw_next_base = fielders_with_ball[0].distance_xz(
 						fielders_with_ball[0].position,
-						fielders_with_ball[0].base_positions[prev_base-1]) / fielders_with_ball[0].max_throw_speed
-					if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
+						fielders_with_ball[0].base_positions[next_base-1]) / fielders_with_ball[0].max_throw_speed
+					if time_to_next_base < time_throw_next_base:
+						printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
 						decisions[i] = coalesce(decisions[i], 1)
+					elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
+						# Stay on current base
+						decisions[i] = coalesce(decisions[i], 0)
 					else:
-						decisions[i] = coalesce(decisions[i], -1)
+						# Not on base, can't make it to next base. Either go back or go to next
+						# Margin for previous base
+						var prev_base = ceil(runners[i].running_progress + 1e-14)
+						var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
+						var time_throw_prev_base = fielders_with_ball[0].distance_xz(
+							fielders_with_ball[0].position,
+							fielders_with_ball[0].base_positions[prev_base-1]) / fielders_with_ball[0].max_throw_speed
+						if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
+							decisions[i] = coalesce(decisions[i], 1)
+						else:
+							decisions[i] = coalesce(decisions[i], -1)
 	elif ball.state in ['thrown']:
 		# Ball is thrown
 		pass
