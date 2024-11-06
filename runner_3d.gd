@@ -17,6 +17,7 @@ var target_base
 var needs_to_tag_up = false
 var able_to_score:bool = false
 var reached_next_base:bool = false
+var can_be_force_out_before_play:bool = false
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -196,3 +197,8 @@ func is_done_for_play() -> bool:
 	# TODO: What if they are standing on a base but need to go to the next base?
 	# Otherwise, they should be standing on a base
 	return true
+
+func can_be_force_out() -> bool:
+	return (can_be_force_out_before_play and
+		running_progress < start_base + 1 and
+		max_running_progress < start_base + 1)

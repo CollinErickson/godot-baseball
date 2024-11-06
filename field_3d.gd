@@ -142,6 +142,16 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	if not user_is_batting_team:
 		$Headon/Bat3D.visible = false
 	
+	# Set if runners can be force out
+	runners[0].can_be_force_out_before_play = true
+	if runners[1].exists_at_start:
+		runners[1].can_be_force_out_before_play = true
+		if runners[2].exists_at_start:
+			runners[2].can_be_force_out_before_play = true
+			if runners[3].exists_at_start:
+				runners[3].can_be_force_out_before_play = true
+		
+	
 	#print('in field reset: printing batter')
 	#batter.print_()
 	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
@@ -300,9 +310,9 @@ func _ready() -> void:
 	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
 	
 	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
-	var fielder_nodes = get_tree().get_nodes_in_group('fielders')
+	#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	# Set up signals from fielders
-	for fielder in fielder_nodes:  
+	for fielder in fielders:  
 		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
@@ -396,9 +406,9 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla = 70
-					hla = 0
-					exitvelo = 32
+					vla = 20
+					hla = 15
+					exitvelo = 42
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -555,9 +565,11 @@ func _process(delta: float) -> void:
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
-func assign_fielders_after_hit():
+
+func find_fielder_to_intercept_ball() -> Array:
+	#func assign_fielders_after_hit():
 	#printt("Starting assign_fielders_after_hit !!")
-	var fielder_nodes = get_tree().get_nodes_in_group('fielders')
+	#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	#printt('fielder nodes', fielder_nodes)
 	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
@@ -566,7 +578,7 @@ func assign_fielders_after_hit():
 	tmp_ball.state = "ball_in_play"
 	tmp_ball.hit_bounced = ball.hit_bounced
 	get_node("Headon").add_child(tmp_ball)
-	printt('tmp_ball', tmp_ball, tmp_ball.state, tmp_ball.hit_bounced)
+	#printt('tmp_ball', tmp_ball, tmp_ball.state, tmp_ball.hit_bounced)
 	tmp_ball.position = ball.position
 	#printt('balls global pos', tmp_ball.global_position, ball.global_position)
 	tmp_ball.velocity = ball.velocity
@@ -592,8 +604,8 @@ func assign_fielders_after_hit():
 		# Make it's reachable
 		if tmp_ball.position.y < 2:
 			# Loop over fielder, see if can reach ball
-			for ifielder in range(len(fielder_nodes)):
-				var fielderi = fielder_nodes[ifielder]
+			for ifielder in range(len(fielders)):
+				var fielderi = fielders[ifielder]
 				var ballgrounddist = sqrt((fielderi.position.x - tmp_ball.position.x)**2 +
 					(fielderi.position.z - tmp_ball.position.z)**2)
 				# TODO: fielders don't run at constant speed
@@ -609,72 +621,94 @@ func assign_fielders_after_hit():
 						min_timetoreach = timetoreach
 						min_ifielder = ifielder
 						found_someone = true
-		if found_someone:
-			fielder_nodes[min_ifielder].assign_to_field_ball(tmp_ball.position)
-			break
-	if not found_someone:
-		print('no fielder found')
-	if found_someone:
-		# Assign someone to cover base
-		#printt('fielder assigned name:', fielder_nodes[min_ifielder].name, fielder_nodes[min_ifielder].posname)
-		#for ifielder in fielder_nodes:
-		if fielder_nodes[min_ifielder].posname == "2B":
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname == "SS":
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname == "1B":
-			get_fielder_with_posname(fielder_nodes, "P").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname == "3B":
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname == "P":
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname == "C":
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "P").assign_to_cover_base(4)
-		elif fielder_nodes[min_ifielder].posname in ["LF", "CF", "RF"]:
-			get_fielder_with_posname(fielder_nodes, "1B").assign_to_cover_base(1)
-			get_fielder_with_posname(fielder_nodes, "3B").assign_to_cover_base(3)
-			get_fielder_with_posname(fielder_nodes, "C").assign_to_cover_base(4)
-			if tmp_ball.position.x > 0:
-				get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(2)
-				get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(5, tmp_ball.position)
-			else:
-				get_fielder_with_posname(fielder_nodes, "SS").assign_to_cover_base(2)
-				get_fielder_with_posname(fielder_nodes, "2B").assign_to_cover_base(5, tmp_ball.position)
-			
+			if found_someone:
+				#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
+				break
+	
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)
 	var tmp_ball_bounced = tmp_ball.hit_bounced
 	tmp_ball.queue_free()
 	
-	for i in range(3):
-		print('------- done with tmp_ball')
+	#for i in range(3):
+		#print('------- done with tmp_ball')
+	
+	return [found_someone, tmp_ball.hit_bounced, min_ifielder, tmp_ball.position, elapsed_time]
+	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
+
+
+func assign_fielders_after_hit():
+	# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
+	var fftib = find_fielder_to_intercept_ball()
+	var found_someone = fftib[0]
+	var tmp_ball_bounced = fftib[1]
+	var min_ifielder = fftib[2]
+	var intercept_position = fftib[3]
+	if found_someone:
+		fielders[min_ifielder].assign_to_field_ball(intercept_position)
+		#break
+
+	if not found_someone:
+		print('no fielder found')
+	if found_someone:
+		# Assign someone to cover base
+		#printt('fielder assigned name:', fielder_nodes[min_ifielder].name, fielder_nodes[min_ifielder].posname)
+		#for ifielder in fielder_nodes:
+		if fielders[min_ifielder].posname == "2B":
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("SS").assign_to_cover_base(2)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname == "SS":
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("2B").assign_to_cover_base(2)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname == "1B":
+			get_fielder_with_posname("P").assign_to_cover_base(1)
+			get_fielder_with_posname("SS").assign_to_cover_base(2)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname == "3B":
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("2B").assign_to_cover_base(2)
+			get_fielder_with_posname("SS").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname == "P":
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("2B").assign_to_cover_base(2)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname == "C":
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("2B").assign_to_cover_base(2)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("P").assign_to_cover_base(4)
+		elif fielders[min_ifielder].posname in ["LF", "CF", "RF"]:
+			get_fielder_with_posname("1B").assign_to_cover_base(1)
+			get_fielder_with_posname("3B").assign_to_cover_base(3)
+			get_fielder_with_posname("C").assign_to_cover_base(4)
+			if tmp_ball.position.x > 0:
+				get_fielder_with_posname("2B").assign_to_cover_base(2)
+				get_fielder_with_posname("SS").assign_to_cover_base(5, intercept_position)
+			else:
+				get_fielder_with_posname("SS").assign_to_cover_base(2)
+				get_fielder_with_posname("2B").assign_to_cover_base(5, intercept_position)
+			
 	
 	# Return whether the ball bounced. Will be used to determine if runners run.
 	return tmp_ball_bounced
 
-func get_fielder_with_posname(fielders_, posname):
-	var f1 = fielders_.filter(func(f): return f.posname == posname)
+#func find_fielder_to_intercept_ball() -> Array:
+	#pass
+	#return []
+	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
+
+func get_fielder_with_posname(posname):
+	var f1 = fielders.filter(func(f): return f.posname == posname)
 	#printt('in get_fielders_with_posname',fielders, posname, f1)
-	assert(len(f1)== 1)
+	assert(len(f1) == 1)
 	return f1[0]
 
 var next_camera = null
@@ -896,6 +930,7 @@ func decide_automatic_runners_actions():
 		for i in range(len(runners)):
 			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
 				decisions[i] = coalesce(decisions[i], -1)
+		# Decide between going forward, staying, or going backward
 		for i in range(len(runners)):
 			if runners[i].is_active():
 				# Margin to go to next base
@@ -923,12 +958,59 @@ func decide_automatic_runners_actions():
 							decisions[i] = coalesce(decisions[i], 1)
 						else:
 							decisions[i] = coalesce(decisions[i], -1)
-	elif ball.state in ['thrown']:
+	elif ball.state in ['thrown__']:
 		# Ball is thrown
 		pass
-	elif ball.state in ['ball_in_play']:
+	elif ball.state in ['ball_in_play', 'thrown']:
 		# Ball in play
-		pass
+		# Simulate ball forward, see if it will bounce, where it will be caught, etc
+		# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
+		var fftib = find_fielder_to_intercept_ball()
+		var seconds_to_intercept = fftib[4]
+		# Determine if ball can be caught. If yes, go back.
+		if not ball_hit_bounced and not fftib[1]:
+				printt('SENDING BACK, CAN CATCH!!!')
+				for i in range(len(runners)):
+					decisions[i] = coalesce(decisions[i], -1)
+		else: # Ball will bounce before catch
+			# If they are a force out and not at next base, go there
+			for i in range(len(runners)):
+				if runners[i].is_active() and runners[i].can_be_force_out():
+					#printt('Runner can be force out', i)
+					decisions[i] = coalesce(decisions[i], 1)
+			# Check if they can make it to next base before throw/run
+			# Else if on base stay there
+			# Else between bases, find safer direction
+			var fielder_with_ball = fielders[fftib[2]]
+			# Decide between going forward, staying, or going backward
+			for i in range(len(runners)):
+				if runners[i].is_active():
+					# Margin to go to next base
+					var next_base = ceil(runners[i].running_progress + 1e-14)
+					if next_base < 4.5:
+						var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
+						var time_throw_next_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
+							fielder_with_ball.position,
+							fielder_with_ball.base_positions[next_base-1]) / fielder_with_ball.max_throw_speed)
+						#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
+						if time_to_next_base < time_throw_next_base:
+							#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
+							decisions[i] = coalesce(decisions[i], 1)
+						elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
+							# Stay on current base
+							decisions[i] = coalesce(decisions[i], 0)
+						else:
+							# Not on base, can't make it to next base. Either go back or go to next
+							# Margin for previous base
+							var prev_base = ceil(runners[i].running_progress + 1e-14)
+							var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
+							var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
+								fielder_with_ball.position,
+								fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed)
+							if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
+								decisions[i] = coalesce(decisions[i], 1)
+							else:
+								decisions[i] = coalesce(decisions[i], -1)
 	else:
 		# Shouldn't happen
 		printerr('error')
