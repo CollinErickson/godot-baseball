@@ -346,8 +346,9 @@ func throw_ball_func(base):
 		ball.position.y = 1.4
 		ball.throw_start_pos = null
 		ball.throw_target = null
-		throw_ball.emit(base, self)
+		# This needs to be before throw_ball.emit() since that can reassign this fielder
 		assignment = 'wait_to_receive' # Not the best name for it
+		throw_ball.emit(base, self)
 		if user_is_pitching_team:
 			set_not_selected_fielder()
 

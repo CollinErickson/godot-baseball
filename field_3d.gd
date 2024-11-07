@@ -194,8 +194,7 @@ func _on_ball_fielded_by_fielder(_fielder):
 
 func _on_throw_ball_by_fielder(base, fielder):
 	printt('In field_3d, throwing ball to:', base, fielder)
-	# Set new assignments
-	
+
 	# Set ball throw
 	var ball = get_node("Headon/Ball3D")
 	var target
@@ -214,6 +213,10 @@ func _on_throw_ball_by_fielder(base, fielder):
 	#var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
 	var velo_vec = ball.fit_approx_parabola_to_trajectory(fielder.position, target, fielder.max_throw_speed, true)
 	ball.throw_to_base(base, velo_vec, fielder.position, target)
+	
+	# Set new assignments
+	assign_fielders_to_cover_bases([], null)
+
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	# Check for force out
@@ -360,8 +363,8 @@ func _process(delta: float) -> void:
 	if is_frozen:
 		return
 
-	if randf_range(0,1) < 1./1000:
-		printt('in field_3d, frame rate', (1./delta))
+	#if randf_range(0,1) < 1./1000:
+		#printt('in field_3d, frame rate', (1./delta))
 	#printt('get_mouse_z', get_mouse_sz_pos())
 	#printt('get_mouse_y0', get_mouse_y0_pos())
 	
@@ -628,7 +631,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)
-	var tmp_ball_bounced = tmp_ball.hit_bounced
+	#var tmp_ball_bounced = tmp_ball.hit_bounced
 	tmp_ball.queue_free()
 	
 	#for i in range(3):
@@ -638,7 +641,8 @@ func find_fielder_to_intercept_ball() -> Array:
 	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 
 
-func assign_fielders_after_hit():
+func assign_fielders_after_hit() -> bool:
+	# Returns whether ball will bounce before fielder intercepts
 	# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 	var fftib = find_fielder_to_intercept_ball()
 	var found_someone = fftib[0]
@@ -700,10 +704,25 @@ func assign_fielders_after_hit():
 	# Return whether the ball bounced. Will be used to determine if runners run.
 	return tmp_ball_bounced
 
-#func find_fielder_to_intercept_ball() -> Array:
-	#pass
-	#return []
-	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
+func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array, _intercept_position=null) -> void:
+	printt('Running assign_fielders_to_cover_bases')
+	for base in [2,1,3,4]:
+		var min_time = 1e10
+		var min_i = null
+		for i in range(len(fielders)):
+			if i not in exclude_fielder_indexes:
+				var fielder_time = (
+					fielders[i].distance_xz(fielders[i].position,
+											fielders[i].base_positions[base-1]) /
+					fielders[i].SPEED)
+				if fielder_time < min_time:
+					min_time = fielder_time
+					min_i = i
+		if min_i:
+			printt('Assigning fielder to cover base', fielders[min_i].posname, base)
+			exclude_fielder_indexes.push_back(min_i)
+			fielders[min_i].assign_to_cover_base(base)
+	return
 
 func get_fielder_with_posname(posname):
 	var f1 = fielders.filter(func(f): return f.posname == posname)
@@ -969,7 +988,7 @@ func decide_automatic_runners_actions():
 		var seconds_to_intercept = fftib[4]
 		# Determine if ball can be caught. If yes, go back.
 		if not ball_hit_bounced and not fftib[1]:
-				printt('SENDING BACK, CAN CATCH!!!')
+				#printt('SENDING BACK, CAN CATCH!!!')
 				for i in range(len(runners)):
 					decisions[i] = coalesce(decisions[i], -1)
 		else: # Ball will bounce before catch
