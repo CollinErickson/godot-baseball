@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 		tagged_up_after_catch = true
 	# Base running
 	if is_running:
-		#printt('running progress', running_progress, start_base, target_base)
+		printt('is running, running progress', running_progress, start_base, target_base)
 		# Check if they will cross target_base
 		var dir = 1
 		if target_base < running_progress:
@@ -126,8 +126,8 @@ func update_position():
 func send_runner(direction: int, can_go_past:bool=true) -> void:
 	if not is_active():
 		return
-	if direction == 1:
-		#printt('sending forward!!!')
+	if direction > 0.5:
+		printt('In runner, sending forward!!!', start_base, direction, can_go_past)
 		#if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
 			#target_base = floor(running_progress) + 1
 			#is_running = true 
@@ -141,6 +141,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 		elif can_go_past and running_progress > target_base - .3:
 			# If already going forward and near next base, send to following base
 			target_base += 1
+		elif not can_go_past:
+			target_base = floor(running_progress) + 1
 		else:
 			pass
 	elif direction == -1:

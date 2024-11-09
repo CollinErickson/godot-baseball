@@ -966,9 +966,20 @@ func decide_automatic_runners_actions():
 			if runners[i].is_active() and runners[i].can_be_force_out():
 				#printt('Runner can be force out', i)
 				decisions[i] = coalesce(decisions[i], 1)
-		# Decide between going forward, staying, or going backward
+		# Decide between going forward to next base, going forward, staying, or going backward
 		for i in range(len(runners)):
 			if runners[i].is_active():
+				# Margin to go to next next base
+				if runners[i].running_progress - floor(runners[i].running_progress) > .7 and floor(runners[i].running_progress) < 2.5:
+					var next_next_base = ceil(runners[i].running_progress) + 1
+					var time_to_next_next_base = (next_next_base - runners[i].running_progress) * 30 / runners[i].SPEED
+					var time_throw_next_next_base = fielders_with_ball[0].distance_xz(
+						fielders_with_ball[0].position,
+						fielders_with_ball[0].base_positions[next_next_base-1]) / fielders_with_ball[0].max_throw_speed
+					if time_to_next_next_base < time_throw_next_next_base:
+						#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
+						print("Sending runner to next next base", next_next_base)
+						decisions[i] = coalesce(decisions[i], 2)
 				# Margin to go to next base
 				var next_base = ceil(runners[i].running_progress + 1e-14)
 				if next_base < 4.5:
@@ -1011,8 +1022,10 @@ func decide_automatic_runners_actions():
 		else: # Ball will bounce before catch
 			# If they are a force out and not at next base, go there
 			for i in range(len(runners)):
+				#if runners[i].is_active():
+					#printt('checking run force out:', runners[i].is_active(), runners[i].can_be_force_out(), ball_hit_bounced, fftib[1])
 				if runners[i].is_active() and runners[i].can_be_force_out():
-					#printt('Runner can be force out', i)
+					printt('Runner can be force out', i)
 					decisions[i] = coalesce(decisions[i], 1)
 			# Check if they can make it to next base before throw/run
 			# Else if on base stay there
@@ -1050,7 +1063,7 @@ func decide_automatic_runners_actions():
 	else:
 		# Shouldn't happen
 		printerr('error')
-	#printt('Final decide_automatic_runners_actions:', decisions)
+	printt('Final decide_automatic_runners_actions:', decisions)
 	# Do the action
 	for i in range(len(runners)):
 		if runners[i].is_active() and decisions[i] and decisions[i] != 0:
