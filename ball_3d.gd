@@ -524,8 +524,8 @@ func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 			#assert(vx1)
 			vy1 = (p2.y * vx1**2 + .5 * gravity * m**2) / (m * vx1)
 			t = m / vx1
-			if t <= 0:
-				printt('assert t > 0', t, m, vx1, p2)
+			if t <= 0 or t == null or is_nan(t):
+				printt('assert t > 0', t, m, vx1, p2, pos1, pos2)
 			assert(t > 0)
 			#var k = d * (p2.x / t)**2
 			vel1 = Vector3(vx1, vy1, 0)
@@ -617,7 +617,6 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 	time_last_thrown = Time.get_ticks_msec()
 	throw_progress = 0
 	set_process(true)
-
 
 func distance_xz(a:Vector3, b:Vector3) -> float:
 	return sqrt((a.x - b.x)**2 +

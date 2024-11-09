@@ -192,27 +192,39 @@ func _on_ball_fielded_by_fielder(_fielder):
 
 
 
-func _on_throw_ball_by_fielder(base, fielder):
-	printt('In field_3d, throwing ball to:', base, fielder)
+func _on_throw_ball_by_fielder(base, fielder, to_fielder) -> void:
+	printt('In field_3d, throwing ball to:', base, fielder, to_fielder)
 
 	# Set ball throw
 	var ball = get_node("Headon/Ball3D")
 	var target
-	if base == 1:
-		target = Vector3(-1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
-	elif base == 2:
-		target = Vector3(0,0,1)*30*sqrt(2) + Vector3(0,1.4,0)
-	elif base == 3:
-		target = Vector3(1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
-	elif base == 4:
-		target = Vector3(0,0,0) + Vector3(0,1.4,0)
+	if base != null:
+		if base == 1:
+			target = Vector3(-1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
+		elif base == 2:
+			target = Vector3(0,0,1)*30*sqrt(2) + Vector3(0,1.4,0)
+		elif base == 3:
+			target = Vector3(1,0,1)*30/sqrt(2) + Vector3(0,1.4,0)
+		elif base == 4:
+			target = Vector3(0,0,0) + Vector3(0,1.4,0)
+		else:
+			printerr('should not happen bad throw to')
+		target.y = 1
+	elif to_fielder != null:
+		target = to_fielder.position
+		target.y = 1.4
 	else:
 		assert(false)
-	target.y = 1
 	#printt('target is', target, 'fielder pos is', fielder.position)
 	#var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
-	var velo_vec = ball.fit_approx_parabola_to_trajectory(fielder.position, target, fielder.max_throw_speed, true)
-	ball.throw_to_base(base, velo_vec, fielder.position, target)
+	var ball_start = fielder.position
+	ball_start.y = 1.4
+	var velo_vec = ball.fit_approx_parabola_to_trajectory(ball_start, target, fielder.max_throw_speed, true)
+	if base != null:
+		ball.throw_to_base(base, velo_vec, fielder.position, target)
+	else:
+		ball.throw_to_base(null, velo_vec, fielder.position, target)
+	
 	
 	# Set new assignments
 	assign_fielders_to_cover_bases([], null)
@@ -409,9 +421,9 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla = -20
-					hla = -30
-					exitvelo = 22
+					vla = 20
+					hla = -20
+					exitvelo = 42
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -965,7 +977,7 @@ func decide_automatic_runners_actions():
 						fielders_with_ball[0].position,
 						fielders_with_ball[0].base_positions[next_base-1]) / fielders_with_ball[0].max_throw_speed
 					if time_to_next_base < time_throw_next_base:
-						printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
+						#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
 						decisions[i] = coalesce(decisions[i], 1)
 					elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
 						# Stay on current base

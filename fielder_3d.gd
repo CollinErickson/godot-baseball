@@ -13,6 +13,7 @@ var holding_ball = false
 var user_is_pitching_team
 var time_last_began_holding_ball
 var start_position = Vector3()
+@onready var fielders = get_tree().get_nodes_in_group('fielders')
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -243,12 +244,23 @@ func _physics_process(delta: float) -> void:
 			if Input.is_action_just_pressed("click"):
 				var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
 				#printt('in fielder, mgl pos is', mgl, mgl.position)
+				# Throw to base
 				for i in range(4):
 					if distance_xz(mgl.position, base_positions[i]) < 2:
+						# This func determines whether to run or throw to that position
 						throw_ball_func(i+1)
 						click_used = true
+						break
 					#else:
 					#	printt('click not near base')
+				# Throw to teammate
+				if not click_used:
+					for fielder in fielders:
+						#printt('checking click throw to fielder', distance_xz(mgl.position, fielder.position))
+						if fielder.posname != posname and distance_xz(mgl.position, fielder.position) < 2:
+							throw_ball_func(null, fielder)
+							click_used = true
+							break
 		else: # CPU defense
 			if assignment != "ball_carry":
 				# Make sure that some frames passed while holding
@@ -335,22 +347,37 @@ func is_stepping_on_base() -> Array:
 signal stepped_on_base_with_ball
 
 signal throw_ball
-func throw_ball_func(base):
-	printt('throw_ball_func', base)
+func throw_ball_func(base, fielder=null) -> void:
+	printt('throw_ball_func', base, fielder)
 	# Only throw if not close to that base
-	if distance_xz(position, base_positions[base-1]) > 3:
-		holding_ball = false
-		remove_from_group('fielder_holding_ball')
-		var ball = get_tree().get_first_node_in_group("ball")
-		ball.position = position
-		ball.position.y = 1.4
-		ball.throw_start_pos = null
-		ball.throw_target = null
-		# This needs to be before throw_ball.emit() since that can reassign this fielder
-		assignment = 'wait_to_receive' # Not the best name for it
-		throw_ball.emit(base, self)
-		if user_is_pitching_team:
-			set_not_selected_fielder()
+	if base != null:
+		if distance_xz(position, base_positions[base-1]) > 3:
+			holding_ball = false
+			remove_from_group('fielder_holding_ball')
+			var ball = get_tree().get_first_node_in_group("ball")
+			ball.position = position
+			ball.position.y = 1.4
+			ball.throw_start_pos = null
+			ball.throw_target = null
+			# This needs to be before throw_ball.emit() since that can reassign this fielder
+			assignment = 'wait_to_receive' # Not the best name for it
+			throw_ball.emit(base, self, null)
+			if user_is_pitching_team:
+				set_not_selected_fielder()
+	elif fielder != null:
+		if distance_xz(position, fielder.position) > 3:
+			holding_ball = false
+			remove_from_group('fielder_holding_ball')
+			var ball = get_tree().get_first_node_in_group("ball")
+			ball.position = position
+			ball.position.y = 1.4
+			ball.throw_start_pos = null
+			ball.throw_target = null
+			# This needs to be before throw_ball.emit() since that can reassign this fielder
+			assignment = 'wait_to_receive' # Not the best name for it
+			throw_ball.emit(base, self, fielder)
+			if user_is_pitching_team:
+				set_not_selected_fielder()
 
 var timer_action
 func _on_timer_timeout() -> void:
