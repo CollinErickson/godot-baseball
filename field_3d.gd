@@ -84,7 +84,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
 	mgl.set_process(false)
-	if user_is_batting_team:
+	if user_is_batting_team_:
 		$Headon/Bat3D.visible = true
 		$Headon/Bat3D.get_node("Sprite3D").visible = true
 		$Headon/Bat3D.set_process(true)
@@ -92,7 +92,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		$Headon/Bat3D.visible = false
 		$Headon/Bat3D.get_node("Sprite3D").visible = false
 		$Headon/Bat3D.set_process(false)
-	if user_is_pitching_team:
+	if user_is_pitching_team_:
 		$Headon/CatchersMitt.visible = true
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=true
 		$Headon/CatchersMitt.set_process(true)
@@ -409,9 +409,9 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla = 20
-					hla = 15
-					exitvelo = 42
+					vla = -20
+					hla = -30
+					exitvelo = 22
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -949,6 +949,11 @@ func decide_automatic_runners_actions():
 		for i in range(len(runners)):
 			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
 				decisions[i] = coalesce(decisions[i], -1)
+		# If they are a force out and not at next base, go there
+		for i in range(len(runners)):
+			if runners[i].is_active() and runners[i].can_be_force_out():
+				#printt('Runner can be force out', i)
+				decisions[i] = coalesce(decisions[i], 1)
 		# Decide between going forward, staying, or going backward
 		for i in range(len(runners)):
 			if runners[i].is_active():
@@ -1037,4 +1042,4 @@ func decide_automatic_runners_actions():
 	# Do the action
 	for i in range(len(runners)):
 		if runners[i].is_active() and decisions[i] and decisions[i] != 0:
-			runners[i].send_runner(decisions[i])
+			runners[i].send_runner(decisions[i], decisions[i] > 1.5)
