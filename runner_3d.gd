@@ -18,6 +18,10 @@ var needs_to_tag_up = false
 var able_to_score:bool = false
 var reached_next_base:bool = false
 var can_be_force_out_before_play:bool = false
+var runners :Array = []
+var runners_before :Array = []
+var runners_after :Array = []
+
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -62,6 +66,14 @@ func _ready() -> void:
 	running_progress = start_base*1.
 	max_running_progress = running_progress
 	target_base = start_base + 1
+	
+	runners = get_tree().get_nodes_in_group('runners')
+	runners_before = []
+	for runner in runners:
+		if runner.start_base < start_base:
+			runners_before.append(runner)
+		elif runner.start_base > start_base:
+			runners_after.append(runner)
 
 func _physics_process(delta: float) -> void:
 	if is_frozen or out_on_play or scored_on_play:
@@ -73,7 +85,7 @@ func _physics_process(delta: float) -> void:
 		tagged_up_after_catch = true
 	# Base running
 	if is_running:
-		printt('is running, running progress', running_progress, start_base, target_base)
+		#printt('is running, running progress', running_progress, start_base, target_base)
 		# Check if they will cross target_base
 		var dir = 1
 		if target_base < running_progress:
@@ -201,6 +213,9 @@ func is_done_for_play() -> bool:
 	return true
 
 func can_be_force_out() -> bool:
+	for runner in runners_before:
+		if !runner.is_active():
+			return false
 	return (can_be_force_out_before_play and
 		running_progress < start_base + 1 and
 		max_running_progress < start_base + 1)
