@@ -139,7 +139,7 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	if not is_active():
 		return
 	if direction > 0.5:
-		printt('In runner, sending forward!!!', start_base, direction, can_go_past)
+		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
 		#if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
 			#target_base = floor(running_progress) + 1
 			#is_running = true 
