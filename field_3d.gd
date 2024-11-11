@@ -173,6 +173,10 @@ func _on_ball_fielded_by_fielder(_fielder):
 	
 	# Do this last so that the type of out can be determined
 	ball.ball_fielded()
+	
+	# Reassign other fielders to cover bases (only really needed when fielder assigned
+	#   to a base go the ball
+	assign_fielders_to_cover_bases([], null, [_fielder.posname])
 #
 	## TODO: If CPU is defense, decide where to throw
 	#var throw_to = -1
@@ -421,9 +425,9 @@ func _process(delta: float) -> void:
 					vla = -20
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
-					vla = 20
-					hla = -20
-					exitvelo = 42
+					vla = -20
+					hla = 0
+					exitvelo = 2
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -716,13 +720,25 @@ func assign_fielders_after_hit() -> bool:
 	# Return whether the ball bounced. Will be used to determine if runners run.
 	return tmp_ball_bounced
 
-func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array, _intercept_position=null) -> void:
+func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
+									_intercept_position=null,
+									exclude_fielder_posname_array:Array=[]) -> void:
 	printt('Running assign_fielders_to_cover_bases')
+	var assigned_indexes = []
 	for base in [2,1,3,4]:
 		var min_time = 1e10
 		var min_i = null
 		for i in range(len(fielders)):
-			if i not in exclude_fielder_indexes:
+			if i in exclude_fielder_indexes or exclude_fielder_posname_array.has(fielders[i].posname):
+				# Only include the excluded ones if they are super close
+				if fielders[i].distance_xz(
+					fielders[i].position,
+					fielders[i].base_positions[base-1]
+				) < 1:
+					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname, base, exclude_fielder_indexes, exclude_fielder_posname_array)
+					min_time = 0
+					min_i = i
+			else:
 				var fielder_time = (
 					fielders[i].distance_xz(fielders[i].position,
 											fielders[i].base_positions[base-1]) /
@@ -730,10 +746,20 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array, _intercept_po
 				if fielder_time < min_time:
 					min_time = fielder_time
 					min_i = i
-		if min_i:
+		if min_i != null:
 			printt('Assigning fielder to cover base', fielders[min_i].posname, base)
 			exclude_fielder_indexes.push_back(min_i)
 			fielders[min_i].assign_to_cover_base(base)
+			assigned_indexes.push_back(min_i)
+		else:
+			printt('NO ONE ASSIGNED TO A BASE')
+	
+	# All fielders that were previously assigned to base and haven't reached it
+	#   and weren't assigned this time to just wait
+	for i in range(len(fielders)):
+		if fielders[i].assignment == 'cover' and not assigned_indexes.has(i):
+			fielders[i].assignment = 'wait_to_receive'
+	
 	return
 
 func get_fielder_with_posname(posname):

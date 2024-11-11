@@ -125,6 +125,10 @@ func _physics_process(delta: float) -> void:
 			max_running_progress = max(running_progress, max_running_progress)
 			update_position()
 	
+	# Reset max_running_progress if need to return
+	if needs_to_tag_up and not tagged_up_after_catch:
+		max_running_progress = start_base
+	
 	# Scored run. Can't do it when they first reach 4 since they may not be eligible then
 	if (running_progress >= 4 and not scored_on_play):
 		if (able_to_score and
