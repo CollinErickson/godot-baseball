@@ -964,6 +964,7 @@ func decide_automatic_runners_actions():
 	#var runners = get_tree().get_nodes_in_group('runners')
 	var fielders_with_ball = get_tree().get_nodes_in_group('fielder_holding_ball')
 	var decisions = [null, null, null, null]
+	var decision_bases = [null, null, null, null]
 	assert(len(fielders_with_ball) < 1.5)
 	var fielder_with_ball = null
 	var fftib = null
@@ -983,26 +984,29 @@ func decide_automatic_runners_actions():
 		for i in range(len(runners)):
 			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
 				decisions[i] = coalesce(decisions[i], -1)
+				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
 	# 2. If ball can be caught, go halfway and stop. TODO: halfway, not back
 	if fielder_with_ball == null:
 		if not ball_hit_bounced and not fftib[1]:
 				#printt('SENDING BACK, CAN CATCH!!!')
 				for i in range(len(runners)):
-					decisions[i] = coalesce(decisions[i], -1)
+					if runners[i].is_active():
+						decisions[i] = coalesce(decisions[i], -1)
+						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
 	# 3. If they are a force out and not at next base, go there
 	for i in range(len(runners)):
 		if runners[i].is_active() and runners[i].can_be_force_out():
 			#printt('Runner can be force out', i)
 			decisions[i] = coalesce(decisions[i], 1)
+			decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + 1)
 	
 	# 4-8: Decide base to go to.
 	if fielder_with_ball == null:
 		fielder_with_ball = fielders[fftib[2]]
 	for i in range(len(runners)):
 		if runners[i].is_active():
-			pass
 			# 4. Go to next next base if possible.
 			if runners[i].running_progress - floor(runners[i].running_progress) > .7 and floor(runners[i].running_progress) < 2.5:
 				var next_next_base = ceil(runners[i].running_progress) + 1
@@ -1017,6 +1021,7 @@ func decide_automatic_runners_actions():
 					#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
 					print("Sending runner to next next base", next_next_base)
 					decisions[i] = coalesce(decisions[i], 2)
+					decision_bases[i] = coalesce(decision_bases[i], next_next_base)
 			
 			var next_base = ceil(runners[i].running_progress + 1e-14)
 			if next_base < 4.5:
@@ -1032,9 +1037,11 @@ func decide_automatic_runners_actions():
 					# 5. Go to next base if possible.
 					#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
 					decisions[i] = coalesce(decisions[i], 1)
+					decision_bases[i] = coalesce(decision_bases[i], next_base)
 				elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
 					# 6. Stay on current base if possible.
 					decisions[i] = coalesce(decisions[i], 0)
+					decision_bases[i] = coalesce(decision_bases[i], round(runners[i].running_progress))
 				else:
 					# 7. Go to previous base if possible.
 					# 8. Go to closer of next and previous base.
@@ -1045,8 +1052,10 @@ func decide_automatic_runners_actions():
 						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed)
 					if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
 						decisions[i] = coalesce(decisions[i], 1)
+						decision_bases[i] = coalesce(decision_bases[i], ceil(runners[i].running_progress))
 					else:
 						decisions[i] = coalesce(decisions[i], -1)
+						decision_bases[i] = coalesce(decision_bases[i], floor(runners[i].running_progress))
 
 
 
@@ -1160,7 +1169,25 @@ func decide_automatic_runners_actions():
 		## Shouldn't happen
 		#printerr('error')
 	#printt('Final decide_automatic_runners_actions:', decisions)
+	
+	# Adjust them so that two aren't sent to the same base (if trail runner is faster)
+	#printt('decision bases before', decision_bases)
+	var lead = null
+	for i in [3,2,1,0]:
+		if decisions[i] != null:
+			if lead != null and lead < 3.99999:
+				# TODO: don't let trail runner go home if lead runner is only going 
+				#      b/c of force out. It will make both out.
+				if decision_bases[i] >= lead:
+					#printt('changing decision from', decision_bases[i], lead - 1)
+					# Change decision back one base
+					decision_bases[i] = lead - 1
+				# They are lead for the next one
+			lead = decision_bases[i]
+	#printt('decision bases after', decision_bases)
+	
 	# Do the action
 	for i in range(len(runners)):
 		if runners[i].is_active() and decisions[i] and decisions[i] != 0:
-			runners[i].send_runner(decisions[i], decisions[i] > 1.5)
+			#runners[i].send_runner(decisions[i], decisions[i] > 1.5)
+			runners[i].send_runner_to_base(decision_bases[i])

@@ -78,6 +78,7 @@ func _physics_process(delta: float) -> void:
 			elif Input.is_action_just_pressed("throwsecond"):
 				pitch_type = "CB"
 			# Begin pitch
+			#if click and on keyboard thing:
 			if Input.is_action_just_pressed("begin_pitch"):
 				begin_pitch()
 		else:

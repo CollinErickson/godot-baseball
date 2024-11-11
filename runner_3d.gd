@@ -21,6 +21,8 @@ var can_be_force_out_before_play:bool = false
 var runners :Array = []
 var runners_before :Array = []
 var runners_after :Array = []
+var runner_before = null
+var runner_after = null
 
 
 signal signal_scored_on_play
@@ -91,6 +93,22 @@ func _physics_process(delta: float) -> void:
 		if target_base < running_progress:
 			dir = -1
 		var next_running_progress = running_progress + delta*SPEED/30 * dir
+		
+		# TODO: Check if they will get to close to next or previous runner
+		var blocked = false
+		if dir > 0:
+			for runner in runners_after:
+				if runner.is_active():
+					if runner.running_progress - next_running_progress < 0.1:
+						blocked = true
+		else:
+			for runner in runners_before:
+				if runner.is_active():
+					if next_running_progress - runner.running_progress < 0.1:
+						blocked = true
+		if blocked:
+			next_running_progress = running_progress
+		
 		if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
 			reached_next_base = true
 			reached_next_base_signal.emit()
@@ -172,6 +190,14 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 				is_running = true
 	else:
 		printerr("bad in send_runner", direction)
+
+func send_runner_to_base(base:int) -> void:
+	#printt('in runner send_runner_to_base', start_base, base)
+	target_base = base
+	if abs(target_base - running_progress) < 1e-12:
+		is_running = false
+	else:
+		is_running = true 
 
 func end_state() -> String:
 	#printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
