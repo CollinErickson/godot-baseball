@@ -83,8 +83,11 @@ func _ready():
 
 signal ball_fielded
 signal tag_out
+signal new_fielder_selected_signal
 
 func _physics_process(delta: float) -> void:
+	#if is_selected_fielder:
+	#printt('selected fielder', posname, assignment)
 	#if randf_range(0,1)<.01:
 	#	printt('fielder user pit team', posname, user_is_pitching_team)
 	if is_frozen:
@@ -121,6 +124,10 @@ func _physics_process(delta: float) -> void:
 				assignment = "wait_to_receive"
 			elif assignment == "ball_carry":
 				assignment = 'holding_ball'
+			elif assignment == "ball_click":
+				assignment = 'ball'
+			else:
+				printt("Bad assignment, didn't update", assignment)
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
@@ -160,7 +167,7 @@ func _physics_process(delta: float) -> void:
 					set_selected_fielder()
 
 	# Check if user moves
-	if user_is_pitching_team and (holding_ball or assignment=="ball") and is_selected_fielder:
+	if user_is_pitching_team and (holding_ball or assignment in ["ball", "ball_click"]) and is_selected_fielder:
 		# Check for movement
 		var anymovement = false
 		var move = Vector3()
@@ -188,6 +195,9 @@ func _physics_process(delta: float) -> void:
 				velocity += delta * MAX_ACCEL * move
 				if velocity.length() > SPEED:
 					velocity = velocity.normalized() * SPEED
+			if assignment == 'ball_click':
+				# If moving due to click then user does other movement, switch to that
+				assignment = 'ball'
 		else: # No movement -> stop
 			if velocity.length() > 1e-12:
 				move = Vector3(-velocity.x, 0, -velocity.z)
@@ -322,8 +332,29 @@ func _physics_process(delta: float) -> void:
 	# Check for click to move selected player or change selected player
 	if user_is_pitching_team and not click_used and Input.is_action_just_pressed("click") and is_selected_fielder:
 		#printt('unused click')
-		assignment = "ball_click"
-		assignment_pos = get_parent().get_parent().get_parent().get_mouse_y0_pos()
+		var click_y0_pos = get_parent().get_parent().get_parent().get_mouse_y0_pos()
+		# Find nearest fielder (besides selected fielder), maybe change to them
+		var min_i = null
+		var min_dist = 1e8
+		for i in range(len(fielders)):
+			if fielders[i].posname != posname:
+				var i_dist = distance_xz(click_y0_pos, fielders[i].position)
+				if i_dist < min_dist:
+					min_dist = i_dist
+					min_i = i
+		if min_dist < 2:
+			# Change to that player
+			set_not_selected_fielder()
+			fielders[min_i].set_selected_fielder()
+			fielders[min_i].assignment = "ball"
+			assignment = "wait_to_receive"
+			new_fielder_selected_signal.emit(fielders[min_i])
+			printt('fielder i assignment new assignment is', fielders[min_i].assignment, fielders[min_i].posname)
+		else:
+			# Run to that position
+			assignment = "ball_click"
+			assignment_pos = click_y0_pos
+		click_used = true
 	
 var stepping_on_base_with_ball = false
 

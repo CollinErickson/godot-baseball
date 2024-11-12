@@ -275,6 +275,10 @@ func _on_tag_out_by_fielder():
 	#get_node("FlashText").new_text("tag out!", 3)
 	record_out('Tag out!')
 
+func _on_new_fielder_selected_signal_by_fielder(fielder):
+	assign_fielders_to_cover_bases([], null, [fielder.posname])
+	#pass
+
 func test_mesh_array():
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
@@ -336,6 +340,7 @@ func _ready() -> void:
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
+		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
 
 	#var runners = get_tree().get_nodes_in_group('runners')
 	# Set up signals from runners
@@ -426,8 +431,8 @@ func _process(delta: float) -> void:
 					vla = randf_range(-1,1)*40
 					hla = -45 + 90 * inzone_prop
 					vla = -20
-					hla = 0
-					exitvelo = 2
+					hla = 30
+					exitvelo = 12
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -728,6 +733,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	for base in [2,1,3,4]:
 		var min_time = 1e10
 		var min_i = null
+		var min_is_excluded = false
 		for i in range(len(fielders)):
 			if i in exclude_fielder_indexes or exclude_fielder_posname_array.has(fielders[i].posname):
 				# Only include the excluded ones if they are super close
@@ -738,6 +744,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname, base, exclude_fielder_indexes, exclude_fielder_posname_array)
 					min_time = 0
 					min_i = i
+					min_is_excluded = true
 			else:
 				var fielder_time = (
 					fielders[i].distance_xz(fielders[i].position,
@@ -747,9 +754,12 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 					min_time = fielder_time
 					min_i = i
 		if min_i != null:
-			printt('Assigning fielder to cover base', fielders[min_i].posname, base)
+			if min_is_excluded:
+				pass
+			else:
+				printt('Assigning fielder to cover base', fielders[min_i].posname, base)
+				fielders[min_i].assign_to_cover_base(base)
 			exclude_fielder_indexes.push_back(min_i)
-			fielders[min_i].assign_to_cover_base(base)
 			assigned_indexes.push_back(min_i)
 		else:
 			printt('NO ONE ASSIGNED TO A BASE')
