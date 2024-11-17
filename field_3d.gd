@@ -423,16 +423,16 @@ func _process(delta: float) -> void:
 					# Zero out spin accel
 					ball3d.spin_acceleration = Vector3()
 					# Create ball velocity
-					var exitvelo = 10 #randf_range(10,50)
+					var exitvelo = randf_range(20,45)
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
 					var inzone_prop = $Headon/Batter3D.swing_elapsed_sec / $Headon/Batter3D.swing_inzone_duration
-					vla = -20
-					vla = randf_range(-1,1)*40
+					#vla = -20
+					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					vla = -20
-					hla = 30
-					exitvelo = 12
+					#vla = -20
+					#hla = 30
+					#exitvelo = 12
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -1018,7 +1018,7 @@ func decide_automatic_runners_actions():
 	# 1. If fielded and need to tag up, do that.
 	if fielder_with_ball:
 		for i in range(len(runners)):
-			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
+			if i > .5 and runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
 				decisions[i] = coalesce(decisions[i], -1)
 				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
@@ -1027,7 +1027,7 @@ func decide_automatic_runners_actions():
 		if not ball_hit_bounced and not fftib[1]:
 				#printt('SENDING BACK, CAN CATCH!!!')
 				for i in range(len(runners)):
-					if runners[i].is_active():
+					if i > .5 and runners[i].is_active():
 						decisions[i] = coalesce(decisions[i], -1)
 						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
