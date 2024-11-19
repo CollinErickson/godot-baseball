@@ -33,6 +33,9 @@ var bounced_previous_frame = false
 var pitch_is_strike:bool = false
 var pitch_is_ball:bool = false
 var touched_by_fielder:bool = false
+var hit_bounced_position = null
+var hit_bounced_time = null
+var elapsed_time = 0
 
 signal ball_overthrown
 
@@ -74,6 +77,10 @@ func reset() -> void:
 	visible = false
 	throw_start_pos = null
 	throw_target = null
+	hit_bounced_position = null
+	hit_bounced_time = null
+	elapsed_time = 0
+
 	printt('finished ball reset, hit bounced', hit_bounced)
 	
 	var dot = get_parent().get_node_or_null('SZ_DOT')
@@ -95,6 +102,7 @@ func is_strike(pos):
 signal pitch_completed_unhit
 signal hit_bounced_signal
 func _physics_process(delta: float) -> void:
+	elapsed_time += delta
 	if is_frozen:
 		return
 	#if randf_range(0,1) < 1.1 and not is_sim:
@@ -157,7 +165,10 @@ func _physics_process(delta: float) -> void:
 						return
 					if not hit_bounced:
 						hit_bounced = true
-						hit_bounced_signal.emit()
+						hit_bounced_position = position
+						hit_bounced_time = elapsed_time
+						if not is_sim:
+							hit_bounced_signal.emit()
 					#if not is_sim:
 						#assert(false)
 		# Move a throw
@@ -176,7 +187,8 @@ func _physics_process(delta: float) -> void:
 					state = 'ball_in_play'
 					throw_start_pos = null
 					throw_target = null
-					ball_overthrown.emit()
+					if not is_sim:
+						ball_overthrown.emit()
 		
 		# Bounce
 		if position.y < ball_radius:
@@ -205,7 +217,10 @@ func _physics_process(delta: float) -> void:
 					# If foul, exit. Otherwise it returns later, or something weird.
 					return
 				hit_bounced = true
-				hit_bounced_signal.emit()
+				hit_bounced_position = position
+				hit_bounced_time = elapsed_time
+				if not is_sim:
+					hit_bounced_signal.emit()
 			bounced_previous_frame = true
 		else:
 			#printt('NOT bounce', delta)
@@ -245,9 +260,10 @@ func _physics_process(delta: float) -> void:
 			pitch_already_done = true
 			is_frozen = true
 			velocity = Vector3()
-			get_node("AnimatedSprite3D").stop()
-			print('in ball: emitting that pitch completed without hit')
-			pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
+			if not is_sim:
+				get_node("AnimatedSprite3D").stop()
+				print('in ball: emitting that pitch completed without hit')
+				pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
 	
 
 func simulate_delivery(pos, vel, delta=1./60):

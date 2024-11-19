@@ -101,6 +101,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=false
 		$Headon/CatchersMitt.set_process(false)
 	$Headon/Cameras.reset()
+	$Headon/BallBounceAnnulus.visible = false
 
 	# Reset this
 	is_frozen = false
@@ -193,6 +194,8 @@ func _on_ball_fielded_by_fielder(_fielder):
 		#printt("in field: ball will be thrown to", throw_to)
 		#if throw_to > -0.5:
 			#fielder.throw_ball_func(throw_to)
+	
+	$Headon/BallBounceAnnulus.visible = false
 
 
 
@@ -483,7 +486,11 @@ func _process(delta: float) -> void:
 			ball_in_play_state_time = 0
 			#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 			#printt('fielder nodes', fielder_nodes)
-			var hit_will_bounce = assign_fielders_after_hit()
+			#var hit_will_bounce = assign_fielders_after_hit()
+			# [found_someone, hit_bounced, min_ifielder, intercept_position,
+			#elapsed_time, hit_bounced_position, hit_bounced_time]
+			var fftib = assign_fielders_after_hit()
+			var hit_will_bounce = fftib[1]
 			printt('Will hit bounce?', hit_will_bounce)
 			if hit_will_bounce:
 				#printt("hit will bounce, send runners!!")
@@ -496,6 +503,9 @@ func _process(delta: float) -> void:
 				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					runner.send_runner(-1)
+			# Set ball land annulus
+			$Headon/BallBounceAnnulus.position = fftib[5]
+			$Headon/BallBounceAnnulus.visible = true
 	
 	# Move baserunners
 	if ball_in_play:
@@ -592,7 +602,7 @@ var ball_3d_scene = load("res://ball_3d.tscn")
 
 func find_fielder_to_intercept_ball() -> Array:
 	#func assign_fielders_after_hit():
-	#printt("Starting assign_fielders_after_hit !!")
+	#printt("\t\t\t\tStarting assign_fielders_after_hit !!")
 	#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	#printt('fielder nodes', fielder_nodes)
 	var ball = get_node_or_null("Headon/Ball3D")
@@ -607,12 +617,20 @@ func find_fielder_to_intercept_ball() -> Array:
 	#printt('balls global pos', tmp_ball.global_position, ball.global_position)
 	tmp_ball.velocity = ball.velocity
 	tmp_ball.pitch_already_done = true 
+	tmp_ball.hit_bounced_position = ball.hit_bounced_position
+	tmp_ball.hit_bounced_time = ball.hit_bounced_time
+	
 	#printt('pos before', tmp_ball.position)
 	#tmp_ball._physics_process(1)
 	#printt('pos after', tmp_ball.position)
 	var take_steps = func(nsteps, delta_):
 		for istep in range(nsteps):
 			tmp_ball._physics_process(delta_)
+			#if hit_bounce_position==null:
+				#if tmp_ball.hit_bounced:
+					#print("FOUND WHERE BALL HITS GROUND IN TMP_BALL")
+					#hit_bounce_position = tmp_ball.position
+					#hit_bounce_time = elapsed_time + istep * delta_
 	# Check every ~.5 second to see if each fielder can reach the ball
 	var iii = 0
 	var numsteps = 5
@@ -649,6 +667,23 @@ func find_fielder_to_intercept_ball() -> Array:
 				#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
 				break
 	
+	# Save important things to return
+	var intercept_position = tmp_ball.position
+	var hit_bounced = tmp_ball.hit_bounced
+	for iiii in range(1e3):
+		if tmp_ball.hit_bounced_position == null:
+			tmp_ball._physics_process(1./60)
+			if tmp_ball.elapsed_time > 10:
+				break
+		else:
+			#printt("FOUND BALL BOUNCE!!!")
+			break
+	if tmp_ball.hit_bounced_position == null:
+		printt("COULDN'T FIND BALL BOUNCE!!!", tmp_ball.state)
+	var hit_bounced_position = tmp_ball.hit_bounced_position
+	var hit_bounced_time = tmp_ball.hit_bounced_time
+	#printt('BALL SIM FOUND HIT INFO', hit_bounced_position, hit_bounced_time)
+
 	# Delete object at end
 	tmp_ball.velocity = Vector3()
 	get_node("Headon").remove_child(tmp_ball)
@@ -658,11 +693,12 @@ func find_fielder_to_intercept_ball() -> Array:
 	#for i in range(3):
 		#print('------- done with tmp_ball')
 	
-	return [found_someone, tmp_ball.hit_bounced, min_ifielder, tmp_ball.position, elapsed_time]
+	return [found_someone, hit_bounced, min_ifielder, intercept_position,
+			elapsed_time, hit_bounced_position, hit_bounced_time]
 	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 
 
-func assign_fielders_after_hit() -> bool:
+func assign_fielders_after_hit() -> Array:
 	# Returns whether ball will bounce before fielder intercepts
 	# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 	var fftib = find_fielder_to_intercept_ball()
@@ -723,7 +759,8 @@ func assign_fielders_after_hit() -> bool:
 			
 	
 	# Return whether the ball bounced. Will be used to determine if runners run.
-	return tmp_ball_bounced
+	#return tmp_ball_bounced
+	return fftib
 
 func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 									_intercept_position=null,
@@ -915,6 +952,7 @@ func _on_ball_3d_hit_bounced_signal() -> void:
 	ball_hit_bounced = true
 	#check_runners_able_to_score()
 	update_max_force_outs_left()
+	$Headon/BallBounceAnnulus.visible = false
 
 func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base
