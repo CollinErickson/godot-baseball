@@ -9,7 +9,6 @@ extends Node3D
 func _ready() -> void:
 	make_annulus()
 
-
 func make_annulus():
 	#print("Running make_annulus")
 	assert(outer_radius > inner_radius)

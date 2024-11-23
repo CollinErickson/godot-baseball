@@ -1,5 +1,11 @@
 extends Control
 
+# Game variables
+var outs_per_inning:int = 1
+var strikes_per_pa:int = 3
+var balls_per_pa:int = 4
+
+# State variables
 var inning:int = 1
 var is_top:bool = true
 var outs:int = 0
@@ -9,6 +15,7 @@ var home_runs:int = 0
 var away_runs:int = 0
 var user_is_away_team:bool = false
 var user_is_home_team:bool = true
+
 var player = preload("res://scenes/player.tscn")
 var batter:Player  = null
 var runner1:Player = null
@@ -50,7 +57,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	if ball_in_play:
 		# Ball must have been in play
 		if is_foul_ball:
-			if strikes < 1.5:
+			if strikes < strikes_per_pa - 1.5:
 				strikes += 1
 		else:
 			new_batter = true
@@ -59,11 +66,11 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			balls += 1
 		if is_strike:
 			strikes += 1
-		if balls > 3.5:
+		if balls > balls_per_pa - 0.5:
 			#TODO: walk
 			balls = 0
 			new_batter = true
-		elif strikes > 2.5:
+		elif strikes > strikes_per_pa - 0.5:
 			strikes = 0
 			outs_on_play += 1
 			new_batter = true
@@ -93,7 +100,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	runner3 = r3
 	
 	# End of half inning, change side and clear bases
-	if outs > 2.5:
+	if outs > outs_per_inning - 0.5:
 		if is_top:
 			is_top = false
 		else:
@@ -122,7 +129,8 @@ func reset_field() -> void:
 		runner1,
 		runner2,
 		runner3,
-		outs)
+		outs,
+		outs_per_inning)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()

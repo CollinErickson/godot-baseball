@@ -7,6 +7,7 @@ var ball_in_play_state_time = 0
 const sz_z = 0.6
 var is_foul_ball:bool = false
 
+var outs_per_inning = 3
 var outs_on_play = 0
 var outs_before_play = 0
 var runs_on_play = 0
@@ -51,7 +52,8 @@ func freeze() -> void:
 	set_process(false)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter, runner1, runner2, runner3, outs_before_play_):
+			batter, runner1, runner2, runner3, outs_before_play_,
+			outs_per_inning_:int):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
@@ -119,6 +121,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_hit_bounced = false
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
+	outs_per_inning = outs_per_inning_
 	runs_on_play = 0
 	user_is_batting_team = user_is_batting_team_
 	user_is_pitching_team = user_is_pitching_team_
@@ -433,9 +436,9 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					#vla = -20
-					#hla = 30
-					#exitvelo = 12
+					vla = 60
+					hla = 0
+					exitvelo = 15
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -473,6 +476,9 @@ func _process(delta: float) -> void:
 					var mgl = get_node("Headon/MouseGroundLocation")
 					mgl.visible = true
 					mgl.set_process(true)
+					
+					# Testing 3D char
+					$Headon/AJ/AnimationTree.set("parameters/conditions/moving", true)
 					
 					
 				else:
@@ -703,7 +709,7 @@ func assign_fielders_after_hit() -> Array:
 	# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 	var fftib = find_fielder_to_intercept_ball()
 	var found_someone = fftib[0]
-	var tmp_ball_bounced = fftib[1]
+	#var tmp_ball_bounced = fftib[1]
 	var min_ifielder = fftib[2]
 	var intercept_position = fftib[3]
 	if found_someone:
@@ -862,7 +868,7 @@ func check_if_play_done():
 	
 	# Check if 3 outs
 	# TODO: play should immediately end, no one else should get out, but scene shouldn't immediately reset
-	if outs_before_play + outs_on_play > 2.5:
+	if outs_before_play + outs_on_play > outs_per_inning - 0.5:
 		play_done()
 		return true
 	
@@ -991,7 +997,7 @@ func check_runners_able_to_score():
 	# Able to score means they won't have to return (ball has bounced) and the
 	#  max number of force outs left isn't enough to negate their scoring.
 	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
-	if outs_before_play + outs_on_play + max_force_outs_left < 2.5 and ball_hit_bounced:
+	if outs_before_play + outs_on_play + max_force_outs_left < outs_per_inning - 0.5 and ball_hit_bounced:
 		printt('RUNNERS CAN SCORE NOW')
 		for runner in get_tree().get_nodes_in_group('runners'):
 			runner.able_to_score = true
@@ -1060,12 +1066,12 @@ func decide_automatic_runners_actions():
 				decisions[i] = coalesce(decisions[i], -1)
 				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
-	# 2. If ball can be caught, go halfway and stop. TODO: halfway, not back
+	# 2. If ball can be caught, go back. TODO: halfway, not back
 	if fielder_with_ball == null:
-		if not ball_hit_bounced and not fftib[1]:
-				#printt('SENDING BACK, CAN CATCH!!!')
+		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5:
 				for i in range(len(runners)):
 					if i > .5 and runners[i].is_active():
+						#printt('SENDING BACK, CAN CATCH!!!', i)
 						decisions[i] = coalesce(decisions[i], -1)
 						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
@@ -1252,16 +1258,19 @@ func decide_automatic_runners_actions():
 			if lead != null and lead < 3.99999:
 				# TODO: don't let trail runner go home if lead runner is only going 
 				#      b/c of force out. It will make both out.
-				if decision_bases[i] >= lead:
+				# If runner on first is staying at first, batter still needs to
+				#   go to first.
+				if decision_bases[i] >= lead and not (i==0 and lead==1):
 					#printt('changing decision from', decision_bases[i], lead - 1)
 					# Change decision back one base
 					decision_bases[i] = lead - 1
-				# They are lead for the next one
+			# They are lead for the next one
 			lead = decision_bases[i]
 	#printt('decision bases after', decision_bases)
 	
+	
 	# Do the action
 	for i in range(len(runners)):
-		if runners[i].is_active() and decisions[i] and decisions[i] != 0:
+		if runners[i].is_active() and decisions[i] != null:
 			#runners[i].send_runner(decisions[i], decisions[i] > 1.5)
 			runners[i].send_runner_to_base(decision_bases[i])

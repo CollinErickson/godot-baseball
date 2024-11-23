@@ -212,7 +212,7 @@ func _physics_process(delta: float) -> void:
 			if pitch_in_progress:
 				delivery_bounced = true
 			if state == "ball_in_play" and not hit_bounced:
-				printt('setting hit_bounced = true', hit_bounced, position)
+				#printt('setting hit_bounced = true', hit_bounced, position)
 				if check_if_foul():
 					# If foul, exit. Otherwise it returns later, or something weird.
 					return
