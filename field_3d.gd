@@ -202,7 +202,7 @@ func _on_ball_fielded_by_fielder(_fielder):
 
 
 
-func _on_throw_ball_by_fielder(base, fielder, to_fielder) -> void:
+func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	printt('In field_3d, throwing ball to:', base, fielder, to_fielder)
 
 	# Set ball throw
@@ -229,7 +229,26 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder) -> void:
 	#var velo_vec = fielder.max_throw_speed * (target - fielder.position).normalized()
 	var ball_start = fielder.position
 	ball_start.y = 1.4
+	
+	# If throw is not success, add noise
+	if success:
+		target.x += randf_range(-.2,.2)
+		target.y += randf_range(-.2,.2)
+		target.z += randf_range(-.2,.2)
+	else:
+		#printt('in field throw is not success')
+		target.x += randf_range(-2,2)*2
+		target.y += randf_range(-2,2)*2
+		target.z += randf_range(-2,2)*2
+	
 	var velo_vec = ball.fit_approx_parabola_to_trajectory(ball_start, target, fielder.max_throw_speed, true)
+	
+	# TODO: Rotate for bad throws, instead of changing target above
+	# If throw is not success, add noise
+	#if success:
+		#var v1 = velo_vec.normalized
+		#velo_vec = velo_vec.rotated()
+	
 	if base != null:
 		ball.throw_to_base(base, velo_vec, fielder.position, target)
 	else:
@@ -400,6 +419,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("reload"):
 		print('reload')
 		get_tree().reload_current_scene()
+		return
 	
 	# Pause game
 	if Input.is_action_just_pressed("startbutton"):
@@ -436,7 +456,7 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					vla = 60
+					vla = -15
 					hla = 0
 					exitvelo = 15
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
@@ -536,8 +556,8 @@ func _process(delta: float) -> void:
 				decide_automatic_runners_actions()
 	
 	# Adjust camera
+	var cam = get_viewport().get_camera_3d()
 	if get_viewport():
-		var cam = get_viewport().get_camera_3d()
 		# Move current camera
 		var cam_move_speed = 10
 		var cam_rotate_speed = 0.3
@@ -587,6 +607,35 @@ func _process(delta: float) -> void:
 			get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 		elif Input.is_key_pressed(KEY_4):
 			get_node("Headon/Cameras/Camera3DAll22").current = true
+	
+	# Move camera so that the ball stays in view
+	cam = get_viewport().get_camera_3d()
+	var ball_viewport_2d_position = cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position)
+	var viewport_size = get_viewport().size
+	if randf_range(0,1)< .1:
+		printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position), get_viewport().size, cam.rotation)
+	if ball_in_play:
+		var rotate_speed = 0.1
+		var rot_axis_y = cam.rotation
+		rot_axis_y.y = 0
+		rot_axis_y = rot_axis_y.normalized()
+		var cam_rotated = false
+		if ball_viewport_2d_position.x < viewport_size.x*.2:
+			cam.rotate(Vector3(0,1,0), delta * rotate_speed)
+			cam_rotated = true
+		if ball_viewport_2d_position.x > viewport_size.x*.8:
+			cam.rotate(Vector3(0,1,0), -delta * rotate_speed)
+			cam_rotated = true
+		if ball_viewport_2d_position.y < viewport_size.y*.1:
+			cam.rotate(rot_axis_y, delta * rotate_speed)
+			cam_rotated = true
+		if ball_viewport_2d_position.y > viewport_size.y*.5:
+			cam.rotate(rot_axis_y, -delta * rotate_speed)
+			cam_rotated = true
+		if cam_rotated:
+			transform = transform.orthonormalized()
+		# TODO: Rotate camera to be level
+		# TODO: Smooth out the camera movement
 	
 	# Check if play is done, but not every time
 	if ball_in_play:

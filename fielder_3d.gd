@@ -14,6 +14,7 @@ var user_is_pitching_team
 var time_last_began_holding_ball
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
+@onready var ball = get_tree().get_first_node_in_group("ball")
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -36,6 +37,14 @@ func reset() -> void:
 	time_last_began_holding_ball = null
 	remove_from_group('selected_fielder')
 	remove_from_group('fielder_holding_ball')
+	
+	# End start throw
+	start_throw_started = false
+	start_throw_base = null
+	start_throw_fielder = null
+	start_throw_key_check_release = null
+	$ThrowBar.visible = false
+	$ThrowBar.active = false
 	
 	
 
@@ -131,7 +140,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
-		var ball = get_tree().get_first_node_in_group("ball")
+		#var ball = get_tree().get_first_node_in_group("ball")
 		if ball.state in ["ball_in_play", "thrown"]:
 			#printt('ball here', ball.position)
 			#if ball.state =='thrown'
@@ -215,6 +224,9 @@ func _physics_process(delta: float) -> void:
 	var click_used = false
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
+		# Update ball position
+		ball.position = position + Vector3(0,1.4,0)
+		
 		# Check if tagging active runner not on base
 		var runners = get_tree().get_nodes_in_group("runners")
 		for runner in runners:
@@ -239,16 +251,25 @@ func _physics_process(delta: float) -> void:
 				
 		# Check for throw
 		if user_is_pitching_team:
-			# Check for throwing ball
+			# Check for throwing ball end
+			if start_throw_started:
+				if Input.is_action_just_released(start_throw_key_check_release):
+					start_throw_end()
+			
+			# Check for throwing ball start
 			if Input.is_action_just_pressed("throwfirst"):
 				#printt('throw to first')
-				throw_ball_func(1)
+				#throw_ball_func(1)
+				start_throw_ball_func(1, null, "throwfirst")
 			elif Input.is_action_just_pressed("throwsecond"):
-				throw_ball_func(2)
+				#throw_ball_func(2)
+				start_throw_ball_func(2, null, "throwsecond")
 			elif Input.is_action_just_pressed("throwthird"):
-				throw_ball_func(3)
+				#throw_ball_func(3)
+				start_throw_ball_func(3, null, "throwthird")
 			elif Input.is_action_just_pressed("throwhome"):
-				throw_ball_func(4)
+				#throw_ball_func(4)
+				start_throw_ball_func(4, null, "throwhome")
 			
 			# Check for click that throws ball
 			if Input.is_action_just_pressed("click"):
@@ -258,7 +279,8 @@ func _physics_process(delta: float) -> void:
 				for i in range(4):
 					if distance_xz(mgl.position, base_positions[i]) < 2:
 						# This func determines whether to run or throw to that position
-						throw_ball_func(i+1)
+						#throw_ball_func(i+1)
+						start_throw_ball_func(i+1, null, "click")
 						click_used = true
 						break
 					#else:
@@ -268,7 +290,8 @@ func _physics_process(delta: float) -> void:
 					for fielder in fielders:
 						#printt('checking click throw to fielder', distance_xz(mgl.position, fielder.position))
 						if fielder.posname != posname and distance_xz(mgl.position, fielder.position) < 2:
-							throw_ball_func(null, fielder)
+							#throw_ball_func(null, fielder)
+							start_throw_ball_func(null, fielder, "click")
 							click_used = true
 							break
 		else: # CPU defense
@@ -377,36 +400,68 @@ func is_stepping_on_base() -> Array:
 
 signal stepped_on_base_with_ball
 
+var start_throw_started = false
+var start_throw_base = null
+var start_throw_fielder = null
+var start_throw_key_check_release = null
+func start_throw_ball_func(base, fielder, key_check_release):
+	start_throw_started = true
+	start_throw_base = base
+	start_throw_fielder = fielder
+	start_throw_key_check_release = key_check_release
+	
+	# Turn on throw bar
+	$ThrowBar.visible = true
+	var cam = get_viewport().get_camera_3d()
+	$ThrowBar.position = cam.unproject_position(global_position)
+	$ThrowBar.reset(20, .7)
+
+func start_throw_end():
+	# Check throw bar
+	var success = $ThrowBar.check_success(true, true)
+	
+	# Actually start throw
+	throw_ball_func(start_throw_base, start_throw_fielder, success)
+	
+	# End start throw
+	start_throw_started = false
+	start_throw_base = null
+	start_throw_fielder = null
+	start_throw_key_check_release = null
+	
+	
+
 signal throw_ball
-func throw_ball_func(base, fielder=null) -> void:
+func throw_ball_func(base, fielder=null, success=true) -> void:
 	printt('throw_ball_func', base, fielder)
+	
 	# Only throw if not close to that base
 	if base != null:
 		if distance_xz(position, base_positions[base-1]) > 3:
 			holding_ball = false
 			remove_from_group('fielder_holding_ball')
-			var ball = get_tree().get_first_node_in_group("ball")
+			#var ball = get_tree().get_first_node_in_group("ball")
 			ball.position = position
 			ball.position.y = 1.4
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
 			assignment = 'wait_to_receive' # Not the best name for it
-			throw_ball.emit(base, self, null)
+			throw_ball.emit(base, self, null, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
-	elif fielder != null:
+	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
 			holding_ball = false
 			remove_from_group('fielder_holding_ball')
-			var ball = get_tree().get_first_node_in_group("ball")
+			#var ball = get_tree().get_first_node_in_group("ball")
 			ball.position = position
 			ball.position.y = 1.4
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
 			assignment = 'wait_to_receive' # Not the best name for it
-			throw_ball.emit(base, self, fielder)
+			throw_ball.emit(base, self, fielder, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
 

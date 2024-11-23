@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmcpm2vuvwdu8"]
+
+[ext_resource type="Script" path="res://scripts/throw_bar.gd" id="1_2ulkn"]
+
+[node name="ThrowBar" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_2ulkn")
+
+[node name="BackgroundRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 212.0
+offset_bottom = 36.0
+
+[node name="RedRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 198.0
+offset_bottom = 31.0
+color = Color(1, 0, 0, 1)
+
+[node name="GreenRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 139.0
+offset_bottom = 29.0
+color = Color(0, 1, 0, 1)
+
+[node name="BlackRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 81.0
+offset_bottom = 34.0
+color = Color(0, 0, 0, 1)
