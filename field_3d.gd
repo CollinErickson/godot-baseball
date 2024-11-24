@@ -53,21 +53,23 @@ func freeze() -> void:
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
 			batter, runner1, runner2, runner3, outs_before_play_,
-			outs_per_inning_:int):
+			outs_per_inning_:int,
+			fielding_team,
+			batting_team):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
 	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
 	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
-		fielder.reset()
+		fielder.reset(fielding_team.color_primary)
 		#printt('fielder posname is', fielder.posname)
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
 			#printt('INVISIBLE CATCHER')
 	#var runners = get_tree().get_nodes_in_group('runners')
 	for runner in runners:
-		runner.reset()
+		runner.reset(batting_team.color_primary)
 		if runner.start_base == 0:
 			runner.visible = false
 			runner.set_runner(batter)
@@ -125,6 +127,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	runs_on_play = 0
 	user_is_batting_team = user_is_batting_team_
 	user_is_pitching_team = user_is_pitching_team_
+	rotate_camera_inertia = Vector2(0,0)
 	#_ready()
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
@@ -404,6 +407,7 @@ func get_mouse_y0_pos():
 	#printt('TEST POSITION MOUSE', mousepos,ppos, cross_sz, cam.position)
 	return cross_y0
 
+var rotate_camera_inertia:Vector2 = Vector2(0,0)
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if is_frozen:
@@ -456,15 +460,14 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					#vla = -15
-					#hla = 0
-					#exitvelo = 15
+					#vla = 75
+					#hla = .45
+					#exitvelo = 55
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
+					# Start with velo all in Z direction, then rotate with vla/hla
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
 					ball3d.velocity.z = exitvelo
-					#print('velo vec before rot is')
-					#print(ball3d.velocity)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
 					ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
 					printt('hit velo vec is', ball3d.velocity)
@@ -615,28 +618,42 @@ func _process(delta: float) -> void:
 	#if randf_range(0,1)< .1:
 		#printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position), get_viewport().size, cam.rotation)
 	if ball_in_play:
+		# Using inertia instead of changing angle based on single frames reduces jitter
+		rotate_camera_inertia = .95 * rotate_camera_inertia
+		var rotate_camera_inertia_increment = .05
 		var rotate_speed = 0.1
 		var rot_axis_y = cam.rotation
 		rot_axis_y.y = 0
 		rot_axis_y = rot_axis_y.normalized()
 		var cam_rotated = false
-		if ball_viewport_2d_position.x < viewport_size.x*.2:
-			cam.rotate(Vector3(0,1,0), delta * rotate_speed)
+		if ball_viewport_2d_position.x < viewport_size.x*.2: # Rotate left
+			#cam.rotate(Vector3(0,1,0), delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.x -= rotate_camera_inertia_increment
+		if ball_viewport_2d_position.x > viewport_size.x*.8: # Rotate right
+			#cam.rotate(Vector3(0,1,0), -delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.x += rotate_camera_inertia_increment
+		if ball_viewport_2d_position.y < viewport_size.y*.1: # Rotate up
+			#cam.rotate(rot_axis_y, delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.y += rotate_camera_inertia_increment
+		if ball_viewport_2d_position.y > viewport_size.y*.5: # Rotate down
+			#cam.rotate(rot_axis_y, -delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.y -= rotate_camera_inertia_increment
+		if abs(rotate_camera_inertia.x) > 1e-12:
+			cam.rotate(Vector3(0,1,0), -delta * rotate_speed * rotate_camera_inertia.x)
 			cam_rotated = true
-		if ball_viewport_2d_position.x > viewport_size.x*.8:
-			cam.rotate(Vector3(0,1,0), -delta * rotate_speed)
+		if abs(rotate_camera_inertia.y) > 1e-12:
+			cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
 			cam_rotated = true
-		if ball_viewport_2d_position.y < viewport_size.y*.1:
-			cam.rotate(rot_axis_y, delta * rotate_speed)
-			cam_rotated = true
-		if ball_viewport_2d_position.y > viewport_size.y*.5:
-			cam.rotate(rot_axis_y, -delta * rotate_speed)
-			cam_rotated = true
+			
 		if cam_rotated:
+			# TODO: Not sure this does anything usefuL
 			transform = transform.orthonormalized()
 		# TODO: Rotate camera to be level
-		# TODO: Smooth out the camera movement
-	
+
 	# Check if play is done, but not every time
 	if ball_in_play:
 		time_since_check_if_play_done_checked += delta
@@ -890,6 +907,7 @@ func _on_batter_3d_start_runner() -> void:
 	runner_node.is_running = true
 	runner_node.running_progress = 0.04
 	runner_node.max_running_progress = 0.04
+	runner_node.set_animation('running')
 	
 	# Turn off batter
 	get_node("Headon/Batter3D").visible = false

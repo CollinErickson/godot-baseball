@@ -2,7 +2,8 @@ extends Control
 
 
 func update(inning: int, is_top: bool, outs: int, balls: int, strikes: int,
-		home_runs:int, away_runs:int, runner1:bool, runner2:bool, runner3:bool) -> void:
+		home_runs:int, away_runs:int, runner1:bool, runner2:bool, runner3:bool,
+		away_abbr:String, home_abbr:String) -> void:
 	$HBoxContainer/Inning.text = str(inning)
 	#$HBoxContainer/Outs.text = str(outs)
 	if outs == 0:
@@ -37,3 +38,6 @@ func update(inning: int, is_top: bool, outs: int, balls: int, strikes: int,
 	else:
 		br += ' '
 	$HBoxContainer/Baserunners.text = br
+	
+	$HBoxContainer/TeamNames/AwayName.text = away_abbr
+	$HBoxContainer/TeamNames/HomeName.text = home_abbr

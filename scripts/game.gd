@@ -22,6 +22,11 @@ var runner1:Player = null
 var runner2:Player = null
 var runner3:Player = null
 
+var team_class = preload("res://scenes/team.tscn")
+var home_team:Team = team_class.instantiate().create_random()
+var away_team:Team = team_class.instantiate().create_random()
+
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -43,7 +48,9 @@ func _process(_delta: float) -> void:
 
 func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
-					runner1!=null, runner2!=null, runner3!=null)
+					runner1!=null, runner2!=null, runner3!=null,
+					away_team.abbr,
+					home_team.abbr)
 
 func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike: bool,
 									is_foul_ball: bool,
@@ -130,7 +137,9 @@ func reset_field() -> void:
 		runner2,
 		runner3,
 		outs,
-		outs_per_inning)
+		outs_per_inning,
+		home_team if is_top else away_team,
+		home_team if !is_top else away_team)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()

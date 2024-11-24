@@ -13,15 +13,15 @@ func _ready() -> void:
 	
 	var charnode = null
 	if character == char_options.AJ:
-		print("in char 3d: Creating AJ")
+		#print("in char 3d: Creating AJ")
 		charnode = char_AJ.instantiate()
 	else:
-		print('nothing selected...')
+		print('In char3d, no character selected!!!!')
 		charnode = char_AJ.instantiate()
-	print('charnode', charnode)
+	#print('charnode', charnode)
 	charnode.name = 'charnode'
 	add_child(charnode)
-	start_animation('a')
+	#start_animation('a')
 
 func start_animation(anim_name:String) -> void:
 	#$charnode

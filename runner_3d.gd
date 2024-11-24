@@ -34,7 +34,7 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
-func reset() -> void:
+func reset(color) -> void:
 	#print('RESET RUNNER', start_base)
 	is_frozen = false
 	visible = true
@@ -55,7 +55,7 @@ func reset() -> void:
 	
 	set_look_at()
 	set_animation("idle")
-	$Char3D.set_color('yellow')
+	$Char3D.set_color(color)
 
 	
 	update_position()

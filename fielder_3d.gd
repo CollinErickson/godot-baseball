@@ -24,7 +24,7 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
-func reset() -> void:
+func reset(color) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -52,7 +52,7 @@ func reset() -> void:
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
 	set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
-	$Char3D.set_color('red')
+	$Char3D.set_color(color)
 	
 	
 
@@ -512,6 +512,8 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			throw_ball.emit(base, self, null, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
+				# Change animation to idle
+				set_animation('idle')
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
 			holding_ball = false
