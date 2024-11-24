@@ -31,3 +31,32 @@ func start_animation(anim_name:String) -> void:
 	elif anim_name == "running":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		$charnode/AnimationTree.set("parameters/conditions/moving", true)
+	else:
+		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
+
+func set_color(col):
+	#printt('\t\t\t\tIN SET COLOR FOR CHAR3D')
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = col
+	#mat.vertex_color_use_as_albedo = true # will need this for the array of colors
+	#meshnode.mesh.surface_set_material(0, mat)   # will need uvs if using a texture
+	$charnode/Armature/Skeleton3D/Boy01_Body_Geo.set_material_override(mat)
+
+	#print('dir mat', dir(mat))
+	#printt('char test', $charnode/Armature/Skeleton3D/Boy01_Body_Geo.set_material_override)
+
+func dir(class_instance):
+	var output = {}
+	var methods = []
+	for method in class_instance.get_method_list():
+		methods.append(method.name)
+	
+	output["METHODS"] = methods
+	
+	var properties = []
+	for prop in class_instance.get_property_list():
+		if prop.type == 3:
+			properties.append(prop.name)
+	output["PROPERTIES"] = properties
+	
+	return output

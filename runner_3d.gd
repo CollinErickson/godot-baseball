@@ -23,7 +23,7 @@ var runners_before :Array = []
 var runners_after :Array = []
 var runner_before = null
 var runner_after = null
-
+var animation = "idle"
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -53,7 +53,13 @@ func reset() -> void:
 	target_base = start_base + 1
 	able_to_score = false
 	
+	set_look_at()
+	set_animation("idle")
+	$Char3D.set_color('yellow')
+
+	
 	update_position()
+	
 
 func is_active():
 	return exists_at_start and not out_on_play and not scored_on_play
@@ -119,6 +125,7 @@ func _physics_process(delta: float) -> void:
 			running_progress = target_base
 			max_running_progress = running_progress
 			is_running = false
+			set_animation('idle')
 		else: # Not crossing base
 			# Update progress
 			running_progress = next_running_progress
@@ -194,14 +201,20 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 				is_running = true
 	else:
 		printerr("bad in send_runner", direction)
+	if is_running:
+		set_animation('running')
+	else:
+		set_animation('idle')
 
 func send_runner_to_base(base:int) -> void:
 	#printt('in runner send_runner_to_base', start_base, base)
 	target_base = base
 	if abs(target_base - running_progress) < 1e-12:
 		is_running = false
+		set_animation('idle')
 	else:
 		is_running = true 
+		set_animation('running')
 
 func end_state() -> String:
 	#printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
@@ -249,3 +262,47 @@ func can_be_force_out() -> bool:
 	return (can_be_force_out_before_play and
 		running_progress < start_base + 1 and
 		max_running_progress < start_base + 1)
+
+
+func set_animation(new_anim):
+	if new_anim == animation:
+		set_look_at() # Running but can change direction
+		return
+	animation = new_anim
+	#if new_anim == "idle":
+		#pass
+	#if new_anim == "moving":
+	$Char3D.start_animation(new_anim)
+	set_look_at()
+
+func set_look_at():
+	var lookat
+	if animation == "idle":
+		lookat = position
+		if floor(running_progress) < .5: # Running to 1st
+			lookat += Vector3(30,0,30)
+		elif floor(running_progress) < 1.5: # Running to 2nd
+			lookat += Vector3(30,0,-30)
+		elif floor(running_progress) < 2.5: # Running to 3rd
+			lookat += Vector3(-30,0,-30)
+		else: # Running to Home
+			lookat += Vector3(-30,0,30)
+	elif animation == "running":
+		lookat = base_positions[min(target_base, 4) - 1]
+		#printt('set_look_at()', start_base, lookat)
+	else:
+		push_error("Error in runner_3d.gd, set_look_at()", animation)
+	
+	# Set it
+	#lookat = to_global(lookat)
+	lookat = lookat.rotated(Vector3(0,1,0), 45.*PI/180)
+	#printt('set_look_at() 2', start_base, lookat)
+	$Char3D.look_at(lookat, Vector3.UP, true)
+
+
+var base_positions = [
+	Vector3(-1,0,1)*30/sqrt(2), # 1
+	Vector3(0,0,1)*30*sqrt(2), # 2
+	Vector3(1,0,1)*30/sqrt(2), # 3
+	Vector3(0,0,0) # Home
+]

@@ -49,8 +49,10 @@ func reset() -> void:
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
 	
-	$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
-	animation = "idle"
+	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
+	set_look_at_position(Vector3(0,0,0))
+	set_animation("idle")
+	$Char3D.set_color('red')
 	
 	
 
@@ -119,10 +121,13 @@ func _physics_process(delta: float) -> void:
 		var distance_can_move = delta * SPEED
 		# Face target
 		#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
-		if distance_from_target > 0:
-			$Char3D.look_at(to_global(assignment_pos), Vector3.UP, true)
-		elif position.distance_squared_to(ball.position) > 1e-12:
-			$Char3D.look_at(to_global(ball.position), Vector3.UP, true)
+		if distance_from_target > 2:
+			#push_warning('check look at', position, assignment_pos)
+			#$Char3D.look_at(to_global(assignment_pos), Vector3.UP, true)
+			set_look_at_position(assignment_pos)
+		elif distance_xz(position, ball.position) > 2:
+			#$Char3D.look_at(to_global(ball.position), Vector3.UP, true)
+			set_look_at_position(ball.position)
 
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 		if distance_can_move < distance_from_target:
@@ -220,8 +225,9 @@ func _physics_process(delta: float) -> void:
 				velocity += delta * MAX_ACCEL * move
 				if velocity.length() > SPEED:
 					velocity = velocity.normalized() * SPEED
-			$Char3D.look_at(position + 100*move.rotated(Vector3(0,1,0), 45.*PI/180), Vector3.UP, true)
-			set_animation("running")
+				#$Char3D.look_at(position + 100*move.rotated(Vector3(0,1,0), 45.*PI/180), Vector3.UP, true)
+				set_look_at_position(position + 1e2*move.normalized())
+				set_animation("running")
 
 			if assignment == 'ball_click':
 				# If moving due to click then user does other movement, switch to that
@@ -252,7 +258,6 @@ func _physics_process(delta: float) -> void:
 				if Input.is_action_just_released(start_throw_key_check_release):
 					start_throw_end()
 			
-			var new_throw = false
 			# Check for throwing ball start
 			if Input.is_action_just_pressed("throwfirst"):
 				#printt('throw to first')
@@ -382,7 +387,8 @@ func _physics_process(delta: float) -> void:
 							assignment = "ball_carry"
 						
 						if run_it:
-							printt('fielder running to base', throw_to, posname)
+							pass
+							#printt('fielder running to base', throw_to, posname)
 						else:
 							
 							if throw_to > -0.5:
@@ -421,7 +427,9 @@ func _physics_process(delta: float) -> void:
 		click_used = true
 	
 	if assignment == 'wait_to_receive':
-		$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
+		if distance_xz(position, ball.position) > 2:
+			#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
+			set_look_at_position(ball.position)
 	
 var stepping_on_base_with_ball = false
 
@@ -583,3 +591,11 @@ func set_animation(new_anim):
 		#pass
 	#if new_anim == "moving":
 	$Char3D.start_animation(new_anim)
+
+func set_look_at_position(pos) -> void:
+	# Always stay vertical
+	pos.y = 0
+	# Rotate to global frame
+	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	# Look at global position
+	$Char3D.look_at(pos, Vector3.UP, true)
