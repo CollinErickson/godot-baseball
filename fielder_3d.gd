@@ -15,6 +15,7 @@ var time_last_began_holding_ball
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var ball = get_tree().get_first_node_in_group("ball")
+var animation = "idle"
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -43,8 +44,13 @@ func reset() -> void:
 	start_throw_base = null
 	start_throw_fielder = null
 	start_throw_key_check_release = null
+	throw_ready = false
+	throw_ready_success = true
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
+	
+	$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
+	animation = "idle"
 	
 	
 
@@ -111,12 +117,20 @@ func _physics_process(delta: float) -> void:
 	if (assignment in ["cover", "ball_click", "ball_carry"]) or (assignment == 'ball' and not user_is_pitching_team):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
+		# Face target
+		#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
+		if distance_from_target > 0:
+			$Char3D.look_at(to_global(assignment_pos), Vector3.UP, true)
+		elif position.distance_squared_to(ball.position) > 1e-12:
+			$Char3D.look_at(to_global(ball.position), Vector3.UP, true)
+
 		#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
 		if distance_can_move < distance_from_target:
 			# Can't reach it, move full distance. Don't move vertically
 			var direction_unit_vec = (assignment_pos - position).normalized()
 			position.x += delta * SPEED * direction_unit_vec.x
 			position.z += delta * SPEED * direction_unit_vec.z
+			set_animation("running")
 		else:
 			# Can reach it, go to that point and stop
 			#printt('ball distance to fielder is', sqrt((position.x-assignment_pos.x)**2+(position.z-assignment_pos.z)**2))
@@ -137,6 +151,8 @@ func _physics_process(delta: float) -> void:
 				assignment = 'ball'
 			else:
 				printt("Bad assignment, didn't update", assignment)
+			# They have reached assignment, so changed anim to idle
+			set_animation("idle")
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
@@ -204,6 +220,9 @@ func _physics_process(delta: float) -> void:
 				velocity += delta * MAX_ACCEL * move
 				if velocity.length() > SPEED:
 					velocity = velocity.normalized() * SPEED
+			$Char3D.look_at(position + 100*move.rotated(Vector3(0,1,0), 45.*PI/180), Vector3.UP, true)
+			set_animation("running")
+
 			if assignment == 'ball_click':
 				# If moving due to click then user does other movement, switch to that
 				assignment = 'ball'
@@ -214,41 +233,18 @@ func _physics_process(delta: float) -> void:
 				var dvel = delta * MAX_ACCEL * move
 				if dvel.length() > velocity.length(): # Cancel to 0
 					velocity = Vector3.ZERO
+					set_animation("idle")
 				else:
 					velocity += dvel
 		#printt('cam fielder movement', cam.rotation)
 		position += delta * velocity
 		#var ball = get_tree().get_first_node_in_group("ball")
 		#ball.position = position
-		
+	
 	var click_used = false
-	# If holding, check if they throw it or step on base or move
-	if holding_ball:
-		# Update ball position
-		ball.position = position + Vector3(0,1.4,0)
-		
-		# Check if tagging active runner not on base
-		var runners = get_tree().get_nodes_in_group("runners")
-		for runner in runners:
-			if (runner.is_active() and
-				(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
-					(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
-						runner.running_progress - runner.start_base > .15)) and
-				distance_xz(position, runner.position) < 1):
-				runner.runner_is_out()
-				tag_out.emit()
-		
-		# Check if step on base
-		var step_on_base = is_stepping_on_base()
-		#printt(posname, step_on_base)
-		if step_on_base[0]:
-			if not stepping_on_base_with_ball:
-				#print("STEPPING ON BASE!!!", posname, step_on_base)
-				stepped_on_base_with_ball.emit(self, step_on_base[1])
-				stepping_on_base_with_ball = true
-		elif not step_on_base[0]: # Not holding ball
-				stepping_on_base_with_ball = false
-				
+	
+	# Check if user is starting throw. Can be done before holding ball, but only by selected fielder
+	if is_selected_fielder:
 		# Check for throw
 		if user_is_pitching_team:
 			# Check for throwing ball end
@@ -256,6 +252,7 @@ func _physics_process(delta: float) -> void:
 				if Input.is_action_just_released(start_throw_key_check_release):
 					start_throw_end()
 			
+			var new_throw = false
 			# Check for throwing ball start
 			if Input.is_action_just_pressed("throwfirst"):
 				#printt('throw to first')
@@ -294,10 +291,54 @@ func _physics_process(delta: float) -> void:
 							start_throw_ball_func(null, fielder, "click")
 							click_used = true
 							break
-		else: # CPU defense
+	
+	# If holding, check if they throw it or step on base or move
+	if holding_ball:
+		# Update ball position
+		ball.position = position + Vector3(0,1.4,0)
+		
+		# Check if tagging active runner not on base
+		var runners = get_tree().get_nodes_in_group("runners")
+		for runner in runners:
+			if (runner.is_active() and
+				(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
+					(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
+						runner.running_progress - runner.start_base > .15)) and
+				distance_xz(position, runner.position) < 1):
+				runner.runner_is_out()
+				tag_out.emit()
+		
+		# Check if step on base
+		var step_on_base = is_stepping_on_base()
+		#printt(posname, step_on_base)
+		if step_on_base[0]:
+			if not stepping_on_base_with_ball:
+				#print("STEPPING ON BASE!!!", posname, step_on_base)
+				stepped_on_base_with_ball.emit(self, step_on_base[1])
+				stepping_on_base_with_ball = true
+		elif not step_on_base[0]: # Not holding ball
+				stepping_on_base_with_ball = false
+		
+		# Throw is ready
+		if user_is_pitching_team and throw_ready:
+			# Only if throw was completed recently
+			if Time.get_ticks_msec() - throw_ready_time < 1000*2:
+				#printt('THROW IS READY')
+				# Execute throw
+				throw_ball_func(start_throw_base, start_throw_fielder, throw_ready_success)
+				# Clear vars
+				start_throw_base = null
+				start_throw_fielder = null
+				throw_ready = false
+				throw_ready_success = true
+			else:
+				throw_ready = false
+		
+		# CPU defense
+		if not user_is_pitching_team:
 			if assignment != "ball_carry":
 				# Make sure that some frames passed while holding
-				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
+				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.40:
 					#printt('TRYING TO CPU THROW NOW', posname)
 					# Decide what to do with ball
 					# TODO: Don't throw if the throw won't beat them
@@ -379,6 +420,9 @@ func _physics_process(delta: float) -> void:
 			assignment_pos = click_y0_pos
 		click_used = true
 	
+	if assignment == 'wait_to_receive':
+		$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
+	
 var stepping_on_base_with_ball = false
 
 func distance_xz(a:Vector3, b:Vector3) -> float:
@@ -405,6 +449,11 @@ var start_throw_base = null
 var start_throw_fielder = null
 var start_throw_key_check_release = null
 func start_throw_ball_func(base, fielder, key_check_release):
+	# If already throw stored, clear it
+	if throw_ready:
+		throw_ready = false
+	
+	# Setup
 	start_throw_started = true
 	start_throw_base = base
 	start_throw_fielder = fielder
@@ -416,17 +465,22 @@ func start_throw_ball_func(base, fielder, key_check_release):
 	$ThrowBar.position = cam.unproject_position(global_position)
 	$ThrowBar.reset(20, .7)
 
+var throw_ready:bool = false
+var throw_ready_success:bool = true
+var throw_ready_time = null
 func start_throw_end():
 	# Check throw bar
-	var success = $ThrowBar.check_success(true, true)
+	throw_ready_success = $ThrowBar.check_success(true, true)
 	
-	# Actually start throw
-	throw_ball_func(start_throw_base, start_throw_fielder, success)
+	## Actually start throw
+	#throw_ball_func(start_throw_base, start_throw_fielder, success)
+	throw_ready = true
+	throw_ready_time = Time.get_ticks_msec()
 	
 	# End start throw
 	start_throw_started = false
-	start_throw_base = null
-	start_throw_fielder = null
+	#start_throw_base = null
+	#start_throw_fielder = null
 	start_throw_key_check_release = null
 	
 	
@@ -520,3 +574,12 @@ func time_to_reach_point(to:Vector3):
 		#printt('cam fielder movement', cam.rotation)
 		pos += delta * vel
 		time += delta
+
+func set_animation(new_anim):
+	if new_anim == animation:
+		return
+	animation = new_anim
+	#if new_anim == "idle":
+		#pass
+	#if new_anim == "moving":
+	$Char3D.start_animation(new_anim)

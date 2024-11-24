@@ -1,0 +1,44 @@
+# How to import character and animations from Mixamo through Blender into Godot
+
+https://www.youtube.com/watch?v=fq0hR2tIsRk&t=668s&ab_channel=FinePointCGI
+
+- Blender: install the Mixamo root add-on, make sure it's enabled (Preferences -> Add-ons
+
+- New blender: delete objects on right
+
+- File -> Import -> (.glb) -> (select your character .glb file)
+
+- Press 'n' to open the right toolbar, click on Mixamo tab. 
+
+- On the Mixamo tab, select the folder with the animations. Load animations. Make sure there is a bone beneath the character (root bone).
+
+- Delete all the armatures except one that has the body (downward triangle in the object list). Delete hierarchy if more than one have the body.
+
+- Click on Animation tab. Change "Dope sheet" to "Action editor."
+Select an action ("Browse action" in bottom section, icon is almost like a face).
+Click on the character. Press the play button at the bottom and they should do the action.
+
+- To delete duplicate animations: in top right file explorer, click on the image icon and change to "Blender File".
+In the Action section, delete the duplicated animations.
+I filtered for "Armature" (case sensitive), and delete all in the "Action" section.
+
+- File -> Export -> as .glb/.gltf -> save in correct folder as .glb file.
+
+- In Godot, click on .glb file in bottom left. It'll open a big box with the character and options. Change root type to CharacterBody3D.
+Select each animation in the bottom left, change "Loop mode" to "Linear" (walking, running, idle), "None" (jump, throw, turn), or "Pingpong" (idle).
+Reimport.
+
+- In bottom left, right click on character glb file and pick "New Inherited Scene".
+
+- Click on AnimationPlayer, pick an animation, click play, and view on 3D page. They should walk forward.
+We don't want them to walk forward, we want to do root motion.
+
+- Right click on Character node, add child node AnimationTree. On the right side, set "Anim player" to be the AnimationPlayer node.
+Change Tree Root to a state machine.
+Click RootMotion -> Track, assign to be the root bone (mixamorig_Root).
+
+- Add a RootMotionView node to the character, set Animation Path for that node to be the animation tree. You should see grid movement.
+
+- On bottom, click on AnimationTree, add nodes and links. Link Start to Idle, and Idle both directions to a BlendSpace2D.
+On those links in Advance - Condition add "moving" for the link that leaves idle and "idle" for the link that enters idle.
+

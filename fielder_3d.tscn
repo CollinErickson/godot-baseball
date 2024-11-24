@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://d3vo8o7aa5kqp"]
+[gd_scene load_steps=8 format=3 uid="uid://d3vo8o7aa5kqp"]
 
 [ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="3_mscjq"]
 [ext_resource type="PackedScene" uid="uid://dmcpm2vuvwdu8" path="res://scenes/throw_bar.tscn" id="4_qkgbs"]
+[ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="5_h61vg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_util4"]
 atlas = ExtResource("2_sqr5y")
@@ -24,6 +25,7 @@ animations = [{
 script = ExtResource("1_bfowq")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+visible = false
 offset = Vector2(0, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_8dfmq")
@@ -38,5 +40,7 @@ outer_radius = 1.5
 color = Color(1, 1, 1, 1)
 
 [node name="ThrowBar" parent="." instance=ExtResource("4_qkgbs")]
+
+[node name="Char3D" parent="." instance=ExtResource("5_h61vg")]
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://cpobb8pjdcvp4"]
+[gd_scene load_steps=7 format=3 uid="uid://cpobb8pjdcvp4"]
 
 [ext_resource type="Script" path="res://runner_3d.gd" id="1_lpabj"]
 [ext_resource type="Texture2D" uid="uid://bqbwl8hnx3i8x" path="res://sprites/batter.png" id="2_cutj8"]
+[ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_tnlrt"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0lpuj"]
 atlas = ExtResource("2_cutj8")
@@ -25,6 +26,7 @@ viewport_path = NodePath("SubViewport")
 script = ExtResource("1_lpabj")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+visible = false
 offset = Vector2(0, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_jwoye")
@@ -42,3 +44,5 @@ offset_left = 1100.0
 offset_right = 1155.0
 offset_bottom = 55.0
 texture = SubResource("ViewportTexture_8symy")
+
+[node name="Char3D" parent="." instance=ExtResource("3_tnlrt")]

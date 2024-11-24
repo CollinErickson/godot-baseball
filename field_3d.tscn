@@ -427,6 +427,7 @@ color = Color(0.640704, 0.0660575, 0.437794, 1)
 
 [node name="AJ" parent="Headon" instance=ExtResource("16_0nsii")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1, 0, 3)
+visible = false
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 

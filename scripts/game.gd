@@ -1,7 +1,7 @@
 extends Control
 
 # Game variables
-var outs_per_inning:int = 1
+var outs_per_inning:int = 3
 var strikes_per_pa:int = 3
 var balls_per_pa:int = 4
 

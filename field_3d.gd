@@ -456,9 +456,9 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					vla = -15
-					hla = 0
-					exitvelo = 15
+					#vla = -15
+					#hla = 0
+					#exitvelo = 15
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					ball3d.velocity.x = 0
 					ball3d.velocity.y = 0
@@ -497,8 +497,8 @@ func _process(delta: float) -> void:
 					mgl.visible = true
 					mgl.set_process(true)
 					
-					# Testing 3D char
-					$Headon/AJ/AnimationTree.set("parameters/conditions/moving", true)
+					## Testing 3D char
+					#$Headon/AJ/AnimationTree.set("parameters/conditions/moving", true)
 					
 					
 				else:
@@ -612,8 +612,8 @@ func _process(delta: float) -> void:
 	cam = get_viewport().get_camera_3d()
 	var ball_viewport_2d_position = cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position)
 	var viewport_size = get_viewport().size
-	if randf_range(0,1)< .1:
-		printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position), get_viewport().size, cam.rotation)
+	#if randf_range(0,1)< .1:
+		#printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position), get_viewport().size, cam.rotation)
 	if ball_in_play:
 		var rotate_speed = 0.1
 		var rot_axis_y = cam.rotation
