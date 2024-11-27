@@ -82,8 +82,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			runner.set_runner(runner3)
 		else:
 			assert(runner.start_base == 0)
-	$Headon/Batter3D.reset()
-	$Headon/Pitcher3D.reset()
+	$Headon/Batter3D.reset(batting_team.color_primary)
+	$Headon/Pitcher3D.reset(fielding_team.color_primary)
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false

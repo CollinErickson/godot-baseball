@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://cluomdr4nxc7v"]
+[gd_scene load_steps=12 format=3 uid="uid://cluomdr4nxc7v"]
 
 [ext_resource type="Script" path="res://batter_3d.gd" id="1_ot85n"]
+[ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_uhmnc"]
 [ext_resource type="Texture2D" uid="uid://b1em3xy0pbuq5" path="res://sprites/batter4.png" id="3_xkgqo"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w2rp2"]
@@ -71,6 +72,7 @@ pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_yjum4")
 
 [node name="AnimatedSprite3DIdle" type="AnimatedSprite3D" parent="."]
+visible = false
 offset = Vector2(80, 160)
 pixel_size = 0.006
 sprite_frames = SubResource("SpriteFrames_rsy1c")
@@ -78,5 +80,7 @@ autoplay = "default"
 frame_progress = 0.00390523
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="Char3D" parent="." instance=ExtResource("3_uhmnc")]
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

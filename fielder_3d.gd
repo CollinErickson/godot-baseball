@@ -512,8 +512,8 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			throw_ball.emit(base, self, null, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
-				# Change animation to idle
-				set_animation('idle')
+			# Change animation to idle
+			set_animation('idle')
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
 			holding_ball = false

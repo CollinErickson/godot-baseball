@@ -9,6 +9,7 @@ var input_click = false
 var swingx = false
 var swingy = false
 var swing_inzone_duration = 0.15
+var animation = "idle"
 
 var user_is_batting_team
 var is_frozen:bool = false
@@ -18,7 +19,7 @@ func freeze() -> void:
 	visible = false
 	set_process(false)
 
-func reset() -> void:
+func reset(color:Color) -> void:
 	is_frozen = false
 	visible = true
 	set_process(true)
@@ -35,6 +36,14 @@ func reset() -> void:
 	get_node('AnimatedSprite3D').visible = false
 	get_node('AnimatedSprite3DIdle').visible = true
 	
+	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
+	set_look_at_position(Vector3(0,0,100))
+	#$Char3D/charnode/AnimationTree.set("parameters/conditions/swing", false)
+	set_animation("idle")
+	set_animation("batter_idle")
+	$Char3D.set_color(color)
+
+	
 
 func begin_swing():
 	print('Starting swing in batter_3d:_process')
@@ -44,12 +53,19 @@ func begin_swing():
 	get_node("AnimatedSprite3DIdle").visible = false
 	get_node("AnimatedSprite3DIdle").set_process(false)
 	
+	set_animation('swing')
+	
 	# Move to next frame
 	get_node('AnimatedSprite3D').set_frame(1)
 	swing_elapsed_sec = 0
 	swing_state = 'inzone'
 
 func _process(delta: float) -> void:
+	#if randf_range(0,1) < .04:
+		#printt('batter process conditions',
+		#$Char3D/charnode/AnimationTree.get("parameters/conditions/batter_idle"),
+		#$Char3D/charnode/AnimationTree.get("parameters/conditions/swing"),
+		#$Char3D/charnode/AnimationTree.get("parameters/conditions/idle"))
 	if is_frozen:
 		return
 	if (not swing_started and not swing_done and 
@@ -98,3 +114,20 @@ func _on_timer_timeout() -> void:
 		begin_swing()
 	else:
 		printerr('bad 9012412')
+
+func set_animation(new_anim):
+	if new_anim == animation:
+		return
+	animation = new_anim
+	#if new_anim == "idle":
+		#pass
+	#if new_anim == "moving":
+	$Char3D.start_animation(new_anim)
+
+func set_look_at_position(pos) -> void:
+	# Always stay vertical
+	pos.y = 0
+	# Rotate to global frame
+	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	# Look at global position
+	$Char3D.look_at(pos, Vector3.UP, true)

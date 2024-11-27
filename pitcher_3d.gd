@@ -20,7 +20,7 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
-func reset() -> void:
+func reset(_color:Color) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)

@@ -28,9 +28,17 @@ func start_animation(anim_name:String) -> void:
 	if anim_name == "idle":
 		$charnode/AnimationTree.set("parameters/conditions/moving", false)
 		$charnode/AnimationTree.set("parameters/conditions/idle", true)
+		$charnode/AnimationTree.set("parameters/conditions/swing", false)
 	elif anim_name == "running":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		$charnode/AnimationTree.set("parameters/conditions/moving", true)
+	elif anim_name == "batter_idle":
+		$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		$charnode/AnimationTree.set("parameters/conditions/batter_idle", true)
+	elif anim_name == "swing":
+		$charnode/AnimationTree.set("parameters/conditions/batter_idle", false)
+		$charnode/AnimationTree.set("parameters/conditions/swing", true)
+		$charnode/AnimationTree.set("parameters/conditions/idle", true)
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 
