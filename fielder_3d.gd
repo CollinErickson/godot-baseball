@@ -3,9 +3,11 @@ extends CharacterBody3D
 @export_group("Baseball")
 @export var posname: String
 
-const SPEED = 8.0
-const MAX_ACCEL = 100.0
-const max_throw_speed = 30.0
+const SPEED:float = 8.0
+const MAX_ACCEL:float = 100.0
+const max_throw_speed:float = 30.0
+const catch_radius_xz:float = 2
+const catch_max_y:float = 2.5
 
 var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos
@@ -114,7 +116,7 @@ func _physics_process(delta: float) -> void:
 	if not assignment:
 		return
 	#print("Moving fielder to ball!!!!!!")
-	# Move fielder
+	# Move fielder to their assignment
 	#if assignment in ["ball", "cover"]:
 	if (assignment in ["cover", "ball_click", "ball_carry"]) or (assignment == 'ball' and not user_is_pitching_team):
 		var distance_from_target = distance_xz(position, assignment_pos)
@@ -165,7 +167,7 @@ func _physics_process(delta: float) -> void:
 		if ball.state in ["ball_in_play", "thrown"]:
 			#printt('ball here', ball.position)
 			#if ball.state =='thrown'
-			var distance_from_ball = distance_xz(position, ball.position)
+			var distance_from_ball_xz = distance_xz(position, ball.position)
 			#var throw_progress = 1
 			#if ball.throw_start_pos != null:
 				#throw_progress = (distance_xz(ball.throw_start_pos, ball.position) /
@@ -179,10 +181,10 @@ func _physics_process(delta: float) -> void:
 			#if posname=='P':
 			#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
 			#printt('fielder check next', distance_from_ball, ball.position.y, ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
-			if (distance_from_ball < 2 and ball.position.y < 2.5 and 
+			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
 				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 				(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-				printt('FIELD BALL', posname, distance_from_ball, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
+				printt('FIELD BALL', posname, distance_from_ball_xz, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
 				ball.position = position
 				ball.position.y = 1.4
 				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
@@ -471,7 +473,7 @@ func start_throw_ball_func(base, fielder, key_check_release):
 	$ThrowBar.visible = true
 	var cam = get_viewport().get_camera_3d()
 	$ThrowBar.position = cam.unproject_position(global_position)
-	$ThrowBar.reset(20, .7)
+	$ThrowBar.reset(50, .5)
 
 var throw_ready:bool = false
 var throw_ready_success:bool = true

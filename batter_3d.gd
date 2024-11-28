@@ -39,9 +39,12 @@ func reset(color:Color) -> void:
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
 	set_look_at_position(Vector3(0,0,100))
 	#$Char3D/charnode/AnimationTree.set("parameters/conditions/swing", false)
-	set_animation("idle")
+	#set_animation("idle")
 	set_animation("batter_idle")
+	#set_animation("swing")
 	$Char3D.set_color(color)
+	#$Char3D/charnode/AnimationPlayer.speed_scale=.1
+	#$Char3D/charnode/Animation.set('parameters/TimeScale/scale', 10)
 
 	
 
@@ -116,6 +119,7 @@ func _on_timer_timeout() -> void:
 		printerr('bad 9012412')
 
 func set_animation(new_anim):
+	printt('Batter setting animation:', new_anim)
 	if new_anim == animation:
 		return
 	animation = new_anim

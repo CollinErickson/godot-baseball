@@ -11,8 +11,10 @@ var pitch_hand = "L"
 var user_is_pitching_team
 var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
+var animation = "idle"
 
 var ball_3d_scene = load("res://ball_3d.tscn")
+@onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -20,7 +22,7 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
-func reset(_color:Color) -> void:
+func reset(color:Color) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -31,6 +33,11 @@ func reset(_color:Color) -> void:
 	pitch_frame = 0
 	pitch_type = "FB"
 	$AnimatedSprite3D.set_frame(0)
+	
+	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
+	set_look_at_position(Vector3(0,0,0))
+	set_animation("idle")
+	$Char3D.set_color(color)
 
 
 func get_spin_acceleration_and_speed():
@@ -58,8 +65,14 @@ func begin_pitch():
 	#printt('BEGINNING PITCH IN PITCHER')
 	pitch_started.emit(pitch_x, pitch_y)
 	#printt('signal was emitted.......')
+	
+	set_animation('pitch')
 
 func _physics_process(delta: float) -> void:
+	#if randf_range(0,1) < .04:
+		#printt('pitcher process conditions',
+		#$Char3D/charnode/AnimationTree.get("parameters/conditions/pitch"),
+		#$Char3D/charnode/AnimationTree.get("parameters/conditions/idle"))
 	if is_frozen:
 		return
 	
@@ -234,3 +247,22 @@ var pitch_y
 func select_pitch_location():
 	pitch_x = randf_range(-9,9)/12/3
 	pitch_y = randf_range(0.5,1.2)
+
+
+func set_animation(new_anim):
+	if new_anim == animation:
+		return
+	animation = new_anim
+	#if new_anim == "idle":
+		#pass
+	#if new_anim == "moving":
+	$Char3D.start_animation(new_anim)
+	pitcher_fielder_node.set_animation(new_anim)
+
+func set_look_at_position(pos) -> void:
+	# Always stay vertical
+	pos.y = 0
+	# Rotate to global frame
+	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	# Look at global position
+	$Char3D.look_at(pos, Vector3.UP, true)
