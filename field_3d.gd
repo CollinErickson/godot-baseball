@@ -18,6 +18,7 @@ var user_is_pitching_team = true
 var user_is_batting_team = !true
 
 var is_frozen: bool = false
+var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 
 @onready var runners = [
 	get_node('Headon/Runners/Runner3DHome'),
@@ -131,6 +132,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#_ready()
 	# Align fielders with the camera
 	get_tree().call_group('fielders', 'align_sprite')
+	# Set this to be an old time
+	time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 	
 	# Calculate max force outs left
 	max_force_outs_at_start = 99
@@ -268,7 +271,8 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	#var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
 		# Check for tag up force outs
-		if base == runner.start_base and runner.exists_at_start and runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
+		if (base == runner.start_base and runner.exists_at_start and runner.is_active() and
+			runner.needs_to_tag_up and not runner.tagged_up_after_catch):
 			runner.runner_is_out()
 			#outs_on_play += 1
 			#get_node("FlashText").new_text("force out, didn't tag up!", 3)
@@ -462,7 +466,7 @@ func _process(delta: float) -> void:
 					hla = -45 + 90 * inzone_prop
 					#vla = 75
 					#hla = .45
-					#exitvelo = 55
+					#exitvelo = 15
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					# Start with velo all in Z direction, then rotate with vla/hla
 					ball3d.velocity.x = 0
@@ -555,7 +559,8 @@ func _process(delta: float) -> void:
 				for runner in runners:
 					runner.send_runner(-1)
 		else:
-			if randf_range(0,1) < .1:
+			#if randf_range(0,1) < .1:
+			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 100:
 				decide_automatic_runners_actions()
 	
 	# Adjust camera
@@ -616,7 +621,8 @@ func _process(delta: float) -> void:
 	var ball_viewport_2d_position = cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position)
 	var viewport_size = get_viewport().size
 	#if randf_range(0,1)< .1:
-		#printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position), get_viewport().size, cam.rotation)
+		#printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position),
+		#       get_viewport().size, cam.rotation)
 	if ball_in_play:
 		# Using inertia instead of changing angle based on single frames reduces jitter
 		rotate_camera_inertia = .95 * rotate_camera_inertia
@@ -705,7 +711,7 @@ func find_fielder_to_intercept_ball() -> Array:
 					#hit_bounce_time = elapsed_time + istep * delta_
 	# Check every ~.5 second to see if each fielder can reach the ball
 	var iii = 0
-	var numsteps = 5
+	var numsteps = 1
 	var delta = 1./30
 	var elapsed_time = 0
 	var found_someone = false
@@ -720,10 +726,9 @@ func find_fielder_to_intercept_ball() -> Array:
 			# Loop over fielder, see if can reach ball
 			for ifielder in range(len(fielders)):
 				var fielderi = fielders[ifielder]
-				var ballgrounddist = sqrt((fielderi.position.x - tmp_ball.position.x)**2 +
-					(fielderi.position.z - tmp_ball.position.z)**2)
+				var ballgrounddist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
 				# TODO: fielders don't run at constant speed
-				var timetoreach = ballgrounddist / fielderi.SPEED
+				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
 				#if fielderi.posname == 'C':
 				#	print('checking fielder time', timetoreach, fielderi.time_to_reach_point(tmp_ball.position))
 				
@@ -850,7 +855,8 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 					fielders[i].position,
 					fielders[i].base_positions[base-1]
 				) < 1:
-					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname, base, exclude_fielder_indexes, exclude_fielder_posname_array)
+					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname,
+							base, exclude_fielder_indexes, exclude_fielder_posname_array)
 					min_time = 0
 					min_i = i
 					min_is_excluded = true
@@ -1079,6 +1085,7 @@ func coalesce(x1, x2=null, x3=null, x4=null, x5=null, x6=null, x7=null, x8=null,
 	return coalesce_array([x1, x2, x3, x4, x5, x6, x7, x8, x9, x10])
 
 func decide_automatic_runners_actions():
+	time_last_decide_automatic_runners_actions = Time.get_ticks_msec()
 	#print("Running decide_automatic_runners_actions")
 	# If someone is holding ball:
 	#	If they need to tag up, go back.
@@ -1123,11 +1130,14 @@ func decide_automatic_runners_actions():
 	else:
 		# Ball in play or thrown
 		fftib = find_fielder_to_intercept_ball()
+		# fftib:
+		#[found_someone, hit_bounced, min_ifielder, intercept_position,
+			#elapsed_time, hit_bounced_position, hit_bounced_time]
 		seconds_to_intercept = fftib[4]
 
 
 	# 1. If fielded and need to tag up, do that.
-	if fielder_with_ball:
+	if fielder_with_ball or outs_on_play > 0.5:
 		for i in range(len(runners)):
 			if i > .5 and runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
 				decisions[i] = coalesce(decisions[i], -1)
@@ -1135,12 +1145,34 @@ func decide_automatic_runners_actions():
 		
 	# 2. If ball can be caught, go back. TODO: halfway, not back
 	if fielder_with_ball == null:
-		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5:
+		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5 and outs_on_play < 0.5:
 				for i in range(len(runners)):
 					if i > .5 and runners[i].is_active():
 						#printt('SENDING BACK, CAN CATCH!!!', i)
 						decisions[i] = coalesce(decisions[i], -1)
-						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
+						#decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
+						# Send proportion of the way that they can make it safely back
+						var prop_to_run:float = 0
+						var time_for_ball_to_get_to_start_base = (
+							max(seconds_to_intercept - 1./60, 0) +
+							fielders[fftib[2]].distance_xz(
+								fftib[3], # intercept position
+								runners[i].base_positions[runners[i].start_base-1]
+							) / fielders[fftib[2]].max_throw_speed
+						)
+						# This calculates how far they could be right now and be safe,
+						#  but not where they should go to while remaining safe.
+						# Baserunner decision is every 0.1 seconds, so calculate where they should
+						#  be at that time plus a small margin
+						prop_to_run = max(0, time_for_ball_to_get_to_start_base - 0.13) * runners[i].SPEED / 30
+						if abs(runners[i].start_base-3)<1e-9:
+							printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
+								seconds_to_intercept, runners[i].SPEED,
+								'progress:', runners[i].running_progress - runners[i].start_base,
+								Time.get_ticks_msec())
+						# Times 0.9 makes them a little conservative
+						prop_to_run = min(prop_to_run, runners[i].start_base + 1) * 0.9
+						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + prop_to_run)
 		
 	# 3. If they are a force out and not at next base, go there
 	for i in range(len(runners)):
@@ -1319,9 +1351,10 @@ func decide_automatic_runners_actions():
 	
 	# Adjust them so that two aren't sent to the same base (if trail runner is faster)
 	#printt('decision bases before', decision_bases)
-	var lead = null
+	var lead = null # target base of active runner in front of runner i
 	for i in [3,2,1,0]:
 		if decisions[i] != null:
+			# If lead runner is going home (4), it doesn't prevent runners behind
 			if lead != null and lead < 3.99999:
 				# TODO: don't let trail runner go home if lead runner is only going 
 				#      b/c of force out. It will make both out.

@@ -1,20 +1,21 @@
 extends CharacterBody3D
 
 
-var SPEED = 8.0 # 8 is avg
+var SPEED = 8.0 # yds/sec. 8 is avg
 
 @export_category("Baseball")
 @export var start_base : int
 
-var is_running = false
-var running_progress
-var exists_at_start = true
-var out_on_play = false
-var scored_on_play = false
-var tagged_up_after_catch = true
-var max_running_progress
-var target_base
-var needs_to_tag_up = false
+var is_running:bool = false
+var running_progress:float
+var exists_at_start:bool = true
+var out_on_play:bool = false
+var scored_on_play:bool = false
+var tagged_up_after_catch:bool = true
+var max_running_progress:float = -1
+# 1/2/3/4 for bases, but can be inbetween (halfway on fly ball, no other reason)
+var target_base:float = -1
+var needs_to_tag_up:bool = false
 var able_to_score:bool = false
 var reached_next_base:bool = false
 var can_be_force_out_before_play:bool = false
@@ -23,7 +24,7 @@ var runners_before :Array = []
 var runners_after :Array = []
 var runner_before = null
 var runner_after = null
-var animation = "idle"
+var animation:String = "idle"
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -46,8 +47,6 @@ func reset(color) -> void:
 	out_on_play = false
 	scored_on_play = false
 	tagged_up_after_catch = true
-	max_running_progress = null
-	target_base = null
 	needs_to_tag_up = false
 	max_running_progress = running_progress
 	target_base = start_base + 1
@@ -123,7 +122,7 @@ func _physics_process(delta: float) -> void:
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			running_progress = target_base
-			max_running_progress = running_progress
+			max_running_progress = max(max_running_progress, running_progress)
 			is_running = false
 			set_animation('idle')
 		else: # Not crossing base
@@ -206,7 +205,7 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	else:
 		set_animation('idle')
 
-func send_runner_to_base(base:int) -> void:
+func send_runner_to_base(base:float) -> void:
 	#printt('in runner send_runner_to_base', start_base, base)
 	target_base = base
 	if abs(target_base - running_progress) < 1e-12:
@@ -288,7 +287,7 @@ func set_look_at():
 		else: # Running to Home
 			lookat += Vector3(-30,0,30)
 	elif animation == "running":
-		lookat = base_positions[min(target_base, 4) - 1]
+		lookat = base_positions[min(round(target_base), 4) - 1]
 		#printt('set_look_at()', start_base, lookat)
 	else:
 		push_error("Error in runner_3d.gd, set_look_at()", animation)

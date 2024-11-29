@@ -184,7 +184,9 @@ func _physics_process(delta: float) -> void:
 			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
 				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 				(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-				printt('FIELD BALL', posname, distance_from_ball_xz, position, ball.position, Time.get_ticks_msec() - ball.time_last_thrown, ball.throw_progress)
+				printt('FIELD BALL', posname, distance_from_ball_xz, position,
+					ball.position, Time.get_ticks_msec() - ball.time_last_thrown,
+					ball.throw_progress, Time.get_ticks_msec())
 				ball.position = position
 				ball.position.y = 1.4
 				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)

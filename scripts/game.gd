@@ -35,9 +35,9 @@ func _ready() -> void:
 		user_is_away_team = true
 		user_is_home_team = false
 	batter = get_player(50)
-	#runner1 = get_player(50)
-	#runner2 = get_player(50)
-	#runner3 = get_player(99)
+	runner1 = get_player(50)
+	runner2 = get_player(50)
+	runner3 = get_player(99)
 	reset_field()
 	update_scorebug()
 
