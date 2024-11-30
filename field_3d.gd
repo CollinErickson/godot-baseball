@@ -1104,35 +1104,21 @@ func coalesce(x1, x2=null, x3=null, x4=null, x5=null, x6=null, x7=null, x8=null,
 func decide_automatic_runners_actions():
 	time_last_decide_automatic_runners_actions = Time.get_ticks_msec()
 	#print("Running decide_automatic_runners_actions")
-	# If someone is holding ball:
-	#	If they need to tag up, go back.
-	#	If they need are a force out, go forward.
-	#	Calculate time for them to reach next base and previous base, and how
-	#		long it will take for the throw to reach there.
-	#	If they can reach their next base before throw will reach and all
-	#		runners in front will too (or have base between), go forward.
-	#	If not, choose between forward/backward based on time margin.
-	# If ball is in play:
-	#	Find time for ball to be fielded, check whether it will have bounced
-	#	If it won't have bounced, go back.
-	# 	Then follow same logic as above
-	# Rearrange those steps to share third step.
-	# Calculate with throw or run to base.
-	# Hard part may be getting all runners to "agree."
-	#
-	# TODO: Reformulate to avoid code repetition
+	
 	# 1. If fielded and need to tag up, do that.
-	# 2. If ball can be caught, go halfway and stop.
+	# 2. If ball can be caught:
+	#  a. If can reach next base safely, wait on start base to tag up.
+	#  b. Else, go as far as is safe and stop.
 	# 3. If they are a force out and not at next base, go there
 	# 4. Go to next next base if possible.
 	# 5. Go to next base if possible.
 	# 6. Stay on current base if possible.
 	# 7. Go to previous base if possible.
 	# 8. Go to closer of next and previous base.
-
+	# After, make sure that the decisions make sense as a whole, to 
+	#  avoid runners trying to pass others.
 	
 	var ball = get_node("Headon/Ball3D")
-	#var runners = get_tree().get_nodes_in_group('runners')
 	var fielders_with_ball = get_tree().get_nodes_in_group('fielder_holding_ball')
 	var decisions = [null, null, null, null]
 	var decision_bases = [null, null, null, null]
@@ -1160,12 +1146,29 @@ func decide_automatic_runners_actions():
 				decisions[i] = coalesce(decisions[i], -1)
 				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
-	# 2. If ball can be caught, go back. TODO: halfway, not back
+	# 2. If ball can be caught:
+	#  a. If can reach next base safely, wait on start base to tag up.
+	#  b. Else, go as far as is safe and stop.
 	if fielder_with_ball == null:
 		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5 and outs_on_play < 0.5:
 				for i in range(len(runners)):
-					if i > .5 and runners[i].is_active():
+					if i > .5 and runners[i].is_active() and decisions[i]==null:
 						#printt('SENDING BACK, CAN CATCH!!!', i)
+						# Check if can tag up
+						var time_for_throw_to_get_to_next_base = (
+							fielders[fftib[2]].distance_xz(
+								fftib[3], # intercept position
+								runners[i].base_positions[runners[i].start_base]
+							) / fielders[fftib[2]].max_throw_speed
+						)
+						#printt('ON DECISION STEP 2', i, time_for_throw_to_get_to_next_base > 30./runners[i].SPEED,
+								#time_for_throw_to_get_to_next_base , 30./runners[i].SPEED)
+						if time_for_throw_to_get_to_next_base > 30./runners[i].SPEED:
+							decisions[i] = coalesce(decisions[i], -1)
+							decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
+							# TODO: Make sure runner can get back to tag up in time
+						
+						# Not really using decisions anymore, but something will be set here
 						decisions[i] = coalesce(decisions[i], -1)
 						#decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 						# Send proportion of the way that they can make it safely back
@@ -1181,7 +1184,7 @@ func decide_automatic_runners_actions():
 						#  but not where they should go to while remaining safe.
 						# Baserunner decision is every 0.1 seconds, so calculate where they should
 						#  be at that time plus a small margin
-						prop_to_run = max(0, time_for_ball_to_get_to_start_base - 0.13) * runners[i].SPEED / 30
+						prop_to_run = max(0, time_for_ball_to_get_to_start_base - 0.13) * runners[i].SPEED / 30.
 						if abs(runners[i].start_base-3)<1e-9:
 							printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
 								seconds_to_intercept, runners[i].SPEED,
@@ -1193,7 +1196,7 @@ func decide_automatic_runners_actions():
 		
 	# 3. If they are a force out and not at next base, go there
 	for i in range(len(runners)):
-		if runners[i].is_active() and runners[i].can_be_force_out():
+		if runners[i].is_active() and runners[i].can_be_force_out() and decisions[i]==null:
 			#printt('Runner can be force out', i)
 			decisions[i] = coalesce(decisions[i], 1)
 			decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + 1)
@@ -1202,7 +1205,7 @@ func decide_automatic_runners_actions():
 	if fielder_with_ball == null:
 		fielder_with_ball = fielders[fftib[2]]
 	for i in range(len(runners)):
-		if runners[i].is_active():
+		if runners[i].is_active() and decisions[i]==null:
 			# 4. Go to next next base if possible.
 			if runners[i].running_progress - floor(runners[i].running_progress) > .7 and floor(runners[i].running_progress) < 2.5:
 				var next_next_base = ceil(runners[i].running_progress) + 1
