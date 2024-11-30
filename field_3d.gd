@@ -122,6 +122,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_in_play_state = null
 	ball_in_play_state_time = 0
 	ball_hit_bounced = false
+	ball_caught_in_air = false
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
 	outs_per_inning = outs_per_inning_
@@ -170,6 +171,7 @@ func _on_ball_fielded_by_fielder(_fielder):
 	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
+		ball_caught_in_air = true
 		printt("fly Out recorded!!!")
 		#outs_on_play += 1
 		#get_node("FlashText").new_text("Fly out!", 3)
@@ -379,6 +381,7 @@ func _ready() -> void:
 	for runner in runners:  
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
 		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
+		runner.connect("tag_up_signal", _on_tag_up_by_runner)
 		
 	
 	# Test mesh array
@@ -464,9 +467,9 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					#vla = 75
-					#hla = .45
-					#exitvelo = 15
+					vla = 45
+					hla = 19
+					exitvelo = 38
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					# Start with velo all in Z direction, then rotate with vla/hla
 					ball3d.velocity.x = 0
@@ -1026,6 +1029,7 @@ func _on_ball_3d_foul_ball() -> void:
 	play_done('Foul ball!')
 
 var ball_hit_bounced:bool = false
+var ball_caught_in_air:bool = false
 func _on_ball_3d_hit_bounced_signal() -> void:
 	printt('In field, _on_ball_3d_hit_bounced_signal, ball_hit_bounced = ', ball_hit_bounced)
 	ball_hit_bounced = true
@@ -1038,9 +1042,21 @@ func _on_reached_next_base_by_runner() -> void:
 	# Recalculate max force outs left
 	update_max_force_outs_left()
 
+func _on_tag_up_by_runner() -> void:
+	print('IN TAG UP SIGNAL IN FIELD')
+	# Recalculate max force outs left
+	update_max_force_outs_left()
+
 func update_max_force_outs_left() -> void:
 	printt('In update_max_force_outs_left...')
-	if ball_hit_bounced: # Force out each base if runner exists and all before it
+	if ball_caught_in_air:
+		print('.... ball caught in air')
+		max_force_outs_left = 0
+		# Number of active runners that haven't tagged up
+		for i in [1,2,3]:
+			if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
+				max_force_outs_at_start += 1
+	elif ball_hit_bounced: # Force out each base if runner exists and all before it
 		max_force_outs_left = 0
 		if not $Headon/Runners/Runner3DHome.out_on_play:
 			if not $Headon/Runners/Runner3DHome.reached_next_base:
@@ -1070,9 +1086,10 @@ func check_runners_able_to_score():
 	# Able to score means they won't have to return (ball has bounced) and the
 	#  max number of force outs left isn't enough to negate their scoring.
 	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
-	if outs_before_play + outs_on_play + max_force_outs_left < outs_per_inning - 0.5 and ball_hit_bounced:
+	if (outs_before_play + outs_on_play + max_force_outs_left < outs_per_inning - 0.5 and
+		(ball_hit_bounced or ball_caught_in_air)):
 		printt('RUNNERS CAN SCORE NOW')
-		for runner in get_tree().get_nodes_in_group('runners'):
+		for runner in runners:
 			runner.able_to_score = true
 
 func coalesce_array(x:Array):

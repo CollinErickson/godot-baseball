@@ -82,14 +82,16 @@ func _ready() -> void:
 		elif runner.start_base > start_base:
 			runners_after.append(runner)
 
+signal tag_up_signal
 func _physics_process(delta: float) -> void:
 	if is_frozen or out_on_play or scored_on_play:
 		return
 	
 	#print('running needs to tag', needs_to_tag_up, start_base)
 	# Tag up
-	if needs_to_tag_up and running_progress - start_base < 1e-8:
+	if not tagged_up_after_catch and needs_to_tag_up and running_progress - start_base < 1e-8:
 		tagged_up_after_catch = true
+		tag_up_signal.emit()
 	# Base running
 	if is_running:
 		#printt('is running, running progress', running_progress, start_base, target_base)
