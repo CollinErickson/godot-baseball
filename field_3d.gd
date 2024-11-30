@@ -265,6 +265,19 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	
 	# Set new assignments
 	assign_fielders_to_cover_bases([], null)
+	
+	# Set new targeted fielder
+	if to_fielder != null:
+		to_fielder.set_targeted_fielder()
+	else:
+		# Thrown to base. Find nearest fielder to target. Should
+		var nearest_fielder = null
+		var nearest_fielder_dist = 1e12
+		for fielder_ in fielders:
+			if fielder_.distance_xz(fielder_.position, target) < nearest_fielder_dist:
+				nearest_fielder_dist = fielder_.distance_xz(fielder_.position, target)
+				nearest_fielder = fielder_
+		nearest_fielder.set_targeted_fielder()
 
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):

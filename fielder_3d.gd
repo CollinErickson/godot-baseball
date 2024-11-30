@@ -39,6 +39,7 @@ func reset(color) -> void:
 	holding_ball = false
 	time_last_began_holding_ball = null
 	remove_from_group('selected_fielder')
+	remove_from_group('targeted_fielder')
 	remove_from_group('fielder_holding_ball')
 	
 	# End start throw
@@ -180,7 +181,8 @@ func _physics_process(delta: float) -> void:
 			#	printt('throw progress', throw_progress, ball.position.y, ball.throw_start_pos)
 			#if posname=='P':
 			#	printt('FIELD BALL???', posname, distance_from_ball, position, ball.position)
-			#printt('fielder check next', distance_from_ball, ball.position.y, ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
+			#printt('fielder check next', distance_from_ball, ball.position.y,
+			#  ball.time_last_thrown, ball.throw_start_pos, ball.throw_progress)
 			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
 				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 				(ball.throw_start_pos==null or ball.throw_progress >= .9)):
@@ -254,10 +256,10 @@ func _physics_process(delta: float) -> void:
 	var click_used = false
 	
 	# Check if user is starting throw. Can be done before holding ball, but only by selected fielder
-	if is_selected_fielder:
+	if is_selected_fielder or is_targeted_fielder:
 		# Check for throw
 		if user_is_pitching_team:
-			# Check for throwing ball end
+			# Check for throwing ball end, this will start throw
 			if start_throw_started:
 				if Input.is_action_just_released(start_throw_key_check_release):
 					start_throw_end()
@@ -539,23 +541,49 @@ func _on_timer_timeout() -> void:
 	if timer_action == "set_visible_true":
 		visible = true
 
-var is_selected_fielder = false
-func set_selected_fielder():
+var is_selected_fielder:bool = false
+var is_targeted_fielder:bool = false # Throw is coming at them, so can start throw but not move
+func set_selected_fielder() -> void:
 	printt('in fielder, set_selected_fielder', posname)
 	# Unselect all other players
 	var selected_fielders = get_tree().get_nodes_in_group("selected_fielder")
 	for fielder in selected_fielders:
 		fielder.set_not_selected_fielder()
+	# Untarget all other players
+	var targeted_fielders = get_tree().get_nodes_in_group("targeted_fielder")
+	for fielder in targeted_fielders:
+		fielder.set_not_targeted_fielder()
 	# Select this player
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
 	get_node("Annulus").visible = true
-	#printt('annulus should be on')
+
+func set_targeted_fielder() -> void:
+	printt('in fielder, set_targeted_fielder', posname)
+	# Unselect all other players
+	var selected_fielders = get_tree().get_nodes_in_group("selected_fielder")
+	for fielder in selected_fielders:
+		fielder.set_not_selected_fielder()
+	# Untarget all other players
+	var targeted_fielders = get_tree().get_nodes_in_group("targeted_fielder")
+	for fielder in targeted_fielders:
+		fielder.set_not_targeted_fielder()
+	# Target this player
+	add_to_group("targeted_fielder")
+	is_targeted_fielder = true
+	# Not putting annulus on targeted players
+	#get_node("Annulus").visible = true
 
 func set_not_selected_fielder():
 	remove_from_group("selected_fielder")
 	is_selected_fielder = false
 	get_node("Annulus").visible = false
+
+func set_not_targeted_fielder():
+	remove_from_group("targeted_fielder")
+	is_targeted_fielder = false
+	#get_node("Annulus").visible = false
+	
 
 func time_to_reach_point(to:Vector3):
 	# Simulate how long it will take to get to a point. 
