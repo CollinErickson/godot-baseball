@@ -69,10 +69,7 @@ func create_random():
 const player_class = preload("res://scenes/player.tscn")
 func get_player(speed:float=randi_range(20,80)) -> Player:
 	var p = player_class.instantiate()
-	var f = ["Nick", "Britt", "Greg", "Troy"]
-	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
-	p.setup(f.pick_random(), l.pick_random(), speed, 39.)
-	#p.print_()
+	p.create_random(speed)
 	return p
 
 func print_():

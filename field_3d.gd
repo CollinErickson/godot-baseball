@@ -73,14 +73,14 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		runner.reset(batting_team.color_primary)
 		if runner.start_base == 0:
 			runner.visible = false
-			runner.set_runner(batter)
+			runner.setup_player(batter)
 			#printt('INVISIBLE RUNNER 0')
 		if runner.start_base == 1:
-			runner.set_runner(runner1)
+			runner.setup_player(runner1)
 		elif runner.start_base == 2:
-			runner.set_runner(runner2)
+			runner.setup_player(runner2)
 		elif runner.start_base == 3:
-			runner.set_runner(runner3)
+			runner.setup_player(runner3)
 		else:
 			assert(runner.start_base == 0)
 	$Headon/Batter3D.reset(batting_team.color_primary)
@@ -324,7 +324,9 @@ func _on_tag_out_by_fielder():
 
 func _on_new_fielder_selected_signal_by_fielder(fielder):
 	assign_fielders_to_cover_bases([], null, [fielder.posname])
-	#pass
+
+func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
+	assign_fielders_to_cover_bases([], null, [fielder.posname])
 
 func test_mesh_array():
 	var surface_array = []
@@ -388,6 +390,7 @@ func _ready() -> void:
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
 		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
+		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
 
 	#var runners = get_tree().get_nodes_in_group('runners')
 	# Set up signals from runners
@@ -464,14 +467,10 @@ func _process(delta: float) -> void:
 			if $Headon/Batter3D.swing_state == "inzone":
 				#if (sz_z - ball3d.position.z)**2 < 1**2:
 				if ball3d.position.z <= sz_z and ball3d.prev_position.z > sz_z:
-					print('CONTACT')
-					contact_done = true
-					ball_in_play = true
-					ball3d.pitch_in_progress = false
-					ball3d.pitch_already_done = true
-					ball_in_play_state = "prereflex"
-					# Zero out spin accel
-					ball3d.spin_acceleration = Vector3()
+					# Ball crossed the strike zone and batter is swinging.
+					# Check if there is actual contact
+					var actual_contact = true
+					
 					# Create ball velocity
 					var exitvelo = randf_range(20,45)
 					var vla = randf_range(-1,1)*20+20
@@ -480,49 +479,75 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
-					vla = 45
-					hla = 19
-					exitvelo = 38
+					var pci:Vector3 = Vector3.ZERO
+					if user_is_batting_team:
+						# Find distance from PCI to ball location
+						pci = $Headon/Bat3D.position
+					else:
+						pci = ball3d.position
+						pci.x += randfn(0, .5)
+						pci.y += randfn(0, .5)
+					# Set vla and exitvelo based on pci
+					var pci_distance_from_ball = fielders[0].distance_xz(pci, ball3d.position)
+					# If PCI wasn't close, it's a swing and miss
+					if pci_distance_from_ball > 1:
+						actual_contact = false
+					vla = 15 + [1,-1].pick_random() * pci_distance_from_ball * 80
+					vla = max(-50, min(80, vla))
+					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
+					# Debugging
+					if !false:
+						vla = -25
+						hla = 0
+						exitvelo = 23.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
-					# Start with velo all in Z direction, then rotate with vla/hla
-					ball3d.velocity.x = 0
-					ball3d.velocity.y = 0
-					ball3d.velocity.z = exitvelo
-					ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
-					ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
-					printt('hit velo vec is', ball3d.velocity)
-					ball3d.state = "ball_in_play"
 					
-					# Start running after .5 seconds
-					var batter = get_node("Headon/Batter3D")
-					batter.timer_action = "start_running_after_hit"
-					batter.get_node("Timer").wait_time = 0.5
-					batter.get_node("Timer").start()
-					
-					# Change camera
-					$TimerCameraChange.wait_time = .3
-					next_camera = $Headon/Cameras/Camera3DHigherHome
-					$TimerCameraChange.start()
-					# Hide strike zone dot at same time
-					ball3d.remove_dot(.3)
-					#$Headon/Camera3DHighHome.current = true
-					# Make ball bigger
-					#ball3d.scale=11*Vector3(1,1,1)
-					
-					# Make catcher visible
-					var catcher = get_node("Headon/Defense/Fielder3DC")
-					catcher.get_node("Timer").wait_time = .5
-					catcher.timer_action = "set_visible_true"
-					catcher.get_node("Timer").start()
-					
-					# Make mouse circle on ground visible
-					var mgl = get_node("Headon/MouseGroundLocation")
-					mgl.visible = true
-					mgl.set_process(true)
-					
-					## Testing 3D char
-					#$Headon/AJ/AnimationTree.set("parameters/conditions/moving", true)
-					
+					if actual_contact:
+						print('CONTACT')
+						contact_done = true
+						ball_in_play = true
+						ball3d.pitch_in_progress = false
+						ball3d.pitch_already_done = true
+						ball_in_play_state = "prereflex"
+						# Zero out spin accel
+						ball3d.spin_acceleration = Vector3()
+						# Start with velo all in Z direction, then rotate with vla/hla
+						ball3d.velocity.x = 0
+						ball3d.velocity.y = 0
+						ball3d.velocity.z = exitvelo
+						ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
+						ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
+						printt('hit velo vec is', ball3d.velocity)
+						ball3d.state = "ball_in_play"
+						
+						# Start running after .5 seconds
+						var batter = get_node("Headon/Batter3D")
+						batter.timer_action = "start_running_after_hit"
+						batter.get_node("Timer").wait_time = 0.5
+						batter.get_node("Timer").start()
+						
+						# Change camera
+						$TimerCameraChange.wait_time = .3
+						next_camera = $Headon/Cameras/Camera3DHigherHome
+						$TimerCameraChange.start()
+						# Hide strike zone dot at same time
+						ball3d.remove_dot(.3)
+						#$Headon/Camera3DHighHome.current = true
+						# Make ball bigger
+						#ball3d.scale=11*Vector3(1,1,1)
+						
+						# Make catcher visible
+						var catcher = get_node("Headon/Defense/Fielder3DC")
+						catcher.get_node("Timer").wait_time = .5
+						catcher.timer_action = "set_visible_true"
+						catcher.get_node("Timer").start()
+						
+						# Make mouse circle on ground visible
+						var mgl = get_node("Headon/MouseGroundLocation")
+						mgl.visible = true
+						mgl.set_process(true)
+					else: # Not actual contact
+						printt("Swing and a miss due to bad PCI!")
 					
 				else:
 					pass #print('MISSED')

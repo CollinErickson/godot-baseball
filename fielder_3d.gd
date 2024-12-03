@@ -3,17 +3,19 @@ extends CharacterBody3D
 @export_group("Baseball")
 @export var posname: String
 
-const SPEED:float = 8.0
+var SPEED:float = 8.0
 const MAX_ACCEL:float = 100.0
-const max_throw_speed:float = 30.0
+var max_throw_speed:float = 30.0
 const catch_radius_xz:float = 2
 const catch_max_y:float = 2.5
+var throws:String = 'R'
 
 var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos
 var holding_ball = false
 var user_is_pitching_team
 var time_last_began_holding_ball
+var position_started_holding_ball = null
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var ball = get_tree().get_first_node_in_group("ball")
@@ -36,11 +38,12 @@ func reset(color) -> void:
 	
 	assignment = null
 	assignment_pos = null
-	holding_ball = false
-	time_last_began_holding_ball = null
 	remove_from_group('selected_fielder')
 	remove_from_group('targeted_fielder')
-	remove_from_group('fielder_holding_ball')
+	#holding_ball = false
+	#time_last_began_holding_ball = null
+	#remove_from_group('fielder_holding_ball')
+	set_holding_ball(false)
 	
 	# End start throw
 	start_throw_started = false
@@ -56,6 +59,9 @@ func reset(color) -> void:
 	set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
 	$Char3D.set_color(color)
+	
+	set_not_selected_fielder()
+	set_not_targeted_fielder()
 	
 	
 
@@ -104,6 +110,7 @@ func _ready():
 signal ball_fielded
 signal tag_out
 signal new_fielder_selected_signal
+signal fielder_moved_reassign_fielders_signal
 
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
@@ -192,11 +199,12 @@ func _physics_process(delta: float) -> void:
 				ball.position = position
 				ball.position.y = 1.4
 				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
-				holding_ball = true
-				add_to_group('fielder_holding_ball')
+				#holding_ball = true
+				#add_to_group('fielder_holding_ball')
+				#time_last_began_holding_ball = Time.get_ticks_msec()
+				set_holding_ball(true)
 				assignment = "holding_ball"
 				assignment_pos = null
-				time_last_began_holding_ball = Time.get_ticks_msec()
 				#printt('fielder emiting ball_fielded')
 				ball_fielded.emit(self)
 				if user_is_pitching_team:
@@ -344,6 +352,14 @@ func _physics_process(delta: float) -> void:
 				throw_ready_success = true
 			else:
 				throw_ready = false
+		
+		# If user ran a distance with the ball, reassign fielders to maybe cover
+		#  base they vacated
+		if (position_started_holding_ball!= null and 
+			distance_xz(position, position_started_holding_ball) > 4):
+			fielder_moved_reassign_fielders_signal.emit(self)
+			# Not a good variable name if updating like this
+			position_started_holding_ball = position
 		
 		# CPU defense
 		if not user_is_pitching_team:
@@ -506,8 +522,9 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 	# Only throw if not close to that base
 	if base != null:
 		if distance_xz(position, base_positions[base-1]) > 3:
-			holding_ball = false
-			remove_from_group('fielder_holding_ball')
+			#holding_ball = false
+			#remove_from_group('fielder_holding_ball')
+			set_holding_ball(false)
 			#var ball = get_tree().get_first_node_in_group("ball")
 			ball.position = position
 			ball.position.y = 1.4
@@ -522,8 +539,9 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			set_animation('idle')
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
-			holding_ball = false
-			remove_from_group('fielder_holding_ball')
+			#holding_ball = false
+			#remove_from_group('fielder_holding_ball')
+			set_holding_ball(false)
 			#var ball = get_tree().get_first_node_in_group("ball")
 			ball.position = position
 			ball.position.y = 1.4
@@ -633,3 +651,19 @@ func set_look_at_position(pos) -> void:
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
 	# Look at global position
 	$Char3D.look_at(pos, Vector3.UP, true)
+
+func set_holding_ball(hb:bool) -> void:
+	holding_ball = hb
+	if hb:
+		add_to_group('fielder_holding_ball')
+		position_started_holding_ball = position
+		time_last_began_holding_ball = Time.get_ticks_msec()
+	else:
+		remove_from_group('fielder_holding_ball')
+		position_started_holding_ball = null
+		time_last_began_holding_ball = null
+
+func setup_player(player) -> void:
+	throws = player.throws
+	SPEED = player.speed_mps()
+	max_throw_speed = player.throwspeed_mps()

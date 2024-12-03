@@ -143,8 +143,6 @@ func reset_field() -> void:
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()
-	var f = ["Nick", "Britt", "Greg", "Troy"]
-	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
-	p.setup(f.pick_random(), l.pick_random(), speed, 39.)
+	p.create_random(speed)
 	#p.print_()
 	return p

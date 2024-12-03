@@ -228,10 +228,10 @@ func end_state() -> String:
 	#printt('runner end_state', start_base, str(round(running_progress)))
 	return str(round(running_progress))
 
-func set_runner(x):
-	if x:
+func setup_player(x) -> void:
+	if x != null:
 		exists_at_start = true
-		SPEED = max(1e-8, x.speed / 10. + 3)
+		SPEED = x.speed_mps()
 		#x.print_()
 		#printt('runner speed is', SPEED, start_base)
 	else: # x is null, no runner
