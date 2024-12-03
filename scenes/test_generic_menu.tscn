@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://b6vcprtlgk8a"]
+
+[ext_resource type="PackedScene" uid="uid://brk67hbp6gicm" path="res://scenes/generic_menu.tscn" id="1_8dj5r"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GenericMenu" parent="." instance=ExtResource("1_8dj5r")]
+layout_mode = 1
+menu_title = "Godot Baseball"
+options = Array[String](["Game", "Franchise", "Rosters", "Options"])
+background_color = Color(0.0113847, 0.82279, 1.54018e-06, 1)
+fill_color = Color(0.623819, 1, 0.593898, 1)
+hover_color = Color(0.529412, 1, 0, 1)
