@@ -44,6 +44,12 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
+func pause() -> void:
+	set_physics_process(false)
+
+func unpause() -> void:
+	set_physics_process(true)
+
 func reset() -> void:
 	is_frozen = false
 	visible = true

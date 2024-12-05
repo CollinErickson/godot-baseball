@@ -14,6 +14,7 @@ var left_indent:float = 300
 @export var hover_shadow_color:Color = "red"
 @export var hover_text_color:Color = 'gray'
 var index_selected:int = 0
+signal return_index_selected
 
 
 # Called when the node enters the scene tree for the first time.
@@ -49,6 +50,8 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	if not is_active:
+		return
 	if Input.is_action_just_pressed("movedown"):
 		unset_hover(index_selected)
 		index_selected += 1
@@ -61,6 +64,10 @@ func _process(_delta: float) -> void:
 		if index_selected < 0:
 			index_selected = len(options)-1
 		set_hover(index_selected)
+	if Input.is_action_just_pressed("ui_accept"):
+		return_index_selected.emit(index_selected)
+		is_active = false
+		return
 
 func set_hover(index) -> void:
 	#printt('setting hover on index', index)
@@ -74,3 +81,6 @@ func unset_hover(index) -> void:
 	var x = gc[2 + index]
 	x.color = shadow_color
 	x.get_child(0).color = fill_color
+
+#func return_selected_index() -> int:
+	#return index_selected

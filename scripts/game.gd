@@ -26,6 +26,7 @@ var team_class = preload("res://scenes/team.tscn")
 var home_team:Team = team_class.instantiate().create_random()
 var away_team:Team = team_class.instantiate().create_random()
 
+var is_paused:bool = false
 
 
 # Called when the node enters the scene tree for the first time.
@@ -40,11 +41,22 @@ func _ready() -> void:
 	runner3 = get_player(99)
 	reset_field()
 	update_scorebug()
+	
+	$PauseMenu.visible = false
+	$PauseMenu.is_active = false
+	$PauseMenu.connect("return_index_selected", _on_return_index_selected_from_pause_menu)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	pass
+	# Check for pause/unpause
+	if Input.is_action_just_pressed("pause_game"):
+		#if is_paused: # Unpause
+			#unpause_game_menu()
+		if not is_paused: # Pause
+			pause_game_menu()
+			is_paused = true
 
 func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
@@ -146,3 +158,22 @@ func get_player(speed:float=50) -> Player:
 	p.create_random(speed)
 	#p.print_()
 	return p
+
+func unpause_game_menu() -> void:
+	#printt('Game unpaused!!!')
+	$Field3D.unpause()
+	$PauseMenu.visible = false
+	$PauseMenu.is_active = false
+	is_paused = false
+
+func pause_game_menu() -> void:
+	#printt('Game paused!!!')
+	$Field3D.pause()
+	$PauseMenu.visible = true
+	$PauseMenu.is_active = true
+	is_paused = true
+
+func _on_return_index_selected_from_pause_menu(index_selected):
+	#printt("pause menu index:", index_selected)
+	#get_tree().create_timer(1)
+	unpause_game_menu()

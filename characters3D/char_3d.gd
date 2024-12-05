@@ -75,3 +75,9 @@ func dir(class_instance):
 	output["PROPERTIES"] = properties
 	
 	return output
+
+func pause() -> void:
+	$charnode/AnimationTree.active = false
+
+func unpause() -> void:
+	$charnode/AnimationTree.active = true

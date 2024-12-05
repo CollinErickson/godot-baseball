@@ -35,6 +35,18 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
+func pause() -> void:
+	$Char3D.pause()
+	#super().pause()
+	#$Player3D.pause()
+	set_physics_process(false)
+
+func unpause() -> void:
+	$Char3D.unpause()
+	#super().pause()
+	#$Player3D.pause()
+	set_physics_process(true)
+
 func reset(color) -> void:
 	#print('RESET RUNNER', start_base)
 	is_frozen = false

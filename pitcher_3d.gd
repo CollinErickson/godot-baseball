@@ -22,6 +22,14 @@ func freeze() -> void:
 	visible = false
 	set_physics_process(false)
 
+func pause() -> void:
+	$Char3D.pause()
+	set_physics_process(false)
+
+func unpause() -> void:
+	$Char3D.unpause()
+	set_physics_process(true)
+
 func reset(color:Color) -> void:
 	is_frozen = false
 	visible = true

@@ -52,6 +52,47 @@ func freeze() -> void:
 	visible = false
 	set_process(false)
 
+func pause() -> void:
+	# Stop timers
+	$Headon/Batter3D/Timer.stop()
+	$TimerCameraChange.stop()
+	$Headon/Defense/Fielder3DC/Timer.stop()
+	$PlayOverTimer.stop()
+
+	# Set children to be frozen
+	$Headon/Ball3D.pause()
+	#var fielders = get_tree().get_nodes_in_group('fielders')
+	for fielder in fielders:
+		fielder.pause()
+	for runner in runners:
+		runner.pause()
+	$Headon/Batter3D.pause()
+	$Headon/Pitcher3D.pause()
+	
+	# Pause this
+	set_process(false)
+
+func unpause() -> void:
+	# Stop timers
+	# TODO: restart these if they were running before
+	#$Headon/Batter3D/Timer.stop()
+	#$TimerCameraChange.stop()
+	#$Headon/Defense/Fielder3DC/Timer.stop()
+	#$PlayOverTimer.stop()
+
+	# Set children to be frozen
+	$Headon/Ball3D.unpause()
+	#var fielders = get_tree().get_nodes_in_group('fielders')
+	for fielder in fielders:
+		fielder.unpause()
+	for runner in runners:
+		runner.unpause()
+	$Headon/Batter3D.unpause()
+	$Headon/Pitcher3D.unpause()
+	
+	# Unpause this
+	set_process(true)
+
 func reset(user_is_batting_team_, user_is_pitching_team_,
 			batter, runner1, runner2, runner3, outs_before_play_,
 			outs_per_inning_:int,
@@ -455,8 +496,8 @@ func _process(delta: float) -> void:
 			_on_resume_button_pressed()
 		else:
 			_on_pause_button_pressed()
-	if Input.is_key_pressed(KEY_P):
-		Engine.time_scale = randf_range(.1,10)
+	#if Input.is_key_pressed(KEY_P):
+		#Engine.time_scale = randf_range(.1,10)
 	
 	# Check for contact on swing
 	if not contact_done and get_node_or_null("Headon/Ball3D"):
