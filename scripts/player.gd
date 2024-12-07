@@ -8,6 +8,7 @@ var age:int
 var bats:String
 var throws:String
 var pos:String
+var skin_color:Color = Color("green")
 
 # Skills
 var speed:float
@@ -32,6 +33,8 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	power = 0.
 	pitching = 0.
 	
+	skin_color = skin_colors.pick_random()
+	
 	return self
 
 func print_():
@@ -42,7 +45,7 @@ func print_():
 func create_random(speed_:float=randi_range(20,80)):
 	var f = ["Nick", "Britt", "Greg", "Troy"]
 	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
-	setup(f.pick_random(), l.pick_random(), speed_, 39., "R", "L")
+	setup(f.pick_random(), l.pick_random(), speed_, 39., "R", "R")
 	#p.print_()
 	return self
 
@@ -51,6 +54,7 @@ func speed_mps() -> float:
 	return SPEED
 
 func throwspeed_mps() -> float:
-	var throwspeed_mps_ = max(1e-8, speed / 10. + 3)
+	var throwspeed_mps_ = 50
 	return throwspeed_mps_
 	
+var skin_colors = [Color(.79,.46,.42), Color(.24,.14,.08)]

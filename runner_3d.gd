@@ -64,6 +64,7 @@ func reset(color) -> void:
 	target_base = start_base + 1
 	able_to_score = false
 	
+	$Char3D.reset() # Resets rotation
 	set_look_at()
 	set_animation("idle")
 	$Char3D.set_color(color)
@@ -240,16 +241,18 @@ func end_state() -> String:
 	#printt('runner end_state', start_base, str(round(running_progress)))
 	return str(round(running_progress))
 
-func setup_player(x) -> void:
-	if x != null:
+		
+func setup_player(player, team, is_home_team:bool) -> void:
+	if player != null:
 		exists_at_start = true
-		SPEED = x.speed_mps()
-		#x.print_()
-		#printt('runner speed is', SPEED, start_base)
+		SPEED = player.speed_mps()
 	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)
 		visible = false
+	if team != null:
+		$Char3D.set_color_from_team(player, team, is_home_team)
+
 
 func is_done_for_play() -> bool:
 	if not exists_at_start:

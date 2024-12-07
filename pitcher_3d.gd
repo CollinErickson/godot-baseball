@@ -12,6 +12,7 @@ var user_is_pitching_team
 var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
 var animation = "idle"
+var throws:String = 'R'
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -41,9 +42,11 @@ func reset(color:Color) -> void:
 	pitch_frame = 0
 	pitch_type = "FB"
 	$AnimatedSprite3D.set_frame(0)
+	$AnimatedSprite3D.visible = false
 	
+	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
-	set_look_at_position(Vector3(0,0,0))
+	set_look_at_position(Vector3(100,0,position.z))
 	set_animation("idle")
 	$Char3D.set_color(color)
 
@@ -117,7 +120,7 @@ func _physics_process(delta: float) -> void:
 		pitch_frame = 2
 		$AnimatedSprite3D.set_frame(2)
 		$PitchSelectKeyboard.visible = false
-	if not pitch_done and pitch_in_progress and pitch_frame == 2 and time_since_pitch_start > .5:
+	if not pitch_done and pitch_in_progress and pitch_frame == 2 and time_since_pitch_start > .95:
 		# Begin pitch
 		pitch_in_progress = false
 		pitch_done = true
@@ -132,18 +135,17 @@ func _physics_process(delta: float) -> void:
 		#print('headon basis'); print($Headon)
 		#ball.transform = transform
 		#ball.basis = basis
-		ball.position.x = -.5 # put in lefty hand
-		ball.position.y=position.y + 1.5 # 1.5 yards higher than ground of pitcher
+		ball.position.x = 0.35 # put in righty hand
+		if throws == "L":
+			ball.position.x *= -1 # put in lefty hand
+		ball.position.y=position.y + 1.7 # 1.5 yards higher than ground of pitcher
 		ball.position.z= position.z - 2 # 2 yards closer than pitcher
 		#ball.velocity.z = -40*.75 # 40 is about about 90 mph
 		#ball.velocity.x=1 # to get over home plate
 		#ball.velocity.y = .62+1.6 # downward throw
 		#ball.acceleration.y = -9.8*.6 # gravity
-		ball.spin_acceleration.y = randf_range(-3,1)
-		ball.spin_acceleration.x = randf_range(-3,3) # Side movement
 		var spin_and_speed = get_spin_acceleration_and_speed()
 		ball.spin_acceleration = spin_and_speed[0]
-		#var pitchspeed = 40
 		var pitchspeed = spin_and_speed[1]
 		var catchers_mitt = get_parent().get_node("CatchersMitt")
 		
@@ -274,3 +276,9 @@ func set_look_at_position(pos) -> void:
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
 	# Look at global position
 	$Char3D.look_at(pos, Vector3.UP, true)
+
+func setup_player(player, team, is_home_team:bool) -> void:
+	if player != null:
+		throws = player.throws
+	if team != null:
+		$Char3D.set_color_from_team(player, team, is_home_team)

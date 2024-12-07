@@ -94,10 +94,13 @@ func unpause() -> void:
 	set_process(true)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter, runner1, runner2, runner3, outs_before_play_,
+			batter, pitcher,
+			runner1, runner2, runner3,
+			outs_before_play_,
 			outs_per_inning_:int,
 			fielding_team,
-			batting_team):
+			batting_team,
+			fielding_team_is_home:bool):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
@@ -105,6 +108,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
 		fielder.reset(fielding_team.color_primary)
+		fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
 		#printt('fielder posname is', fielder.posname)
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
@@ -114,18 +118,20 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		runner.reset(batting_team.color_primary)
 		if runner.start_base == 0:
 			runner.visible = false
-			runner.setup_player(batter)
+			runner.setup_player(batter, batting_team, !fielding_team_is_home)
 			#printt('INVISIBLE RUNNER 0')
 		if runner.start_base == 1:
-			runner.setup_player(runner1)
+			runner.setup_player(runner1, batting_team, !fielding_team_is_home)
 		elif runner.start_base == 2:
-			runner.setup_player(runner2)
+			runner.setup_player(runner2, batting_team, !fielding_team_is_home)
 		elif runner.start_base == 3:
-			runner.setup_player(runner3)
+			runner.setup_player(runner3, batting_team, !fielding_team_is_home)
 		else:
 			assert(runner.start_base == 0)
 	$Headon/Batter3D.reset(batting_team.color_primary)
+	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
 	$Headon/Pitcher3D.reset(fielding_team.color_primary)
+	$Headon/Pitcher3D.setup_player(pitcher, fielding_team, fielding_team_is_home)
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
@@ -500,7 +506,7 @@ func _process(delta: float) -> void:
 		#Engine.time_scale = randf_range(.1,10)
 	
 	# Check for contact on swing
-	if not contact_done and get_node_or_null("Headon/Ball3D"):
+	if not contact_done and get_node_or_null("Headon/Ball3D")!=null:
 		var ball3d = $Headon/Ball3D
 		#print('found ball')
 		# pitch is active
@@ -537,7 +543,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
+					if false:
 						vla = -25
 						hla = 0
 						exitvelo = 23.8
@@ -1012,7 +1018,7 @@ func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y) -> void:
 	#printt('in field, pitch started!!!!!!!!!!!!!!!!!')
 	if not user_is_batting_team:
 		get_node("Headon/Batter3D").timer_action = 'begin_swing'
-		get_node("Headon/Batter3D/Timer").wait_time = .95
+		get_node("Headon/Batter3D/Timer").wait_time = 1.45
 		get_node("Headon/Batter3D/Timer").start()
 
 var time_since_check_if_play_done_checked = 0
@@ -1064,10 +1070,11 @@ func check_if_play_done():
 	return near_infield
 
 signal signal_play_done(is_ball: bool, is_strike: bool, outs_on_play: int, runs_on_play: int)
-func play_done(flash='Play is done!'):
+func play_done(flash=null):
 	printt('in field: running play_done()')
 	#play_done_fully = true
-	get_node("FlashText").new_text(flash, 3)
+	if flash != null:
+		get_node("FlashText").new_text(flash, 3)
 	#get_tree().reload_current_scene()
 	freeze()
 	# Check for swing and miss

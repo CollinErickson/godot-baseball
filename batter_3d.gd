@@ -42,10 +42,11 @@ func reset(color:Color) -> void:
 	
 	get_node('AnimatedSprite3D').set_frame(0)
 	get_node('AnimatedSprite3D').visible = false
-	get_node('AnimatedSprite3DIdle').visible = true
+	get_node('AnimatedSprite3DIdle').visible = false
 	
+	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
-	set_look_at_position(Vector3(0,0,100))
+	set_look_at_position(Vector3(-100,0,0))
 	#$Char3D/charnode/AnimationTree.set("parameters/conditions/swing", false)
 	#set_animation("idle")
 	set_animation("batter_idle")
@@ -60,7 +61,7 @@ func begin_swing():
 	print('Starting swing in batter_3d:_process')
 	swing_started = true
 	# Change which sprite is visible
-	get_node("AnimatedSprite3D").visible = true
+	get_node("AnimatedSprite3D").visible = false
 	get_node("AnimatedSprite3DIdle").visible = false
 	get_node("AnimatedSprite3DIdle").set_process(false)
 	
@@ -116,7 +117,7 @@ var timer_action
 signal start_runner
 func _on_timer_timeout() -> void:
 	get_node('Timer').stop()
-	if not timer_action:
+	if timer_action==null:
 		printerr("bad timer 33512422")
 	if timer_action == "start_running_after_hit":
 		# Create Runner, place near 0, set to run
@@ -137,9 +138,17 @@ func set_animation(new_anim):
 	$Char3D.start_animation(new_anim)
 
 func set_look_at_position(pos) -> void:
+	printt('setting batter to look at ', pos)
 	# Always stay vertical
 	pos.y = 0
 	# Rotate to global frame
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	printt('setting batter to look at global position ', pos)
 	# Look at global position
 	$Char3D.look_at(pos, Vector3.UP, true)
+
+func setup_player(player, team, is_home_team:bool) -> void:
+	if player != null:
+		pass
+	if team != null:
+		$Char3D.set_color_from_team(player, team, is_home_team)

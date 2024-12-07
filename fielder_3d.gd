@@ -63,8 +63,12 @@ func reset(color) -> void:
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
 	
+	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
-	set_look_at_position(Vector3(0,0,0))
+	if posname == 'P':
+		set_look_at_position(Vector3(100,0,position.z))
+	else:
+		set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
 	$Char3D.set_color(color)
 	
@@ -671,7 +675,10 @@ func set_holding_ball(hb:bool) -> void:
 		position_started_holding_ball = null
 		time_last_began_holding_ball = null
 
-func setup_player(player) -> void:
-	throws = player.throws
-	SPEED = player.speed_mps()
-	max_throw_speed = player.throwspeed_mps()
+func setup_player(player, team, is_home_team:bool) -> void:
+	if player != null:
+		throws = player.throws
+		SPEED = player.speed_mps()
+		max_throw_speed = player.throwspeed_mps()
+	if team != null:
+		$Char3D.set_color_from_team(player, team, is_home_team)

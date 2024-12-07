@@ -10,13 +10,14 @@ https://www.youtube.com/watch?v=fq0hR2tIsRk&t=668s&ab_channel=FinePointCGI
 
 - Press 'n' to open the right toolbar, click on Mixamo tab. 
 
-- On the Mixamo tab, select the folder with the animations. Load animations. Make sure there is a bone beneath the character (root bone).
+- On the Mixamo tab, select the folder with the animations. Select "Insert root". Then click "Import Animations".
+Make sure there is a bone beneath the character (root bone).
 
 - Delete all the armatures except one that has the body (downward triangle in the object list). Delete hierarchy if more than one have the body.
 
 - Click on Animation tab. Change "Dope sheet" to "Action editor."
 Select an action ("Browse action" in bottom section, icon is almost like a face).
-Click on the character. Press the play button at the bottom and they should do the action.
+Click on the armature on the top right. Press the play button at the bottom and they should do the action.
 
 - To delete duplicate animations: in top right file explorer, click on the image icon and change to "Blender File".
 In the Action section, delete the duplicated animations.

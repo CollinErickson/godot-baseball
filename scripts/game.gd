@@ -145,13 +145,15 @@ func reset_field() -> void:
 		(is_top and user_is_away_team) or (!is_top and user_is_home_team),
 		(is_top and user_is_home_team) or (!is_top and user_is_away_team),
 		batter,
+		home_team.roster[0] if is_top else away_team.roster[0],
 		runner1,
 		runner2,
 		runner3,
 		outs,
 		outs_per_inning,
 		home_team if is_top else away_team,
-		home_team if !is_top else away_team)
+		home_team if !is_top else away_team,
+		is_top)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()
@@ -173,7 +175,7 @@ func pause_game_menu() -> void:
 	$PauseMenu.is_active = true
 	is_paused = true
 
-func _on_return_index_selected_from_pause_menu(index_selected):
+func _on_return_index_selected_from_pause_menu(_index_selected):
 	#printt("pause menu index:", index_selected)
 	#get_tree().create_timer(1)
 	unpause_game_menu()
