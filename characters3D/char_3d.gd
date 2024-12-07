@@ -34,7 +34,7 @@ func reset() -> void:
 	current_animation_rotation = 0
 	
 
-func start_animation(anim_name:String) -> void:
+func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	# Undo current animation rotation
 	rotate_y(-current_animation_rotation)
 	current_animation_rotation = 0
@@ -43,28 +43,39 @@ func start_animation(anim_name:String) -> void:
 	if anim_name == "idle":
 		$charnode/AnimationTree.set("parameters/conditions/moving", false)
 		$charnode/AnimationTree.set("parameters/conditions/idle", true)
-		$charnode/AnimationTree.set("parameters/conditions/swing", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitch", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+		$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+		$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
 	elif anim_name == "running":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/swing", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitch", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+		$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+		$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
 		$charnode/AnimationTree.set("parameters/conditions/moving", true)
 	elif anim_name == "batter_idle":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/swing", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
 		$charnode/AnimationTree.set("parameters/conditions/batter_idle", true)
 	elif anim_name == "swing":
-		current_animation_rotation = PI/2
+		current_animation_rotation = PI/2 * (1 if batsR else -1)
 		rotate_y(current_animation_rotation)
 		$charnode/AnimationTree.set("parameters/conditions/batter_idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/swing", true)
+		if batsR:
+			$charnode/AnimationTree.set("parameters/conditions/swingR", true)
+		else:
+			$charnode/AnimationTree.set("parameters/conditions/swingL", true)
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 	elif anim_name == "pitch":
-		current_animation_rotation = PI/2
-		rotate_y(current_animation_rotation)
+		#current_animation_rotation = PI/2 * (1 if !batsR else -1)
+		#rotate_y(current_animation_rotation)
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitch", true)
+		if throwsR:
+			$charnode/AnimationTree.set("parameters/conditions/pitchR", true)
+		else:
+			$charnode/AnimationTree.set("parameters/conditions/pitchL", true)
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 

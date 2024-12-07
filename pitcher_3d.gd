@@ -77,6 +77,7 @@ func begin_pitch():
 	pitch_started.emit(pitch_x, pitch_y)
 	#printt('signal was emitted.......')
 	
+	set_look_at_position(Vector3(0,0,0))
 	set_animation('pitch')
 
 func _physics_process(delta: float) -> void:
@@ -266,7 +267,7 @@ func set_animation(new_anim):
 	#if new_anim == "idle":
 		#pass
 	#if new_anim == "moving":
-	$Char3D.start_animation(new_anim)
+	$Char3D.start_animation(new_anim, false, throws=='R')
 	pitcher_fielder_node.set_animation(new_anim)
 
 func set_look_at_position(pos) -> void:
@@ -280,5 +281,9 @@ func set_look_at_position(pos) -> void:
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		throws = player.throws
+		if throws == 'R':
+			set_look_at_position(Vector3(100,0,position.z))
+		else:
+			set_look_at_position(Vector3(-100,0,position.z))
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)

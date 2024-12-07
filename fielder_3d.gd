@@ -66,7 +66,8 @@ func reset(color) -> void:
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
 	if posname == 'P':
-		set_look_at_position(Vector3(100,0,position.z))
+		#set_look_at_position(Vector3(100,0,position.z))
+		set_look_at_position(Vector3(0,0,0))
 	else:
 		set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
@@ -654,7 +655,7 @@ func set_animation(new_anim):
 	#if new_anim == "idle":
 		#pass
 	#if new_anim == "moving":
-	$Char3D.start_animation(new_anim)
+	$Char3D.start_animation(new_anim, false, throws=='R')
 
 func set_look_at_position(pos) -> void:
 	# Always stay vertical

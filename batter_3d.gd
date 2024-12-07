@@ -10,6 +10,7 @@ var swingx = false
 var swingy = false
 var swing_inzone_duration = 0.15
 var animation = "idle"
+var bats:String # "L", "R"
 
 var user_is_batting_team
 var is_frozen:bool = false
@@ -135,7 +136,7 @@ func set_animation(new_anim):
 	#if new_anim == "idle":
 		#pass
 	#if new_anim == "moving":
-	$Char3D.start_animation(new_anim)
+	$Char3D.start_animation(new_anim, bats=="R", false)
 
 func set_look_at_position(pos) -> void:
 	printt('setting batter to look at ', pos)
@@ -149,6 +150,12 @@ func set_look_at_position(pos) -> void:
 
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
-		pass
+		bats = player.bats
+		position = Vector3(1, 0, 0.5)
+		if bats == 'R':
+			set_look_at_position(Vector3(-100,0,0))
+		else:
+			position.x *= -1
+			set_look_at_position(Vector3(100,0,0))	
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)

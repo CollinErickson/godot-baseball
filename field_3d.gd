@@ -526,6 +526,8 @@ func _process(delta: float) -> void:
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
+					if $Headon/Batter3D.bats == 'L':
+						hla *= -1
 					var pci:Vector3 = Vector3.ZERO
 					if user_is_batting_team:
 						# Find distance from PCI to ball location

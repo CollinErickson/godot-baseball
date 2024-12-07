@@ -45,7 +45,9 @@ func print_():
 func create_random(speed_:float=randi_range(20,80)):
 	var f = ["Nick", "Britt", "Greg", "Troy"]
 	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
-	setup(f.pick_random(), l.pick_random(), speed_, 39., "R", "R")
+	setup(f.pick_random(), l.pick_random(), speed_, 39.,
+		["R","L"].pick_random(), 
+		["R","L"].pick_random())
 	#p.print_()
 	return self
 

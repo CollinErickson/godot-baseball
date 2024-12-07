@@ -288,7 +288,7 @@ func set_animation(new_anim):
 	#if new_anim == "idle":
 		#pass
 	#if new_anim == "moving":
-	$Char3D.start_animation(new_anim)
+	$Char3D.start_animation(new_anim, false, false)
 	set_look_at()
 
 func set_look_at():
