@@ -551,10 +551,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
-						vla = -25
-						hla = 0
-						exitvelo = 23.8
+					if !false:
+						vla = -5
+						hla = 40
+						exitvelo = 43.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -1292,11 +1292,11 @@ func decide_automatic_runners_actions():
 						# Baserunner decision is every 0.1 seconds, so calculate where they should
 						#  be at that time plus a small margin
 						prop_to_run = max(0, time_for_ball_to_get_to_start_base - 0.13) * runners[i].SPEED / 30.
-						if abs(runners[i].start_base-3)<1e-9:
-							printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
-								seconds_to_intercept, runners[i].SPEED,
-								'progress:', runners[i].running_progress - runners[i].start_base,
-								Time.get_ticks_msec())
+						#if abs(runners[i].start_base-3)<1e-9:
+							#printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
+								#seconds_to_intercept, runners[i].SPEED,
+								#'progress:', runners[i].running_progress - runners[i].start_base,
+								#Time.get_ticks_msec())
 						# Times 0.9 makes them a little conservative
 						prop_to_run = min(prop_to_run, runners[i].start_base + 1) * 0.9
 						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + prop_to_run)
@@ -1325,7 +1325,7 @@ func decide_automatic_runners_actions():
 				) + seconds_to_intercept
 				if time_to_next_next_base < time_throw_next_next_base:
 					#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
-					print("Sending runner to next next base", next_next_base)
+					#print("Sending runner to next next base", next_next_base)
 					decisions[i] = coalesce(decisions[i], 2)
 					decision_bases[i] = coalesce(decision_bases[i], next_next_base)
 			

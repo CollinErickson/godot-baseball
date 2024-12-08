@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://8dnwcee74i2b"]
+[gd_scene load_steps=35 format=3 uid="uid://8dnwcee74i2b"]
 
 [ext_resource type="PackedScene" uid="uid://d0671p5ff0bg0" path="res://characters3D/Player1/Player1.glb" id="1_olo1y"]
 
@@ -133,6 +133,10 @@ switch_mode = 2
 advance_mode = 2
 advance_condition = &"idle"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_f01h2"]
+advance_mode = 2
+advance_condition = &"throw"
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_783kb"]
 "states/Baseball Hit/node" = SubResource("AnimationNodeAnimation_2k81h")
 "states/Baseball Hit/position" = Vector2(531, 272.534)
@@ -146,12 +150,13 @@ advance_condition = &"idle"
 "states/Baseball Pitching mirror/position" = Vector2(663, 181.534)
 states/BlendSpace2D/node = SubResource("AnimationNodeBlendSpace2D_hag80")
 states/BlendSpace2D/position = Vector2(337, 73.534)
+states/Start/position = Vector2(52, 87.534)
 "states/Throw Object/node" = SubResource("AnimationNodeAnimation_r1y55")
-"states/Throw Object/position" = Vector2(74, 168.534)
+"states/Throw Object/position" = Vector2(72, 209.534)
 states/idle/node = SubResource("AnimationNodeAnimation_5kkmu")
 states/idle/position = Vector2(337, 199)
-transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb"), "idle", "Throw Object", SubResource("AnimationNodeStateMachineTransition_y1bcw"), "Throw Object", "idle", SubResource("AnimationNodeStateMachineTransition_2267f")]
-graph_offset = Vector2(0, 42.534)
+transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb"), "idle", "Throw Object", SubResource("AnimationNodeStateMachineTransition_y1bcw"), "Throw Object", "idle", SubResource("AnimationNodeStateMachineTransition_2267f"), "BlendSpace2D", "Throw Object", SubResource("AnimationNodeStateMachineTransition_f01h2")]
+graph_offset = Vector2(0, 57.4028)
 
 [node name="Player1" instance=ExtResource("1_olo1y")]
 

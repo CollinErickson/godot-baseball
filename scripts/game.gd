@@ -32,7 +32,7 @@ var is_paused:bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#printt('test create player:', get_player())
-	if !true:
+	if true:
 		user_is_away_team = true
 		user_is_home_team = false
 	batter = get_player(50)
@@ -140,7 +140,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	reset_field()
 
 func reset_field() -> void:
-	batter.print_()
+	#batter.print_()
 	$Field3D.reset(
 		(is_top and user_is_away_team) or (!is_top and user_is_home_team),
 		(is_top and user_is_home_team) or (!is_top and user_is_away_team),

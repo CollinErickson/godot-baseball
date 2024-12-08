@@ -47,6 +47,7 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
 		$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
 		$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
+		$charnode/AnimationTree.set("parameters/conditions/throw", false)
 	elif anim_name == "running":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
@@ -76,6 +77,10 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 			$charnode/AnimationTree.set("parameters/conditions/pitchR", true)
 		else:
 			$charnode/AnimationTree.set("parameters/conditions/pitchL", true)
+	elif anim_name == "throw":
+		$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		$charnode/AnimationTree.set("parameters/conditions/moving", false)
+		$charnode/AnimationTree.set("parameters/conditions/throw", true)
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 

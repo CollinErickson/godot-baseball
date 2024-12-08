@@ -9,9 +9,10 @@ var max_throw_speed:float = 30.0
 const catch_radius_xz:float = 2
 const catch_max_y:float = 2.5
 var throws:String = 'R'
+const time_throw_animation_release_point:float = 0.55
 
 var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
-var assignment_pos
+var assignment_pos # Position to go to for assignment
 var holding_ball = false
 var user_is_pitching_team
 var time_last_began_holding_ball
@@ -20,6 +21,8 @@ var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var ball = get_tree().get_first_node_in_group("ball")
 var animation = "idle"
+var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
+var time_in_state:float = 0
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -52,6 +55,8 @@ func reset(color) -> void:
 	#time_last_began_holding_ball = null
 	#remove_from_group('fielder_holding_ball')
 	set_holding_ball(false)
+	state = 'free'
+	time_in_state = 0
 	
 	# End start throw
 	start_throw_started = false
@@ -62,6 +67,7 @@ func reset(color) -> void:
 	throw_ready_success = true
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
+	$Timer.stop()
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -134,12 +140,22 @@ func _physics_process(delta: float) -> void:
 		return
 	#if posname == 'C':
 	#	printt('catcher fielder', assignment)
-	if not assignment:
+	
+	time_in_state += delta
+	
+	if assignment==null:
 		return
-	#print("Moving fielder to ball!!!!!!")
+
+	if state == 'throwing':
+		if time_in_state > time_throw_animation_release_point + 0.15:
+			set_state('free')
+			set_animation('idle')
+		else: # Remain in throwing state
+			return
+
 	# Move fielder to their assignment
-	#if assignment in ["ball", "cover"]:
-	if (assignment in ["cover", "ball_click", "ball_carry"]) or (assignment == 'ball' and not user_is_pitching_team):
+	if ((assignment in ["cover", "ball_click", "ball_carry"]) or
+		(assignment == 'ball' and not user_is_pitching_team)):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		# Face target
@@ -357,13 +373,14 @@ func _physics_process(delta: float) -> void:
 			if Time.get_ticks_msec() - throw_ready_time < 1000*2:
 				#printt('THROW IS READY')
 				# Execute throw
-				throw_ball_func(start_throw_base, start_throw_fielder, throw_ready_success)
+				#throw_ball_func(start_throw_base, start_throw_fielder, throw_ready_success)
+				start_throw_ball_animation(start_throw_base, start_throw_fielder, throw_ready_success)
 				# Clear vars
 				start_throw_base = null
 				start_throw_fielder = null
 				throw_ready = false
 				throw_ready_success = true
-			else:
+			else: # Timed out, clear the throw info
 				throw_ready = false
 		
 		# If user ran a distance with the ball, reassign fielders to maybe cover
@@ -378,7 +395,7 @@ func _physics_process(delta: float) -> void:
 		if not user_is_pitching_team:
 			if assignment != "ball_carry":
 				# Make sure that some frames passed while holding
-				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.40:
+				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
 					#printt('TRYING TO CPU THROW NOW', posname)
 					# Decide what to do with ball
 					# TODO: Don't throw if the throw won't beat them
@@ -428,7 +445,8 @@ func _physics_process(delta: float) -> void:
 							
 							if throw_to > -0.5:
 								printt("in field: ball will be thrown to", throw_to)
-								throw_ball_func(throw_to)
+								#throw_ball_func(throw_to)
+								start_throw_ball_animation(throw_to)
 							else:
 								pass #printt('deciding not to throw', posname)
 	else:
@@ -512,6 +530,8 @@ var throw_ready:bool = false
 var throw_ready_success:bool = true
 var throw_ready_time = null
 func start_throw_end():
+	# This ends getting the throw ready. The throw info will be stored
+	#  for up to 2 seconds to begin throw later if fielder doesn't have ball.
 	# Check throw bar
 	throw_ready_success = $ThrowBar.check_success(true, true)
 	
@@ -525,11 +545,10 @@ func start_throw_end():
 	#start_throw_base = null
 	#start_throw_fielder = null
 	start_throw_key_check_release = null
-	
-	
 
 signal throw_ball
 func throw_ball_func(base, fielder=null, success=true) -> void:
+	# This begins the throw.
 	printt('throw_ball_func', base, fielder)
 	
 	# Only throw if not close to that base
@@ -566,11 +585,39 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			if user_is_pitching_team:
 				set_not_selected_fielder()
 
+# Begin throw animation, ball to be released when animation is ready
+func start_throw_ball_animation(base, fielder=null, success=true) -> void:
+	printt('In fielder start_throw_ball_animation', posname, state, Time.get_ticks_msec(),
+		base, fielder, success)
+	# Don't overwrite throw already in progress
+	if timer_action == 'throw' and timer_args != null:
+		printt("In fielder, not overwriting throw", posname, timer_args, base, fielder)
+		return
+	# Turn to face target
+	if fielder != null:
+		set_look_at_position(fielder.position)
+	else:
+		set_look_at_position(base_positions[base-1])
+	set_state('throwing')
+	set_animation('throw')
+	$Timer.stop()
+	$Timer.wait_time = time_throw_animation_release_point # Time for animation to reach release point
+	$Timer.start()
+	timer_action = 'throw'
+	timer_args = [base, fielder, success]
+
 var timer_action
+var timer_args
 func _on_timer_timeout() -> void:
-	get_node("Timer").stop()
+	$Timer.stop()
 	if timer_action == "set_visible_true":
 		visible = true
+	elif timer_action == "throw":
+		throw_ball_func(timer_args[0], timer_args[1], timer_args[2])
+	else:
+		push_error("Bad timer_action in fielder", posname, timer_action)
+	timer_action = ''
+	timer_args = null
 
 var is_selected_fielder:bool = false
 var is_targeted_fielder:bool = false # Throw is coming at them, so can start throw but not move
@@ -587,7 +634,7 @@ func set_selected_fielder() -> void:
 	# Select this player
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
-	get_node("Annulus").visible = true
+	$Annulus.visible = true
 
 func set_targeted_fielder() -> void:
 	printt('in fielder, set_targeted_fielder', posname)
@@ -603,12 +650,12 @@ func set_targeted_fielder() -> void:
 	add_to_group("targeted_fielder")
 	is_targeted_fielder = true
 	# Not putting annulus on targeted players
-	#get_node("Annulus").visible = true
+	#$Annulus.visible = true
 
 func set_not_selected_fielder():
 	remove_from_group("selected_fielder")
 	is_selected_fielder = false
-	get_node("Annulus").visible = false
+	$Annulus.visible = false
 
 func set_not_targeted_fielder():
 	remove_from_group("targeted_fielder")
@@ -657,7 +704,14 @@ func set_animation(new_anim):
 	#if new_anim == "moving":
 	$Char3D.start_animation(new_anim, false, throws=='R')
 
+func set_state(state_:String):
+	state = state_
+	time_in_state = 0
+
 func set_look_at_position(pos) -> void:
+	# Can't look at current position, gives error
+	if distance_xz(pos, position) < 1:
+		return
 	# Always stay vertical
 	pos.y = 0
 	# Rotate to global frame

@@ -138,7 +138,7 @@ func _on_timer_timeout() -> void:
 		printerr('bad 9012412')
 
 func set_animation(new_anim):
-	printt('Batter setting animation:', new_anim)
+	#printt('Batter setting animation:', new_anim)
 	if new_anim == animation:
 		return
 	animation = new_anim
@@ -148,12 +148,12 @@ func set_animation(new_anim):
 	$Char3D.start_animation(new_anim, bats=="R", false)
 
 func set_look_at_position(pos) -> void:
-	printt('setting batter to look at ', pos)
+	#printt('setting batter to look at ', pos)
 	# Always stay vertical
 	pos.y = 0
 	# Rotate to global frame
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
-	printt('setting batter to look at global position ', pos)
+	#printt('setting batter to look at global position ', pos)
 	# Look at global position
 	$Char3D.look_at(pos, Vector3.UP, true)
 
