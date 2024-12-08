@@ -13,6 +13,7 @@ var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
 var animation = "idle"
 var throws:String = 'R'
+const time_until_pitch_release:float = 0.95
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -69,12 +70,13 @@ func get_spin_acceleration_and_speed():
 	return [Vector3(0,3,0)*sign_, max_pitch_speed]
 
 signal pitch_started#(pitch_x, pitch_y)
+signal pitch_released_signal
 func begin_pitch():
 	pitch_in_progress = true
 	pitch_frame = 1
 	$AnimatedSprite3D.set_frame(1)
 	#printt('BEGINNING PITCH IN PITCHER')
-	pitch_started.emit(pitch_x, pitch_y)
+	pitch_started.emit(pitch_x, pitch_y, pitch_t)
 	#printt('signal was emitted.......')
 	
 	set_look_at_position(Vector3(0,0,0))
@@ -90,6 +92,12 @@ func _physics_process(delta: float) -> void:
 	
 	if pitch_in_progress:
 		time_since_pitch_start += delta
+	
+	# If it started the pitch animation, change to idle. It will finish the 
+	#  pitch animation before transitioning.
+	if animation == 'pitch':
+		set_animation('idle')
+	
 	# Pre-pitch
 	if not pitch_done and not pitch_in_progress: 
 		if user_is_pitching_team:
@@ -121,7 +129,7 @@ func _physics_process(delta: float) -> void:
 		pitch_frame = 2
 		$AnimatedSprite3D.set_frame(2)
 		$PitchSelectKeyboard.visible = false
-	if not pitch_done and pitch_in_progress and pitch_frame == 2 and time_since_pitch_start > .95:
+	if not pitch_done and pitch_in_progress and pitch_frame == 2 and time_since_pitch_start > time_until_pitch_release:
 		# Begin pitch
 		pitch_in_progress = false
 		pitch_done = true
@@ -186,6 +194,8 @@ func _physics_process(delta: float) -> void:
 		catchers_mitt.get_node("Sprite3D").visible=false
 		catchers_mitt.set_process(false)
 		ball.velocity = velo_vec_with_start
+		pitch_t = ball.simulate_delivery(ball.position, ball.velocity, 1./60, true)
+		printt('pitch_t is', pitch_t)
 		ball.pitch_in_progress = true
 		ball.state = "pitch"
 		
@@ -195,10 +205,11 @@ func _physics_process(delta: float) -> void:
 		#get_tree().current_scene.get_node('Headon').add_child(ball)
 		# Put ball under Headon node
 		#get_parent().add_child(ball)
-		print(ball.position)
-		print(ball.global_position)
-		print(position)
-		print(global_position)
+		#print(ball.position)
+		#print(ball.global_position)
+		#print(position)
+		#print(global_position)
+		pitch_released_signal.emit(pitch_x, pitch_y, pitch_t)
 		
 		
 		# Testing simulate_delivery
@@ -216,6 +227,7 @@ func _physics_process(delta: float) -> void:
 		var fielderP = get_parent().get_node("Defense/Fielder3DP")
 		fielderP.visible = true
 		fielderP.position = position
+		
 	
 	# Place catcher's mitt for pitch target
 	if not pitch_done and not pitch_in_progress:
@@ -255,6 +267,7 @@ func _on_timer_timeout() -> void:
 
 var pitch_x
 var pitch_y
+var pitch_t
 func select_pitch_location():
 	pitch_x = randf_range(-9,9)/12/3
 	pitch_y = randf_range(0.5,1.2)

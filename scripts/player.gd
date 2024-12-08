@@ -56,7 +56,7 @@ func speed_mps() -> float:
 	return SPEED
 
 func throwspeed_mps() -> float:
-	var throwspeed_mps_ = 50
+	var throwspeed_mps_ = 40
 	return throwspeed_mps_
 	
 var skin_colors = [Color(.79,.46,.42), Color(.24,.14,.08)]

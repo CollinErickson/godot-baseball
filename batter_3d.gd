@@ -8,6 +8,7 @@ var swing_elapsed_sec = 0
 var input_click = false
 var swingx = false
 var swingy = false
+var swing_prezone_duration = 0.10
 var swing_inzone_duration = 0.15
 var animation = "idle"
 var bats:String # "L", "R"
@@ -71,7 +72,7 @@ func begin_swing():
 	# Move to next frame
 	get_node('AnimatedSprite3D').set_frame(1)
 	swing_elapsed_sec = 0
-	swing_state = 'inzone'
+	swing_state = 'prezone'
 
 func _process(delta: float) -> void:
 	#if randf_range(0,1) < .04:
@@ -89,7 +90,15 @@ func _process(delta: float) -> void:
 			begin_swing()
 	if swing_started and not swing_done:
 		swing_elapsed_sec += delta
-		if swing_state == 'inzone' and swing_elapsed_sec > swing_inzone_duration:
+		
+		# If prezone, check if should be inzone
+		if (swing_state == 'prezone' and
+			swing_elapsed_sec > swing_prezone_duration):
+			swing_state = "inzone"
+		
+		# If inzone, check if should be done/backswing
+		if (swing_state == 'inzone' and
+			swing_elapsed_sec > swing_prezone_duration + swing_inzone_duration):
 			# Finish swing
 			swing_state = 'backswing'
 			swing_done = true

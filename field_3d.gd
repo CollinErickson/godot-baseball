@@ -27,6 +27,7 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 	get_node('Headon/Runners/Runner3D3B')
 ]
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
+@onready var pitcher = $Headon/Pitcher3D
 
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
@@ -94,7 +95,7 @@ func unpause() -> void:
 	set_process(true)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter, pitcher,
+			batter, pitcher_,
 			runner1, runner2, runner3,
 			outs_before_play_,
 			outs_per_inning_:int,
@@ -131,7 +132,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$Headon/Batter3D.reset(batting_team.color_primary)
 	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
 	$Headon/Pitcher3D.reset(fielding_team.color_primary)
-	$Headon/Pitcher3D.setup_player(pitcher, fielding_team, fielding_team_is_home)
+	$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
@@ -445,7 +446,9 @@ func _ready() -> void:
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
 		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
 		runner.connect("tag_up_signal", _on_tag_up_by_runner)
-		
+	
+	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
+	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
 	
 	# Test mesh array
 	#test_mesh_array()
@@ -522,7 +525,10 @@ func _process(delta: float) -> void:
 					var exitvelo = randf_range(20,45)
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
-					var inzone_prop = $Headon/Batter3D.swing_elapsed_sec / $Headon/Batter3D.swing_inzone_duration
+					var inzone_prop = ($Headon/Batter3D.swing_elapsed_sec - 
+						$Headon/Batter3D.swing_prezone_duration) / $Headon/Batter3D.swing_inzone_duration
+					if inzone_prop < 0 or inzone_prop > 1:
+						push_error("Error with inzone_prop", inzone_prop)
 					#vla = -20
 					#vla = randf_range(-1,1)*40 + 20
 					hla = -45 + 90 * inzone_prop
@@ -962,7 +968,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			if min_is_excluded:
 				pass
 			else:
-				printt('Assigning fielder to cover base', fielders[min_i].posname, base)
+				#printt('Assigning fielder to cover base', fielders[min_i].posname, base)
 				fielders[min_i].assign_to_cover_base(base)
 			exclude_fielder_indexes.push_back(min_i)
 			assigned_indexes.push_back(min_i)
@@ -1016,11 +1022,24 @@ func _on_pause_button_pressed():
 func _on_resume_button_pressed():
 	get_tree().paused = false
 
-func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y) -> void:
-	#printt('in field, pitch started!!!!!!!!!!!!!!!!!')
+func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y, _pitch_t) -> void:
+	# Replaced with pitch_released since pitch_t isn't known until then
+	##printt('in field, pitch started!!!!!!!!!!!!!!!!!')
+	#if not user_is_batting_team:
+		#get_node("Headon/Batter3D").timer_action = 'begin_swing'
+		#get_node("Headon/Batter3D/Timer").wait_time = $Headon/Pitcher3D.time_until_pitch_release + pitch_t
+		#get_node("Headon/Batter3D/Timer").start()
+	pass
+
+func _on_pitcher_3d_pitch_released(_pitch_x, _pitch_y, pitch_t) -> void:
+	printt('in field, _on_pitcher_3d_pitch_released', pitch_t)
 	if not user_is_batting_team:
 		get_node("Headon/Batter3D").timer_action = 'begin_swing'
-		get_node("Headon/Batter3D/Timer").wait_time = 1.45
+		# Need to start swing before pitch arrives
+		get_node("Headon/Batter3D/Timer").wait_time = (
+			pitch_t - 
+			$Headon/Batter3D.swing_prezone_duration -
+			0.5 * $Headon/Batter3D.swing_inzone_duration )
 		get_node("Headon/Batter3D/Timer").start()
 
 var time_since_check_if_play_done_checked = 0

@@ -272,15 +272,17 @@ func _physics_process(delta: float) -> void:
 				pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
 	
 
-func simulate_delivery(pos, vel, delta=1./60):
+func simulate_delivery(pos, vel, delta=1./60, return_time:bool=false):
 	# Find position where the ball will cross the strike zone
 	#print('starting simulate_Delivery inside ball_3d')
 	# Simulate forward in time
 	var accel
 	var nsteps = 0
+	var time = 0
 	while pos.z > sz_z and nsteps < 1e6:
 		#printt('sd step:', nsteps)
 		nsteps += 1
+		time += delta
 		accel = Vector3()
 		accel.y = -gravity
 		accel += spin_acceleration
@@ -296,10 +298,14 @@ func simulate_delivery(pos, vel, delta=1./60):
 	#printt('pos before going back', pos)
 	# Go back in trajectory to where it cross sz_z
 	vel -= delta * accel
+	# sz_t should be negative, time to go back to when it crossed sz
 	var sz_t = (sz_z - pos.z) / vel.z
 	pos += sz_t * vel
+	time += sz_t
 	#printt('pos AFTER going back', pos)
 	#printt('simulate delivery found', pos)
+	if return_time:
+		return time
 	return pos
 
 func secant_step(x0, x1, f0, f1, step_size = 1, max_mult=10) -> float:
@@ -499,6 +505,12 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 	# Fit parabola starting from pos1 going to pos2 with speed1
 	# Return velocity vector at pos1
+	# This is only an approximation to how drag works. 
+	# For fielder throws, this may be good enough.
+	# For pitches, this is used to get a
+	#  good starting point, which is then passed as the starting point
+	#  to the optimization algorithm to get better results.
+	
 	#var p1 = Vector3(0,0,0)
 	var p2 = pos2 - pos1
 	# Rotate so that 3rd dim is 0

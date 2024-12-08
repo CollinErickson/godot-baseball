@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://8dnwcee74i2b"]
+[gd_scene load_steps=34 format=3 uid="uid://8dnwcee74i2b"]
 
 [ext_resource type="PackedScene" uid="uid://d0671p5ff0bg0" path="res://characters3D/Player1/Player1.glb" id="1_olo1y"]
 
@@ -55,6 +55,9 @@ blend_point_5/pos = Vector2(-0.5, 0)
 blend_point_6/node = SubResource("AnimationNodeAnimation_7ounb")
 blend_point_6/pos = Vector2(-1, 0)
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_r1y55"]
+animation = &"Throw Object"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_5kkmu"]
 animation = &"idle"
 
@@ -92,6 +95,8 @@ advance_mode = 2
 advance_condition = &"pitchR"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_k5g3r"]
+break_loop_at_end = true
+switch_mode = 2
 advance_mode = 2
 advance_condition = &"idle"
 
@@ -113,6 +118,18 @@ advance_mode = 2
 advance_condition = &"pitchL"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_yd3jb"]
+break_loop_at_end = true
+switch_mode = 2
+advance_mode = 2
+advance_condition = &"idle"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_y1bcw"]
+advance_mode = 2
+advance_condition = &"throw"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_2267f"]
+break_loop_at_end = true
+switch_mode = 2
 advance_mode = 2
 advance_condition = &"idle"
 
@@ -129,9 +146,11 @@ advance_condition = &"idle"
 "states/Baseball Pitching mirror/position" = Vector2(663, 181.534)
 states/BlendSpace2D/node = SubResource("AnimationNodeBlendSpace2D_hag80")
 states/BlendSpace2D/position = Vector2(337, 73.534)
+"states/Throw Object/node" = SubResource("AnimationNodeAnimation_r1y55")
+"states/Throw Object/position" = Vector2(74, 168.534)
 states/idle/node = SubResource("AnimationNodeAnimation_5kkmu")
 states/idle/position = Vector2(337, 199)
-transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb")]
+transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb"), "idle", "Throw Object", SubResource("AnimationNodeStateMachineTransition_y1bcw"), "Throw Object", "idle", SubResource("AnimationNodeStateMachineTransition_2267f")]
 graph_offset = Vector2(0, 42.534)
 
 [node name="Player1" instance=ExtResource("1_olo1y")]
@@ -192,6 +211,7 @@ parameters/conditions/pitchL = false
 parameters/conditions/pitchR = false
 parameters/conditions/swingL = false
 parameters/conditions/swingR = false
+parameters/conditions/throw = false
 parameters/BlendSpace2D/blend_position = Vector2(-0.00336701, -0.814159)
 
 [node name="RootMotionView" type="RootMotionView" parent="." index="3"]
