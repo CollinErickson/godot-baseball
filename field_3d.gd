@@ -95,7 +95,7 @@ func unpause() -> void:
 	set_process(true)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter, pitcher_,
+			batter,
 			runner1, runner2, runner3,
 			outs_before_play_,
 			outs_per_inning_:int,
@@ -109,11 +109,19 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
 		fielder.reset(fielding_team.color_primary)
-		fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
+		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
+		#printt('setup fielder', fielder.posnum, fielding_team.defense_order, fielding_team.roster)
+		fielder.setup_player(
+			fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]],
+			fielding_team,
+			fielding_team_is_home
+		)
+		
 		#printt('fielder posname is', fielder.posname)
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
 			#printt('INVISIBLE CATCHER')
+	
 	#var runners = get_tree().get_nodes_in_group('runners')
 	for runner in runners:
 		runner.reset(batting_team.color_primary)
@@ -132,7 +140,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$Headon/Batter3D.reset(batting_team.color_primary)
 	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
 	$Headon/Pitcher3D.reset(fielding_team.color_primary)
-	$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
+	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
+	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
+									fielding_team, fielding_team_is_home)
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
@@ -286,18 +296,25 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	var ball_start = fielder.position
 	ball_start.y = 1.4
 	
+	var target_distance = fielder.distance_xz(fielder.position, target)
+	
 	# If throw is not success, add noise
+	var noise = Vector3.ZERO
 	if success:
-		target.x += randf_range(-.2,.2)
-		target.y += randf_range(-.2,.2)
-		target.z += randf_range(-.2,.2)
+		noise.x += randf_range(-.2,.2)
+		noise.y += randf_range(-.2,.2)
+		noise.z += randf_range(-.2,.2)
 	else:
 		#printt('in field throw is not success')
-		target.x += randf_range(-2,2)*2
-		target.y += randf_range(-2,2)*2
-		target.z += randf_range(-2,2)*2
+		noise.x += randf_range(-2,2)*2
+		noise.y += randf_range(-2,2)*2
+		noise.z += randf_range(-2,2)*2
 	
-	var velo_vec = ball.fit_approx_parabola_to_trajectory(ball_start, target, fielder.max_throw_speed, true)
+	noise *= target_distance / 20
+	target += noise
+	
+	var velo_vec = ball.fit_approx_parabola_to_trajectory(
+		ball_start, target, fielder.max_throw_speed, true)
 	
 	# TODO: Rotate for bad throws, instead of changing target above
 	# If throw is not success, add noise
@@ -1143,6 +1160,11 @@ func _on_ball_3d_hit_bounced_signal() -> void:
 	#check_runners_able_to_score()
 	update_max_force_outs_left()
 	$Headon/BallBounceAnnulus.visible = false
+	
+	# Tell runners: they can't necessarily score now, but if they reach home
+	#  they should go invisible and not be able to return to 3rd
+	for runner in runners:
+		runner.may_need_to_tag_up = false
 
 func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base

@@ -19,7 +19,8 @@ func _ready() -> void:
 		#charnode = char_Player1.instantiate()
 		pass
 	else:
-		print('In char3d, no character selected!!!!')
+		pass
+		#print('In char3d, no character selected!!!!')
 		#charnode = char_AJ.instantiate()
 	
 	charnode = char_Player1.instantiate()
@@ -138,6 +139,8 @@ func set_color_from_team(player, team, is_home_team:bool) -> void:
 	for bp in skin_body:
 		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_skin)
 	
+	# Set height
+	$charnode/Armature/Skeleton3D.scale = Vector3.ONE * player.height_mult
 
 func dir(class_instance):
 	var output = {}

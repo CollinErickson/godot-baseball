@@ -9,6 +9,7 @@ var bats:String
 var throws:String
 var pos:String
 var skin_color:Color = Color("green")
+var height_mult:float # 1 is average. Scales all dimensions of body
 
 # Skills
 var speed:float
@@ -34,6 +35,7 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	pitching = 0.
 	
 	skin_color = skin_colors.pick_random()
+	height_mult = randfn(1,.1)
 	
 	return self
 
@@ -59,4 +61,10 @@ func throwspeed_mps() -> float:
 	var throwspeed_mps_ = 40
 	return throwspeed_mps_
 	
-var skin_colors = [Color(.79,.46,.42), Color(.24,.14,.08)]
+var skin_colors = [Color( .79, .46, .42),
+					Color(.24, .14, .08),
+					Color(.88, .61, .57),
+					Color(.94, .72, .74),
+					Color(.58, .30, .27),
+					Color(.39, .26, .16),
+				]

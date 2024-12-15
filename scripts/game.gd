@@ -25,6 +25,8 @@ var runner3:Player = null
 var team_class = preload("res://scenes/team.tscn")
 var home_team:Team = team_class.instantiate().create_random()
 var away_team:Team = team_class.instantiate().create_random()
+var home_team_batting_order_index = 0
+var away_team_batting_order_index = 0
 
 var is_paused:bool = false
 
@@ -32,13 +34,15 @@ var is_paused:bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#printt('test create player:', get_player())
+	printt('in game ready', away_team, home_team)
 	if true:
 		user_is_away_team = true
 		user_is_home_team = false
-	batter = get_player(50)
+	#batter = get_player(50)
+	batter = away_team.roster[away_team.batting_order[0]]
 	runner1 = get_player(50)
 	runner2 = get_player(50)
-	runner3 = get_player(99)
+	runner3 = get_player(199)
 	reset_field()
 	update_scorebug()
 	
@@ -73,6 +77,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	#assert(int(ball_in_play) + int(is_ball) + int(is_strike) == 1) fails
 	
 	var new_batter = false
+	var was_top = is_top
+	
 	if ball_in_play:
 		# Ball must have been in play
 		if is_foul_ball:
@@ -133,7 +139,15 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	if new_batter:
 		balls = 0
 		strikes = 0
-		batter = get_player()
+		#batter = get_player()
+		if was_top:
+			away_team_batting_order_index += 1
+		else:
+			home_team_batting_order_index += 1
+		if is_top:
+			batter = away_team.roster[away_team.batting_order[away_team_batting_order_index]]
+		else:
+			batter = home_team.roster[home_team.batting_order[home_team_batting_order_index]]
 	#get_node('Field3D').freeze()
 	update_scorebug()
 	printt('\n\n\n\n\n\n\n\n\n\n\n\n\nin game, about to reset field')
@@ -145,7 +159,7 @@ func reset_field() -> void:
 		(is_top and user_is_away_team) or (!is_top and user_is_home_team),
 		(is_top and user_is_home_team) or (!is_top and user_is_away_team),
 		batter,
-		home_team.roster[0] if is_top else away_team.roster[0],
+		#home_team.roster[0] if is_top else away_team.roster[0],
 		runner1,
 		runner2,
 		runner3,

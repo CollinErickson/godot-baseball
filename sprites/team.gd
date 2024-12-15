@@ -11,6 +11,8 @@ var color_secondary:Color
 
 # Roster
 var roster:Array = []
+var batting_order:Array = []
+var defense_order:Array = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -32,14 +34,24 @@ func create(city_name_,
 	color_primary = color_primary_
 	color_secondary = color_secondary_
 	
-	# Create roster
-	for i in range(9):
-		roster.push_back(get_player())
+	create_roster()
 	
 	printt('New team is:', self)
 	print_()
 	
 	return self
+
+func create_roster():
+	# Create roster
+	for i in range(9):
+		roster.push_back(get_player())
+	
+	# Index i equals j means that roster[j] bats i+1 in batting order
+	batting_order = range(9)
+	batting_order.shuffle()
+	# Index i equals j means that roster[j] plays position i+1
+	defense_order = range(9)
+	defense_order.shuffle()
 
 #const sample_colors = ["red", "yellow", "blue", "green", "white", "black",
 						#Color(1,.5,.5), Color(0,.5,.5)]
@@ -54,14 +66,12 @@ func create_random():
 	
 	city_name = ["Minnesota", "New York City", "Washington Heights", "Bronx", "Nashville"].pick_random()
 	team_name = ["Otters", "Construction Workers", "Icebergs", "Burritos", "Tricycles"].pick_random()
-	abbr = ["AAA", "BBB", "CC"].pick_random()
+	abbr = ["MIN", "NYC", "USA"].pick_random()
 	
 	color_primary = random_color()
 	color_secondary = random_color()
 	
-	# Create roster
-	for i in range(9):
-		roster.push_back(get_player())
+	create_roster()
 	
 	return self
 

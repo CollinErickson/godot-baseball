@@ -17,6 +17,7 @@ const time_until_pitch_release:float = 0.95
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
+var player = null
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -50,6 +51,7 @@ func reset(color:Color) -> void:
 	set_look_at_position(Vector3(100,0,position.z))
 	set_animation("idle")
 	$Char3D.set_color(color)
+	player = null
 
 
 func get_spin_acceleration_and_speed():
@@ -148,6 +150,8 @@ func _physics_process(delta: float) -> void:
 		if throws == "L":
 			ball.position.x *= -1 # put in lefty hand
 		ball.position.y=position.y + 1.7 # 1.5 yards higher than ground of pitcher
+		# Adjust ball height for pitcher height
+		ball.position.y *= player.height_mult
 		ball.position.z= position.z - 2 # 2 yards closer than pitcher
 		#ball.velocity.z = -40*.75 # 40 is about about 90 mph
 		#ball.velocity.x=1 # to get over home plate
@@ -291,12 +295,14 @@ func set_look_at_position(pos) -> void:
 	# Look at global position
 	$Char3D.look_at(pos, Vector3.UP, true)
 
-func setup_player(player, team, is_home_team:bool) -> void:
-	if player != null:
-		throws = player.throws
-		if throws == 'R':
-			set_look_at_position(Vector3(100,0,position.z))
-		else:
-			set_look_at_position(Vector3(-100,0,position.z))
+func setup_player(player_, team, is_home_team:bool) -> void:
+	if player_ == null:
+		push_error("no player in pitcher")
+	player = player_
+	throws = player.throws
+	if throws == 'R':
+		set_look_at_position(Vector3(100,0,position.z))
+	else:
+		set_look_at_position(Vector3(-100,0,position.z))
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)

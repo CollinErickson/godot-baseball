@@ -16,6 +16,7 @@ var max_running_progress:float = -1
 # 1/2/3/4 for bases, but can be inbetween (halfway on fly ball, no other reason)
 var target_base:float = -1
 var needs_to_tag_up:bool = false
+var may_need_to_tag_up:bool = false
 var able_to_score:bool = false
 var reached_next_base:bool = false
 var can_be_force_out_before_play:bool = false
@@ -60,6 +61,7 @@ func reset(color) -> void:
 	scored_on_play = false
 	tagged_up_after_catch = true
 	needs_to_tag_up = false
+	may_need_to_tag_up = true
 	max_running_progress = running_progress
 	target_base = start_base + 1
 	able_to_score = false
@@ -154,6 +156,7 @@ func _physics_process(delta: float) -> void:
 	if (running_progress >= 4 and not scored_on_play):
 		if (able_to_score and
 			(not needs_to_tag_up or tagged_up_after_catch)):
+			# Runner scores
 			is_running = false
 			running_progress = 4
 			scored_on_play = true
@@ -161,8 +164,12 @@ func _physics_process(delta: float) -> void:
 			signal_scored_on_play.emit()
 			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
 		else:
+			# Runner can't score yet, stays at 4
 			#printt("RUNNER IS WAITING TO SCORE", start_base, able_to_score, needs_to_tag_up, tagged_up_after_catch)
 			running_progress = 4
+			# If they are done with play (no reason to ever go back), make invisible
+			if not may_need_to_tag_up and visible:
+				visible = false
 
 func update_position():
 	# Update location on field based on running_progress
@@ -179,6 +186,7 @@ func update_position():
 	#printt('RUN', is_running, running_progress, position)
 		
 func send_runner(direction: int, can_go_past:bool=true) -> void:
+	printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
 	if direction > 0.5:
@@ -189,28 +197,35 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 			#printt('actually send forward')
 		#else:
 			#printt('didnt actually send forward', running_progress, target_base)
-		is_running = true
-		if target_base < running_progress:
-			# If going backward, send forward to next
-			target_base = ceil(running_progress)
-		elif can_go_past and running_progress > target_base - .3:
-			# If already going forward and near next base, send to following base
-			target_base += 1
-		elif not can_go_past:
-			target_base = floor(running_progress) + 1
-		else:
+		if running_progress >= 4:
+			# If made it home and just waiting, don't send forward
 			pass
+		else:
+			is_running = true
+			if target_base < running_progress:
+				# If going backward, send forward to next
+				target_base = ceil(running_progress)
+			elif can_go_past and running_progress > target_base - .3:
+				# If already going forward and near next base, send to following base
+				target_base += 1
+			elif not can_go_past:
+				target_base = floor(running_progress) + 1
+			else:
+				pass
 	elif direction == -1:
 		#print('sending backward!!!')
 		if running_progress > 1 and running_progress > start_base: # Can't go back to home
 			# Standing on base, go to previous
 			if abs(running_progress - floor(running_progress)) < 1e-16:
-				# Go to previous base
-				target_base = floor(running_progress) - 1
-				is_running = true
+				# Go to previous base, unless reached home and no reason to return
+				if running_progress >= 4 and not may_need_to_tag_up:
+					pass
+				else:
+					target_base = floor(running_progress) - 1
+					is_running = true
 			else:
 				# In between bases, go back
-				#printt('going back?', running_progress, target_base)
+				#printt('going back?', running_progress, target_base, may_need_to_tag_up)
 				target_base = floor(running_progress)
 				is_running = true
 	else:

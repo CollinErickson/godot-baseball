@@ -308,40 +308,49 @@ mesh = SubResource("QuadMesh_5r354")
 [node name="Fielder3D2B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 42)
 posname = "2B"
+posnum = 4
 
 [node name="Fielder3D1B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 29)
 posname = "1B"
+posnum = 3
 
 [node name="Fielder3D3B" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 29)
 posname = "3B"
+posnum = 5
 
 [node name="Fielder3DSS" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 42)
 posname = "SS"
+posnum = 6
 
 [node name="Fielder3DCF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 70)
 posname = "CF"
+posnum = 8
 
 [node name="Fielder3DLF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 60)
 posname = "LF"
+posnum = 7
 
 [node name="Fielder3DRF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 60)
 posname = "RF"
+posnum = 9
 
 [node name="Fielder3DP" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
 visible = false
 posname = "P"
+posnum = 1
 
 [node name="Fielder3DC" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 visible = false
 posname = "C"
+posnum = 2
 
 [node name="CatchersMitt" parent="Headon" instance=ExtResource("5_kcgmt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.6)

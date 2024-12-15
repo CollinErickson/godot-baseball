@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 @export_group("Baseball")
 @export var posname: String
+@export var posnum: int
 
 var SPEED:float = 8.0
 const MAX_ACCEL:float = 100.0
@@ -151,6 +152,13 @@ func _physics_process(delta: float) -> void:
 			set_state('free')
 			set_animation('idle')
 		else: # Remain in throwing state
+			return
+
+	if state == 'catching':
+		if time_in_state > 0.15:
+			set_state('free')
+			set_animation('idle')
+		else: # Remain in catching state
 			return
 
 	# Move fielder to their assignment
@@ -419,12 +427,13 @@ func _physics_process(delta: float) -> void:
 						#var runners = get_tree().get_nodes_in_group("runners")
 						if throw_to < -0.5:
 							for runner in runners:
-								if runner.is_active():
+								if runner.is_active() and runner.running_progress < 4:
 									max_running_progress = max(max_running_progress, runner.running_progress)
 									#printt('fielder is', fielder)
 									if runner.is_running and runner.target_base > runner.running_progress:
 										throw_to = max(throw_to, runner.target_base)
-										#printt('could throw out runner', runner.target_base, runner.out_on_play)
+										printt('could throw out runner', runner.target_base,
+											runner.start_base, runner.out_on_play)
 									
 						# If OF, throw to IF
 						if throw_to < -0.5:
@@ -433,6 +442,7 @@ func _physics_process(delta: float) -> void:
 									throw_to = ceil(max_running_progress)
 								else:
 									throw_to = 2
+						throw_to = max(min(throw_to, 4), 1)
 						if distance_xz(position, base_positions[throw_to-1]) < 10:
 							run_it = true
 							assignment_pos = base_positions[throw_to-1]
