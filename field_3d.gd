@@ -570,8 +570,8 @@ func _process(delta: float) -> void:
 					# Debugging
 					if !false:
 						vla = -5
-						hla = 40
-						exitvelo = 43.8
+						hla = 24
+						exitvelo = 53.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:

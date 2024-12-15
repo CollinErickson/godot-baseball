@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://8dnwcee74i2b"]
+[gd_scene load_steps=37 format=3 uid="uid://8dnwcee74i2b"]
 
 [ext_resource type="PackedScene" uid="uid://d0671p5ff0bg0" path="res://characters3D/Player1/Player1.glb" id="1_olo1y"]
 
@@ -137,6 +137,14 @@ advance_condition = &"idle"
 advance_mode = 2
 advance_condition = &"throw"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_r6umi"]
+advance_mode = 2
+advance_condition = &"moving"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1a310"]
+advance_mode = 2
+advance_condition = &"moving"
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_783kb"]
 "states/Baseball Hit/node" = SubResource("AnimationNodeAnimation_2k81h")
 "states/Baseball Hit/position" = Vector2(531, 272.534)
@@ -155,23 +163,23 @@ states/Start/position = Vector2(52, 87.534)
 "states/Throw Object/position" = Vector2(72, 209.534)
 states/idle/node = SubResource("AnimationNodeAnimation_5kkmu")
 states/idle/position = Vector2(337, 199)
-transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb"), "idle", "Throw Object", SubResource("AnimationNodeStateMachineTransition_y1bcw"), "Throw Object", "idle", SubResource("AnimationNodeStateMachineTransition_2267f"), "BlendSpace2D", "Throw Object", SubResource("AnimationNodeStateMachineTransition_f01h2")]
-graph_offset = Vector2(0, 57.4028)
+transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_46m5i"), "idle", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_8m76c"), "Baseball Idle", "Baseball Hit", SubResource("AnimationNodeStateMachineTransition_ge8da"), "Baseball Hit", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_5myq0"), "Baseball Hit", "idle", SubResource("AnimationNodeStateMachineTransition_62pe0"), "idle", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_di1k5"), "BlendSpace2D", "idle", SubResource("AnimationNodeStateMachineTransition_li3br"), "idle", "Baseball Pitching", SubResource("AnimationNodeStateMachineTransition_3krvi"), "Baseball Pitching", "idle", SubResource("AnimationNodeStateMachineTransition_k5g3r"), "Baseball Idle", "Baseball Hit mirror", SubResource("AnimationNodeStateMachineTransition_84nmi"), "Baseball Hit mirror", "Baseball Idle", SubResource("AnimationNodeStateMachineTransition_3dndo"), "Baseball Hit mirror", "idle", SubResource("AnimationNodeStateMachineTransition_3fvr0"), "idle", "Baseball Pitching mirror", SubResource("AnimationNodeStateMachineTransition_x7bri"), "Baseball Pitching mirror", "idle", SubResource("AnimationNodeStateMachineTransition_yd3jb"), "idle", "Throw Object", SubResource("AnimationNodeStateMachineTransition_y1bcw"), "Throw Object", "idle", SubResource("AnimationNodeStateMachineTransition_2267f"), "BlendSpace2D", "Throw Object", SubResource("AnimationNodeStateMachineTransition_f01h2"), "Baseball Pitching", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_r6umi"), "Baseball Pitching mirror", "BlendSpace2D", SubResource("AnimationNodeStateMachineTransition_1a310")]
+graph_offset = Vector2(0, 16.5135)
 
 [node name="Player1" instance=ExtResource("1_olo1y")]
 
 [node name="Skeleton3D" parent="Armature" index="0"]
 bones/0/position = Vector3(0, 0.77717, 0.000625988)
-bones/0/rotation = Quaternion(-0.0330747, -0.047806, -0.0233513, 0.998036)
-bones/1/rotation = Quaternion(0.0394435, 0.0142663, 0.0198953, 0.998922)
-bones/2/rotation = Quaternion(0.0111864, 0.00354864, 0.0141584, 0.999831)
-bones/3/rotation = Quaternion(0.0109636, 0.00374708, 0.0141768, 0.999832)
-bones/4/rotation = Quaternion(0.0430827, -0.00157207, 0.00480943, 0.999059)
-bones/5/rotation = Quaternion(-0.0715441, 0.0100658, -0.000538391, 0.997387)
-bones/7/rotation = Quaternion(0.693724, 0.310091, -0.498142, 0.417667)
-bones/8/rotation = Quaternion(0.505822, 0.117125, 0.0992071, 0.848872)
-bones/9/rotation = Quaternion(-0.0717784, -0.00382041, 0.0800454, 0.994196)
-bones/10/rotation = Quaternion(-0.0762059, 0.987563, -0.0573676, -0.124985)
+bones/0/rotation = Quaternion(-0.0344771, -0.0464504, -0.0230582, 0.998059)
+bones/1/rotation = Quaternion(0.0420074, 0.0152926, 0.0209805, 0.99878)
+bones/2/rotation = Quaternion(0.0118613, 0.00400455, 0.0144621, 0.999817)
+bones/3/rotation = Quaternion(0.0116399, 0.00420311, 0.0144733, 0.999819)
+bones/4/rotation = Quaternion(0.0446312, -0.00189651, 0.0046279, 0.998991)
+bones/5/rotation = Quaternion(-0.0755944, 0.00845968, 0.000193148, 0.997103)
+bones/7/rotation = Quaternion(0.695367, 0.307936, -0.497249, 0.417593)
+bones/8/rotation = Quaternion(0.50434, 0.116492, 0.101567, 0.849561)
+bones/9/rotation = Quaternion(-0.071783, -0.00380587, 0.0802515, 0.994179)
+bones/10/rotation = Quaternion(-0.0766629, 0.987594, -0.0610347, -0.122699)
 bones/11/position = Vector3(-0.027873, 0.0317345, 2.59373e-07)
 bones/11/rotation = Quaternion(0.00910209, 0.0106361, 0.368581, 0.92949)
 bones/12/position = Vector3(-0.00183208, 0.0337398, -1.62936e-07)
@@ -183,10 +191,10 @@ bones/16/position = Vector3(-0.00221603, 0.0568701, -2.29177e-07)
 bones/16/rotation = Quaternion(-0.0790731, 0.00643621, -0.10334, 0.991477)
 bones/17/position = Vector3(0.00122145, 0.0436887, -2.12918e-07)
 bones/17/rotation = Quaternion(-0.0466765, 0.00219417, -0.0480412, 0.997752)
-bones/19/rotation = Quaternion(0.693933, -0.306988, 0.517347, 0.395686)
-bones/20/rotation = Quaternion(0.433078, -0.211941, -0.121091, 0.867676)
-bones/21/rotation = Quaternion(-0.0721253, -0.000232844, -0.1121, 0.991076)
-bones/22/rotation = Quaternion(0.0255946, 0.96883, -0.0429664, 0.242625)
+bones/19/rotation = Quaternion(0.695452, -0.305062, 0.516227, 0.395972)
+bones/20/rotation = Quaternion(0.433296, -0.210973, -0.117952, 0.868235)
+bones/21/rotation = Quaternion(-0.072125, -0.000231863, -0.112087, 0.991077)
+bones/22/rotation = Quaternion(0.0256161, 0.968906, -0.0431939, 0.242278)
 bones/23/position = Vector3(0.0250442, 0.0329945, 2.26777e-07)
 bones/23/rotation = Quaternion(0.0228041, -0.0123701, -0.342442, 0.939181)
 bones/24/rotation = Quaternion(-0.0464521, -0.027376, -0.277979, 0.959073)
@@ -197,14 +205,14 @@ bones/27/rotation = Quaternion(-0.103544, 0.000536991, 0.0693732, 0.992203)
 bones/28/rotation = Quaternion(-0.103394, -0.00328158, 0.106378, 0.98893)
 bones/29/position = Vector3(-0.00110582, 0.0433405, -7.59541e-08)
 bones/29/rotation = Quaternion(-0.110844, 0.00757607, 0.0492126, 0.99259)
-bones/31/rotation = Quaternion(0.135576, 0.0798624, 0.982697, -0.0977156)
-bones/32/rotation = Quaternion(-0.206534, -0.0073884, 0.0235118, 0.978129)
-bones/33/rotation = Quaternion(0.572071, -0.049638, -0.0644319, 0.816161)
+bones/31/rotation = Quaternion(0.137022, 0.0778092, 0.982574, -0.0985829)
+bones/32/rotation = Quaternion(-0.206267, -0.00436648, 0.0230458, 0.978215)
+bones/33/rotation = Quaternion(0.572438, -0.0499713, -0.0648158, 0.815853)
 bones/34/rotation = Quaternion(0.298232, 0.00642725, -0.00162731, 0.95447)
-bones/36/rotation = Quaternion(-0.090289, -0.0714182, 0.993348, -0.00251756)
-bones/37/rotation = Quaternion(-0.034417, 0.0833398, -0.0146676, 0.995819)
-bones/38/rotation = Quaternion(0.555443, 0.0357256, 0.0306517, 0.830221)
-bones/39/rotation = Quaternion(0.316481, -0.00632717, 0.00155473, 0.948577)
+bones/36/rotation = Quaternion(-0.0908056, -0.0730015, 0.993186, -0.00276024)
+bones/37/rotation = Quaternion(-0.0381439, 0.0833446, -0.0151337, 0.995676)
+bones/38/rotation = Quaternion(0.558792, 0.0365083, 0.0304397, 0.827944)
+bones/39/rotation = Quaternion(0.316459, -0.00632727, 0.0015548, 0.948584)
 
 [node name="AnimationTree" type="AnimationTree" parent="." index="2"]
 tree_root = SubResource("AnimationNodeStateMachine_783kb")

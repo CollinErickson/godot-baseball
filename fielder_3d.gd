@@ -139,8 +139,8 @@ func _physics_process(delta: float) -> void:
 	#	printt('fielder user pit team', posname, user_is_pitching_team)
 	if is_frozen:
 		return
-	#if posname == 'C':
-	#	printt('catcher fielder', assignment)
+	#if posname == 'P':
+		#printt('pitcher fielder', state, assignment, animation)
 	
 	time_in_state += delta
 	
@@ -148,7 +148,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if state == 'throwing':
-		if time_in_state > time_throw_animation_release_point + 0.15:
+		if time_in_state > time_throw_animation_release_point + 0.35:
 			set_state('free')
 			set_animation('idle')
 		else: # Remain in throwing state
@@ -161,6 +161,9 @@ func _physics_process(delta: float) -> void:
 		else: # Remain in catching state
 			return
 
+	assert(state == 'free')
+	var _moved_this_process = false
+	
 	# Move fielder to their assignment
 	if ((assignment in ["cover", "ball_click", "ball_carry"]) or
 		(assignment == 'ball' and not user_is_pitching_team)):
@@ -403,62 +406,68 @@ func _physics_process(delta: float) -> void:
 		if not user_is_pitching_team:
 			if assignment != "ball_carry":
 				# Make sure that some frames passed while holding
-				if Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10:
+				if (Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10
+					and Time.get_ticks_msec() - time_last_decide_what_to_do_with_ball > 1000.*1.):
 					#printt('TRYING TO CPU THROW NOW', posname)
 					# Decide what to do with ball
+					# 1. If runner needs to 
 					# TODO: Don't throw if the throw won't beat them
 					# TODO: Throw to better base for double play.
 					# TODO: Throw to better base for force out.
 					# TODO: Baserunners running backward
-					var throw_to = -1
-					var max_running_progress = -1
-					var run_it = false
-					if not user_is_pitching_team:
-						#print('CPU decide what to do with ball now')
-						# Check for active runners that need to tag up, throw at lead
-						if throw_to < -0.5:
-							#printt('CHECKING THROW OUT TAG UP')
-							for runner in runners:
-								#printt('CHECKING THROW OUT TAG UP', runner.needs_to_tag_up, runner.tagged_up_after_catch)
-								if runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
-									throw_to = max(throw_to, runner.start_base)
-									#printt('CAN THROW OUT TAG UP')
-						# Check for active runners, throw in front of lead
-						#var runners = get_tree().get_nodes_in_group("runners")
-						if throw_to < -0.5:
-							for runner in runners:
-								if runner.is_active() and runner.running_progress < 4:
-									max_running_progress = max(max_running_progress, runner.running_progress)
-									#printt('fielder is', fielder)
-									if runner.is_running and runner.target_base > runner.running_progress:
-										throw_to = max(throw_to, runner.target_base)
-										printt('could throw out runner', runner.target_base,
-											runner.start_base, runner.out_on_play)
-									
-						# If OF, throw to IF
-						if throw_to < -0.5:
-							if distance_xz(position, Vector3(0,0,20)) > 25:
-								if max_running_progress > -0.5:
-									throw_to = ceil(max_running_progress)
-								else:
-									throw_to = 2
-						throw_to = max(min(throw_to, 4), 1)
-						if distance_xz(position, base_positions[throw_to-1]) < 10:
-							run_it = true
-							assignment_pos = base_positions[throw_to-1]
-							assignment = "ball_carry"
-						
-						if run_it:
-							pass
-							#printt('fielder running to base', throw_to, posname)
+					#var throw_to = -1
+					#var max_running_progress = -1
+					#var run_it = false
+					##print('CPU decide what to do with ball now')
+					## Check for active runners that need to tag up, throw at lead
+					#if throw_to < -0.5:
+						##printt('CHECKING THROW OUT TAG UP')
+						#for runner in runners:
+							##printt('CHECKING THROW OUT TAG UP', runner.needs_to_tag_up, runner.tagged_up_after_catch)
+							#if runner.is_active() and runner.needs_to_tag_up and not runner.tagged_up_after_catch:
+								#throw_to = max(throw_to, runner.start_base)
+								##printt('CAN THROW OUT TAG UP')
+					## Check for active runners, throw in front of lead
+					##var runners = get_tree().get_nodes_in_group("runners")
+					#if throw_to < -0.5:
+						#for runner in runners:
+							#if runner.is_active() and runner.running_progress < 4:
+								#max_running_progress = max(max_running_progress, runner.running_progress)
+								##printt('fielder is', fielder)
+								#if runner.is_running and runner.target_base > runner.running_progress:
+									#throw_to = max(throw_to, runner.target_base)
+									#printt('could throw out runner', runner.target_base,
+										#runner.start_base, runner.out_on_play)
+								#
+					## If OF, throw to IF
+					#if throw_to < -0.5:
+						#if distance_xz(position, Vector3(0,0,20)) > 25:
+							#if max_running_progress > -0.5:
+								#throw_to = ceil(max_running_progress)
+							#else:
+								#throw_to = 2
+					#throw_to = max(min(throw_to, 4), 1)
+					#if distance_xz(position, base_positions[throw_to-1]) < 10:
+						#run_it = true
+						#assignment_pos = base_positions[throw_to-1]
+						#assignment = "ball_carry"
+					
+					var decision_out = decide_what_to_do_with_ball()
+					var throw_to = decision_out[0]
+					var run_it = decision_out[1]
+					
+					if run_it:
+						pass
+						assignment_pos = base_positions[throw_to-1]
+						assignment = "ball_carry"
+						#printt('fielder running to base', throw_to, posname)
+					else:
+						if throw_to > -0.5:
+							printt("in field: ball will be thrown to", throw_to)
+							#throw_ball_func(throw_to)
+							start_throw_ball_animation(throw_to)
 						else:
-							
-							if throw_to > -0.5:
-								printt("in field: ball will be thrown to", throw_to)
-								#throw_ball_func(throw_to)
-								start_throw_ball_animation(throw_to)
-							else:
-								pass #printt('deciding not to throw', posname)
+							pass #printt('deciding not to throw', posname)
 	else:
 		stepping_on_base_with_ball = false
 	
@@ -747,3 +756,86 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		max_throw_speed = player.throwspeed_mps()
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
+
+var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
+func decide_what_to_do_with_ball() -> Array:
+	time_last_decide_what_to_do_with_ball = Time.get_ticks_msec()
+	printt('Starting decide_what_to_do_with_ball in fielder', posname)
+	# When CPU fielder has ball, decide where to throw/run it to
+	# Return [base, run_it]
+	
+	# Runners that are active, first one should be furthest ahead
+	var runners = get_tree().get_nodes_in_group('runners')
+	runners.filter(func(r): return r.is_active())
+	runners.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
+	
+	# Check which bases are covered for throws
+	var base_covered = [false, false, false, false]
+	#var fielders = get_tree().get_nodes_in_group('fielders')
+	for base in range(1,5):
+		for fielder in fielders:
+			if fielder.posname != posname:
+				if distance_xz(fielder.position, base_positions[base - 1]) < 1:
+					base_covered[base-1] = true
+					break
+	#printt('BASES COVERED', base_covered)
+	
+	
+	# Calculate time to throw in front+behind, to run in front+behind
+	var time_throw_front = []
+	var time_throw_behind = []
+	var time_throw_start = []
+	var time_run_behind = []
+	var time_run_front = []
+	var time_run_start = []
+	var time_runner_run_forward = []
+	var time_runner_run_back = []
+
+	var base_front = []
+	var base_behind = []
+	var base_front_pos = []
+	var base_behind_pos = []
+	var base_start_pos = []
+	for i in range(len(runners)):
+		var runner = runners[i]
+		base_front.push_back(min(floor(runner.running_progress) + 1, 4))
+		base_behind.push_back(floor(runner.running_progress))
+		base_front_pos.push_back(base_positions[base_front[i] - 1])
+		base_behind_pos.push_back(base_positions[base_behind[i] - 1])
+		base_start_pos.push_back(base_positions[runner.start_base - 1])
+		
+		time_throw_front.push_back(distance_xz(position, base_front_pos[i]) / max_throw_speed + time_throw_animation_release_point)
+		time_throw_behind.push_back(distance_xz(position, base_behind_pos[i]) / max_throw_speed + time_throw_animation_release_point)
+		time_throw_start.push_back(distance_xz(position, base_start_pos[i]) / max_throw_speed + time_throw_animation_release_point)
+		
+		time_run_front.push_back(distance_xz(position, base_front_pos[i]) / SPEED)
+		time_run_behind.push_back(distance_xz(position, base_behind_pos[i]) / SPEED)
+		time_run_start.push_back(distance_xz(position, base_start_pos[i]) / SPEED)
+		
+		time_runner_run_forward.push_back(abs(base_front[i] - runner.running_progress) * 30 / runner.SPEED)
+		time_runner_run_back.push_back(abs(base_behind[i] - runner.running_progress) * 30 / runner.SPEED)
+
+	# Check if there's a fielder covering each base
+	
+	# 1. If runner needs to tag up:
+	#  a. If throw can get them, throw behind.
+	#  b. If can beat them to base, run behind.
+	for i in range(len(runners)):
+		if runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
+			if time_throw_start[i] < time_runner_run_back[i] and base_covered[runners[i].start_base - 1]:
+				return [runners[i].start_base, false]
+			if time_run_start[i] < time_runner_run_back[i]:
+				return [runners[i].start_base, true]
+	# 2. If runner can be force out:
+	#  a. If throw can get them, throw ahead.
+	#  b. If can beat them to base, run ahead.
+	for i in range(len(runners)):
+		if runners[i].can_be_force_out():
+			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
+				return [base_front[i], false]
+			if time_run_front[i] < time_runner_run_forward[i]:
+				return [base_front[i], true]
+	# 3. If runner is between bases and no force out:
+	
+	# X. If in outfield, throw it in 
+	return [4, false]
