@@ -53,12 +53,16 @@ func freeze() -> void:
 	visible = false
 	set_process(false)
 
+var timers_to_restart_on_unpause:Array = []
 func pause() -> void:
 	# Stop timers
-	$Headon/Batter3D/Timer.stop()
-	$TimerCameraChange.stop()
-	$Headon/Defense/Fielder3DC/Timer.stop()
-	$PlayOverTimer.stop()
+	var timers = [$Headon/Batter3D/Timer, $TimerCameraChange,
+					$Headon/Defense/Fielder3DC/Timer, $PlayOverTimer]
+	for timer in timers:
+		#printt('PAUSE TIMER:', timer, timer.time_left)
+		if timer.time_left > 0:
+			timers_to_restart_on_unpause += [[timer, timer.time_left]]
+		timer.stop()
 
 	# Set children to be frozen
 	$Headon/Ball3D.pause()
@@ -74,12 +78,12 @@ func pause() -> void:
 	set_process(false)
 
 func unpause() -> void:
-	# Stop timers
-	# TODO: restart these if they were running before
-	#$Headon/Batter3D/Timer.stop()
-	#$TimerCameraChange.stop()
-	#$Headon/Defense/Fielder3DC/Timer.stop()
-	#$PlayOverTimer.stop()
+	# Unpause timers
+	for i in range(len(timers_to_restart_on_unpause)):
+		var timer = timers_to_restart_on_unpause[i][0]
+		timer.wait_time = timers_to_restart_on_unpause[i][1]
+		timer.start()
+	timers_to_restart_on_unpause = []
 
 	# Set children to be frozen
 	$Headon/Ball3D.unpause()
@@ -515,13 +519,13 @@ func _process(delta: float) -> void:
 		get_tree().reload_current_scene()
 		return
 	
-	# Pause game
-	if Input.is_action_just_pressed("startbutton"):
-		print('start button pressed')
-		if get_tree().paused:
-			_on_resume_button_pressed()
-		else:
-			_on_pause_button_pressed()
+	## Pause game
+	#if Input.is_action_just_pressed("startbutton"):
+		#print('start button pressed')
+		#if get_tree().paused:
+			#_on_resume_button_pressed()
+		#else:
+			#_on_pause_button_pressed()
 	#if Input.is_key_pressed(KEY_P):
 		#Engine.time_scale = randf_range(.1,10)
 	

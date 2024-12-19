@@ -159,7 +159,23 @@ func dir(class_instance):
 	return output
 
 func pause() -> void:
-	$charnode/AnimationTree.active = false
+	# Can't get animations to restart where they stopped. Giving up for now.
+	#$charnode/AnimationTree.active = false
+	#$charnode/AnimationTree.set_process(false)
+	#$charnode/AnimationPlayer.pause()
+	#$charnode/AnimationTree.set("parameters")
+	#printt('$charnode/AnimationTree.set_process_callback', 
+	#$charnode/AnimationTree.get_process_callback())
+	#printt('char3d callback mode', $charnode/AnimationTree.get_callback_mode_process())
+	#$charnode/AnimationTree.set_process_callback(2)
+	#$charnode/AnimationTree.set_process(false)
+	#$charnode/AnimationTree.set_physics_process(false)
+	#$charnode/AnimationPlayer.set_process(false)
+	#$charnode/AnimationPlayer.set_physics_process(false)
+	$charnode/AnimationTree.set_callback_mode_process(2)
+	#printt('char3d callback mode', $charnode/AnimationTree.get_callback_mode_process())
 
 func unpause() -> void:
-	$charnode/AnimationTree.active = true
+	#$charnode/AnimationTree.active = true
+	#$charnode/AnimationTree.set_process_callback(1)
+	$charnode/AnimationTree.set_callback_mode_process(1)

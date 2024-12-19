@@ -69,6 +69,8 @@ func reset(color) -> void:
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
 	$Timer.stop()
+	timer_action = null
+	timer_args = null
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -453,21 +455,25 @@ func _physics_process(delta: float) -> void:
 						#assignment = "ball_carry"
 					
 					var decision_out = decide_what_to_do_with_ball()
-					var throw_to = decision_out[0]
-					var run_it = decision_out[1]
-					
-					if run_it:
+					printt('  decide_what_to_do_with_ball result:', posname, decision_out)
+					if decision_out[0] == null:
+						# No decision, keep holding
 						pass
-						assignment_pos = base_positions[throw_to-1]
-						assignment = "ball_carry"
-						#printt('fielder running to base', throw_to, posname)
-					else:
-						if throw_to > -0.5:
-							printt("in field: ball will be thrown to", throw_to)
-							#throw_ball_func(throw_to)
-							start_throw_ball_animation(throw_to)
+					else: # Throw or run ball
+						var throw_to = decision_out[0]
+						var run_it = decision_out[1]
+						
+						if run_it:
+							assignment_pos = base_positions[throw_to-1]
+							assignment = "ball_carry"
+							#printt('fielder running to base', throw_to, posname)
 						else:
-							pass #printt('deciding not to throw', posname)
+							if throw_to > -0.5:
+								printt("in field: ball will be thrown to", throw_to)
+								#throw_ball_func(throw_to)
+								start_throw_ball_animation(throw_to)
+							else:
+								pass #printt('deciding not to throw', posname)
 	else:
 		stepping_on_base_with_ball = false
 	
@@ -635,7 +641,7 @@ func _on_timer_timeout() -> void:
 		throw_ball_func(timer_args[0], timer_args[1], timer_args[2])
 	else:
 		push_error("Bad timer_action in fielder", posname, timer_action)
-	timer_action = ''
+	timer_action = null
 	timer_args = null
 
 var is_selected_fielder:bool = false
@@ -766,7 +772,7 @@ func decide_what_to_do_with_ball() -> Array:
 	
 	# Runners that are active, first one should be furthest ahead
 	var runners = get_tree().get_nodes_in_group('runners')
-	runners.filter(func(r): return r.is_active())
+	runners = runners.filter(func(r): return r.is_active())
 	runners.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
 	
 	# Check which bases are covered for throws
@@ -837,5 +843,10 @@ func decide_what_to_do_with_ball() -> Array:
 				return [base_front[i], true]
 	# 3. If runner is between bases and no force out:
 	
+	# X. 
+	
 	# X. If in outfield, throw it in 
-	return [4, false]
+	if abs(position.x) + abs(position.z - 20) > 20:
+		return [4, distance_xz(Vector3.ZERO, position) < 10]
+	
+	return [null, null]
