@@ -153,7 +153,11 @@ func _physics_process(delta: float) -> void:
 		if time_in_state > time_throw_animation_release_point + 0.35:
 			set_state('free')
 			set_animation('idle')
-		else: # Remain in throwing state
+		else:
+			if Input.is_action_just_pressed("cancel_throw"):
+				# Cancel throw
+				cancel_throw()
+			# Remain in throwing state
 			return
 
 	if state == 'catching':
@@ -311,7 +315,9 @@ func _physics_process(delta: float) -> void:
 		if user_is_pitching_team:
 			# Check for throwing ball end, this will start throw
 			if start_throw_started:
-				if Input.is_action_just_released(start_throw_key_check_release):
+				if Input.is_action_just_pressed("cancel_throw"):
+					cancel_throw()
+				elif Input.is_action_just_released(start_throw_key_check_release):
 					start_throw_end()
 			
 			# Check for throwing ball start
@@ -550,6 +556,22 @@ func start_throw_ball_func(base, fielder, key_check_release):
 	var cam = get_viewport().get_camera_3d()
 	$ThrowBar.position = cam.unproject_position(global_position)
 	$ThrowBar.reset(50, .5)
+
+func cancel_throw():
+	if state == 'throwing':
+		$Timer.stop()
+		timer_action = null
+		timer_args = null
+		set_animation("idle")
+		set_state('free')
+	elif state == 'free':
+		start_throw_started = false
+		start_throw_base = null
+		start_throw_fielder = null
+		start_throw_key_check_release = null
+		$ThrowBar.visible = false
+	else:
+		push_error("error in fielder cancel_throw")
 
 var throw_ready:bool = false
 var throw_ready_success:bool = true
