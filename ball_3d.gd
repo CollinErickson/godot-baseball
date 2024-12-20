@@ -231,6 +231,9 @@ func _physics_process(delta: float) -> void:
 		else:
 			#printt('NOT bounce', delta)
 			bounced_previous_frame = false
+		
+		if not is_sim:
+			align_trail(position, prev_position, delta, velocity)
 	#if position.z < 10:
 	#	velocity = Vector3()
 	
@@ -678,3 +681,26 @@ func _on_timer_timeout() -> void:
 	var dot = get_parent().get_node_or_null('SZ_DOT')
 	if dot:
 		dot.visible = false
+
+func align_trail(pos:Vector3, pos_prev:Vector3, delta:float, vel:Vector3) -> void:
+	#$Trail.rotation = Vector3.ZERO
+	#$Trail.rotate_y(atan((pos.x - pos_prev.x) / (pos.z - pos_prev.z)))
+	#$Trail.rotate_x(130*PI/180)
+	#$Trail.rotate_z(230*PI/180)
+	var target = (pos_prev - pos).normalized()
+	#target = target.rotated(Vector3(1,0,0), -90.*PI/180) # Rotate to put behind ball
+	target = target.rotated(Vector3(0,1,0), 45.*PI/180) # Rotate to global frame
+	target *= 100 # look_at can't be too close
+	$TrailNode.look_at(target)
+	
+	# Change length of tail
+	#var speed = (pos - pos_prev).length() / delta
+	var speed = vel.length()
+	var trail_length = 1. * speed / 20.
+	$TrailNode/Trail.mesh.height = trail_length
+	$TrailNode/Trail.position.z = -0.1 - trail_length / 2.
+	#$TrailNode/Trail.mesh.height = $TrailNode/Trail.mesh.height * .9 + trail_length*.1
+	#$TrailNode/Trail.position.z = -0.1 - $TrailNode/Trail.mesh.height / 2.
+	
+	#if randf() < 1.1:
+		#printt('trail rotation,', $TrailNode.rotation, $TrailNode.position, $TrailNode/Trail.position, trail_length)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dsb1e4kc4120x"]
+[gd_scene load_steps=11 format=3 uid="uid://dsb1e4kc4120x"]
 
 [ext_resource type="Script" path="res://ball_3d.gd" id="1_royqy"]
 [ext_resource type="Texture2D" uid="uid://88gqpbx0xaan" path="res://sprites/baseball320x4.png" id="2_3fcf0"]
@@ -43,6 +43,18 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2yfu7"]
+albedo_color = Color(1, 1, 1, 0.157)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_mpg7q"]
+material = SubResource("StandardMaterial3D_2yfu7")
+top_radius = 0.0
+bottom_radius = 0.03
+height = 1.0
+radial_segments = 8
+rings = 3
+cap_top = false
+
 [node name="Ball3D" type="CharacterBody3D"]
 script = ExtResource("1_royqy")
 
@@ -55,5 +67,13 @@ pixel_size = 0.0002
 sprite_frames = SubResource("SpriteFrames_hdlku")
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="TrailNode" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+
+[node name="Trail" type="MeshInstance3D" parent="TrailNode"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_mpg7q")
+skeleton = NodePath("../..")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
