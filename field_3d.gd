@@ -1239,7 +1239,7 @@ func decide_automatic_runners_actions():
 	#print("Running decide_automatic_runners_actions")
 	
 	# 1. If fielded and need to tag up, do that.
-	# 2. If ball can be caught:
+	# 2. If ball can be caught and less than 2 outs:
 	#  a. If can reach next base safely, wait on start base to tag up.
 	#  b. Else, go as far as is safe and stop.
 	# 3. If they are a force out and not at next base, go there
@@ -1279,7 +1279,7 @@ func decide_automatic_runners_actions():
 				decisions[i] = coalesce(decisions[i], -1)
 				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
-	# 2. If ball can be caught:
+	# 2. If ball can be caught and less than 2 outs:
 	#  a. If can reach next base safely, wait on start base to tag up.
 	#  b. Else, go as far as is safe and stop.
 	if fielder_with_ball == null:
@@ -1325,7 +1325,7 @@ func decide_automatic_runners_actions():
 								#'progress:', runners[i].running_progress - runners[i].start_base,
 								#Time.get_ticks_msec())
 						# Times 0.9 makes them a little conservative
-						prop_to_run = min(prop_to_run, runners[i].start_base + 1) * 0.9
+						prop_to_run = min(prop_to_run, 1) * 0.9
 						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + prop_to_run)
 		
 	# 3. If they are a force out and not at next base, go there
