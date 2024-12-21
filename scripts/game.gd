@@ -35,7 +35,7 @@ var is_paused:bool = false
 func _ready() -> void:
 	#printt('test create player:', get_player())
 	printt('in game ready', away_team, home_team)
-	if true:
+	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
 	#batter = get_player(50)
@@ -142,8 +142,12 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		#batter = get_player()
 		if was_top:
 			away_team_batting_order_index += 1
+			if away_team_batting_order_index > 8.5:
+				away_team_batting_order_index = 0
 		else:
 			home_team_batting_order_index += 1
+			if home_team_batting_order_index > 8.5:
+				home_team_batting_order_index = 0
 		if is_top:
 			batter = away_team.roster[away_team.batting_order[away_team_batting_order_index]]
 		else:
