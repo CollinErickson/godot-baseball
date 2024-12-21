@@ -572,9 +572,9 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
-						vla = -5
-						hla = 24
+					if false:
+						vla = 35
+						hla = 54
 						exitvelo = 53.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -742,11 +742,15 @@ func _process(delta: float) -> void:
 		#       get_viewport().size, cam.rotation)
 	if ball_in_play:
 		# Using inertia instead of changing angle based on single frames reduces jitter
-		rotate_camera_inertia = .95 * rotate_camera_inertia
-		var rotate_camera_inertia_increment = .05
-		var rotate_speed = 0.1
+		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
+		var rotate_camera_inertia_decay = 0.98
+		#rotate_camera_inertia = (1 - rotate_camera_inertia_increment) * rotate_camera_inertia
+		rotate_camera_inertia = rotate_camera_inertia_decay * rotate_camera_inertia
+		var rotate_speed = 0.1*3
 		var rot_axis_y = cam.rotation
+		rot_axis_y = cam.get_global_transform().basis.z
 		rot_axis_y.y = 0
+		rot_axis_y = rot_axis_y.rotated(Vector3(0,1,0), 45.*PI/180.)
 		rot_axis_y = rot_axis_y.normalized()
 		var cam_rotated = false
 		if ball_viewport_2d_position.x < viewport_size.x*.2: # Rotate left
@@ -765,17 +769,18 @@ func _process(delta: float) -> void:
 			#cam.rotate(rot_axis_y, -delta * rotate_speed)
 			#cam_rotated = true
 			rotate_camera_inertia.y -= rotate_camera_inertia_increment
-		if abs(rotate_camera_inertia.x) > 1e-12:
+		if abs(rotate_camera_inertia.x) > 1e-8:
+			rotate_camera_inertia.x = min(rotate_camera_inertia.x, 1)
 			cam.rotate(Vector3(0,1,0), -delta * rotate_speed * rotate_camera_inertia.x)
 			cam_rotated = true
-		if abs(rotate_camera_inertia.y) > 1e-12:
+		if abs(rotate_camera_inertia.y) > 1e-8:
+			rotate_camera_inertia.y = min(rotate_camera_inertia.y, 1)
 			cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
 			cam_rotated = true
 			
 		if cam_rotated:
 			# TODO: Not sure this does anything usefuL
 			transform = transform.orthonormalized()
-		# TODO: Rotate camera to be level
 
 	# Check if play is done, but not every time
 	if ball_in_play:
