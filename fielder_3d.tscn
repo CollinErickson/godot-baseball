@@ -39,6 +39,12 @@ inner_radius = 1.2
 outer_radius = 1.5
 color = Color(1, 1, 1, 1)
 
+[node name="Annulus2" parent="." instance=ExtResource("3_mscjq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+inner_radius = 1.5
+outer_radius = 1.8
+color = Color(0.0431373, 0.529412, 1, 1)
+
 [node name="ThrowBar" parent="." instance=ExtResource("4_qkgbs")]
 
 [node name="Char3D" parent="." instance=ExtResource("5_h61vg")]

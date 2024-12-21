@@ -86,6 +86,7 @@ func reset() -> void:
 	hit_bounced_position = null
 	hit_bounced_time = null
 	elapsed_time = 0
+	$TrailNode.visible = false
 
 	printt('finished ball reset, hit bounced', hit_bounced)
 	
@@ -682,7 +683,9 @@ func _on_timer_timeout() -> void:
 	if dot:
 		dot.visible = false
 
-func align_trail(pos:Vector3, pos_prev:Vector3, delta:float, vel:Vector3) -> void:
+func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> void:
+	if not pitch_already_done:
+		return
 	#$Trail.rotation = Vector3.ZERO
 	#$Trail.rotate_y(atan((pos.x - pos_prev.x) / (pos.z - pos_prev.z)))
 	#$Trail.rotate_x(130*PI/180)

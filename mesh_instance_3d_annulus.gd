@@ -10,7 +10,7 @@ func _ready() -> void:
 	make_annulus()
 
 func make_annulus():
-	#print("Running make_annulus")
+	print("Running make_annulus", inner_radius, outer_radius)
 	assert(outer_radius > inner_radius)
 	assert(inner_radius > 0)
 	
@@ -58,7 +58,9 @@ func make_annulus():
 	# No blendshapes, lods, or compression used.
 	#var meshnode = get_node("MeshInstance3D")
 	var meshnode = MeshInstance3D.new()
+	meshnode.name = "MeshNode"
 	meshnode.mesh = ArrayMesh.new()
+	#meshnode.mesh.name = "Mesh"
 	add_child(meshnode)
 	#printt('annulus color is', color)
 	#meshnode.mesh.local_to_scene
@@ -68,3 +70,14 @@ func make_annulus():
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	#print("Finished make annulua")
+
+#func set_color(col:Color) -> void:
+	#printt('starting annulus set_color', col)
+	#get_node("MeshNode")
+	#get_node("MeshNode").mesh
+	#get_node("MeshNode").mesh
+	#MeshInstance3D.new().get
+	#printt('finished annulus set_color')
+	
+	# Couldn't get this to change color. Just going to have two annuli.
+	

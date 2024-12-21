@@ -681,7 +681,11 @@ func set_selected_fielder() -> void:
 	# Select this player
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
-	$Annulus.visible = true
+	if holding_ball:
+		#$Annulus.set_color("red")
+		$Annulus.visible = true
+	else:
+		$Annulus2.visible = true
 
 func set_targeted_fielder() -> void:
 	printt('in fielder, set_targeted_fielder', posname)
@@ -703,6 +707,7 @@ func set_not_selected_fielder():
 	remove_from_group("selected_fielder")
 	is_selected_fielder = false
 	$Annulus.visible = false
+	$Annulus2.visible = false
 
 func set_not_targeted_fielder():
 	remove_from_group("targeted_fielder")
@@ -772,6 +777,8 @@ func set_holding_ball(hb:bool) -> void:
 		add_to_group('fielder_holding_ball')
 		position_started_holding_ball = position
 		time_last_began_holding_ball = Time.get_ticks_msec()
+		$Annulus.visible = true
+		$Annulus2.visible = false
 	else:
 		remove_from_group('fielder_holding_ball')
 		position_started_holding_ball = null
