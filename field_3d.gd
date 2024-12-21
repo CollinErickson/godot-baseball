@@ -105,14 +105,17 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			outs_per_inning_:int,
 			fielding_team,
 			batting_team,
-			fielding_team_is_home:bool):
+			fielding_team_is_home:bool,
+			throw_mode_:String,
+			bat_mode_:String,
+			pitch_mode_:String):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
 	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
 	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for fielder in fielders:
-		fielder.reset(fielding_team.color_primary)
+		fielder.reset(throw_mode_)
 		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
 		#printt('setup fielder', fielder.posnum, fielding_team.defense_order, fielding_team.roster)
 		fielder.setup_player(

@@ -1,5 +1,10 @@
 extends Control
 
+# Settings
+var throw_mode:String = "Button" # "Button", "Bar"
+var bat_mode:String = "" # "Timing", "Target"
+var pitch_mode:String = "" # 
+
 # Game variables
 var outs_per_inning:int = 3
 var strikes_per_pa:int = 3
@@ -171,7 +176,10 @@ func reset_field() -> void:
 		outs_per_inning,
 		home_team if is_top else away_team,
 		home_team if !is_top else away_team,
-		is_top)
+		is_top,
+		throw_mode,
+		bat_mode,
+		pitch_mode)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()

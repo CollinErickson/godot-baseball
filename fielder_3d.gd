@@ -24,6 +24,7 @@ var start_position = Vector3()
 var animation = "idle"
 var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
 var time_in_state:float = 0
+var throw_mode:String = "" # "Button", "Bar"
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -40,7 +41,7 @@ func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
 
-func reset(color) -> void:
+func reset(throw_mode_:String) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -71,6 +72,7 @@ func reset(color) -> void:
 	$Timer.stop()
 	timer_action = null
 	timer_args = null
+	throw_mode = throw_mode_
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -80,7 +82,7 @@ func reset(color) -> void:
 	else:
 		set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
-	$Char3D.set_color(color)
+	#$Char3D.set_color(color)
 	
 	set_not_selected_fielder()
 	set_not_targeted_fielder()
@@ -551,6 +553,13 @@ func start_throw_ball_func(base, fielder, key_check_release):
 	start_throw_fielder = fielder
 	start_throw_key_check_release = key_check_release
 	
+	# If throw_mode=="Button", immediately start throw
+	if throw_mode == "Button":
+		start_throw_end()
+		return
+	
+	assert(throw_mode == "Bar")
+	
 	# Turn on throw bar
 	$ThrowBar.visible = true
 	var cam = get_viewport().get_camera_3d()
@@ -579,8 +588,14 @@ var throw_ready_time = null
 func start_throw_end():
 	# This ends getting the throw ready. The throw info will be stored
 	#  for up to 2 seconds to begin throw later if fielder doesn't have ball.
-	# Check throw bar
-	throw_ready_success = $ThrowBar.check_success(true, true)
+	
+	if throw_mode == "Button":
+		throw_ready_success = randf() < .9
+	elif throw_mode == "Bar":
+		# Check throw bar
+		throw_ready_success = $ThrowBar.check_success(true, true)
+	else:
+		push_error("Fielder throw error 3819249")
 	
 	## Actually start throw
 	#throw_ball_func(start_throw_base, start_throw_fielder, success)
