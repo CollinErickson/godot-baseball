@@ -49,4 +49,10 @@ color = Color(0.0431373, 0.529412, 1, 1)
 
 [node name="Char3D" parent="." instance=ExtResource("5_h61vg")]
 
+[node name="CutoffLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+billboard = 1
+text = "CUT	"
+font_size = 200
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

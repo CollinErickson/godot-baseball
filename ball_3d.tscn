@@ -44,7 +44,11 @@ animations = [{
 }]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2yfu7"]
+transparency = 1
 albedo_color = Color(1, 1, 1, 0.157)
+emission = Color(1, 0, 0, 1)
+emission_energy_multiplier = 12.75
+emission_on_uv2 = true
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_mpg7q"]
 material = SubResource("StandardMaterial3D_2yfu7")

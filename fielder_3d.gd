@@ -86,6 +86,7 @@ func reset(throw_mode_:String) -> void:
 	
 	set_not_selected_fielder()
 	set_not_targeted_fielder()
+	set_not_cutoff_fielder()
 	
 	
 
@@ -117,6 +118,9 @@ func assign_to_cover_base(base, ball_pos=null):
 	elif base == 4:
 		assignment_pos = Vector3(0,0,0)
 	elif base == 5:
+		# Cutoff
+		set_cutoff_fielder()
+		# Assign to halfway between ball position and 2nd base
 		assignment_pos = .5*(Vector3(0,0,1)*30*sqrt(2) + ball_pos)
 	else:
 		assert(false)
@@ -336,6 +340,12 @@ func _physics_process(delta: float) -> void:
 			elif Input.is_action_just_pressed("throwhome"):
 				#throw_ball_func(4)
 				start_throw_ball_func(4, null, "throwhome")
+			elif Input.is_action_just_pressed("throwcutoff"):
+				var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+				if len(cutoff_fielders) > 0.5:
+					start_throw_ball_func(null, cutoff_fielders[0], "throwcutoff")
+				for cutoff_fielder in cutoff_fielders:
+					cutoff_fielder.set_not_cutoff_fielder()
 			
 			# Check for click that throws ball
 			if Input.is_action_just_pressed("click"):
@@ -615,7 +625,10 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 	
 	# Only throw if not close to that base
 	if base != null:
-		if distance_xz(position, base_positions[base-1]) > 3:
+		if base == 5:
+			# Cutoff
+			1
+		elif distance_xz(position, base_positions[base-1]) > 3:
 			#holding_ball = false
 			#remove_from_group('fielder_holding_ball')
 			set_holding_ball(false)
@@ -646,6 +659,12 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			throw_ball.emit(base, self, fielder, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
+	
+	# Remove cutoff status from any fielder
+	var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+	for cutoff_fielder in cutoff_fielders:
+		cutoff_fielder.set_not_cutoff_fielder()
+
 
 # Begin throw animation, ball to be released when animation is ready
 func start_throw_ball_animation(base, fielder=null, success=true) -> void:
@@ -728,7 +747,14 @@ func set_not_targeted_fielder():
 	remove_from_group("targeted_fielder")
 	is_targeted_fielder = false
 	#get_node("Annulus").visible = false
-	
+
+func set_cutoff_fielder():
+	add_to_group("cutoff_fielder")
+	$CutoffLabel3D.visible = true
+
+func set_not_cutoff_fielder():
+	remove_from_group("cutoff_fielder")
+	$CutoffLabel3D.visible = false
 
 func time_to_reach_point(to:Vector3):
 	# Simulate how long it will take to get to a point. 
@@ -794,6 +820,7 @@ func set_holding_ball(hb:bool) -> void:
 		time_last_began_holding_ball = Time.get_ticks_msec()
 		$Annulus.visible = true
 		$Annulus2.visible = false
+		set_not_cutoff_fielder()
 	else:
 		remove_from_group('fielder_holding_ball')
 		position_started_holding_ball = null
