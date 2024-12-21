@@ -105,19 +105,45 @@ func set_color(col):
 func set_color_from_team(player, team, is_home_team:bool) -> void:
 	if player == null:
 		return
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = team.color_primary
-	var primary_body = ["torso", "shoulders", "hat"]
+	
+	
+	var primary_body = ["torso", "shoulders"]
+	var secondary_body = []
+	
+	match team.jersey_style:
+		"PP":
+			primary_body.append_array(["sleeve_left", "sleeve_right"])
+		"PS":
+			secondary_body.append_array(["sleeve_left", "sleeve_right"])
+		_:
+			push_error("Error in char_3d.gd team.jersey_style #91386")
+	
+	match team.hat_style:
+		"PP":
+			primary_body.append_array(["hat", "hat_bill"])
+		"PS":
+			primary_body.append("hat")
+			secondary_body.append("hat_bill")
+		"SP":
+			primary_body.append("hat_bill")
+			secondary_body.append("hat")
+		"SS":
+			secondary_body.append_array(["hat", "hat_bill"])
+		_:
+			push_error("Error in char_3d.gd team.hat_style #129728")
+	
+	#printt('prim body', primary_body, secondary_body)
+	#printt('team stuff', team.jersey_style, team.hat_style)
+	
+	var mat_primary = StandardMaterial3D.new()
+	mat_primary.albedo_color = team.color_primary
 	for bp in primary_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat)
-	#$charnode/Armature/Skeleton3D/torso.set_material_override(mat)
-	#$charnode/Armature/Skeleton3D/shoulders.set_material_override(mat)
-	#$charnode/Armature/Skeleton3D/hat.set_material_override(mat)
-	var mat2 = StandardMaterial3D.new()
-	mat2.albedo_color = team.color_secondary
-	var secondary_body = ["hat_bill", "sleeve_left", "sleeve_right"]
+		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_primary)
+	
+	var mat_secondary = StandardMaterial3D.new()
+	mat_secondary.albedo_color = team.color_secondary
 	for bp in secondary_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat2)
+		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_secondary)
 	
 	# Change pants color based on home/away
 	var matha = StandardMaterial3D.new()

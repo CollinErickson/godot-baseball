@@ -7,6 +7,8 @@ var team_name:String
 var abbr:String
 var color_primary:Color
 var color_secondary:Color
+var jersey_style:String
+var hat_style:String
 #var logo
 
 # Roster
@@ -35,6 +37,8 @@ func create(city_name_,
 	color_secondary = color_secondary_
 	
 	create_roster()
+	
+	randomize_jersey()
 	
 	printt('New team is:', self)
 	print_()
@@ -73,6 +77,8 @@ func create_random():
 	
 	create_roster()
 	
+	randomize_jersey()
+	
 	return self
 
 
@@ -88,3 +94,8 @@ func print_():
 	print("Roster:")
 	for player in roster:
 		player.print_()
+
+func randomize_jersey() -> void:
+	# Randomize jersey/hat style
+	jersey_style = ["PP", "PS"].pick_random()
+	hat_style = ["PP", "PS", "SP", "SS"].pick_random()
