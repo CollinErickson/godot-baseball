@@ -142,7 +142,15 @@ func _physics_process(delta: float) -> void:
 			max_running_progress = max(max_running_progress, running_progress)
 			is_running = false
 			set_animation('idle')
-		else: # Not crossing base
+			update_position()
+			set_look_at()
+		elif floor(running_progress) < floor(next_running_progress):
+			# Crossing a base, update look position
+			running_progress = next_running_progress
+			max_running_progress = max(max_running_progress, running_progress)
+			update_position()
+			set_look_at()
+		else: # Not crossing any base
 			# Update progress
 			running_progress = next_running_progress
 			max_running_progress = max(running_progress, max_running_progress)
@@ -319,7 +327,11 @@ func set_look_at():
 		else: # Running to Home
 			lookat += Vector3(-30,0,30)
 	elif animation == "running":
-		lookat = base_positions[min(round(target_base), 4) - 1]
+		#lookat = base_positions[min(round(target_base), 4) - 1]
+		if target_base < running_progress:
+			lookat = base_positions[min(round(target_base), 4) - 1]
+		else:
+			lookat = base_positions[min(floor(running_progress) + 1, 4) - 1]
 		#printt('set_look_at()', start_base, lookat)
 	else:
 		push_error("Error in runner_3d.gd, set_look_at()", animation)
