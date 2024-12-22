@@ -750,7 +750,8 @@ func set_not_targeted_fielder():
 
 func set_cutoff_fielder():
 	add_to_group("cutoff_fielder")
-	$CutoffLabel3D.visible = true
+	if user_is_pitching_team:
+		$CutoffLabel3D.visible = true
 
 func set_not_cutoff_fielder():
 	remove_from_group("cutoff_fielder")

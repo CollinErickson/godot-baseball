@@ -12,9 +12,12 @@ var swing_prezone_duration = 0.10
 var swing_inzone_duration = 0.15
 var animation = "idle"
 var bats:String # "L", "R"
+var bat_mode:String
 
 var user_is_batting_team
 var is_frozen:bool = false
+
+@onready var minibat = get_parent().get_node("Bat3D")
 
 func freeze() -> void:
 	is_frozen = true
@@ -29,11 +32,12 @@ func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
 
-func reset(color:Color) -> void:
+func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 	is_frozen = false
 	visible = true
 	set_process(true)
 	
+	user_is_batting_team = user_is_batting_team_
 	swing_started = false
 	swing_done = false
 	swing_state = 'notstarted'
@@ -41,6 +45,15 @@ func reset(color:Color) -> void:
 	input_click = false
 	swingx = false
 	swingy = false
+	bat_mode = bat_mode_
+	assert(bat_mode in ["Timing", "Target"])
+	if user_is_batting_team:
+		if bat_mode == "Timing":
+			disable_minibat()
+		else:
+			enable_minibat()
+	else:
+		disable_minibat()
 	
 	get_node('AnimatedSprite3D').set_frame(0)
 	get_node('AnimatedSprite3D').visible = false
@@ -53,7 +66,7 @@ func reset(color:Color) -> void:
 	#set_animation("idle")
 	set_animation("batter_idle")
 	#set_animation("swing")
-	$Char3D.set_color(color)
+	#$Char3D.set_color(color)
 	#$Char3D/charnode/AnimationPlayer.speed_scale=.1
 	#$Char3D/charnode/Animation.set('parameters/TimeScale/scale', 10)
 
@@ -105,9 +118,7 @@ func _process(delta: float) -> void:
 			# next animation
 			get_node('AnimatedSprite3D').set_frame(2)
 			# Turn off mini bat for aiming
-			var minibat = get_parent().get_node("Bat3D")
-			minibat.get_node("Sprite3D").visible = false
-			minibat.set_process(false)
+			disable_minibat()
 			# Start running after .5 seconds
 			#timer_action = "start_running_after_hit"
 			#get_node("Timer").wait_time = 0.5
@@ -116,12 +127,12 @@ func _process(delta: float) -> void:
 	
 	# Make bat move with mouse
 	# Place bat for swing target
-	if not swing_started and not swing_done and user_is_batting_team:
+	if not swing_started and not swing_done and user_is_batting_team and bat_mode == "Target":
 		var mouse_sz_pos = get_parent().get_parent().get_mouse_sz_pos()
 		#printt('glove pos', mouse_sz_pos)
 		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001
-		get_parent().get_node("Bat3D").position = mouse_sz_pos
+		minibat.position = mouse_sz_pos
 
 var timer_action
 signal start_runner
@@ -168,3 +179,13 @@ func setup_player(player, team, is_home_team:bool) -> void:
 			set_look_at_position(Vector3(100,0,0))	
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
+
+func disable_minibat() -> void:
+	minibat.visible = false
+	minibat.get_node("Sprite3D").visible = false
+	minibat.set_process(false)
+
+func enable_minibat() -> void:
+	minibat.visible = true
+	minibat.get_node("Sprite3D").visible = true
+	minibat.set_process(true)

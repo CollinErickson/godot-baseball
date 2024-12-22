@@ -16,6 +16,7 @@ var max_force_outs_left:int
 
 var user_is_pitching_team = true
 var user_is_batting_team = !true
+var bat_mode:String
 
 var is_frozen: bool = false
 var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
@@ -28,6 +29,8 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 ]
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var pitcher = $Headon/Pitcher3D
+@onready var ball3d = $Headon/Ball3D
+
 
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
@@ -144,24 +147,30 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			runner.setup_player(runner3, batting_team, !fielding_team_is_home)
 		else:
 			assert(runner.start_base == 0)
-	$Headon/Batter3D.reset(batting_team.color_primary)
+
+	# Setup batter
+	bat_mode = bat_mode_
+	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
 	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
+
+	# Setup pitcher
 	$Headon/Pitcher3D.reset(fielding_team.color_primary)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
+
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
 	mgl.set_process(false)
-	if user_is_batting_team_:
-		$Headon/Bat3D.visible = true
-		$Headon/Bat3D.get_node("Sprite3D").visible = true
-		$Headon/Bat3D.set_process(true)
-	else:
-		$Headon/Bat3D.visible = false
-		$Headon/Bat3D.get_node("Sprite3D").visible = false
-		$Headon/Bat3D.set_process(false)
+	#if user_is_batting_team_:
+		#$Headon/Bat3D.visible = true
+		#$Headon/Bat3D.get_node("Sprite3D").visible = true
+		#$Headon/Bat3D.set_process(true)
+	#else:
+		#$Headon/Bat3D.visible = false
+		#$Headon/Bat3D.get_node("Sprite3D").visible = false
+		#$Headon/Bat3D.set_process(false)
 	if user_is_pitching_team_:
 		$Headon/CatchersMitt.visible = true
 		$Headon/CatchersMitt.get_node("Sprite3D").visible=true
@@ -214,9 +223,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	if not user_is_pitching_team:
 		$Headon/CatchersMitt.visible = false
 		$Headon/Pitcher3D/PitchSelectKeyboard.visible = false
-	$Headon/Batter3D.user_is_batting_team = user_is_batting_team
-	if not user_is_batting_team:
-		$Headon/Bat3D.visible = false
+	#$Headon/Batter3D.user_is_batting_team = user_is_batting_team
+	#if not user_is_batting_team:
+		#$Headon/Bat3D.visible = false
 	
 	# Set if runners can be force out
 	runners[0].can_be_force_out_before_play = true
@@ -533,8 +542,8 @@ func _process(delta: float) -> void:
 		#Engine.time_scale = randf_range(.1,10)
 	
 	# Check for contact on swing
-	if not contact_done and get_node_or_null("Headon/Ball3D")!=null:
-		var ball3d = $Headon/Ball3D
+	if not contact_done: # and get_node_or_null("Headon/Ball3D")!=null:
+		#var ball3d = $Headon/Ball3D
 		#print('found ball')
 		# pitch is active
 		if ball3d.velocity.length() > 0:
@@ -559,7 +568,7 @@ func _process(delta: float) -> void:
 					if $Headon/Batter3D.bats == 'L':
 						hla *= -1
 					var pci:Vector3 = Vector3.ZERO
-					if user_is_batting_team:
+					if user_is_batting_team and $Headon/Batter3D.bat_mode == 'Target':
 						# Find distance from PCI to ball location
 						pci = $Headon/Bat3D.position
 					else:
@@ -575,7 +584,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
+					if false:
 						vla = 25
 						hla = -14
 						exitvelo = 43.8
