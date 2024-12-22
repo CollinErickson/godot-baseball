@@ -45,7 +45,7 @@ func _ready() -> void:
 		user_is_home_team = false
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
-	runner1 = get_player(50)
+	#runner1 = get_player(50)
 	runner2 = get_player(50)
 	runner3 = get_player(199)
 	reset_field()

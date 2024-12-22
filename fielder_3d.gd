@@ -128,12 +128,8 @@ func assign_to_cover_base(base, ball_pos=null):
 func begin_chase():
 	pass
 
-func change_color():
-	pass #var image = get_node("AnimatedSprite3D")#.texture.get_data()
-
 func _ready():
 	start_position = position
-	change_color()
 
 signal ball_fielded
 signal tag_out
@@ -424,7 +420,9 @@ func _physics_process(delta: float) -> void:
 		
 		# CPU defense
 		if not user_is_pitching_team:
-			if assignment != "ball_carry":
+			if assignment != "ball_carry" or assignment == "ball_carry":
+				# Adding this for ball_carry so that they rethink regularly
+				#   Avoids issue of fielder running long distance when they shouldn't
 				# Make sure that some frames passed while holding
 				if (Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10
 					and Time.get_ticks_msec() - time_last_decide_what_to_do_with_ball > 1000.*1.):
@@ -838,7 +836,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
 func decide_what_to_do_with_ball() -> Array:
 	time_last_decide_what_to_do_with_ball = Time.get_ticks_msec()
-	printt('Starting decide_what_to_do_with_ball in fielder', posname)
+	printt('Starting decide_what_to_do_with_ball in fielder', posname, time_last_decide_what_to_do_with_ball)
 	# When CPU fielder has ball, decide where to throw/run it to
 	# Return [base, run_it]
 	
@@ -895,6 +893,7 @@ func decide_what_to_do_with_ball() -> Array:
 
 	# Check if there's a fielder covering each base
 	
+	# TODO: All these should use time diff to pick quicker
 	# 1. If runner needs to tag up:
 	#  a. If throw can get them, throw behind.
 	#  b. If can beat them to base, run behind.
@@ -914,11 +913,73 @@ func decide_what_to_do_with_ball() -> Array:
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
 	# 3. If runner is between bases and no force out:
+	#  a. If on next base
+	#  a. If throw can beat them to next base, throw ahead.
+	#  b. If can beat them to next base, run ahead.
+	for i in range(len(runners)):
+		# Only do something if they are off base
+		if abs(runners[i].running_progress - round(runners[i].running_progress)) > .02:
+			# If ahead of them in path to next base, run them back
+			if distance_to_line(position, base_behind_pos[i], base_front_pos[i]) < 0.5:
+				var fielder_progress = progress_on_line(position, base_behind_pos[i], base_front_pos[i])
+				if fielder_progress <= 1.02 and fielder_progress > runners[i].running_progress - (runners[i].running_progress):
+					return [base_behind[i], true]
+			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
+				return [base_front[i], false]
+			if time_run_front[i] < time_runner_run_forward[i]:
+				return [base_front[i], true]
 	
 	# X. 
 	
 	# X. If in outfield, throw it in 
-	if abs(position.x) + abs(position.z - 20) > 20:
-		return [4, distance_xz(Vector3.ZERO, position) < 10]
+	# TODO: Make this base in front of lead runner. Or nearest base if no runner.
+	if abs(position.x) + abs(position.z - 20) > 22:
+		for i in range(len(runners)):
+			if base_covered[i-1]:
+				return [base_front[i], false]
+			if distance_xz(position, base_front_pos[i]) < 20:
+				return [base_front[i], true]
+		# No runner
+		var nearest_base
+		var nearest_base_dist = 1e12
+		for i in range(1,4):
+			if distance_xz(position, base_positions[i-1]) < nearest_base_dist:
+				nearest_base_dist = distance_xz(position, base_positions[i-1])
+				nearest_base = i
+		if base_covered[nearest_base - 1]:
+			return [nearest_base, false]
+		else:
+			return [nearest_base, true]
+			
+		#return [4, distance_xz(Vector3.ZERO, position) < 10]
 	
 	return [null, null]
+
+func distance_to_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
+	# Ignore height dim
+	p.y = 0
+	l1.y = 0
+	l2.y = 0
+	
+	# Recenter
+	var q = p - l1
+	var l = l2 - l1
+	
+	var q_proj_on_l = q.dot(l) / l.dot(l) * l
+	var q_perp_l = q - q_proj_on_l
+	
+	return q_perp_l.length()
+
+func progress_on_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
+	# Ignore height dim
+	p.y = 0
+	l1.y = 0
+	l2.y = 0
+	
+	# Recenter
+	var q = p - l1
+	var l = l2 - l1
+	
+	var q_proj_on_l = q.dot(l) / l.dot(l) * l
+	
+	return q_proj_on_l.length() / l.length()

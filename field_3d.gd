@@ -584,10 +584,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
-						vla = 25
-						hla = -14
-						exitvelo = 43.8
+					if !false:
+						vla = 20
+						hla = -12
+						exitvelo = 53.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:

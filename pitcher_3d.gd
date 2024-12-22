@@ -6,7 +6,7 @@ var pitch_done = false
 var time_since_pitch_start = 0
 var pitch_frame = 0
 var pitch_type = "FB"
-var max_pitch_speed = 40
+var max_pitch_speed = 34
 var pitch_hand = "L"
 var user_is_pitching_team
 var prev_mouse_sz_pos
