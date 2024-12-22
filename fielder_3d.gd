@@ -106,8 +106,10 @@ func assign_to_field_ball(pos):
 	assignment_pos.y = 0
 	if user_is_pitching_team:
 		set_selected_fielder()
+	set_not_cutoff_fielder()
 
 func assign_to_cover_base(base, ball_pos=null):
+	set_not_cutoff_fielder()
 	assignment = 'cover'
 	if base == 1:
 		assignment_pos = Vector3(-1,0,1) * 30/sqrt(2)
@@ -121,6 +123,7 @@ func assign_to_cover_base(base, ball_pos=null):
 		# Cutoff
 		set_cutoff_fielder()
 		# Assign to halfway between ball position and 2nd base
+		# TODO: make this most relevant base, not always 2nd base
 		assignment_pos = .5*(Vector3(0,0,1)*30*sqrt(2) + ball_pos)
 	else:
 		assert(false)
@@ -917,7 +920,7 @@ func decide_what_to_do_with_ball() -> Array:
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
 	# 3. If runner is between bases and no force out:
-	#  a. If on next base
+	#  a. If ahead of them in baseline, run them back
 	#  a. If throw can beat them to next base, throw ahead.
 	#  b. If can beat them to next base, run ahead.
 	for i in range(len(runners)):
@@ -928,15 +931,24 @@ func decide_what_to_do_with_ball() -> Array:
 				var fielder_progress = progress_on_line(position, base_behind_pos[i], base_front_pos[i])
 				if fielder_progress <= 1.02 and fielder_progress > runners[i].running_progress - (runners[i].running_progress):
 					return [base_behind[i], true]
+			# Throw in front of them if can beat them
 			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
 				return [base_front[i], false]
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
 	
-	# X. If in outfield, throw it in 
+	# Can't beat them to base, not in front of them in baseline
+	# X. If in outfield, throw it in front of lead runner
 	if abs(position.x) + abs(position.z - 20) > 22:
 		for i in range(len(runners)):
-			if base_covered[i-1]:
+			if base_front[i] < 3.5:
+				# Throw at next next base
+				if distance_xz(position, base_positions[base_front[i]+1-1]) > 50:
+					var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+					if len(cutoff_fielders) > 0.5:
+						return [5, false, cutoff_fielders[0]]
+				return [base_front[i] + 1, false]
+			if base_covered[base_front[i]-1]:
 				if distance_xz(position, base_front_pos[i]) > 50:
 					var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
 					if len(cutoff_fielders) > 0.5:
@@ -944,7 +956,7 @@ func decide_what_to_do_with_ball() -> Array:
 				return [base_front[i], false]
 			if distance_xz(position, base_front_pos[i]) < 20:
 				return [base_front[i], true]
-		# No runner
+		# No runner (or no one covering base), so throw/run toward nearest base
 		var nearest_base
 		var nearest_base_dist = 1e12
 		for i in range(1,4):
@@ -962,6 +974,7 @@ func decide_what_to_do_with_ball() -> Array:
 		else:
 			return [nearest_base, true]
 	
+	# No decision made, shouln't happen
 	return [null, null, null]
 
 func distance_to_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
