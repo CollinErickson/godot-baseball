@@ -484,7 +484,11 @@ func _physics_process(delta: float) -> void:
 							assignment = "ball_carry"
 							#printt('fielder running to base', throw_to, posname)
 						else:
-							if throw_to > -0.5:
+							if throw_to > 4.5:
+								# Throw to a fielder
+								start_throw_ball_animation(null, decision_out[2])
+							elif throw_to > -0.5:
+								# Throw to a base
 								printt("in field: ball will be thrown to", throw_to)
 								#throw_ball_func(throw_to)
 								start_throw_ball_animation(throw_to)
@@ -838,7 +842,7 @@ func decide_what_to_do_with_ball() -> Array:
 	time_last_decide_what_to_do_with_ball = Time.get_ticks_msec()
 	printt('Starting decide_what_to_do_with_ball in fielder', posname, time_last_decide_what_to_do_with_ball)
 	# When CPU fielder has ball, decide where to throw/run it to
-	# Return [base, run_it]
+	# Return [base to throw to, run_it, fielder to throw to]
 	
 	# Runners that are active, first one should be furthest ahead
 	var runners = get_tree().get_nodes_in_group('runners')
@@ -929,13 +933,14 @@ func decide_what_to_do_with_ball() -> Array:
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
 	
-	# X. 
-	
 	# X. If in outfield, throw it in 
-	# TODO: Make this base in front of lead runner. Or nearest base if no runner.
 	if abs(position.x) + abs(position.z - 20) > 22:
 		for i in range(len(runners)):
 			if base_covered[i-1]:
+				if distance_xz(position, base_front_pos[i]) > 50:
+					var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+					if len(cutoff_fielders) > 0.5:
+						return [5, false, cutoff_fielders[0]]
 				return [base_front[i], false]
 			if distance_xz(position, base_front_pos[i]) < 20:
 				return [base_front[i], true]
@@ -946,14 +951,18 @@ func decide_what_to_do_with_ball() -> Array:
 			if distance_xz(position, base_positions[i-1]) < nearest_base_dist:
 				nearest_base_dist = distance_xz(position, base_positions[i-1])
 				nearest_base = i
+		
+		# If far away, throw to cutoff
+		if distance_xz(position, base_positions[nearest_base-1]) > 40:
+			var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+			if len(cutoff_fielders) > 0.5:
+				return [5, false, cutoff_fielders[0]]
 		if base_covered[nearest_base - 1]:
 			return [nearest_base, false]
 		else:
 			return [nearest_base, true]
-			
-		#return [4, distance_xz(Vector3.ZERO, position) < 10]
 	
-	return [null, null]
+	return [null, null, null]
 
 func distance_to_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
 	# Ignore height dim
