@@ -152,12 +152,14 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	bat_mode = bat_mode_
 	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
 	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
+	$PrepitchFieldOverlay.setup_batter(batter)
 
 	# Setup pitcher
 	$Headon/Pitcher3D.reset(fielding_team.color_primary)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
+	$PrepitchFieldOverlay.setup_pitcher(fielding_team.roster[fielding_team.defense_order[1 - 1]])
 
 	$Headon/Cameras/Camera3DBatting.current = true
 	var mgl = get_node("Headon/MouseGroundLocation")
@@ -181,6 +183,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		$Headon/CatchersMitt.set_process(false)
 	$Headon/Cameras.reset()
 	$Headon/BallBounceAnnulus.visible = false
+	
+	$PrepitchFieldOverlay.visible = true
 
 	# Reset this
 	is_frozen = false
@@ -241,7 +245,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#batter.print_()
 	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
 
-func _on_ball_fielded_by_fielder(_fielder):
+func _on_ball_fielded_by_fielder(fielder):
 	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -262,7 +266,7 @@ func _on_ball_fielded_by_fielder(_fielder):
 	
 	# Reassign other fielders to cover bases (only really needed when fielder assigned
 	#   to a base go the ball
-	assign_fielders_to_cover_bases([], null, [_fielder.posname])
+	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
 #
 	## TODO: If CPU is defense, decide where to throw
 	#var throw_to = -1
@@ -343,9 +347,8 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	else:
 		ball.throw_to_base(null, velo_vec, fielder.position, target)
 	
-	
 	# Set new assignments
-	assign_fielders_to_cover_bases([], null)
+	assign_fielders_to_cover_bases([], target, [])
 	
 	# Set new targeted fielder
 	if to_fielder != null:
@@ -404,10 +407,10 @@ func _on_tag_out_by_fielder():
 	record_out('Tag out!')
 
 func _on_new_fielder_selected_signal_by_fielder(fielder):
-	assign_fielders_to_cover_bases([], null, [fielder.posname])
+	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
 
 func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
-	assign_fielders_to_cover_bases([], null, [fielder.posname])
+	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
 
 func test_mesh_array():
 	var surface_array = []
@@ -587,7 +590,7 @@ func _process(delta: float) -> void:
 					if !false:
 						vla = 20
 						hla = -12
-						exitvelo = 53.8
+						exitvelo = 63.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -974,20 +977,39 @@ func assign_fielders_after_hit() -> Array:
 	return fftib
 
 func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
-									_intercept_position=null,
+									intercept_position=null,
 									exclude_fielder_posname_array:Array=[]) -> void:
 	printt('Running assign_fielders_to_cover_bases')
 	var assigned_indexes = []
-	for base in [2,1,3,4]:
+	
+	# Assign nearest fielder to cover bases
+	# TODO: Assign cutoff fielder
+	# Only do if ball is far away from infield
+	for base in [2,1,3,4, 5]:
+		var base_position:Vector3 = Vector3(0,0,20)
+		if base == 5:
+			printt('starting assign fielder to cutoff', intercept_position,
+				abs(intercept_position.x) + abs(intercept_position.z - 20))
+			# Assign cutoff fielder
+			# Only do if ball is far away from infield
+			if abs(intercept_position.x) + abs(intercept_position.z - 20) < 30:
+				continue
+			
+			# Find relevant base to cover
+			# TODO: this should be based on current active runners. Also pass this location.
+			base_position = fielders[0].base_positions[2 - 1]
+		else:
+			base_position = fielders[0].base_positions[base - 1]
 		var min_time = 1e10
 		var min_i = null
 		var min_is_excluded = false
 		for i in range(len(fielders)):
 			if i in exclude_fielder_indexes or exclude_fielder_posname_array.has(fielders[i].posname):
 				# Only include the excluded ones if they are super close
+				# This avoids putting one fielder on top of another
 				if fielders[i].distance_xz(
 					fielders[i].position,
-					fielders[i].base_positions[base-1]
+					base_position
 				) < 1:
 					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname,
 							base, exclude_fielder_indexes, exclude_fielder_posname_array)
@@ -997,7 +1019,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			else:
 				var fielder_time = (
 					fielders[i].distance_xz(fielders[i].position,
-											fielders[i].base_positions[base-1]) /
+											base_position) /
 					fielders[i].SPEED)
 				if fielder_time < min_time:
 					min_time = fielder_time
@@ -1007,11 +1029,13 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 				pass
 			else:
 				#printt('Assigning fielder to cover base', fielders[min_i].posname, base)
-				fielders[min_i].assign_to_cover_base(base)
+				fielders[min_i].assign_to_cover_base(base, intercept_position)
+				if base == 5:
+					printt('assigning fielder to be cutoff', fielders[min_i].posname)
 			exclude_fielder_indexes.push_back(min_i)
 			assigned_indexes.push_back(min_i)
 		else:
-			printt('NO ONE ASSIGNED TO A BASE')
+			printt('In field assign_fielders_to_cover_bases: NO ONE ASSIGNED TO A BASE', base)
 	
 	# All fielders that were previously assigned to base and haven't reached it
 	#   and weren't assigned this time to just wait
@@ -1068,6 +1092,8 @@ func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y, _pitch_t) -> void:
 		#get_node("Headon/Batter3D/Timer").wait_time = $Headon/Pitcher3D.time_until_pitch_release + pitch_t
 		#get_node("Headon/Batter3D/Timer").start()
 	pass
+	
+	$PrepitchFieldOverlay.visible = false
 
 func _on_pitcher_3d_pitch_released(_pitch_x, _pitch_y, pitch_t) -> void:
 	printt('in field, _on_pitcher_3d_pitch_released', pitch_t)

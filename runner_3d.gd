@@ -194,7 +194,7 @@ func update_position():
 	#printt('RUN', is_running, running_progress, position)
 		
 func send_runner(direction: int, can_go_past:bool=true) -> void:
-	printt('In runner send_runner', start_base, direction, can_go_past)
+	#printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
 	if direction > 0.5:

@@ -3,7 +3,7 @@ extends CharacterBody3D
 var acceleration = Vector3()
 
 const drag_coef = .01 # .3 took pitch from 40 at start to 34.8 at end
-const gravity = 9.8*1.09361 # Full gravity seemed high
+const gravity = 9.8*1.09361 # Gravity in yards/sec
 const restitution_coef = 0.546 # MLB rules
 var time_last_thrown = Time.get_ticks_msec()
 
@@ -36,6 +36,9 @@ var touched_by_fielder:bool = false
 var hit_bounced_position = null
 var hit_bounced_time = null
 var elapsed_time = 0
+
+#var ball_trail_array = range(60)
+#var ball_trail_this_trail = ra
 
 signal ball_overthrown
 

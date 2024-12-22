@@ -16,7 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://c8pe2ur7pkpbb" path="res://mouse_ground_location.tscn" id="12_ah4ma"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="13_rbd7b"]
 [ext_resource type="Script" path="res://flash_text.gd" id="14_g2qjr"]
-[ext_resource type="PackedScene" uid="uid://ql8ju5espro6" path="res://characters3D/AJ/AJ.tscn" id="16_0nsii"]
+[ext_resource type="PackedScene" uid="uid://ccbr5gjhlqkux" path="res://scenes/prepitch_field_overlay.tscn" id="18_opycq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -434,10 +434,6 @@ inner_radius = 1.2
 outer_radius = 1.5
 color = Color(0.640704, 0.0660575, 0.437794, 1)
 
-[node name="AJ" parent="Headon" instance=ExtResource("16_0nsii")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1, 0, 3)
-visible = false
-
 [node name="TimerCameraChange" type="Timer" parent="."]
 
 [node name="Label" type="Label" parent="."]
@@ -463,6 +459,8 @@ script = ExtResource("14_g2qjr")
 [node name="Timer" type="Timer" parent="FlashText"]
 
 [node name="PlayOverTimer" type="Timer" parent="."]
+
+[node name="PrepitchFieldOverlay" parent="." instance=ExtResource("18_opycq")]
 
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="ball_overthrown" from="Headon/Ball3D" to="." method="_on_ball_3d_ball_overthrown"]
