@@ -40,12 +40,12 @@ var is_paused:bool = false
 func _ready() -> void:
 	#printt('test create player:', get_player())
 	printt('in game ready', away_team, home_team)
-	if true:
+	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
-	batter.speed = 200
+	#batter.speed = 200
 	#runner1 = get_player(50)
 	#runner2 = get_player(150)
 	#runner3 = get_player(199)

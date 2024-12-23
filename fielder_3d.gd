@@ -51,8 +51,6 @@ func reset(throw_mode_:String) -> void:
 	
 	assignment = null
 	assignment_pos = null
-	remove_from_group('selected_fielder')
-	remove_from_group('targeted_fielder')
 	#holding_ball = false
 	#time_last_began_holding_ball = null
 	#remove_from_group('fielder_holding_ball')
@@ -87,8 +85,7 @@ func reset(throw_mode_:String) -> void:
 	set_not_selected_fielder()
 	set_not_targeted_fielder()
 	set_not_cutoff_fielder()
-	
-	
+	set_not_alt_fielder()
 
 # Rotate sprites to face the camera
 func align_sprite():
@@ -138,6 +135,7 @@ signal ball_fielded
 signal tag_out
 signal new_fielder_selected_signal
 signal fielder_moved_reassign_fielders_signal
+signal alt_fielder_selected_signal
 
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
@@ -174,6 +172,17 @@ func _physics_process(delta: float) -> void:
 
 	assert(state == 'free')
 	var _moved_this_process = false
+	
+	# Check if user changed to alt fielder
+	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder"):
+		var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
+		if len(alt_fielders) > 0.5:
+			set_not_selected_fielder()
+			set_animation('idle')
+			alt_fielders[0].set_selected_fielder()
+			alt_fielders[0].assignment = "ball"
+			alt_fielder_selected_signal.emit(alt_fielders[0])
+			return
 	
 	# Move fielder to their assignment
 	if ((assignment in ["cover", "ball_click", "ball_carry"]) or
@@ -517,6 +526,7 @@ func _physics_process(delta: float) -> void:
 			# Change to that player
 			set_not_selected_fielder()
 			fielders[min_i].set_selected_fielder()
+			fielders[min_i].set_not_alt_fielder()
 			fielders[min_i].assignment = "ball"
 			assignment = "wait_to_receive"
 			new_fielder_selected_signal.emit(fielders[min_i])
@@ -717,6 +727,10 @@ func set_selected_fielder() -> void:
 	var targeted_fielders = get_tree().get_nodes_in_group("targeted_fielder")
 	for fielder in targeted_fielders:
 		fielder.set_not_targeted_fielder()
+	# Remove as cutoff fielder
+	set_not_cutoff_fielder()
+	# Remove as alt fielder
+	set_not_alt_fielder()
 	# Select this player
 	add_to_group("selected_fielder")
 	is_selected_fielder = true
@@ -761,6 +775,19 @@ func set_cutoff_fielder():
 func set_not_cutoff_fielder():
 	remove_from_group("cutoff_fielder")
 	$CutoffLabel3D.visible = false
+
+func set_alt_fielder():
+	var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
+	for alt_fielder in alt_fielders:
+		alt_fielder.set_not_alt_fielder()
+	
+	add_to_group("alt_fielder")
+	if user_is_pitching_team:
+		$AltFielderLabel3D.visible = true
+
+func set_not_alt_fielder():
+	remove_from_group("alt_fielder")
+	$AltFielderLabel3D.visible = false
 
 func time_to_reach_point(to:Vector3):
 	# Simulate how long it will take to get to a point. 
@@ -827,6 +854,9 @@ func set_holding_ball(hb:bool) -> void:
 		$Annulus.visible = true
 		$Annulus2.visible = false
 		set_not_cutoff_fielder()
+		# No need for alt fielders, including this one
+		for alt_fielder in get_tree().get_nodes_in_group("alt_fielder"):
+			alt_fielder.set_not_alt_fielder()
 	else:
 		remove_from_group('fielder_holding_ball')
 		position_started_holding_ball = null

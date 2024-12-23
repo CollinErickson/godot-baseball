@@ -702,11 +702,11 @@ func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> vo
 	# Change length of tail
 	#var speed = (pos - pos_prev).length() / delta
 	var speed = vel.length()
-	if speed < 1:
+	if speed < 5:
 		$TrailNode.visible = false
 	else:
 		$TrailNode.visible = true
-		var trail_length = 1. * speed / 20.
+		var trail_length = 1. * speed / 40.
 		$TrailNode/Trail.mesh.height = trail_length
 		$TrailNode/Trail.position.z = -0.1 - trail_length / 2.
 		#$TrailNode/Trail.mesh.height = $TrailNode/Trail.mesh.height * .9 + trail_length*.1

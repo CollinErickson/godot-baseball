@@ -267,7 +267,7 @@ func _on_ball_fielded_by_fielder(fielder):
 	# Reassign other fielders to cover bases (only really needed when fielder assigned
 	#   to a base go the ball
 	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
-#
+	
 	## TODO: If CPU is defense, decide where to throw
 	#var throw_to = -1
 	#if not user_is_pitching_team:
@@ -286,6 +286,8 @@ func _on_ball_fielded_by_fielder(fielder):
 	
 	$Headon/BallBounceAnnulus.visible = false
 
+func _on_alt_fielder_selected_by_fielder(fielder):
+	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
 
 
 func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
@@ -475,6 +477,7 @@ func _ready() -> void:
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
 		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
 		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
+		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
 
 	#var runners = get_tree().get_nodes_in_group('runners')
 	# Set up signals from runners
@@ -587,10 +590,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
+					if false:
 						vla = 20
-						hla = -12
-						exitvelo = 63.8
+						hla = -22
+						exitvelo = 16.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -758,7 +761,8 @@ func _process(delta: float) -> void:
 	if ball_in_play:
 		# Using inertia instead of changing angle based on single frames reduces jitter
 		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
-		var rotate_camera_inertia_decay = 0.98
+		# .98 is high. If too high, it goes too far. If too low, it jerks.
+		var rotate_camera_inertia_decay = 0.9
 		#rotate_camera_inertia = (1 - rotate_camera_inertia_increment) * rotate_camera_inertia
 		rotate_camera_inertia = rotate_camera_inertia_decay * rotate_camera_inertia
 		var rotate_speed = 0.1*3
@@ -881,9 +885,21 @@ func find_fielder_to_intercept_ball() -> Array:
 				#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
 				break
 	
+	# Find 2nd fielder to set as alt fielder
+	var min2_dist = 1e8
+	var min2_ifielder = null
+	for ifielder in range(len(fielders)):
+		if ifielder != min_ifielder:
+			var fielderi = fielders[ifielder]
+			if fielderi.distance_xz(fielderi.position, tmp_ball.position) < min2_dist:
+				min2_dist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
+				min2_ifielder = ifielder
+
+	
 	# Save important things to return
 	var intercept_position = tmp_ball.position
 	var hit_bounced = tmp_ball.hit_bounced
+	# Find where the hit would bounce if not fielded
 	for iiii in range(1e3):
 		if tmp_ball.hit_bounced_position == null:
 			tmp_ball._physics_process(1./60)
@@ -908,7 +924,7 @@ func find_fielder_to_intercept_ball() -> Array:
 		#print('------- done with tmp_ball')
 	
 	return [found_someone, hit_bounced, min_ifielder, intercept_position,
-			elapsed_time, hit_bounced_position, hit_bounced_time]
+			elapsed_time, hit_bounced_position, hit_bounced_time, min2_ifielder]
 	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 
 
@@ -923,6 +939,7 @@ func assign_fielders_after_hit() -> Array:
 	if found_someone:
 		fielders[min_ifielder].assign_to_field_ball(intercept_position)
 		#break
+		fielders[fftib[7]].set_alt_fielder()
 
 	if not found_someone:
 		print('no fielder found')
@@ -982,9 +999,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	printt('Running assign_fielders_to_cover_bases')
 	var assigned_indexes = []
 	
-	# Assign nearest fielder to cover bases
-	# TODO: Assign cutoff fielder
-	# Only do if ball is far away from infield
+	# Assign nearest fielder to cover bases and cutoff
 	for base in [2,1,3,4, 5]:
 		var base_position:Vector3 = Vector3(0,0,20)
 		if base == 5:
