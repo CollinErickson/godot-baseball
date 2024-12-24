@@ -111,7 +111,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			fielding_team_is_home:bool,
 			throw_mode_:String,
 			bat_mode_:String,
-			pitch_mode_:String):
+			_pitch_mode_:String):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
@@ -286,9 +286,19 @@ func _on_ball_fielded_by_fielder(fielder):
 	
 	$Headon/BallBounceAnnulus.visible = false
 
-func _on_alt_fielder_selected_by_fielder(fielder):
+func _on_alt_fielder_selected_by_fielder(fielder, _prev_fielder):
 	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
-
+	
+	# Set new alt fielder
+	var min_dist = 1e12
+	var min_fielder
+	for f in fielders:
+		if f.posname != fielder.posname:
+			if f.distance_xz(f.position, ball3d.position) < min_dist:
+				min_dist = f.distance_xz(f.position, ball3d.position)
+				min_fielder = f
+	min_fielder.set_alt_fielder()
+	#printt('setting new alt fielder', min_fielder.posname, Time.get_ticks_msec())
 
 func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	printt('In field_3d, throwing ball to:', base, fielder, to_fielder)
@@ -590,10 +600,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
+					if !false:
 						vla = 20
 						hla = -22
-						exitvelo = 16.8
+						exitvelo = 38.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:

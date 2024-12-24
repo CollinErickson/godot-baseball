@@ -122,6 +122,7 @@ func assign_to_cover_base(base, ball_pos=null):
 		# Assign to halfway between ball position and 2nd base
 		# TODO: make this most relevant base, not always 2nd base
 		assignment_pos = .5*(Vector3(0,0,1)*30*sqrt(2) + ball_pos)
+		assignment_pos.y = 0
 	else:
 		assert(false)
 
@@ -176,12 +177,13 @@ func _physics_process(delta: float) -> void:
 	# Check if user changed to alt fielder
 	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder"):
 		var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
-		if len(alt_fielders) > 0.5:
+		if (len(alt_fielders) > 0.5 and
+			Time.get_ticks_msec() - alt_fielders[0].time_set_alt_fielder > 1./10 * 1000):
 			set_not_selected_fielder()
 			set_animation('idle')
 			alt_fielders[0].set_selected_fielder()
 			alt_fielders[0].assignment = "ball"
-			alt_fielder_selected_signal.emit(alt_fielders[0])
+			alt_fielder_selected_signal.emit(alt_fielders[0], self)
 			return
 	
 	# Move fielder to their assignment
@@ -352,8 +354,8 @@ func _physics_process(delta: float) -> void:
 				var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
 				if len(cutoff_fielders) > 0.5:
 					start_throw_ball_func(null, cutoff_fielders[0], "throwcutoff")
-				for cutoff_fielder in cutoff_fielders:
-					cutoff_fielder.set_not_cutoff_fielder()
+				#for cutoff_fielder in cutoff_fielders:
+					#cutoff_fielder.set_not_cutoff_fielder()
 			
 			# Check for click that throws ball
 			if Input.is_action_just_pressed("click"):
@@ -642,7 +644,7 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 	if base != null:
 		if base == 5:
 			# Cutoff
-			1
+			pass
 		elif distance_xz(position, base_positions[base-1]) > 3:
 			#holding_ball = false
 			#remove_from_group('fielder_holding_ball')
@@ -770,24 +772,44 @@ func set_not_targeted_fielder():
 func set_cutoff_fielder():
 	add_to_group("cutoff_fielder")
 	if user_is_pitching_team:
-		$CutoffLabel3D.visible = true
+		if $AltFielderLabel3D.visible:
+			$AltFielderAndCutLabel3D.visible = true
+			$AltFielderLabel3D.visible = false
+		else:
+			$CutoffLabel3D.visible = true
 
 func set_not_cutoff_fielder():
 	remove_from_group("cutoff_fielder")
-	$CutoffLabel3D.visible = false
+	if user_is_pitching_team:
+		if $AltFielderAndCutLabel3D.visible:
+			$AltFielderAndCutLabel3D.visible = false
+			$AltFielderLabel3D.visible = true
+		else:
+			$CutoffLabel3D.visible = false
 
+var time_set_alt_fielder #= Time.get_ticks_msec() - 1000
 func set_alt_fielder():
 	var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
 	for alt_fielder in alt_fielders:
 		alt_fielder.set_not_alt_fielder()
 	
+	time_set_alt_fielder = Time.get_ticks_msec()
 	add_to_group("alt_fielder")
 	if user_is_pitching_team:
-		$AltFielderLabel3D.visible = true
+		if $CutoffLabel3D.visible:
+			$AltFielderAndCutLabel3D.visible = true
+			$CutoffLabel3D.visible = false
+		else:
+			$AltFielderLabel3D.visible = true
 
 func set_not_alt_fielder():
 	remove_from_group("alt_fielder")
-	$AltFielderLabel3D.visible = false
+	#time_set_alt_fielder = Time.get_ticks_msec() - 1000
+	if $AltFielderAndCutLabel3D.visible:
+		$AltFielderAndCutLabel3D.visible = false
+		$CutoffLabel3D.visible = true
+	else:
+		$AltFielderLabel3D.visible = false
 
 func time_to_reach_point(to:Vector3):
 	# Simulate how long it will take to get to a point. 
