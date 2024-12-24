@@ -342,6 +342,11 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 		noise.y += randf_range(-2,2)*2
 		noise.z += randf_range(-2,2)*2
 	
+	# Test wild throws
+	#noise.x += randf_range(-2,2)*4
+	#noise.y += randf_range(-2,2)*4
+	#noise.z += randf_range(-2,2)*4
+	
 	noise *= target_distance / 20
 	target += noise
 	
@@ -601,9 +606,9 @@ func _process(delta: float) -> void:
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
 					if false:
-						vla = -0
+						vla = 10
 						hla = 32
-						exitvelo = 28.8
+						exitvelo = 48.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -1022,7 +1027,12 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			
 			# Find relevant base to cover
 			# TODO: this should be based on current active runners. Also pass this location.
-			base_position = fielders[0].base_positions[2 - 1]
+			base_position = .5 * (fielders[0].base_positions[2 - 1] + intercept_position)
+
+			# Only do if cutoff won't be near intercept position
+			if fielders[0].distance_xz(intercept_position, base_position) < 15:
+				continue
+
 		else:
 			base_position = fielders[0].base_positions[base - 1]
 		var min_time = 1e10
@@ -1051,6 +1061,10 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 					min_i = i
 		if min_i != null:
 			if min_is_excluded:
+				pass
+			elif (base == 5 and
+				  fielders[min_i].distance_xz(fielders[min_i].position, base_position) < 3):
+				# Don't move cutoff fielder if they are close enough, it looks silly
 				pass
 			else:
 				#printt('Assigning fielder to cover base', fielders[min_i].posname, base)

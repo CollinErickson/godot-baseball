@@ -146,8 +146,8 @@ func _physics_process(delta: float) -> void:
 	#	printt('fielder user pit team', posname, user_is_pitching_team)
 	if is_frozen:
 		return
-	#if posname == 'P':
-		#printt('pitcher fielder', state, assignment, animation)
+	#if posname == '2B':
+		#printt('2B fielder', state, assignment, animation, assignment_pos, position)
 	
 	time_in_state += delta
 	
@@ -223,6 +223,7 @@ func _physics_process(delta: float) -> void:
 				set_assignment("wait_to_receive")
 			elif assignment == "cover":
 				set_assignment("wait_to_receive")
+				set_animation("idle")
 			elif assignment == "ball_carry":
 				set_assignment('holding_ball')
 			elif assignment == "ball_click":

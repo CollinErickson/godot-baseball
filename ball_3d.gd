@@ -90,11 +90,14 @@ func reset() -> void:
 	hit_bounced_time = null
 	elapsed_time = 0
 	$TrailNode.visible = false
+	throw_start_pos = null
+	throw_start_velo = null
+	throw_target = null
 
 	printt('finished ball reset, hit bounced', hit_bounced)
 	
 	var dot = get_parent().get_node_or_null('SZ_DOT')
-	if dot:
+	if dot != null:
 		get_parent().remove_child(dot)
 
 func pow_vec_components(x, a=2) :
@@ -192,7 +195,9 @@ func _physics_process(delta: float) -> void:
 				var throw_target_distance = distance_xz(throw_target, throw_start_pos)
 				if throw_target_distance < 1:
 					throw_progress = 1
-				if throw_progress > 1.05 or velocity.length() < .5:
+				if (throw_progress > 1.05 or
+					(throw_start_velo!=null and
+						velocity.length()/throw_start_velo.length() < .25)):
 					printt('ball throw prog over 1', throw_progress)
 					state = 'ball_in_play'
 					throw_start_pos = null
@@ -644,8 +649,12 @@ func ball_fielded():
 	state = "fielded"
 	set_process(false)
 	touched_by_fielder = true
+	throw_start_pos = null
+	throw_start_velo = null
+	throw_target = null
 
 var throw_start_pos
+var throw_start_velo
 var throw_target
 func throw_to_base(_base, velo_vec, start_pos, target):
 	#printt('in ball: setting throw_to_base', _base, 'target is', target)
@@ -653,6 +662,7 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 	is_frozen = false
 	velocity = velo_vec
 	throw_start_pos = start_pos
+	throw_start_velo = velo_vec
 	throw_target = target
 	state = "thrown"
 	time_last_thrown = Time.get_ticks_msec()

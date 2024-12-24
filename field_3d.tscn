@@ -331,12 +331,12 @@ posname = "CF"
 posnum = 8
 
 [node name="Fielder3DLF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 60)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 60)
 posname = "LF"
 posnum = 7
 
 [node name="Fielder3DRF" parent="Headon/Defense" groups=["fielders"] instance=ExtResource("4_386e5")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 60)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 0, 60)
 posname = "RF"
 posnum = 9
 
