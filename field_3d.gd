@@ -245,7 +245,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	#batter.print_()
 	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
 
-func _on_ball_fielded_by_fielder(fielder):
+func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -262,7 +262,7 @@ func _on_ball_fielded_by_fielder(fielder):
 			runner.tagged_up_after_catch = runner.running_progress - runner.start_base < 1e-8
 	
 	# Do this last so that the type of out can be determined
-	ball.ball_fielded()
+	ball.ball_fielded(ball_position_before_fielded)
 	
 	# Reassign other fielders to cover bases (only really needed when fielder assigned
 	#   to a base go the ball
@@ -605,10 +605,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
-						vla = 10
-						hla = 32
-						exitvelo = 48.8
+					if !false:
+						vla = 30
+						hla = 45
+						exitvelo = 28.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -762,7 +762,12 @@ func _process(delta: float) -> void:
 			else:
 				get_node("Headon/Cameras/Camera3DHighHome").current = true
 		elif Input.is_key_pressed(KEY_3):
-			get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DBallOverhead").current = true
+				get_node("Headon/Cameras/Camera3DBallOverhead").position = ball3d.position
+				get_node("Headon/Cameras/Camera3DBallOverhead").position.y = 30
+			else:
+				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 		elif Input.is_key_pressed(KEY_4):
 			get_node("Headon/Cameras/Camera3DAll22").current = true
 	

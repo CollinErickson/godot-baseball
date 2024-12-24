@@ -36,6 +36,8 @@ var touched_by_fielder:bool = false
 var hit_bounced_position = null
 var hit_bounced_time = null
 var elapsed_time = 0
+var fair_foul_determined:bool = false
+var is_foul:bool = false
 
 #var ball_trail_array = range(60)
 #var ball_trail_this_trail = ra
@@ -93,6 +95,8 @@ func reset() -> void:
 	throw_start_pos = null
 	throw_start_velo = null
 	throw_target = null
+	fair_foul_determined = false
+	is_foul = false
 
 	printt('finished ball reset, hit bounced', hit_bounced)
 	
@@ -118,8 +122,8 @@ func _physics_process(delta: float) -> void:
 	elapsed_time += delta
 	if is_frozen:
 		return
-	#if randf_range(0,1) < 1.1 and not is_sim:
-		#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress, hit_bounced)
+	if randf_range(0,1) < 1.1 and not is_sim:
+		printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress, hit_bounced, fair_foul_determined, is_foul)
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)
@@ -173,7 +177,7 @@ func _physics_process(delta: float) -> void:
 					#printt('velo before and after', velocity, wallout[3])
 					printt("In ball, hit wall at ball coords", position)
 					velocity = wallout[3]
-					if check_if_foul():
+					if check_if_foul_on_bounce():
 						# If foul, exit. Otherwise it returns later, or something weird.
 						return
 					if not hit_bounced:
@@ -227,13 +231,18 @@ func _physics_process(delta: float) -> void:
 			if pitch_in_progress:
 				delivery_bounced = true
 			if state == "ball_in_play" and not hit_bounced:
+				#if not is_sim:
+					#printt('hit_bounced true soon', hit_bounced, fair_foul_determined)
 				#printt('setting hit_bounced = true', hit_bounced, position)
-				if check_if_foul():
-					# If foul, exit. Otherwise it returns later, or something weird.
-					return
 				hit_bounced = true
 				hit_bounced_position = position
 				hit_bounced_time = elapsed_time
+				# Check foul before signaling that hit bounced
+				if check_if_foul_on_bounce():
+					# If foul, exit. Otherwise it returns later, or something weird.
+					return
+				if not is_sim:
+					print('hit_bounced true')
 				if not is_sim:
 					hit_bounced_signal.emit()
 			bounced_previous_frame = true
@@ -641,7 +650,7 @@ func _ready() -> void:
 	pass
 	#fit_approx_parabola_to_trajectory(Vector3(1,2,20), Vector3(3,.5,.6), 80, false)
 
-func ball_fielded():
+func ball_fielded(ball_position_before_fielded:Vector3):
 	printt('In ball: in func ball_fielded, state will be fielded')
 	visible = false
 	velocity = Vector3()
@@ -649,6 +658,14 @@ func ball_fielded():
 	state = "fielded"
 	set_process(false)
 	touched_by_fielder = true
+	printt('In ball: in func ball_fielded--', fair_foul_determined, is_foul,
+		is_in_fair_territory(ball_position_before_fielded), ball_position_before_fielded,
+		position, global_position)
+	if not fair_foul_determined:
+		fair_foul_determined = true
+		is_foul = !is_in_fair_territory(ball_position_before_fielded)
+		if is_foul:
+			foul_ball.emit()
 	throw_start_pos = null
 	throw_start_velo = null
 	throw_target = null
@@ -674,16 +691,30 @@ func distance_xz(a:Vector3, b:Vector3) -> float:
 				(a.z - b.z)**2)
 
 signal foul_ball
-func check_if_foul():
+func check_if_foul_on_bounce(emit:bool=true):
 	if is_sim:
 		return false
-	printt('in check if foul', global_position, hit_bounced, touched_by_fielder)
-	if not hit_bounced and not touched_by_fielder:
-		#printt('in check if foul', global_position)
-		if global_position.x < 0 or global_position.z < 0:
-			printt('in ball, emitting signal FOUL BALL')
+	if fair_foul_determined:
+		return is_foul
+	#printt('in check if foul', global_position, hit_bounced, touched_by_fielder)
+	# If it bounces in fair territory past the base lines, it's fair
+	if ((global_position.x >= 0 and global_position.z >= 30) or
+			(global_position.z >= 0 and global_position.x >= 30)):
+		#printt('in check_if_foul_on_bounce, setting fair', fair_foul_determined, is_foul)
+		fair_foul_determined = true
+		is_foul = false
+		return false
+	# If it bounces past the baselines in foul territory, it depends on where it
+	#   was when it crossed the baselines connecting to 2nd base.
+	if ((global_position.x < 0 and global_position.z > 30) or
+			(global_position.z < 0 and global_position.x > 30)):
+		#printt('in check_if_foul_on_bounce, setting foul', fair_foul_determined, is_foul, emit)
+		fair_foul_determined = true
+		is_foul = true
+		printt('in ball, emitting signal FOUL BALL')
+		if emit:
 			foul_ball.emit()
-			return true
+		return true
 	return false
 
 func remove_dot(seconds):
@@ -724,3 +755,9 @@ func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> vo
 	
 	#if randf() < 1.1:
 		#printt('trail rotation,', $TrailNode.rotation, $TrailNode.position, $TrailNode/Trail.position, trail_length)
+
+func is_in_fair_territory(pos=position) -> bool:
+	print('in ball is_in_fair_territory, pos:', position)
+	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	return pos.x >= 0 and pos.z >= 0
+	#return global_position.x >= 0 and global_position.z >= 0

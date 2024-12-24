@@ -260,6 +260,7 @@ func _physics_process(delta: float) -> void:
 				printt('FIELD BALL', posname, distance_from_ball_xz, position,
 					ball.position, Time.get_ticks_msec() - ball.time_last_thrown,
 					ball.throw_progress, Time.get_ticks_msec())
+				var ball_position_before_fielded = ball.position
 				ball.position = position
 				ball.position.y = 1.4
 				#printt('FIELD BALL', posname, distance_from_ball, position, ball.position)
@@ -270,7 +271,7 @@ func _physics_process(delta: float) -> void:
 				set_assignment("holding_ball")
 				assignment_pos = null
 				#printt('fielder emiting ball_fielded')
-				ball_fielded.emit(self)
+				ball_fielded.emit(self, ball_position_before_fielded)
 				if user_is_pitching_team:
 					set_selected_fielder()
 
