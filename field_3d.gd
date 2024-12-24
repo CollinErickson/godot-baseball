@@ -600,10 +600,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
-						vla = 20
-						hla = -22
-						exitvelo = 38.8
+					if false:
+						vla = -0
+						hla = 32
+						exitvelo = 28.8
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
@@ -1066,7 +1066,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	#   and weren't assigned this time to just wait
 	for i in range(len(fielders)):
 		if fielders[i].assignment == 'cover' and not assigned_indexes.has(i):
-			fielders[i].assignment = 'wait_to_receive'
+			fielders[i].set_assignment('wait_to_receive')
 	
 	return
 

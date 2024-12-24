@@ -12,12 +12,13 @@ const catch_max_y:float = 2.5
 var throws:String = 'R'
 const time_throw_animation_release_point:float = 0.55
 
-var assignment # cover, ball_click, ball_carry, wait_to_receive, holding_ball
+var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos # Position to go to for assignment
 var holding_ball = false
 var user_is_pitching_team
 var time_last_began_holding_ball
-var position_started_holding_ball = null
+var position_holding_ball_reassigned_fielders = null
+var position_assignment_ball_reassigned_fielders = null
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var ball = get_tree().get_first_node_in_group("ball")
@@ -98,7 +99,7 @@ func align_sprite():
 
 func assign_to_field_ball(pos):
 	printt('in fielder, assign_to_field_ball', posname, pos)
-	assignment = 'ball'
+	set_assignment('ball')
 	assignment_pos = pos
 	assignment_pos.y = 0
 	if user_is_pitching_team:
@@ -107,7 +108,7 @@ func assign_to_field_ball(pos):
 
 func assign_to_cover_base(base, ball_pos=null):
 	set_not_cutoff_fielder()
-	assignment = 'cover'
+	set_assignment('cover')
 	if base == 1:
 		assignment_pos = Vector3(-1,0,1) * 30/sqrt(2)
 	elif base == 2:
@@ -182,7 +183,7 @@ func _physics_process(delta: float) -> void:
 			set_not_selected_fielder()
 			set_animation('idle')
 			alt_fielders[0].set_selected_fielder()
-			alt_fielders[0].assignment = "ball"
+			alt_fielders[0].set_assignment("ball")
 			alt_fielder_selected_signal.emit(alt_fielders[0], self)
 			return
 	
@@ -219,13 +220,13 @@ func _physics_process(delta: float) -> void:
 				#assignment = "holding_ball"
 				#ball_fielded.emit()
 				#holding_ball = true
-				assignment = "wait_to_receive"
+				set_assignment("wait_to_receive")
 			elif assignment == "cover":
-				assignment = "wait_to_receive"
+				set_assignment("wait_to_receive")
 			elif assignment == "ball_carry":
-				assignment = 'holding_ball'
+				set_assignment('holding_ball')
 			elif assignment == "ball_click":
-				assignment = 'ball'
+				set_assignment('ball')
 			else:
 				printt("Bad assignment, didn't update", assignment)
 			# They have reached assignment, so changed anim to idle
@@ -265,7 +266,7 @@ func _physics_process(delta: float) -> void:
 				#add_to_group('fielder_holding_ball')
 				#time_last_began_holding_ball = Time.get_ticks_msec()
 				set_holding_ball(true)
-				assignment = "holding_ball"
+				set_assignment("holding_ball")
 				assignment_pos = null
 				#printt('fielder emiting ball_fielded')
 				ball_fielded.emit(self)
@@ -307,7 +308,7 @@ func _physics_process(delta: float) -> void:
 
 			if assignment == 'ball_click':
 				# If moving due to click then user does other movement, switch to that
-				assignment = 'ball'
+				set_assignment('ball')
 		else: # No movement -> stop
 			if velocity.length() > 1e-12:
 				move = Vector3(-velocity.x, 0, -velocity.z)
@@ -426,11 +427,11 @@ func _physics_process(delta: float) -> void:
 		
 		# If user ran a distance with the ball, reassign fielders to maybe cover
 		#  base they vacated
-		if (position_started_holding_ball!= null and 
-			distance_xz(position, position_started_holding_ball) > 4):
+		if (position_holding_ball_reassigned_fielders!= null and 
+			distance_xz(position, position_holding_ball_reassigned_fielders) > 4):
 			fielder_moved_reassign_fielders_signal.emit(self)
 			# Not a good variable name if updating like this
-			position_started_holding_ball = position
+			position_holding_ball_reassigned_fielders = position
 		
 		# CPU defense
 		if not user_is_pitching_team:
@@ -495,7 +496,7 @@ func _physics_process(delta: float) -> void:
 						
 						if run_it:
 							assignment_pos = base_positions[throw_to-1]
-							assignment = "ball_carry"
+							set_assignment("ball_carry")
 							#printt('fielder running to base', throw_to, posname)
 						else:
 							if throw_to > 4.5:
@@ -508,8 +509,16 @@ func _physics_process(delta: float) -> void:
 								start_throw_ball_animation(throw_to)
 							else:
 								pass #printt('deciding not to throw', posname)
-	else:
+	else: # Not holding ball
 		stepping_on_base_with_ball = false
+		
+		# If user ran a distance while chasing the ball, reassign fielders to
+		# maybe cover base they vacated.
+		if (assignment == "ball" and
+			position_assignment_ball_reassigned_fielders != null and 
+			distance_xz(position, position_assignment_ball_reassigned_fielders) > 4):
+			fielder_moved_reassign_fielders_signal.emit(self)
+			position_assignment_ball_reassigned_fielders = position
 	
 	# Check for click to move selected player or change selected player
 	if user_is_pitching_team and not click_used and Input.is_action_just_pressed("click") and is_selected_fielder:
@@ -529,13 +538,13 @@ func _physics_process(delta: float) -> void:
 			set_not_selected_fielder()
 			fielders[min_i].set_selected_fielder()
 			fielders[min_i].set_not_alt_fielder()
-			fielders[min_i].assignment = "ball"
-			assignment = "wait_to_receive"
+			fielders[min_i].set_assignment("ball")
+			set_assignment("wait_to_receive")
 			new_fielder_selected_signal.emit(fielders[min_i])
 			printt('fielder i assignment new assignment is', fielders[min_i].assignment, fielders[min_i].posname)
 		else:
 			# Run to that position
-			assignment = "ball_click"
+			set_assignment("ball_click")
 			assignment_pos = click_y0_pos
 		click_used = true
 	
@@ -655,7 +664,7 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
-			assignment = 'wait_to_receive' # Not the best name for it
+			set_assignment('wait_to_receive')
 			throw_ball.emit(base, self, null, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
@@ -672,7 +681,7 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
-			assignment = 'wait_to_receive' # Not the best name for it
+			set_assignment('wait_to_receive')
 			throw_ball.emit(base, self, fielder, success)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
@@ -856,6 +865,25 @@ func set_state(state_:String):
 	state = state_
 	time_in_state = 0
 
+func set_assignment(assignment_):
+	assert(assignment_ in ['cover', 'ball', 'ball_click', 'ball_carry',
+							'wait_to_receive', 'holding_ball'])
+	
+	if assignment == assignment_:
+		return
+	
+	# Exit assignment changes
+	if assignment == "ball":
+		position_assignment_ball_reassigned_fielders = null
+	
+	# New assignment changes
+	if assignment_ == "ball":
+		position_assignment_ball_reassigned_fielders = position
+	
+	# Set new assignment
+	assignment = assignment_
+	
+
 func set_look_at_position(pos) -> void:
 	# Can't look at current position, gives error
 	if distance_xz(pos, position) < 1:
@@ -868,10 +896,12 @@ func set_look_at_position(pos) -> void:
 	$Char3D.look_at(pos, Vector3.UP, true)
 
 func set_holding_ball(hb:bool) -> void:
+	# This is for the bool of holding ball, not the state.
+	# State can be "holding_ball" or "ball_carry".
 	holding_ball = hb
 	if hb:
 		add_to_group('fielder_holding_ball')
-		position_started_holding_ball = position
+		position_holding_ball_reassigned_fielders = position
 		time_last_began_holding_ball = Time.get_ticks_msec()
 		$Annulus.visible = true
 		$Annulus2.visible = false
@@ -881,7 +911,7 @@ func set_holding_ball(hb:bool) -> void:
 			alt_fielder.set_not_alt_fielder()
 	else:
 		remove_from_group('fielder_holding_ball')
-		position_started_holding_ball = null
+		position_holding_ball_reassigned_fielders = null
 		time_last_began_holding_ball = null
 
 func setup_player(player, team, is_home_team:bool) -> void:
