@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3 uid="uid://nprqmch1yea5"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_yebit"]
+spread = 180.0
+initial_velocity_min = 5.16
+initial_velocity_max = 21.16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sjsx4"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_tfxys"]
+material = SubResource("StandardMaterial3D_sjsx4")
+radius = 0.03
+height = 0.06
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qcfll"]
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_87xit"]
+material = SubResource("StandardMaterial3D_qcfll")
+radius = 0.03
+height = 0.06
+radial_segments = 16
+rings = 8
+
+[node name="Explosion" type="Node3D"]
+
+[node name="Red" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_yebit")
+draw_pass_1 = SubResource("SphereMesh_tfxys")
+
+[node name="Yellow" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
+process_material = SubResource("ParticleProcessMaterial_yebit")
+draw_pass_1 = SubResource("SphereMesh_87xit")

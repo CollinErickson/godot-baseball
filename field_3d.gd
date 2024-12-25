@@ -576,7 +576,7 @@ func _process(delta: float) -> void:
 					var actual_contact = true
 					
 					# Create ball velocity
-					var exitvelo = randf_range(20,45)
+					var exitvelo = randf_range(20,60)
 					var vla = randf_range(-1,1)*20+20
 					var hla = randf_range(-1,1)*20
 					var inzone_prop = ($Headon/Batter3D.swing_elapsed_sec - 
@@ -605,14 +605,15 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
-						vla = 30
-						hla = 45
+					if false:
+						vla = 0
+						hla = 1.5
 						exitvelo = 28.8
+						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
 					if actual_contact:
-						print('CONTACT')
+						print('In field: CONTACT')
 						contact_done = true
 						ball_in_play = true
 						ball3d.pitch_in_progress = false
@@ -655,6 +656,13 @@ func _process(delta: float) -> void:
 						var mgl = get_node("Headon/MouseGroundLocation")
 						mgl.visible = true
 						mgl.set_process(true)
+						
+						# Explosion if good hit
+						if ((exitvelo > 95 * .48889 and hla > 10 and hla < 40) or
+							!true):
+							$Headon/Explosion.position = ball3d.position
+							$Headon/Explosion/Red.emitting = true
+							$Headon/Explosion/Yellow.emitting = true
 					else: # Not actual contact
 						printt("Swing and a miss due to bad PCI!")
 					
@@ -1446,7 +1454,15 @@ func decide_automatic_runners_actions():
 					) / fielder_with_ball.max_throw_speed +
 					min_time_fielder_release_throw
 				) + seconds_to_intercept
-				if time_to_next_next_base < time_throw_next_next_base:
+				var time_fielder_run_next_next_base = (
+					fielder_with_ball.distance_xz(
+						fielder_with_ball.position,
+						fielder_with_ball.base_positions[next_next_base-1]
+					) / fielder_with_ball.SPEED
+				) + seconds_to_intercept
+				var time_fielder_next_next_base = min(time_throw_next_next_base,
+												time_fielder_run_next_next_base)
+				if time_to_next_next_base < time_fielder_next_next_base:
 					#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
 					#print("Sending runner to next next base", next_next_base)
 					decisions[i] = coalesce(decisions[i], 2)
@@ -1462,8 +1478,16 @@ func decide_automatic_runners_actions():
 					) / fielder_with_ball.max_throw_speed +
 					min_time_fielder_release_throw
 				) + seconds_to_intercept
+				var time_fielder_run_next_base = (
+					fielder_with_ball.distance_xz(
+						fielder_with_ball.position,
+						fielder_with_ball.base_positions[next_base-1]
+					) / fielder_with_ball.SPEED 
+				) + seconds_to_intercept
+				var time_fielder_next_base = min(time_throw_next_base,
+												time_fielder_run_next_base)
 				#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
-				if time_to_next_base < time_throw_next_base:
+				if time_to_next_base < time_fielder_next_base:
 					# 5. Go to next base if possible.
 					#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
 					decisions[i] = coalesce(decisions[i], 1)
@@ -1475,13 +1499,21 @@ func decide_automatic_runners_actions():
 				else:
 					# 7. Go to previous base if possible.
 					# 8. Go to closer of next and previous base.
-					var prev_base = ceil(runners[i].running_progress + 1e-14)
-					var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
+					var prev_base = floor(runners[i].running_progress)
+					var time_to_prev_base = abs(prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
 					var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
 						fielder_with_ball.position,
 						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed +
 						min_time_fielder_release_throw)
-					if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
+					var time_fielder_run_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
+						fielder_with_ball.position,
+						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.SPEED)
+					var time_fielder_prev_base = min(time_throw_prev_base,
+													 time_fielder_run_prev_base)
+					# Only go forward if can't go back safely and if it's closer with margin boost
+					if ((time_to_next_base - time_throw_next_base) - 0.2 <
+							(time_to_prev_base - time_fielder_prev_base)
+						and time_to_prev_base > time_fielder_prev_base):
 						decisions[i] = coalesce(decisions[i], 1)
 						decision_bases[i] = coalesce(decision_bases[i], ceil(runners[i].running_progress))
 					else:

@@ -122,8 +122,8 @@ func _physics_process(delta: float) -> void:
 	elapsed_time += delta
 	if is_frozen:
 		return
-	if randf_range(0,1) < 1.1 and not is_sim:
-		printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress, hit_bounced, fair_foul_determined, is_foul)
+	#if randf_range(0,1) < 1.1 and not is_sim:
+		#printt('in ball:', state, position, throw_start_pos, throw_target, throw_progress, hit_bounced, fair_foul_determined, is_foul)
 	#printt('pitch_in_progress', pitch_in_progress)
 	#print('in ball pp, ', position)
 	#print('in ball pp vel, ', velocity)

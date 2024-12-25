@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=59 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://c8pe2ur7pkpbb" path="res://mouse_ground_location.tscn" id="12_ah4ma"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="13_rbd7b"]
 [ext_resource type="Script" path="res://flash_text.gd" id="14_g2qjr"]
+[ext_resource type="PackedScene" uid="uid://nprqmch1yea5" path="res://scenes/explosion.tscn" id="16_mgd0q"]
 [ext_resource type="PackedScene" uid="uid://ccbr5gjhlqkux" path="res://scenes/prepitch_field_overlay.tscn" id="18_opycq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
@@ -437,6 +438,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.001, 5)
 inner_radius = 1.2
 outer_radius = 1.5
 color = Color(0.640704, 0.0660575, 0.437794, 1)
+
+[node name="Explosion" parent="Headon" instance=ExtResource("16_mgd0q")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1)
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 

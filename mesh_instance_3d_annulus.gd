@@ -10,7 +10,7 @@ func _ready() -> void:
 	make_annulus()
 
 func make_annulus():
-	print("Running make_annulus", inner_radius, outer_radius)
+	#print("Running make_annulus", inner_radius, outer_radius)
 	assert(outer_radius > inner_radius)
 	assert(inner_radius > 0)
 	

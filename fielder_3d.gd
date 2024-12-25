@@ -173,7 +173,7 @@ func _physics_process(delta: float) -> void:
 			return
 
 	assert(state == 'free')
-	var _moved_this_process = false
+	var moved_this_process = false
 	
 	# Check if user changed to alt fielder
 	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder"):
@@ -192,6 +192,7 @@ func _physics_process(delta: float) -> void:
 		(assignment == 'ball' and not user_is_pitching_team)):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
+		moved_this_process = true
 		# Face target
 		#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
 		if distance_from_target > 2:
@@ -294,6 +295,7 @@ func _physics_process(delta: float) -> void:
 			anymovement = true
 		if anymovement:
 			if move.length() > 0: # Could press opposite directions
+				moved_this_process = true
 				#move = move.normalized() * delta * SPEED
 				# move is the move direction
 				move = move.normalized()
@@ -311,7 +313,7 @@ func _physics_process(delta: float) -> void:
 			if assignment == 'ball_click':
 				# If moving due to click then user does other movement, switch to that
 				set_assignment('ball')
-		else: # No movement -> stop
+		else: # No movement but moved last step -> stop
 			if velocity.length() > 1e-12:
 				move = Vector3(-velocity.x, 0, -velocity.z)
 				move = move.normalized()
@@ -319,6 +321,7 @@ func _physics_process(delta: float) -> void:
 				if dvel.length() > velocity.length(): # Cancel to 0
 					velocity = Vector3.ZERO
 					set_animation("idle")
+					set_look_at_position(ball.position)
 				else:
 					velocity += dvel
 		#printt('cam fielder movement', cam.rotation)
@@ -550,7 +553,8 @@ func _physics_process(delta: float) -> void:
 			assignment_pos = click_y0_pos
 		click_used = true
 	
-	if assignment == 'wait_to_receive':
+	if (assignment == 'wait_to_receive' or
+		(assignment == 'ball' and not moved_this_process and false)):
 		if distance_xz(position, ball.position) > 2:
 			#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
 			set_look_at_position(ball.position)

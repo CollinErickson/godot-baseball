@@ -46,9 +46,9 @@ func _ready() -> void:
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
 	#batter.speed = 200
-	#runner1 = get_player(50)
-	#runner2 = get_player(150)
-	#runner3 = get_player(199)
+	runner1 = get_player(50)
+	runner2 = get_player(50)
+	runner3 = get_player(99)
 	reset_field()
 	update_scorebug()
 	
