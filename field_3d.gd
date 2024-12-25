@@ -268,22 +268,6 @@ func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	#   to a base go the ball
 	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
 	
-	## TODO: If CPU is defense, decide where to throw
-	#var throw_to = -1
-	#if not user_is_pitching_team:
-		#print('CPU decide what to do with ball now')
-		## Check for active runners
-		#var runners = get_tree().get_nodes_in_group("runners")
-		#for runner in runners:
-			#if runner.is_active():
-				##printt('fielder is', fielder)
-				#if runner.is_running and runner.target_base > runner.running_progress:
-					#throw_to = max(throw_to, runner.target_base)
-					#printt('could throw out runner', runner.target_base, runner.out_on_play)
-		#printt("in field: ball will be thrown to", throw_to)
-		#if throw_to > -0.5:
-			#fielder.throw_ball_func(throw_to)
-	
 	$Headon/BallBounceAnnulus.visible = false
 
 func _on_alt_fielder_selected_by_fielder(fielder, _prev_fielder):
@@ -898,13 +882,8 @@ func find_fielder_to_intercept_ball() -> Array:
 				var ballgrounddist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
 				# TODO: fielders don't run at constant speed
 				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
-				#if fielderi.posname == 'C':
-				#	print('checking fielder time', timetoreach, fielderi.time_to_reach_point(tmp_ball.position))
 				
 				if timetoreach <= elapsed_time:
-					#printt('found fielder to field', elapsed_time, fielderi.position, tmp_ball.position)
-					#fielderi.assign_to_field_ball(tmp_ball.position)
-					#printt('ball bounced???', tmp_ball.hit_bounced, tmp_ball.state)
 					if timetoreach < min_timetoreach:
 						min_timetoreach = timetoreach
 						min_ifielder = ifielder
@@ -1519,119 +1498,6 @@ func decide_automatic_runners_actions():
 					else:
 						decisions[i] = coalesce(decisions[i], -1)
 						decision_bases[i] = coalesce(decision_bases[i], floor(runners[i].running_progress))
-
-
-
-	#if len(fielders_with_ball) > 0.5:
-		## Fielder has ball
-		#assert(ball.state == 'fielded')
-		## If need to tag up, do it
-		#for i in range(len(runners)):
-			#if runners[i].is_active() and runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
-				#decisions[i] = coalesce(decisions[i], -1)
-		## If they are a force out and not at next base, go there
-		#for i in range(len(runners)):
-			#if runners[i].is_active() and runners[i].can_be_force_out():
-				##printt('Runner can be force out', i)
-				#decisions[i] = coalesce(decisions[i], 1)
-		## Decide between going forward to next base, going forward, staying, or going backward
-		#for i in range(len(runners)):
-			#if runners[i].is_active():
-				## Margin to go to next next base
-				#if runners[i].running_progress - floor(runners[i].running_progress) > .7 and floor(runners[i].running_progress) < 2.5:
-					#var next_next_base = ceil(runners[i].running_progress) + 1
-					#var time_to_next_next_base = (next_next_base - runners[i].running_progress) * 30 / runners[i].SPEED
-					#var time_throw_next_next_base = fielders_with_ball[0].distance_xz(
-						#fielders_with_ball[0].position,
-						#fielders_with_ball[0].base_positions[next_next_base-1]) / fielders_with_ball[0].max_throw_speed
-					#if time_to_next_next_base < time_throw_next_next_base:
-						##printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
-						#print("Sending runner to next next base", next_next_base)
-						#decisions[i] = coalesce(decisions[i], 2)
-				## Margin to go to next base
-				#var next_base = ceil(runners[i].running_progress + 1e-14)
-				#if next_base < 4.5:
-					#var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
-					#var time_throw_next_base = fielders_with_ball[0].distance_xz(
-						#fielders_with_ball[0].position,
-						#fielders_with_ball[0].base_positions[next_base-1]) / fielders_with_ball[0].max_throw_speed
-					#if time_to_next_base < time_throw_next_base:
-						##printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
-						#decisions[i] = coalesce(decisions[i], 1)
-					#elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
-						## Stay on current base
-						#decisions[i] = coalesce(decisions[i], 0)
-					#else:
-						## Not on base, can't make it to next base. Either go back or go to next
-						## Margin for previous base
-						#var prev_base = ceil(runners[i].running_progress + 1e-14)
-						#var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
-						#var time_throw_prev_base = fielders_with_ball[0].distance_xz(
-							#fielders_with_ball[0].position,
-							#fielders_with_ball[0].base_positions[prev_base-1]) / fielders_with_ball[0].max_throw_speed
-						#if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
-							#decisions[i] = coalesce(decisions[i], 1)
-						#else:
-							#decisions[i] = coalesce(decisions[i], -1)
-	#elif ball.state in ['thrown__']:
-		## Ball is thrown
-		#pass
-	#elif ball.state in ['ball_in_play', 'thrown']:
-		## Ball in play
-		## Simulate ball forward, see if it will bounce, where it will be caught, etc
-		## [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
-		#var fftib = find_fielder_to_intercept_ball()
-		#var seconds_to_intercept = fftib[4]
-		## Determine if ball can be caught. If yes, go back.
-		#if not ball_hit_bounced and not fftib[1]:
-				##printt('SENDING BACK, CAN CATCH!!!')
-				#for i in range(len(runners)):
-					#decisions[i] = coalesce(decisions[i], -1)
-		#else: # Ball will bounce before catch
-			## If they are a force out and not at next base, go there
-			#for i in range(len(runners)):
-				##if runners[i].is_active():
-					##printt('checking run force out:', runners[i].is_active(), runners[i].can_be_force_out(), ball_hit_bounced, fftib[1])
-				#if runners[i].is_active() and runners[i].can_be_force_out():
-					#printt('Runner can be force out', i)
-					#decisions[i] = coalesce(decisions[i], 1)
-			## Check if they can make it to next base before throw/run
-			## Else if on base stay there
-			## Else between bases, find safer direction
-			#var fielder_with_ball = fielders[fftib[2]]
-			## Decide between going forward, staying, or going backward
-			#for i in range(len(runners)):
-				#if runners[i].is_active():
-					## Margin to go to next base
-					#var next_base = ceil(runners[i].running_progress + 1e-14)
-					#if next_base < 4.5:
-						#var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
-						#var time_throw_next_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-							#fielder_with_ball.position,
-							#fielder_with_ball.base_positions[next_base-1]) / fielder_with_ball.max_throw_speed)
-						##printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
-						#if time_to_next_base < time_throw_next_base:
-							##printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
-							#decisions[i] = coalesce(decisions[i], 1)
-						#elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
-							## Stay on current base
-							#decisions[i] = coalesce(decisions[i], 0)
-						#else:
-							## Not on base, can't make it to next base. Either go back or go to next
-							## Margin for previous base
-							#var prev_base = ceil(runners[i].running_progress + 1e-14)
-							#var time_to_prev_base = (prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
-							#var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-								#fielder_with_ball.position,
-								#fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed)
-							#if (time_to_next_base - time_throw_next_base) < (time_to_prev_base - time_throw_prev_base):
-								#decisions[i] = coalesce(decisions[i], 1)
-							#else:
-								#decisions[i] = coalesce(decisions[i], -1)
-	#else:
-		## Shouldn't happen
-		#printerr('error')
-	#printt('Final decide_automatic_runners_actions:', decisions)
 	
 	# Adjust them so that two aren't sent to the same base (if trail runner is faster)
 	#printt('decision bases before', decision_bases)
