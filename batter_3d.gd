@@ -8,7 +8,7 @@ var swing_elapsed_sec = 0
 var input_click = false
 var swingx = false
 var swingy = false
-var swing_prezone_duration = 0.10
+var swing_prezone_duration = 0.25
 var swing_inzone_duration = 0.15
 var animation = "idle"
 var bats:String # "L", "R"
@@ -174,9 +174,17 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		position = Vector3(1, 0, 0.5)
 		if bats == 'R':
 			set_look_at_position(Vector3(-100,0,0))
+			
+			# Make bat visible
+			get_node('Char3D/charnode/Armature/Skeleton3D/batR').visible = true
+			get_node('Char3D/charnode/Armature/Skeleton3D/batL').visible = false
 		else:
 			position.x *= -1
-			set_look_at_position(Vector3(100,0,0))	
+			set_look_at_position(Vector3(100,0,0))
+			
+			# Make bat visible
+			get_node('Char3D/charnode/Armature/Skeleton3D/batR').visible = false
+			get_node('Char3D/charnode/Armature/Skeleton3D/batL').visible = true
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 

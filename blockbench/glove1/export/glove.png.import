@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckid1tcdhk5mi"
-path.s3tc="res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"
+uid="uid://bv4xwjvyrdyxu"
+path.s3tc="res://.godot/imported/glove.png-f4651209ddcb19b96ae08d71b59497db.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://blockbench/player1/player1_0.png"
-dest_files=["res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"]
+source_file="res://blockbench/glove1/export/glove.png"
+dest_files=["res://.godot/imported/glove.png-f4651209ddcb19b96ae08d71b59497db.s3tc.ctex"]
 
 [params]
 

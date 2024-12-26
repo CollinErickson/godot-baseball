@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckid1tcdhk5mi"
-path.s3tc="res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"
+uid="uid://cbdg6vuhlwkxo"
+path.s3tc="res://.godot/imported/Player1_bat.png-f703567f6851f1779ff65effd9916bd7.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "76e563502915bc39f4ab262e441ba2e1"
+}
 
 [deps]
 
-source_file="res://blockbench/player1/player1_0.png"
-dest_files=["res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"]
+source_file="res://characters3D/Player1/Player1_bat.png"
+dest_files=["res://.godot/imported/Player1_bat.png-f703567f6851f1779ff65effd9916bd7.s3tc.ctex"]
 
 [params]
 

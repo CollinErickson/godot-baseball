@@ -10,7 +10,7 @@ var max_throw_speed:float = 30.0
 const catch_radius_xz:float = 2
 const catch_max_y:float = 2.5
 var throws:String = 'R'
-const time_throw_animation_release_point:float = 0.55
+const time_throw_animation_release_point:float = 0.75
 
 var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos # Position to go to for assignment
@@ -852,6 +852,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		max_throw_speed = player.throwspeed_mps()
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
+		$Char3D.set_glove(throws=="R")
 
 var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
 func decide_what_to_do_with_ball() -> Array:

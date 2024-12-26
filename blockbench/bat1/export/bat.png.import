@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckid1tcdhk5mi"
-path.s3tc="res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"
+uid="uid://bi54mje0bc55y"
+path.s3tc="res://.godot/imported/bat.png-3fbeaf59f9f37a76ddefd99dfe51c4bf.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://blockbench/player1/player1_0.png"
-dest_files=["res://.godot/imported/player1_0.png-90486adfa570a36381954e4dc24df562.s3tc.ctex"]
+source_file="res://blockbench/bat1/export/bat.png"
+dest_files=["res://.godot/imported/bat.png-3fbeaf59f9f37a76ddefd99dfe51c4bf.s3tc.ctex"]
 
 [params]
 

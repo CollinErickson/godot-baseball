@@ -28,6 +28,10 @@ func _ready() -> void:
 	charnode.name = 'charnode'
 	add_child(charnode)
 	#start_animation('a')
+	
+	# Hide bats by default, the batter will need to turn them on
+	charnode.get_node('Armature/Skeleton3D/batR').visible = false
+	charnode.get_node('Armature/Skeleton3D/batL').visible = false
 
 func reset() -> void:
 	# Undo current animation rotation
@@ -205,3 +209,11 @@ func unpause() -> void:
 	#$charnode/AnimationTree.active = true
 	#$charnode/AnimationTree.set_process_callback(1)
 	$charnode/AnimationTree.set_callback_mode_process(1)
+
+func set_glove(throwsR:bool) -> void:
+	$charnode/Armature/Skeleton3D/gloveL.visible = throwsR
+	$charnode/Armature/Skeleton3D/gloveR.visible = !throwsR
+	$charnode/Armature/Skeleton3D/hand_left.visible = !throwsR
+	$charnode/Armature/Skeleton3D/hand_right.visible = throwsR
+	$charnode/Armature/Skeleton3D/thumb_left.visible = !throwsR
+	$charnode/Armature/Skeleton3D/thumb_left.visible = throwsR

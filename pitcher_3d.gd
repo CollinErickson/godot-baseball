@@ -13,7 +13,7 @@ var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
 var animation = "idle"
 var throws:String = 'R'
-const time_until_pitch_release:float = 0.95
+const time_until_pitch_release:float = 1.2
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -306,3 +306,4 @@ func setup_player(player_, team, is_home_team:bool) -> void:
 		set_look_at_position(Vector3(-100,0,position.z))
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
+		$Char3D.set_glove(throws=="R")
