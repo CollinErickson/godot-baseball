@@ -14,6 +14,7 @@ var catchermitt_speed = 0.5 # non-mouse movement
 var animation = "idle"
 var throws:String = 'R'
 const time_until_pitch_release:float = 1.2
+var pitch_mode:String
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -33,7 +34,7 @@ func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
 
-func reset(color:Color) -> void:
+func reset(pitch_mode_:String) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -45,12 +46,14 @@ func reset(color:Color) -> void:
 	pitch_type = "FB"
 	$AnimatedSprite3D.set_frame(0)
 	$AnimatedSprite3D.visible = false
+	pitch_mode = pitch_mode_
+	assert(pitch_mode in ["Button", "Bar"])
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
 	set_look_at_position(Vector3(100,0,position.z))
 	set_animation("idle")
-	$Char3D.set_color(color)
+	#$Char3D.set_color(color)
 	player = null
 
 

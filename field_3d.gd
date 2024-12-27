@@ -111,12 +111,13 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			fielding_team_is_home:bool,
 			throw_mode_:String,
 			bat_mode_:String,
-			_pitch_mode_:String):
+			pitch_mode_:String):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	$Headon/Ball3D.reset()
 	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
-	#var fielders = get_tree().get_nodes_in_group('fielders')
+	
+	# Setup fielders
 	for fielder in fielders:
 		fielder.reset(throw_mode_)
 		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
@@ -128,11 +129,12 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		)
 		
 		#printt('fielder posname is', fielder.posname)
+		# Hit Fielder P since Pitcher is visible
 		if fielder.posname in ["C", "P"]:
 			fielder.visible = false
 			#printt('INVISIBLE CATCHER')
 	
-	#var runners = get_tree().get_nodes_in_group('runners')
+	# Setup runners
 	for runner in runners:
 		runner.reset(batting_team.color_primary)
 		if runner.start_base == 0:
@@ -155,7 +157,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$PrepitchFieldOverlay.setup_batter(batter)
 
 	# Setup pitcher
-	$Headon/Pitcher3D.reset(fielding_team.color_primary)
+	$Headon/Pitcher3D.reset(pitch_mode_)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
@@ -642,7 +644,7 @@ func _process(delta: float) -> void:
 						mgl.set_process(true)
 						
 						# Explosion if good hit
-						if ((exitvelo > 95 * .48889 and hla > 10 and hla < 40) or
+						if ((exitvelo > 95 * .48889 and vla > 10 and vla < 40) or
 							!true):
 							$Headon/Explosion.position = ball3d.position
 							$Headon/Explosion/Red.emitting = true

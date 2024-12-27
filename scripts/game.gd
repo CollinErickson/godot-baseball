@@ -3,7 +3,7 @@ extends Control
 # Settings
 var throw_mode:String = "Button" # "Button", "Bar"
 var bat_mode:String = "Target" # "Timing", "Target"
-var pitch_mode:String = "" # 
+var pitch_mode:String = "Button" # "Button", "Bar"
 
 # Game variables
 var outs_per_inning:int = 3
