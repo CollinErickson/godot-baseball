@@ -844,6 +844,8 @@ func set_holding_ball(hb:bool) -> void:
 		remove_from_group('fielder_holding_ball')
 		position_holding_ball_reassigned_fielders = null
 		time_last_began_holding_ball = null
+		if !user_is_pitching_team:
+			$Annulus.visible = false
 
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:

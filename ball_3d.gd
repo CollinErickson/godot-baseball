@@ -761,3 +761,15 @@ func is_in_fair_territory(pos=position) -> bool:
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
 	return pos.x >= 0 and pos.z >= 0
 	#return global_position.x >= 0 and global_position.z >= 0
+
+func find_where_ball_will_hit_ground() -> Vector3:
+	# Use this after ball is hit to find where to place bounce annulus
+	# Not actually used since this data comes from assigning fielders
+	var pos = position
+	var vel = velocity
+	var dt = 1e-3
+	while pos.y > 0:
+		pos += dt * vel
+		vel += dt*Vector3(0,-gravity, 0)
+	pos.y = 0
+	return pos

@@ -332,6 +332,7 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	#noise.x += randf_range(-2,2)*4
 	#noise.y += randf_range(-2,2)*4
 	#noise.z += randf_range(-2,2)*4
+	#noise = Vector3.ONE*3
 	
 	noise *= target_distance / 20
 	target += noise
@@ -591,7 +592,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
+					if !false:
 						vla = 0
 						hla = 1.5
 						exitvelo = 28.8
@@ -645,7 +646,7 @@ func _process(delta: float) -> void:
 						
 						# Explosion if good hit
 						if ((exitvelo > 95 * .48889 and vla > 10 and vla < 40) or
-							!true):
+							true):
 							$Headon/Explosion.position = ball3d.position
 							$Headon/Explosion/Red.emitting = true
 							$Headon/Explosion/Yellow.emitting = true
@@ -657,29 +658,26 @@ func _process(delta: float) -> void:
 	if ball_in_play:
 		ball_in_play_state_time += delta
 		
+		# No one should move (fielder or runner) until enough time to react passed
 		if ball_in_play_state == "prereflex" and ball_in_play_state_time > .4:
-			printt("REACT NOW")
+			#printt("REACT NOW")
 			ball_in_play_state = "prefield"
 			ball_in_play_state_time = 0
-			#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
-			#printt('fielder nodes', fielder_nodes)
 			#var hit_will_bounce = assign_fielders_after_hit()
 			# [found_someone, hit_bounced, min_ifielder, intercept_position,
 			#elapsed_time, hit_bounced_position, hit_bounced_time]
 			var fftib = assign_fielders_after_hit()
 			var hit_will_bounce = fftib[1]
-			printt('Will hit bounce?', hit_will_bounce)
+			#printt('Will hit bounce?', hit_will_bounce)
 			if hit_will_bounce:
 				#printt("hit will bounce, send runners!!")
-				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
-					#runner.is_running = true
 					runner.send_runner(1)
-					#printt('runner details', runner.target_base, runner.running_progress)
 			else:
-				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					runner.send_runner(-1)
+			# Could use full function instead, but not necessary here
+			#decide_automatic_runners_actions()
 			# Set ball land annulus
 			$Headon/BallBounceAnnulus.position = fftib[5]
 			$Headon/BallBounceAnnulus.visible = true
@@ -692,19 +690,17 @@ func _process(delta: float) -> void:
 				pass
 			elif Input.is_action_just_pressed("throwsecond"):
 				# Move all forward
-				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					runner.send_runner(1)
 			elif Input.is_action_just_pressed("throwthird"):
 				pass
 			elif Input.is_action_just_pressed("throwhome"):
 				# Move all forward
-				#var runners = get_tree().get_nodes_in_group("runners")
 				for runner in runners:
 					runner.send_runner(-1)
 		else:
-			#if randf_range(0,1) < .1:
-			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 100:
+			# Redo runner decisions every 0.166 sec (10 frames)
+			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
 				decide_automatic_runners_actions()
 	
 	# Adjust camera
@@ -780,8 +776,10 @@ func _process(delta: float) -> void:
 		#rotate_camera_inertia = (1 - rotate_camera_inertia_increment) * rotate_camera_inertia
 		rotate_camera_inertia = rotate_camera_inertia_decay * rotate_camera_inertia
 		var rotate_speed = 0.1*3
+		# To rotate up/down (y), need to get direction of x and z for camera
 		var rot_axis_y = cam.rotation
-		rot_axis_y = cam.get_global_transform().basis.z
+		var cam_global_basis_z = cam.get_global_transform().basis.z
+		rot_axis_y = cam_global_basis_z
 		rot_axis_y.y = 0
 		rot_axis_y = rot_axis_y.rotated(Vector3(0,1,0), 45.*PI/180.)
 		rot_axis_y = rot_axis_y.normalized()
@@ -808,8 +806,13 @@ func _process(delta: float) -> void:
 			cam_rotated = true
 		if abs(rotate_camera_inertia.y) > 1e-8:
 			rotate_camera_inertia.y = min(rotate_camera_inertia.y, 1)
-			cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
-			cam_rotated = true
+			# Only rotate up to level, not above
+			cam_global_basis_z = -cam_global_basis_z.rotated(Vector3(0,1,0), -45.*PI/180)
+			if cam_global_basis_z.y > 0 and rotate_camera_inertia.y > 0:
+				rotate_camera_inertia.y = 0
+			else:
+				cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
+				cam_rotated = true
 			
 		if cam_rotated:
 			# TODO: Not sure this does anything usefuL
@@ -1312,7 +1315,8 @@ func coalesce(x1, x2=null, x3=null, x4=null, x5=null, x6=null, x7=null, x8=null,
 
 func decide_automatic_runners_actions():
 	time_last_decide_automatic_runners_actions = Time.get_ticks_msec()
-	#print("Running decide_automatic_runners_actions")
+	#printt("Running decide_automatic_runners_actions\t",
+		#time_last_decide_automatic_runners_actions/1000.)
 	
 	# 1. If fielded and need to tag up, do that.
 	# 2. If ball can be caught and less than 2 outs:
