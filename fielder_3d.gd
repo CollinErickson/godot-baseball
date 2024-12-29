@@ -106,7 +106,7 @@ func assign_to_field_ball(pos):
 		set_selected_fielder()
 	set_not_cutoff_fielder()
 
-func assign_to_cover_base(base, ball_pos=null):
+func assign_to_cover_base(base, ball_pos=null, distance_away:float=10):
 	set_not_cutoff_fielder()
 	set_assignment('cover')
 	if base == 1:
@@ -123,6 +123,34 @@ func assign_to_cover_base(base, ball_pos=null):
 		# Assign to halfway between ball position and 2nd base
 		# TODO: make this most relevant base, not always 2nd base
 		assignment_pos = .5*(Vector3(0,0,1)*30*sqrt(2) + ball_pos)
+		assignment_pos.y = 0
+		#printt('in fielder assigning to cutoff:', posname, position,
+		#	assignment_pos, Time.get_ticks_msec()/1e3)
+	elif base == 6:
+		# Assign to location
+		assert(distance_away != null)
+		assert(distance_away > 0)
+		if distance_xz(position, ball_pos) < distance_away:
+			# Close enough
+			pass
+			#printt('in fielder NOT assigning to 6:', posname, position,
+			#	Time.get_ticks_msec()/1e3, ball_pos)
+		else:
+			# Move toward ball_pos
+			ball_pos.y = 0
+			#assignment_pos = ball_pos - distance_away * (ball_pos - position).normalized()
+			# Stay to left or right, not in front. Messes with cutoff and looks bad.
+			var move_vec
+			if position.cross(ball_pos).y > 0:
+				# Assign right
+				move_vec = ball_pos.normalized().rotated(Vector3(0,1,0), -PI/2.)
+				assignment_pos = ball_pos + distance_away * move_vec
+			else:
+				# Assign left
+				move_vec = ball_pos.normalized().rotated(Vector3(0,1,0), PI/2.)
+				assignment_pos = ball_pos + distance_away * move_vec
+			#printt('in fielder assigning to 6:', posname, position,
+			#	assignment_pos, Time.get_ticks_msec()/1e3, ball_pos, move_vec)
 		assignment_pos.y = 0
 	else:
 		assert(false)
@@ -710,6 +738,11 @@ func set_not_targeted_fielder():
 	#get_node("Annulus").visible = false
 
 func set_cutoff_fielder():
+	# Unset all other players as cutoff
+	var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+	for fielder in cutoff_fielders:
+		fielder.set_not_cutoff_fielder()
+
 	add_to_group("cutoff_fielder")
 	if user_is_pitching_team:
 		if $AltFielderLabel3D.visible:

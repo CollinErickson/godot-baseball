@@ -6,6 +6,7 @@ var ball_in_play_state = null
 var ball_in_play_state_time = 0
 const sz_z = 0.6
 var is_foul_ball:bool = false
+var ball_touched_by_fielder:bool = false
 
 var outs_per_inning = 3
 var outs_on_play = 0
@@ -203,6 +204,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_in_play_state_time = 0
 	ball_hit_bounced = false
 	ball_caught_in_air = false
+	ball_touched_by_fielder = false
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
 	outs_per_inning = outs_per_inning_
@@ -248,6 +250,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
+	ball_touched_by_fielder = true
 	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -273,7 +276,8 @@ func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	$Headon/BallBounceAnnulus.visible = false
 
 func _on_alt_fielder_selected_by_fielder(fielder, _prev_fielder):
-	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
+	var intercept_pos = find_intercept_position_for_fielder(fielder)
+	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
 	
 	# Set new alt fielder
 	var min_dist = 1e12
@@ -411,10 +415,14 @@ func _on_tag_out_by_fielder():
 	record_out('Tag out!')
 
 func _on_new_fielder_selected_signal_by_fielder(fielder):
-	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
+	var intercept_pos = find_intercept_position_for_fielder(fielder)
+	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
+
 
 func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
-	assign_fielders_to_cover_bases([], fielder.position, [fielder.posname])
+	var intercept_pos = find_intercept_position_for_fielder(fielder)
+	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
+
 
 func test_mesh_array():
 	var surface_array = []
@@ -592,10 +600,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
-						vla = 0
-						hla = 1.5
-						exitvelo = 28.8
+					if false:
+						vla = 44
+						hla = 21.5
+						exitvelo = 48.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -823,7 +831,7 @@ func _process(delta: float) -> void:
 		time_since_check_if_play_done_checked += delta
 		if time_since_check_if_play_done_checked > .5:
 			if check_if_play_done():
-				printt('ball in play and play is done')
+				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
 				if time_since_play_done_consecutive > .6:
 					#play_done_fully = true
@@ -941,7 +949,7 @@ func find_fielder_to_intercept_ball() -> Array:
 
 
 func assign_fielders_after_hit() -> Array:
-	# Returns whether ball will bounce before fielder intercepts
+	# Returns array of info:
 	# [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
 	var fftib = find_fielder_to_intercept_ball()
 	var found_someone = fftib[0]
@@ -999,7 +1007,15 @@ func assign_fielders_after_hit() -> Array:
 			else:
 				get_fielder_with_posname("SS").assign_to_cover_base(2)
 				get_fielder_with_posname("2B").assign_to_cover_base(5, intercept_position)
-			
+			# Assign other outfielder to go close as backup
+			if fielders[min_ifielder].posname == "CF":
+				if intercept_position.x > 0:
+					get_fielder_with_posname("LF").assign_to_cover_base(6, intercept_position)
+				else:
+					get_fielder_with_posname("RF").assign_to_cover_base(6, intercept_position)
+
+			else:
+				get_fielder_with_posname("CF").assign_to_cover_base(6, intercept_position)
 	
 	# Return whether the ball bounced. Will be used to determine if runners run.
 	#return tmp_ball_bounced
@@ -1008,15 +1024,17 @@ func assign_fielders_after_hit() -> Array:
 func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 									intercept_position=null,
 									exclude_fielder_posname_array:Array=[]) -> void:
-	printt('Running assign_fielders_to_cover_bases')
+	printt('Running assign_fielders_to_cover_bases', intercept_position)
 	var assigned_indexes = []
+	intercept_position.y = 0
 	
-	# Assign nearest fielder to cover bases and cutoff
-	for base in [2,1,3,4, 5]:
+	# Assign nearest fielder to cover bases and cutoff and alt
+	for base in [2,1,3,4, 5, 6]:
 		var base_position:Vector3 = Vector3(0,0,20)
+		# Assign cutoff
 		if base == 5:
-			printt('starting assign fielder to cutoff', intercept_position,
-				abs(intercept_position.x) + abs(intercept_position.z - 20))
+			#printt('starting assign fielder to cutoff', intercept_position,
+				#abs(intercept_position.x) + abs(intercept_position.z - 20))
 			# Assign cutoff fielder
 			# Only do if ball is far away from infield
 			if abs(intercept_position.x) + abs(intercept_position.z - 20) < 30:
@@ -1029,7 +1047,13 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			# Only do if cutoff won't be near intercept position
 			if fielders[0].distance_xz(intercept_position, base_position) < 15:
 				continue
-
+		# Assign backup fielder to go close
+		elif base == 6:
+			# Skip if in/near infield
+			if intercept_position.length() < 50:
+				continue
+			# Should find outfielder that can get there 2nd fastest
+			base_position = intercept_position
 		else:
 			base_position = fielders[0].base_positions[base - 1]
 		var min_time = 1e10
@@ -1042,26 +1066,34 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 				if fielders[i].distance_xz(
 					fielders[i].position,
 					base_position
-				) < 1:
+				) < 1 and base != 6:
 					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname,
 							base, exclude_fielder_indexes, exclude_fielder_posname_array)
 					min_time = 0
 					min_i = i
 					min_is_excluded = true
 			else:
-				var fielder_time = (
-					fielders[i].distance_xz(fielders[i].position,
-											base_position) /
-					fielders[i].SPEED)
-				if fielder_time < min_time:
-					min_time = fielder_time
-					min_i = i
+				# Only let OF be backup, don't let OF be first cutoff
+				if (!(base == 6 and !(fielders[i].posname  in ["LF", "CF", "RF"])) and 
+					!(!ball_touched_by_fielder and base == 5 and
+						(fielders[i].posname  in ["LF", "CF", "RF"]))):
+					var fielder_time = (
+						fielders[i].distance_xz(fielders[i].position,
+												base_position) /
+						fielders[i].SPEED)
+					if fielder_time < min_time:
+						min_time = fielder_time
+						min_i = i
 		if min_i != null:
 			if min_is_excluded:
 				pass
 			elif (base == 5 and
 				  fielders[min_i].distance_xz(fielders[min_i].position, base_position) < 3):
 				# Don't move cutoff fielder if they are close enough, it looks silly
+				pass
+			elif (base == 6 and
+				  fielders[min_i].distance_xz(fielders[min_i].position, base_position) < 15):
+				# Don't move backup fielder if they are close enough, it looks silly
 				pass
 			else:
 				#printt('Assigning fielder to cover base', fielders[min_i].posname, base)
@@ -1078,6 +1110,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	for i in range(len(fielders)):
 		if fielders[i].assignment == 'cover' and not assigned_indexes.has(i):
 			fielders[i].set_assignment('wait_to_receive')
+			fielders[i].set_animation('idle')
 	
 	return
 
@@ -1086,6 +1119,45 @@ func get_fielder_with_posname(posname):
 	#printt('in get_fielders_with_posname',fielders, posname, f1)
 	assert(len(f1) == 1)
 	return f1[0]
+
+func find_intercept_position_for_fielder(fielder) -> Vector3:
+	# For specific fielder, find where they will intercept ball's path
+	var ball = get_node_or_null("Headon/Ball3D")
+	tmp_ball = ball_3d_scene.instantiate()
+	tmp_ball.name = "tmp_ball"
+	tmp_ball.is_sim = true
+	tmp_ball.state = "ball_in_play"
+	tmp_ball.hit_bounced = ball.hit_bounced
+	get_node("Headon").add_child(tmp_ball)
+	tmp_ball.position = ball.position
+	tmp_ball.velocity = ball.velocity
+	tmp_ball.pitch_already_done = true 
+	tmp_ball.hit_bounced_position = ball.hit_bounced_position
+	tmp_ball.hit_bounced_time = ball.hit_bounced_time
+	
+	var take_steps = func(nsteps, delta_):
+		for istep in range(nsteps):
+			tmp_ball._physics_process(delta_)
+	# Check every ~.5 second to see if each fielder can reach the ball
+	var iii = 0
+	var numsteps = 1
+	var delta = 1./30
+	var elapsed_time = 0
+	while iii < 1000:
+		iii += 1
+		take_steps.call(numsteps, delta)
+		elapsed_time += numsteps * delta
+		# Make it's reachable
+		if tmp_ball.position.y < 2:
+			# See if fielder can reach ball
+			var ballgrounddist = fielder.distance_xz(fielder.position, tmp_ball.position)
+			# TODO: fielders don't run at constant speed
+			var timetoreach = max(0, (ballgrounddist - fielder.catch_radius_xz) / fielder.SPEED)
+				
+			if timetoreach <= elapsed_time:
+				return tmp_ball.position
+
+	return fielder.position
 
 var next_camera = null
 func _on_timer_camera_change_timeout() -> void:
