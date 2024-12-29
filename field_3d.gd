@@ -600,9 +600,9 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
+					if !false:
 						vla = 44
-						hla = 21.5
+						hla = 31.5
 						exitvelo = 48.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
@@ -851,7 +851,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	#printt('fielder nodes', fielder_nodes)
 	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
-	tmp_ball.name = "tmp_ball"
+	tmp_ball.name = "tmp_ball_from_find_fielder_to_intercept_ball"
 	tmp_ball.is_sim = true
 	tmp_ball.state = "ball_in_play"
 	tmp_ball.hit_bounced = ball.hit_bounced
@@ -1124,7 +1124,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 	# For specific fielder, find where they will intercept ball's path
 	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
-	tmp_ball.name = "tmp_ball"
+	tmp_ball.name = "tmp_ball_from_find_intercept_position_for_fielder"
 	tmp_ball.is_sim = true
 	tmp_ball.state = "ball_in_play"
 	tmp_ball.hit_bounced = ball.hit_bounced

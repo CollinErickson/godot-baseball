@@ -174,8 +174,9 @@ func _physics_process(delta: float) -> void:
 					# TODO: Home run
 				else: # Hit wall: fair or foul
 					global_position = wallout[2]
-					#printt('velo before and after', velocity, wallout[3])
-					printt("In ball, hit wall at ball coords", position)
+					if not is_sim:
+						#printt('velo before and after', velocity, wallout[3])
+						printt("In ball, hit wall at ball coords", position, name, is_sim)
 					velocity = wallout[3]
 					if check_if_foul_on_bounce():
 						# If foul, exit. Otherwise it returns later, or something weird.
