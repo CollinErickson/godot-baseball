@@ -2,9 +2,12 @@ extends Node3D
 
 @export var Type: String
 
-# (angle: 0 is LF, 90 is RF, distance from home in FT, height in FT)
 #var wall_color = "Red"
 var wall_color = Color(0,0,1,1)
+
+# wall_array is array with:
+# (angle: 0 is LF, 90 is RF, distance from home in FT, height in FT)
+# To connect back to starting point, duplicate first element at end
 var wall_array = [
 	[-15, 270, 20],
 	[0, 320, 10],
@@ -29,19 +32,19 @@ var wall_array = [
 	#[90, 400*sqrt(3)/2., 100]
 #]
 
-var mindist = 1e9
-var mindists = Array()
+var wall_coords:Array = []
+var mindist:float = 1e9
+var mindists:Array = Array()
 func cosd(angle):
 	return cos(angle*PI/180)
 func sind(angle):
 	return sin(angle*PI/180)
-	
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	# Create the mesh for the wall
 	make_wall()
 	
+	# Find min distance to each wall segment
 	for i in range(len(wall_array)-1):
 		var u1 = Vector2(cosd(wall_array[i][0]), sind(wall_array[i][0])) * wall_array[i][1]
 		var u2 = Vector2(cosd(wall_array[i+1][0]), sind(wall_array[i+1][0])) * wall_array[i+1][1]
@@ -54,6 +57,14 @@ func _ready() -> void:
 	#	mindist = min(mindist, i[1])
 	mindist = mindists.min()
 	#printt("Min wall dist is", mindist)
+	
+	# wall_coords: array of 3D points in global coords of top of wall
+	for i in range(len(wall_array)):
+		wall_coords.push_back(Vector3(
+			wall_array[i][1]*cosd(wall_array[i][0]),
+			wall_array[i][2]/3,
+			wall_array[i][1]*sind(wall_array[i][0])
+		))
 
 func make_wall():
 	#print("Running make_wall")
@@ -130,8 +141,6 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 	##
 	## Find if the ball crossed a wall. If it did, give the updated position
 	## and velocity.
-	# TODO: Only reflect when going past wall, not when coming back
-	# TODO: Fielders also should be prevented from crossing walls
 	#printt('ball pos is', pos)
 	if pos.x**2 + pos.z**2 < mindist/3:
 		return [false]
@@ -279,6 +288,32 @@ func check_fielder_cross(pos, prev_pos) -> Array:
 	var intersect_x = intersect_out[1].x
 	var intersect_z = intersect_out[1].y
 	return [true, Vector3(intersect_x, 0, intersect_z)]
+
+func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) -> Array:
+	## Check if fielder is on the correct side of the walls
+	##
+	## Returns [bool whether on correct side, position where they should be
+	# TODO: in corners this returns after first wall. Keep doing next wall too.
+	if sqrt(pos.x**2 + pos.z**2) < mindist/3:
+		return [true]
+	for iwall in range(len(wall_array) - 1):
+		# vector in direction of wall
+		# TODO: store along_walls and normal_outs so it's not recalculated every time
+		var along_wall:Vector3 = wall_coords[iwall+1]/3 - wall_coords[iwall]/3
+		along_wall.y = 0
+		var normal_out:Vector3 = along_wall.rotated(
+			Vector3(0,1,0), 90.*PI/180).normalized()
+		var f = (pos + buffer*normal_out) - wall_coords[iwall]/3
+		f.y = 0
+		if normal_out.dot(f) > 0:
+			# They are on the wrong side
+			# Find where they should be
+			var replace_pos = (f.dot(along_wall) * along_wall / along_wall.length_squared()
+				) + wall_coords[iwall]/3 - buffer*normal_out
+			replace_pos.y = 0
+			#printt('in wall check_fielder_correct_side: on the wrong side of the wall')
+			return [false, replace_pos]
+	return [true]
 
 func nearest_point_on_plane(v0, v1, v2, x):
 	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/
