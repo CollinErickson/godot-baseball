@@ -125,7 +125,7 @@ func make_wall():
 	#print("Finished make wall")
 
 var restitution_coef = .6 # multiplied by ball restituion_coefv
-func check_ball_cross(pos, vel, cor, prev_pos, _prev_vel, is_sim):
+func check_object_cross(pos:Vector3, prev_pos:Vector3):
 	## Check if ball crossed a wall
 	##
 	## Find if the ball crossed a wall. If it did, give the updated position
@@ -173,59 +173,92 @@ func check_ball_cross(pos, vel, cor, prev_pos, _prev_vel, is_sim):
 					)
 			if not intersect_out[0]:
 				return [false]
-			
-			# Now we know it crossed the wall in x-z dimensions, but not where on y
-			#printt('found intersect', pos, prev_pos, intersect_out)
-			var intersect_x = intersect_out[1].x
-			var intersect_z = intersect_out[1].y
-			# Find y coordinate of crossing
-			var second_intersect = intersect_two_line_segments(
-				Vector2(intersect_x, 0),
-				Vector2(intersect_x, 1e4),
-				Vector2(pos.x, pos.y),
-				Vector2(prev_pos.x, prev_pos.y)
-			)
-			#printt('found 2nd intersect', second_intersect)
-			var intersect_y = second_intersect[1].y
-			var intersect_v = Vector3(intersect_x, intersect_y, intersect_z)
-			var wall_length_to_left = intersect_out[1].distance_to(
-					Vector2(wall_left_x, wall_left_z)/3)
-			var wall_length_to_right = intersect_out[1].distance_to(
-					Vector2(wall_right_x, wall_right_z)/3)
-			var weight = wall_length_to_right / (wall_length_to_right + wall_length_to_left)
-			#var wall_dist = v_intersect.length() #weight * wall_array[i][1] + (1 - weight) * wall_array[i+1][1]
-			var wall_height_ft = weight * wall_array[i][2] + (1 - weight) * wall_array[i+1][2]
-			#printt('check weight', wall_length_to_left, wall_length_to_right, wall_height_ft, weight)
-			var is_over = intersect_y > wall_height_ft / 3.
-			if is_over:
-				print("OVER wall")
-				return [true, is_over]
-			#print('In wall: HIT wall')
-			
-			# Reflect position vector across wall for part after intersection point, dampen with cor proportionally
-			var diff_pos_after_wall = pos - intersect_v
-			if not is_sim:
-				pass
-			var mirrored_diff_pos_after_wall = mirror_vector_across_plane(
-				diff_pos_after_wall,
-				Vector3(wall_left_x, 10, wall_left_z),
-				Vector3(wall_left_x, 0, wall_left_z),
-				Vector3(wall_right_x, 0, wall_right_z)
-			)
-			var reflect_pos = intersect_v + cor * restitution_coef * mirrored_diff_pos_after_wall
-			
-			# Reflect velocity vector across wall, dampen with cor fully
-			var reflect_vel = mirror_vector_across_plane(
-				vel,
-				Vector3(wall_left_x, 10, wall_left_z).rotated(Vector3(0,1,0), -45*PI/180),
-				Vector3(wall_left_x, 0, wall_left_z).rotated(Vector3(0,1,0), -45*PI/180),
-				Vector3(wall_right_x, 0, wall_right_z).rotated(Vector3(0,1,0), -45*PI/180)
-			)
-			var new_vel = cor * restitution_coef * reflect_vel
-			#printt('check reflect vel', vel, rotated_vel, reflect_vel, new_vel)
-			
-			return [true, is_over, reflect_pos, new_vel]
+			else:
+				return [true, intersect_out, i, [wall_left_x, wall_left_z, wall_right_x, wall_right_z]]
 	# Found no contact
+	return [false]
+
+func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
+						is_sim:bool):
+	var wall_cross_info = check_object_cross(pos, prev_pos)
+	if !wall_cross_info[0]:
+		return [false]
+	# Now we know it crossed the wall in x-z dimensions, but not where on y
+	var i = wall_cross_info[2]
+	var intersect_out = wall_cross_info[1]
+	var wall_left_x = wall_cross_info[3][0]
+	var wall_left_z = wall_cross_info[3][1]
+	var wall_right_x = wall_cross_info[3][2]
+	var wall_right_z = wall_cross_info[3][3]
+	
+	# If the ball went from out of field back into play, don't reflect it
+	# One line segment for wall, one from home plate to current position
+	#if intersect_two_line_segments(
+		#Vector2(wall_left_x, wall_left_z),
+		#Vector2(wall_right_x, wall_right_z),
+		#Vector2(0, 0),
+		#Vector2(pos.x, pos.z)
+	#):
+	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)/3).cross(
+		Vector3(wall_right_x, 0, wall_right_z)/3 - Vector3(wall_left_x, 0, wall_left_z)/3
+	).y > 0:
+		#printt('cross product is wrong way, allowing back through hit wall')
+		return [false]
+	
+	#printt('found intersect', pos, prev_pos, intersect_out)
+	var intersect_x = intersect_out[1].x
+	var intersect_z = intersect_out[1].y
+	# Find y coordinate of crossing
+	var second_intersect = intersect_two_line_segments(
+		Vector2(intersect_x, 0),
+		Vector2(intersect_x, 1e4),
+		Vector2(pos.x, pos.y),
+		Vector2(prev_pos.x, prev_pos.y)
+	)
+	#printt('found 2nd intersect', second_intersect)
+	var intersect_y = second_intersect[1].y
+	# intersect_v is the intersect point
+	var intersect_v = Vector3(intersect_x, intersect_y, intersect_z)
+	var wall_length_to_left = intersect_out[1].distance_to(
+			Vector2(wall_left_x, wall_left_z)/3)
+	var wall_length_to_right = intersect_out[1].distance_to(
+			Vector2(wall_right_x, wall_right_z)/3)
+	var weight = wall_length_to_right / (wall_length_to_right + wall_length_to_left)
+	#var wall_dist = v_intersect.length() #weight * wall_array[i][1] + (1 - weight) * wall_array[i+1][1]
+	var wall_height_ft = weight * wall_array[i][2] + (1 - weight) * wall_array[i+1][2]
+	#printt('check weight', wall_length_to_left, wall_length_to_right, wall_height_ft, weight)
+	var is_over = intersect_y > wall_height_ft / 3.
+	if is_over:
+		print("in wall: OVER wall")
+		return [true, is_over]
+	#print('In wall: HIT wall')
+	
+	# Reflect position vector across wall for part after intersection point, dampen with cor proportionally
+	var diff_pos_after_wall = pos - intersect_v
+	if not is_sim:
+		pass
+	var mirrored_diff_pos_after_wall = mirror_vector_across_plane(
+		diff_pos_after_wall,
+		Vector3(wall_left_x, 10, wall_left_z),
+		Vector3(wall_left_x, 0, wall_left_z),
+		Vector3(wall_right_x, 0, wall_right_z)
+	)
+	var reflect_pos = intersect_v + cor * restitution_coef * mirrored_diff_pos_after_wall
+	
+	# Reflect velocity vector across wall, dampen with cor fully
+	var reflect_vel = mirror_vector_across_plane(
+		vel,
+		Vector3(wall_left_x, 10, wall_left_z).rotated(Vector3(0,1,0), -45*PI/180),
+		Vector3(wall_left_x, 0, wall_left_z).rotated(Vector3(0,1,0), -45*PI/180),
+		Vector3(wall_right_x, 0, wall_right_z).rotated(Vector3(0,1,0), -45*PI/180)
+	)
+	var new_vel = cor * restitution_coef * reflect_vel
+	#printt('check reflect vel', vel, rotated_vel, reflect_vel, new_vel)
+	
+	return [true, is_over, reflect_pos, new_vel]
+
+func check_fielder_cross(pos, prev_pos) -> Array:
+	pass
 	return [false]
 
 func nearest_point_on_plane(v0, v1, v2, x):
@@ -269,6 +302,7 @@ func intersect_two_lines(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> 
 
 func intersect_two_line_segments(u1: Vector2, u2: Vector2, v1: Vector2, v2: Vector2) -> Array:
 	# u1 and u2 form one line, v1 and v2 form second. All in 2D.
+	# Returns array: [whether there is intersection, intersect point]
 	var w = intersect_two_lines(u1, u2, v1, v2)
 	if sign((u1 - w).dot(u2 - w)) >= 0:
 		return [false, w, (u1 - w).dot(u2 - w), u1, u2, w]
