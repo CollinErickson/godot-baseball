@@ -258,8 +258,27 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 	return [true, is_over, reflect_pos, new_vel]
 
 func check_fielder_cross(pos, prev_pos) -> Array:
-	pass
-	return [false]
+	var wall_cross_info = check_object_cross(pos, prev_pos)
+	if !wall_cross_info[0]:
+		return [false]
+	# Now we know it crossed the wall in x-z dimensions, but not where on y
+	#var i = wall_cross_info[2]
+	var intersect_out = wall_cross_info[1]
+	var wall_left_x = wall_cross_info[3][0]
+	var wall_left_z = wall_cross_info[3][1]
+	var wall_right_x = wall_cross_info[3][2]
+	var wall_right_z = wall_cross_info[3][3]
+	
+	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)/3).cross(
+		Vector3(wall_right_x, 0, wall_right_z)/3 - Vector3(wall_left_x, 0, wall_left_z)/3
+	).y > 0:
+		#printt('cross product is wrong way, allowing back through hit wall')
+		return [false]
+	
+	#printt('found intersect', pos, prev_pos, intersect_out)
+	var intersect_x = intersect_out[1].x
+	var intersect_z = intersect_out[1].y
+	return [true, Vector3(intersect_x, 0, intersect_z)]
 
 func nearest_point_on_plane(v0, v1, v2, x):
 	# https://www.physicsforums.com/threads/projection-of-a-point-on-the-plane-defined-by-3-other-points.704826/

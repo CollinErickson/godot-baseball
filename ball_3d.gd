@@ -43,6 +43,7 @@ var is_foul:bool = false
 #var ball_trail_this_trail = ra
 
 signal ball_overthrown
+@onready var wallnodes = get_tree().get_nodes_in_group("walls")
 
 func freeze() -> void:
 	is_frozen = true
@@ -157,7 +158,7 @@ func _physics_process(delta: float) -> void:
 		# If you do velocity first, then subtract accel, more accurate
 		position += delta * velocity - 0.5 * delta**2 * acceleration
 		#printt('new ball pos', position)
-		for wallnode in get_tree().get_nodes_in_group("walls"):
+		for wallnode in wallnodes:
 			# check_ball_across returns array of 4 items:
 			# 0: Did it cross?
 			# 1: Was it over?

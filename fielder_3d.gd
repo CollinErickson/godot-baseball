@@ -26,6 +26,8 @@ var animation = "idle"
 var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
 var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
+var prev_position:Vector3
+var prev_global_position:Vector3
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -166,6 +168,7 @@ signal tag_out
 signal new_fielder_selected_signal
 signal fielder_moved_reassign_fielders_signal
 signal alt_fielder_selected_signal
+@onready var wallnodes = get_tree().get_nodes_in_group("walls")
 
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
@@ -177,6 +180,8 @@ func _physics_process(delta: float) -> void:
 	#if posname == '2B':
 		#printt('2B fielder', state, assignment, animation, assignment_pos, position)
 	
+	prev_position = position
+	prev_global_position = global_position
 	time_in_state += delta
 	
 	if assignment==null:
@@ -511,6 +516,20 @@ func _physics_process(delta: float) -> void:
 		if distance_xz(position, ball.position) > 2:
 			#$Char3D.look_at(ball.global_position * Vector3(1,0,1), Vector3.UP, true)
 			set_look_at_position(ball.position)
+	
+	# Check if moved past a wall, move back within field
+	if (position - prev_position).length() > 1e-14:
+		for wallnode in wallnodes:
+			# check_ball_across returns array of 2 items:
+			# 0: Did the fielder cross a wall (only to out of play)?
+			# 1: Where they intersected the wall (can't use this as new position
+			#    since then they will move past the wall next step)
+			var wallout = wallnode.check_fielder_cross(global_position, prev_global_position)
+			if wallout[0]: # Crossed wall
+				# TODO: keep them ~1 ft from wall
+				#printt('in fielder, fielder cross wall', posname)
+				# Can't set to intersect wall point since it needs to be before wall
+				position = prev_position
 	
 var stepping_on_base_with_ball = false
 
