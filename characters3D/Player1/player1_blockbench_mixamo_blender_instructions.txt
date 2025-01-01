@@ -1,0 +1,84 @@
+# Full character work process for Player1 (Blockbench, Mixamo, Blender, Godot)
+
+## Blockbench
+
+- Create character model. Make sure there are enough loop cuts/body parts for animations to work.
+Add textures for each body part. In Godot we will assign body parts colors, so textures don't really matter.
+
+- Export as .ftx or .obj (which setting for texture? which file type?)
+
+- Do the same thing for separate bat model and glove model (mirrored for each handedness if needed).
+
+## Mixamo
+
+- Upload the character model.
+
+- Look at the spreadsheet in this repo for Mixamo animations.
+Find each of them in Mixamo, set the parameters as specified in the spreadsheet, and download.
+This downloads the model and the animation, in Blender we will delete all but one model.
+Put all these downloads in the same folder.
+
+## Blender
+
+- Blender: install the Mixamo root add-on, make sure it's enabled (Preferences -> Add-ons).
+I'm no longer using root bone since it messes up for some animations, but this imports animations.
+
+- New blender: delete objects on right
+
+- File -> Import -> (.glb) -> (select your character .glb file)
+
+- Press 'n' to open the right toolbar, click on Mixamo tab. 
+
+- On the Mixamo tab, select the folder with the animations. DON'T select "Insert root". Then click "Import Animations".
+Make sure there is NOT a bone beneath the character (root bone).
+
+- Delete all the armatures except one that has the body (downward triangle in the object list). Delete hierarchy if more than one have the body.
+
+- Click on Animation tab. Change "Dope sheet" to "Action editor."
+Select an action ("Browse action" in bottom section, icon is almost like a face).
+Click on the armature on the top right. Press the play button at the bottom and they should do the action.
+
+- To delete duplicate animations: in top right file explorer, click on the image icon and change to "Blender File".
+In the Action section, delete the duplicated animations.
+I filtered for "Armature" (case sensitive), and delete all in the "Action" section.
+
+- Import the baseball bat object that we exported from Blockbench. Rename it to batL or batR.
+Pick one of the animations for the swing.
+Find a frame in the middle of the swing (maybe when the bat should be parallel or perpendicular to pitcher).
+Move the bat into the position.
+Change the size of the bat so that it looks right.
+Steps from: https://blender.stackexchange.com/questions/259286/how-to-combine-a-object-to-an-mixamo-character-animation-in-blender.
+Select the bat. Hold down shift and select the armature (not in object list, but a part of the model.
+Go to pose mode. Click on the forearm for the lead arm.
+Press CTRL-P -> Bone.
+Make sure that this looks okay when playing the animation.
+Repeat this process for the other handed swing animation. Match to the same frame, and adjust to the same size.
+
+- Repeat the previous step but with the glove for each hand.
+Use a throwing animation. Attach again to the forearm.
+Turn off the hand and thumb for the glove hand to check if it looks right.
+
+- File -> Export -> as .glb/.gltf -> save in correct folder as .glb file.
+
+## Godot
+
+- In Godot, click on .glb file in bottom left. It'll open a big box with the character and options. Change root type to CharacterBody3D.
+Select each animation in the bottom left, change "Loop mode" to "Linear" (walking, running, idle), "None" (jump, throw, turn), or "Pingpong" (idle).
+Reimport.
+When reimporting, only new animations need to be updated.
+
+- Only when creating for the first time:
+
+	- In bottom left, right click on character glb file and pick "New Inherited Scene".
+
+	- Click on AnimationPlayer, pick an animation, click play, and view on 3D page. They should walk forward.
+We don't want them to walk forward, we want to do root motion.
+
+	- Right click on Character node, add child node AnimationTree. On the right side, set "Anim player" to be the AnimationPlayer node.
+Change Tree Root to a state machine.
+DON'T do this anymore: Click RootMotion -> Track, assign to be the root bone (mixamorig_Root).
+
+	- Add a RootMotionView node to the character, set Animation Path for that node to be the animation tree. You should see grid movement.
+
+	- On bottom, click on AnimationTree, add nodes and links. Link Start to Idle, and Idle both directions to a BlendSpace2D.
+On those links in Advance - Condition add "moving" for the link that leaves idle and "idle" for the link that enters idle.
