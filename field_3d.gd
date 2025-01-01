@@ -1376,16 +1376,19 @@ func decide_automatic_runners_actions():
 	var fielder_with_ball = null
 	var fftib = null
 	var seconds_to_intercept = 0
+	var intercept_position #= fftib[3]
 	if len(fielders_with_ball) > .5:
 		# Some fielder has the ball
 		fielder_with_ball = fielders_with_ball[0]
 		assert(ball.state == 'fielded')
+		intercept_position = fielder_with_ball.position
 	else:
 		# Ball in play or thrown
 		fftib = find_fielder_to_intercept_ball()
 		# fftib:
 		#[found_someone, hit_bounced, min_ifielder, intercept_position,
 			#elapsed_time, hit_bounced_position, hit_bounced_time]
+		intercept_position = fftib[3]
 		seconds_to_intercept = fftib[4]
 
 	# 1. If fielded and need to tag up, do that.
@@ -1472,14 +1475,14 @@ func decide_automatic_runners_actions():
 					) * 30 / runners[i].SPEED
 				var time_throw_next_next_base = (
 					fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[next_next_base-1]
 					) / fielder_with_ball.max_throw_speed +
 					min_time_fielder_release_throw
 				) + seconds_to_intercept
 				var time_fielder_run_next_next_base = (
 					fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[next_next_base-1]
 					) / fielder_with_ball.SPEED
 				) + seconds_to_intercept
@@ -1494,14 +1497,14 @@ func decide_automatic_runners_actions():
 				var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
 				var time_throw_next_base = (
 					fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[next_base-1]
 					) / fielder_with_ball.max_throw_speed +
 					min_time_fielder_release_throw
 				) + seconds_to_intercept
 				var time_fielder_run_next_base = (
 					fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[next_base-1]
 					) / fielder_with_ball.SPEED 
 				) + seconds_to_intercept
@@ -1522,11 +1525,11 @@ func decide_automatic_runners_actions():
 					var time_to_prev_base = abs(prev_base - runners[i].running_progress
 						) * 30 / runners[i].SPEED
 					var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed +
 						min_time_fielder_release_throw)
 					var time_fielder_run_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-						fielder_with_ball.position,
+						intercept_position,
 						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.SPEED)
 					var time_fielder_prev_base = min(time_throw_prev_base,
 													 time_fielder_run_prev_base)
