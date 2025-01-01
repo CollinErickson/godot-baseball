@@ -581,10 +581,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
+					if false:
 						vla = 30
 						hla = 21.5
-						exitvelo = 48.8
+						exitvelo = 8.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -633,7 +633,7 @@ func _process(delta: float) -> void:
 						
 						# Explosion if good hit
 						if ((exitvelo > 95 * .48889 and vla > 10 and vla < 40) or
-							true):
+							!true):
 							$Headon/Explosion.position = ball.position
 							$Headon/Explosion/Red.emitting = true
 							$Headon/Explosion/Yellow.emitting = true
@@ -875,9 +875,9 @@ func find_fielder_to_intercept_ball() -> Array:
 						min_timetoreach = timetoreach
 						min_ifielder = ifielder
 						found_someone = true
-			if found_someone:
-				#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
-				break
+		if found_someone:
+			#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
+			break
 	
 	# Find 2nd fielder to set as alt fielder
 	var min2_dist = 1e8
@@ -888,7 +888,6 @@ func find_fielder_to_intercept_ball() -> Array:
 			if fielderi.distance_xz(fielderi.position, tmp_ball.position) < min2_dist:
 				min2_dist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
 				min2_ifielder = ifielder
-
 	
 	# Save important things to return
 	var intercept_position = tmp_ball.position
@@ -914,13 +913,8 @@ func find_fielder_to_intercept_ball() -> Array:
 	#var tmp_ball_bounced = tmp_ball.hit_bounced
 	tmp_ball.queue_free()
 	
-	#for i in range(3):
-		#print('------- done with tmp_ball')
-	
 	return [found_someone, hit_bounced, min_ifielder, intercept_position,
 			elapsed_time, hit_bounced_position, hit_bounced_time, min2_ifielder]
-	#return [found_someone, ball_will_bounce, fielder name, intercept position, seconds_to_intercept]
-
 
 func assign_fielders_after_hit() -> Array:
 	# Returns array of info:
@@ -1394,7 +1388,6 @@ func decide_automatic_runners_actions():
 			#elapsed_time, hit_bounced_position, hit_bounced_time]
 		seconds_to_intercept = fftib[4]
 
-
 	# 1. If fielded and need to tag up, do that.
 	if fielder_with_ball or outs_on_play > 0.5:
 		for i in range(len(runners)):
@@ -1468,13 +1461,15 @@ func decide_automatic_runners_actions():
 		min_time_fielder_release_throw = 0
 		if fielder_with_ball.state != "throwing":
 			min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
-			
+	
 	for i in range(len(runners)):
 		if runners[i].is_active() and decisions[i]==null:
 			# 4. Go to next next base if possible.
-			if runners[i].running_progress - floor(runners[i].running_progress) > .7 and floor(runners[i].running_progress) < 2.5:
+			if (runners[i].running_progress - floor(runners[i].running_progress) > .7 and
+				floor(runners[i].running_progress) < 2.5):
 				var next_next_base = ceil(runners[i].running_progress) + 1
-				var time_to_next_next_base = (next_next_base - runners[i].running_progress) * 30 / runners[i].SPEED
+				var time_to_next_next_base = (next_next_base - runners[i].running_progress
+					) * 30 / runners[i].SPEED
 				var time_throw_next_next_base = (
 					fielder_with_ball.distance_xz(
 						fielder_with_ball.position,
@@ -1491,8 +1486,6 @@ func decide_automatic_runners_actions():
 				var time_fielder_next_next_base = min(time_throw_next_next_base,
 												time_fielder_run_next_next_base)
 				if time_to_next_next_base < time_fielder_next_next_base:
-					#printt('decision for', i, next_base, time_to_next_base, time_throw_next_base)
-					#print("Sending runner to next next base", next_next_base)
 					decisions[i] = coalesce(decisions[i], 2)
 					decision_bases[i] = coalesce(decision_bases[i], next_next_base)
 			
@@ -1514,10 +1507,8 @@ func decide_automatic_runners_actions():
 				) + seconds_to_intercept
 				var time_fielder_next_base = min(time_throw_next_base,
 												time_fielder_run_next_base)
-				#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
 				if time_to_next_base < time_fielder_next_base:
 					# 5. Go to next base if possible.
-					#printt('decision for', i, decisions[i], next_base, time_to_next_base, time_throw_next_base)
 					decisions[i] = coalesce(decisions[i], 1)
 					decision_bases[i] = coalesce(decision_bases[i], next_base)
 				elif abs(runners[i].running_progress - round(runners[i].running_progress)) < 1e-12:
@@ -1528,7 +1519,8 @@ func decide_automatic_runners_actions():
 					# 7. Go to previous base if possible.
 					# 8. Go to closer of next and previous base.
 					var prev_base = floor(runners[i].running_progress)
-					var time_to_prev_base = abs(prev_base - runners[i].running_progress) * 30 / runners[i].SPEED
+					var time_to_prev_base = abs(prev_base - runners[i].running_progress
+						) * 30 / runners[i].SPEED
 					var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
 						fielder_with_ball.position,
 						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed +
@@ -1565,8 +1557,8 @@ func decide_automatic_runners_actions():
 					decision_bases[i] = lead - 1
 			# They are lead for the next one
 			lead = decision_bases[i]
-	#printt('decision bases after', decision_bases)
-	
+	#printt('in field decide_automatic_runners_actions: decision bases after',
+			#decision_bases)
 	
 	# Do the action
 	for i in range(len(runners)):
