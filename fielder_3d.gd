@@ -21,6 +21,7 @@ var position_holding_ball_reassigned_fielders = null
 var position_assignment_ball_reassigned_fielders = null
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
+@onready var runners = get_tree().get_nodes_in_group("runners")
 @onready var ball = get_tree().get_first_node_in_group("ball")
 var animation = "idle"
 var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
@@ -394,7 +395,6 @@ func _physics_process(delta: float) -> void:
 		ball.position = position + Vector3(0,1.4,0)
 		
 		# Check if tagging active runner not on base
-		var runners = get_tree().get_nodes_in_group("runners")
 		for runner in runners:
 			if (runner.is_active() and
 				(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
@@ -910,13 +910,11 @@ func decide_what_to_do_with_ball() -> Array:
 	# Return [base to throw to, run_it, fielder to throw to]
 	
 	# Runners that are active, first one should be furthest ahead
-	var runners = get_tree().get_nodes_in_group('runners')
 	runners = runners.filter(func(r): return r.is_active())
 	runners.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
 	
 	# Check which bases are covered for throws
 	var base_covered = [false, false, false, false]
-	#var fielders = get_tree().get_nodes_in_group('fielders')
 	for base in range(1,5):
 		for fielder in fielders:
 			if fielder.posname != posname:

@@ -30,8 +30,7 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 ]
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var pitcher = $Headon/Pitcher3D
-@onready var ball3d = $Headon/Ball3D
-
+@onready var ball = $Headon/Ball3D
 
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
@@ -46,11 +45,10 @@ func freeze() -> void:
 	$PlayOverTimer.stop()
 
 	# Set children to be frozen
-	$Headon/Ball3D.freeze()
-	#var fielders = get_tree().get_nodes_in_group('fielders')
+	ball.freeze()
 	for fielder in fielders:
 		fielder.freeze()
-	for runner in get_tree().get_nodes_in_group('runners'):
+	for runner in runners:
 		runner.freeze()
 	# Freeze this
 	is_frozen = true
@@ -69,8 +67,7 @@ func pause() -> void:
 		timer.stop()
 
 	# Set children to be frozen
-	$Headon/Ball3D.pause()
-	#var fielders = get_tree().get_nodes_in_group('fielders')
+	ball.pause()
 	for fielder in fielders:
 		fielder.pause()
 	for runner in runners:
@@ -90,8 +87,7 @@ func unpause() -> void:
 	timers_to_restart_on_unpause = []
 
 	# Set children to be frozen
-	$Headon/Ball3D.unpause()
-	#var fielders = get_tree().get_nodes_in_group('fielders')
+	ball.unpause()
 	for fielder in fielders:
 		fielder.unpause()
 	for runner in runners:
@@ -115,8 +111,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			pitch_mode_:String):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
-	$Headon/Ball3D.reset()
-	printt('after field/ball reset', $Headon/Ball3D.hit_bounced)
+	ball.reset()
 	
 	# Setup fielders
 	for fielder in fielders:
@@ -243,15 +238,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			runners[2].can_be_force_out_before_play = true
 			if runners[3].exists_at_start:
 				runners[3].can_be_force_out_before_play = true
-		
-	
-	#print('in field reset: printing batter')
-	#batter.print_()
-	printt('after field full reset', $Headon/Ball3D.hit_bounced, ball_hit_bounced)
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	ball_touched_by_fielder = true
-	var ball = get_node("Headon/Ball3D")
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
 		ball_caught_in_air = true
@@ -261,7 +250,6 @@ func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
 		record_out("Fly out!")
 		
-		#var runners = get_tree().get_nodes_in_group('runners')
 		for runner in runners:
 			runner.needs_to_tag_up = true
 			runner.tagged_up_after_catch = runner.running_progress - runner.start_base < 1e-8
@@ -284,8 +272,8 @@ func _on_alt_fielder_selected_by_fielder(fielder, _prev_fielder):
 	var min_fielder
 	for f in fielders:
 		if f.posname != fielder.posname:
-			if f.distance_xz(f.position, ball3d.position) < min_dist:
-				min_dist = f.distance_xz(f.position, ball3d.position)
+			if f.distance_xz(f.position, ball.position) < min_dist:
+				min_dist = f.distance_xz(f.position, ball.position)
 				min_fielder = f
 	min_fielder.set_alt_fielder()
 	#printt('setting new alt fielder', min_fielder.posname, Time.get_ticks_msec())
@@ -294,7 +282,6 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	printt('In field_3d, throwing ball to:', base, fielder, to_fielder)
 
 	# Set ball throw
-	var ball = get_node("Headon/Ball3D")
 	var target
 	if base != null:
 		if base == 1:
@@ -375,7 +362,6 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	# Check for force out
 	#printt('in field3D, stepped on base with ball!!!!')
-	#var runners = get_tree().get_nodes_in_group("runners")
 	for runner in runners:
 		# Check for tag up force outs
 		if (base == runner.start_base and runner.exists_at_start and runner.is_active() and
@@ -478,7 +464,6 @@ func _ready() -> void:
 	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
 	
 	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
-	#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	# Set up signals from fielders
 	for fielder in fielders:  
 		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
@@ -489,7 +474,6 @@ func _ready() -> void:
 		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
 		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
 
-	#var runners = get_tree().get_nodes_in_group('runners')
 	# Set up signals from runners
 	for runner in runners:  
 		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
@@ -558,14 +542,11 @@ func _process(delta: float) -> void:
 		#Engine.time_scale = randf_range(.1,10)
 	
 	# Check for contact on swing
-	if not contact_done: # and get_node_or_null("Headon/Ball3D")!=null:
-		#var ball3d = $Headon/Ball3D
-		#print('found ball')
+	if not contact_done:
 		# pitch is active
-		if ball3d.velocity.length() > 0:
+		if ball.velocity.length() > 0:
 			if $Headon/Batter3D.swing_state == "inzone":
-				#if (sz_z - ball3d.position.z)**2 < 1**2:
-				if ball3d.position.z <= sz_z and ball3d.prev_position.z > sz_z:
+				if ball.position.z <= sz_z and ball.prev_position.z > sz_z:
 					# Ball crossed the strike zone and batter is swinging.
 					# Check if there is actual contact
 					var actual_contact = true
@@ -588,21 +569,21 @@ func _process(delta: float) -> void:
 						# Find distance from PCI to ball location
 						pci = $Headon/Bat3D.position
 					else:
-						pci = ball3d.position
+						pci = ball.position
 						pci.x += randfn(0, .5)
 						pci.y += randfn(0, .5)
 					# Set vla and exitvelo based on pci
-					var pci_distance_from_ball = fielders[0].distance_xz(pci, ball3d.position)
+					var pci_distance_from_ball = fielders[0].distance_xz(pci, ball.position)
 					# If PCI wasn't close, it's a swing and miss
 					if pci_distance_from_ball > 1:
 						actual_contact = false
 					vla = 15 + [1,-1].pick_random() * pci_distance_from_ball * 80
 					vla = max(-50, min(80, vla))
-					printt('pci is', pci, ball3d.position, pci_distance_from_ball, vla)
+					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging
 					if !false:
-						vla = 44
-						hla = 31.5
+						vla = 30
+						hla = 21.5
 						exitvelo = 48.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
@@ -611,19 +592,19 @@ func _process(delta: float) -> void:
 						print('In field: CONTACT')
 						contact_done = true
 						ball_in_play = true
-						ball3d.pitch_in_progress = false
-						ball3d.pitch_already_done = true
+						ball.pitch_in_progress = false
+						ball.pitch_already_done = true
 						ball_in_play_state = "prereflex"
 						# Zero out spin accel
-						ball3d.spin_acceleration = Vector3()
+						ball.spin_acceleration = Vector3()
 						# Start with velo all in Z direction, then rotate with vla/hla
-						ball3d.velocity.x = 0
-						ball3d.velocity.y = 0
-						ball3d.velocity.z = exitvelo
-						ball3d.velocity = ball3d.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
-						ball3d.velocity = ball3d.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
-						printt('hit velo vec is', ball3d.velocity)
-						ball3d.state = "ball_in_play"
+						ball.velocity.x = 0
+						ball.velocity.y = 0
+						ball.velocity.z = exitvelo
+						ball.velocity = ball.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
+						ball.velocity = ball.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
+						printt('hit velo vec is', ball.velocity)
+						ball.state = "ball_in_play"
 						
 						# Start running after .5 seconds
 						var batter = get_node("Headon/Batter3D")
@@ -636,10 +617,8 @@ func _process(delta: float) -> void:
 						next_camera = $Headon/Cameras/Camera3DHigherHome
 						$TimerCameraChange.start()
 						# Hide strike zone dot at same time
-						ball3d.remove_dot(.3)
+						ball.remove_dot(.3)
 						#$Headon/Camera3DHighHome.current = true
-						# Make ball bigger
-						#ball3d.scale=11*Vector3(1,1,1)
 						
 						# Make catcher visible
 						var catcher = get_node("Headon/Defense/Fielder3DC")
@@ -655,7 +634,7 @@ func _process(delta: float) -> void:
 						# Explosion if good hit
 						if ((exitvelo > 95 * .48889 and vla > 10 and vla < 40) or
 							true):
-							$Headon/Explosion.position = ball3d.position
+							$Headon/Explosion.position = ball.position
 							$Headon/Explosion/Red.emitting = true
 							$Headon/Explosion/Yellow.emitting = true
 					else: # Not actual contact
@@ -762,7 +741,7 @@ func _process(delta: float) -> void:
 		elif Input.is_key_pressed(KEY_3):
 			if Input.is_key_pressed(KEY_SHIFT):
 				get_node("Headon/Cameras/Camera3DBallOverhead").current = true
-				get_node("Headon/Cameras/Camera3DBallOverhead").position = ball3d.position
+				get_node("Headon/Cameras/Camera3DBallOverhead").position = ball.position
 				get_node("Headon/Cameras/Camera3DBallOverhead").position.y = 30
 			else:
 				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
@@ -771,11 +750,8 @@ func _process(delta: float) -> void:
 	
 	# Move camera so that the ball stays in view
 	cam = get_viewport().get_camera_3d()
-	var ball_viewport_2d_position = cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position)
+	var ball_viewport_2d_position = cam.unproject_position(ball.global_position)
 	var viewport_size = get_viewport().size
-	#if randf_range(0,1)< .1:
-		#printt("TEST BALL 2d loc:", cam.unproject_position(get_node_or_null("Headon/Ball3D").global_position),
-		#       get_viewport().size, cam.rotation)
 	if ball_in_play:
 		# Using inertia instead of changing angle based on single frames reduces jitter
 		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
@@ -847,9 +823,7 @@ var ball_3d_scene = load("res://ball_3d.tscn")
 func find_fielder_to_intercept_ball() -> Array:
 	#func assign_fielders_after_hit():
 	#printt("\t\t\t\tStarting assign_fielders_after_hit !!")
-	#var fielder_nodes = get_tree().get_nodes_in_group('fielders')
 	#printt('fielder nodes', fielder_nodes)
-	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball_from_find_fielder_to_intercept_ball"
 	tmp_ball.is_sim = true
@@ -1122,7 +1096,6 @@ func get_fielder_with_posname(posname):
 
 func find_intercept_position_for_fielder(fielder) -> Vector3:
 	# For specific fielder, find where they will intercept ball's path
-	var ball = get_node_or_null("Headon/Ball3D")
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball_from_find_intercept_position_for_fielder"
 	tmp_ball.is_sim = true
@@ -1155,8 +1128,9 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 			var timetoreach = max(0, (ballgrounddist - fielder.catch_radius_xz) / fielder.SPEED)
 				
 			if timetoreach <= elapsed_time:
+				tmp_ball.queue_free()
 				return tmp_ball.position
-
+	tmp_ball.queue_free()
 	return fielder.position
 
 var next_camera = null
@@ -1167,7 +1141,7 @@ func _on_timer_camera_change_timeout() -> void:
 		next_camera.current = true
 		next_camera = null
 		
-		$Headon/Ball3D.scale=11*Vector3(1,1,1)
+		ball.scale=11*Vector3(1,1,1)
 	$TimerCameraChange.stop()
 
 
@@ -1227,7 +1201,6 @@ func check_if_play_done():
 		return true
 	
 	# Check if runners aren't running and are near base
-	#var runners = get_tree().get_nodes_in_group("runners")
 	var n_runners_active:int = 0
 	for runner in runners:
 		if not runner.is_done_for_play():
@@ -1243,7 +1216,6 @@ func check_if_play_done():
 		return true
 	# None are running, all are near base
 	# Check if fielder is holding ball
-	#var fielders = get_tree().get_nodes_in_group("fielders")
 	var holding_ball = false
 	var ball_pos
 	#printt('checking for holdin gball now')
@@ -1403,7 +1375,6 @@ func decide_automatic_runners_actions():
 	# After, make sure that the decisions make sense as a whole, to 
 	#  avoid runners trying to pass others.
 	
-	var ball = get_node("Headon/Ball3D")
 	var fielders_with_ball = get_tree().get_nodes_in_group('fielder_holding_ball')
 	var decisions = [null, null, null, null]
 	var decision_bases = [null, null, null, null]
