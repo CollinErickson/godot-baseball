@@ -15,10 +15,11 @@ var wall_array:Array = [
 	[45, 408./3, 16./3],
 	[60, 350./3, 15./3],
 	[90, 310./3, 8./3],
-	[105, 250./3, 20./3]
-	#[0,400,10],
-	#[90,600,90]
+	[105, 250./3, 20./3],
+	[180, 90./3, 10./3],
+	[270, 90./3, 10./3]
 ]
+
 # Aligned with coordinates, for testing
 #var wall_array = [
 	#[0, 400*sqrt(3)/2., 100],
@@ -43,6 +44,9 @@ func sind(angle):
 	return sin(angle*PI/180)
 
 func _ready() -> void:
+	# Close the wall
+	wall_array.push_back(wall_array[0])
+	
 	# Create the mesh for the wall
 	make_wall()
 	
