@@ -33,6 +33,8 @@ var wall_array = [
 #]
 
 var wall_coords:Array = []
+var along_walls:Array = []
+var normal_outs:Array = []
 var mindist:float = 1e9
 var mindists:Array = Array()
 func cosd(angle):
@@ -65,6 +67,16 @@ func _ready() -> void:
 			wall_array[i][2]/3,
 			wall_array[i][1]*sind(wall_array[i][0])
 		))
+	for iwall in range(len(wall_array) - 1):
+		# vector in direction of wall
+		# TODO: store along_walls and normal_outs so it's not recalculated every time
+		var along_wall:Vector3 = wall_coords[iwall+1]/3 - wall_coords[iwall]/3
+		along_wall.y = 0
+		along_walls.push_back(along_wall)
+		var normal_out:Vector3 = along_wall.rotated(
+			Vector3(0,1,0), 90.*PI/180).normalized()
+		normal_outs.push_back(normal_out)
+
 
 func make_wall():
 	#print("Running make_wall")
@@ -292,27 +304,27 @@ func check_fielder_cross(pos, prev_pos) -> Array:
 func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) -> Array:
 	## Check if fielder is on the correct side of the walls
 	##
-	## Returns [bool whether on correct side, position where they should be
-	# TODO: in corners this returns after first wall. Keep doing next wall too.
+	## Returns array: [bool whether on correct side, position where they should be]
 	if sqrt(pos.x**2 + pos.z**2) < mindist/3:
 		return [true]
+	var adjusted_position:bool = false
 	for iwall in range(len(wall_array) - 1):
 		# vector in direction of wall
-		# TODO: store along_walls and normal_outs so it's not recalculated every time
-		var along_wall:Vector3 = wall_coords[iwall+1]/3 - wall_coords[iwall]/3
-		along_wall.y = 0
-		var normal_out:Vector3 = along_wall.rotated(
-			Vector3(0,1,0), 90.*PI/180).normalized()
+		var along_wall:Vector3 = along_walls[iwall]
+		var normal_out:Vector3 = normal_outs[iwall]
 		var f = (pos + buffer*normal_out) - wall_coords[iwall]/3
 		f.y = 0
+		# Check which side of wall player position is on 
 		if normal_out.dot(f) > 0:
 			# They are on the wrong side
 			# Find where they should be
-			var replace_pos = (f.dot(along_wall) * along_wall / along_wall.length_squared()
+			pos = (f.dot(along_wall) * along_wall /
+					along_wall.length_squared()
 				) + wall_coords[iwall]/3 - buffer*normal_out
-			replace_pos.y = 0
-			#printt('in wall check_fielder_correct_side: on the wrong side of the wall')
-			return [false, replace_pos]
+			pos.y = 0
+			adjusted_position = true
+	if adjusted_position:
+		return [false, pos]
 	return [true]
 
 func nearest_point_on_plane(v0, v1, v2, x):

@@ -523,20 +523,7 @@ func _physics_process(delta: float) -> void:
 		for wallnode in wallnodes:
 			var cfcs = wallnode.check_fielder_correct_side(global_position, prev_global_position, 1)
 			if !cfcs[0]:
-				#printt('check_fielder_correct_side', global_position, cfcs[1])
 				global_position = cfcs[1]
-		
-		#for wallnode in wallnodes:
-			## check_ball_across returns array of 2 items:
-			## 0: Did the fielder cross a wall (only to out of play)?
-			## 1: Where they intersected the wall (can't use this as new position
-			##    since then they will move past the wall next step)
-			#var wallout = wallnode.check_fielder_cross(global_position, prev_global_position)
-			#if wallout[0]: # Crossed wall
-				## TODO: keep them ~1 ft from wall
-				##printt('in fielder, fielder cross wall', posname)
-				## Can't set to intersect wall point since it needs to be before wall
-				#position = prev_position
 
 var stepping_on_base_with_ball = false
 
