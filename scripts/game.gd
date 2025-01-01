@@ -45,10 +45,10 @@ func _ready() -> void:
 		user_is_home_team = false
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
-	#batter.speed = 200
-	runner1 = get_player(50)
-	runner2 = get_player(50)
-	runner3 = get_player(99)
+	#batter.speed = 1.80
+	#runner1 = get_player(50)
+	#runner2 = get_player(50)
+	#runner3 = get_player(99)
 	reset_field()
 	update_scorebug()
 	
@@ -114,21 +114,22 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	else:
 		home_runs += runs_on_play
 	# Update runners
-	var r1 = null
-	var r2 = null
-	var r3 = null
-	var runner_pairs = [[batter, runner0state], [runner1, runner1state],
-						[runner2, runner2state], [runner3, runner3state]]
-	for pair in runner_pairs:
-		if pair[1] == '1':
-			r1 = pair[0]
-		elif pair[1] == '2':
-			r2 = pair[0]
-		elif pair[1] == '3':
-			r3 = pair[0]
-	runner1 = r1
-	runner2 = r2
-	runner3 = r3
+	if !is_foul_ball:
+		var r1 = null
+		var r2 = null
+		var r3 = null
+		var runner_pairs = [[batter, runner0state], [runner1, runner1state],
+							[runner2, runner2state], [runner3, runner3state]]
+		for pair in runner_pairs:
+			if pair[1] == '1':
+				r1 = pair[0]
+			elif pair[1] == '2':
+				r2 = pair[0]
+			elif pair[1] == '3':
+				r3 = pair[0]
+		runner1 = r1
+		runner2 = r2
+		runner3 = r3
 	
 	# End of half inning, change side and clear bases
 	if outs > outs_per_inning - 0.5:
