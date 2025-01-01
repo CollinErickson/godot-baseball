@@ -154,7 +154,7 @@ func assign_to_cover_base(base, ball_pos=null, distance_away:float=10):
 				assignment_pos = ball_pos + distance_away * move_vec
 			#printt('in fielder assigning to 6:', posname, position,
 			#	assignment_pos, Time.get_ticks_msec()/1e3, ball_pos, move_vec)
-		assignment_pos.y = 0
+			assignment_pos.y = 0
 	else:
 		assert(false)
 
