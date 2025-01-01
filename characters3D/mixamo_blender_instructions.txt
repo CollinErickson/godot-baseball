@@ -2,7 +2,7 @@
 
 https://www.youtube.com/watch?v=fq0hR2tIsRk&t=668s&ab_channel=FinePointCGI
 
-- Blender: install the Mixamo root add-on, make sure it's enabled (Preferences -> Add-ons
+- Blender: install the Mixamo root add-on, make sure it's enabled (Preferences -> Add-ons)
 
 - New blender: delete objects on right
 

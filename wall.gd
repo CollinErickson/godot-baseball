@@ -6,16 +6,16 @@ extends Node3D
 var wall_color = Color(0,0,1,1)
 
 # wall_array is array with:
-# (angle: 0 is LF, 90 is RF, distance from home in FT, height in FT)
+# (angle: 0 is LF, 90 is RF, distance from home in YD, height in YD)
 # To connect back to starting point, duplicate first element at end
-var wall_array = [
-	[-15, 270, 20],
-	[0, 320, 10],
-	[30, 370, 15],
-	[45, 408, 16],
-	[60, 350, 15],
-	[90, 310, 8],
-	[105, 250, 20]
+var wall_array:Array = [
+	[-15, 270./3, 20./3],
+	[0, 320./3, 10./3],
+	[30, 370./3, 15./3],
+	[45, 408./3, 16./3],
+	[60, 350./3, 15./3],
+	[90, 310./3, 8./3],
+	[105, 250./3, 20./3]
 	#[0,400,10],
 	#[90,600,90]
 ]
@@ -64,13 +64,13 @@ func _ready() -> void:
 	for i in range(len(wall_array)):
 		wall_coords.push_back(Vector3(
 			wall_array[i][1]*cosd(wall_array[i][0]),
-			wall_array[i][2]/3,
+			wall_array[i][2],
 			wall_array[i][1]*sind(wall_array[i][0])
 		))
 	for iwall in range(len(wall_array) - 1):
 		# vector in direction of wall
 		# TODO: store along_walls and normal_outs so it's not recalculated every time
-		var along_wall:Vector3 = wall_coords[iwall+1]/3 - wall_coords[iwall]/3
+		var along_wall:Vector3 = wall_coords[iwall+1] - wall_coords[iwall]
 		along_wall.y = 0
 		along_walls.push_back(along_wall)
 		var normal_out:Vector3 = along_wall.rotated(
@@ -99,10 +99,12 @@ func make_wall():
 	for i in range(len(wall_array) - 1):
 		if wall_array[i][0] >= wall_array[i+1][0]:
 			printerr("Bad angle in wall")
-		var v1 = wall_array[i][1]/3.*Vector3(0,0,1).rotated(Vector3(0,1,0), (90-wall_array[i][0])*PI/180)
-		var v1up = v1 + Vector3(0, wall_array[i][2]/3.,0)
-		var v2 = wall_array[i+1][1]/3.*Vector3(0,0,1).rotated(Vector3(0,1,0), (90-wall_array[i+1][0])*PI/180)
-		var v2up = v2 + Vector3(0, wall_array[i+1][2]/3.,0)
+		var v1 = wall_array[i][1] * Vector3(0,0,1).rotated(
+			Vector3(0,1,0), (90-wall_array[i][0])*PI/180)
+		var v1up = v1 + Vector3(0, wall_array[i][2],0)
+		var v2 = wall_array[i+1][1] * Vector3(0,0,1).rotated(
+			Vector3(0,1,0), (90-wall_array[i+1][0])*PI/180)
+		var v2up = v2 + Vector3(0, wall_array[i+1][2],0)
 		#printt('WALL VERTEXES', v1, v1up, v2, v2up)
 		
 		# First triangle
@@ -154,7 +156,7 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 	## Find if the ball crossed a wall. If it did, give the updated position
 	## and velocity.
 	#printt('ball pos is', pos)
-	if pos.x**2 + pos.z**2 < mindist/3:
+	if pos.x**2 + pos.z**2 < mindist:
 		return [false]
 	# Find angle of ball where 0 is LF, 90 is RF. In range [-90, 270].
 	var ball_angle = atan(pos.z / pos.x) * 180 / PI
@@ -174,7 +176,7 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 				fposmod(prev_ball_angle - wall_array[i][0], 360.) <=
 				 fposmod(wall_array[i+1][0] - wall_array[i][0], 360.)
 				) and
-			 sqrt(pos.x**2 + pos.z**2) >= mindists[i]/3.
+			 sqrt(pos.x**2 + pos.z**2) >= mindists[i]
 			):
 			#printt('ball angles', ball_angle, prev_ball_angle,
 			#wall_array[i][0], wall_array[i+1][0])
@@ -187,8 +189,8 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 			var wall_right_z =  wall_array[i+1][1]*sind(wall_array[i+1][0])
 			
 			var intersect_out = intersect_two_line_segments(
-						Vector2(wall_left_x, wall_left_z)/3,
-						Vector2(wall_right_x, wall_right_z)/3,
+						Vector2(wall_left_x, wall_left_z),
+						Vector2(wall_right_x, wall_right_z),
 						Vector2(prev_pos.x, prev_pos.z), 
 						Vector2(pos.x, pos.z)
 					)
@@ -220,8 +222,8 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 		#Vector2(0, 0),
 		#Vector2(pos.x, pos.z)
 	#):
-	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)/3).cross(
-		Vector3(wall_right_x, 0, wall_right_z)/3 - Vector3(wall_left_x, 0, wall_left_z)/3
+	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)).cross(
+		Vector3(wall_right_x, 0, wall_right_z) - Vector3(wall_left_x, 0, wall_left_z)
 	).y > 0:
 		#printt('cross product is wrong way, allowing back through hit wall')
 		return [false]
@@ -241,14 +243,14 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 	# intersect_v is the intersect point
 	var intersect_v = Vector3(intersect_x, intersect_y, intersect_z)
 	var wall_length_to_left = intersect_out[1].distance_to(
-			Vector2(wall_left_x, wall_left_z)/3)
+			Vector2(wall_left_x, wall_left_z))
 	var wall_length_to_right = intersect_out[1].distance_to(
-			Vector2(wall_right_x, wall_right_z)/3)
+			Vector2(wall_right_x, wall_right_z))
 	var weight = wall_length_to_right / (wall_length_to_right + wall_length_to_left)
 	#var wall_dist = v_intersect.length() #weight * wall_array[i][1] + (1 - weight) * wall_array[i+1][1]
 	var wall_height_ft = weight * wall_array[i][2] + (1 - weight) * wall_array[i+1][2]
 	#printt('check weight', wall_length_to_left, wall_length_to_right, wall_height_ft, weight)
-	var is_over = intersect_y > wall_height_ft / 3.
+	var is_over = intersect_y > wall_height_ft
 	if is_over:
 		print("in wall: OVER wall")
 		return [true, is_over]
@@ -290,8 +292,8 @@ func check_fielder_cross(pos, prev_pos) -> Array:
 	var wall_right_x = wall_cross_info[3][2]
 	var wall_right_z = wall_cross_info[3][3]
 	
-	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)/3).cross(
-		Vector3(wall_right_x, 0, wall_right_z)/3 - Vector3(wall_left_x, 0, wall_left_z)/3
+	if (Vector3(pos.x, 0, pos.z) - Vector3(wall_left_x, 0, wall_left_z)).cross(
+		Vector3(wall_right_x, 0, wall_right_z) - Vector3(wall_left_x, 0, wall_left_z)
 	).y > 0:
 		#printt('cross product is wrong way, allowing back through hit wall')
 		return [false]
@@ -305,14 +307,14 @@ func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) 
 	## Check if fielder is on the correct side of the walls
 	##
 	## Returns array: [bool whether on correct side, position where they should be]
-	if sqrt(pos.x**2 + pos.z**2) < mindist/3:
+	if sqrt(pos.x**2 + pos.z**2) < mindist:
 		return [true]
 	var adjusted_position:bool = false
 	for iwall in range(len(wall_array) - 1):
 		# vector in direction of wall
 		var along_wall:Vector3 = along_walls[iwall]
 		var normal_out:Vector3 = normal_outs[iwall]
-		var f = (pos + buffer*normal_out) - wall_coords[iwall]/3
+		var f = (pos + buffer*normal_out) - wall_coords[iwall]
 		f.y = 0
 		# Check which side of wall player position is on 
 		if normal_out.dot(f) > 0:
@@ -320,7 +322,7 @@ func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) 
 			# Find where they should be
 			pos = (f.dot(along_wall) * along_wall /
 					along_wall.length_squared()
-				) + wall_coords[iwall]/3 - buffer*normal_out
+				) + wall_coords[iwall] - buffer*normal_out
 			pos.y = 0
 			adjusted_position = true
 	if adjusted_position:
