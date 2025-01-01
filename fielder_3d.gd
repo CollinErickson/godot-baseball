@@ -8,14 +8,14 @@ var SPEED:float = 8.0
 const MAX_ACCEL:float = 100.0
 var max_throw_speed:float = 30.0
 const catch_radius_xz:float = 2
-const catch_max_y:float = 2.5
+var catch_max_y:float = 2.5
 var throws:String = 'R'
 const time_throw_animation_release_point:float = 0.75
 
 var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball
 var assignment_pos # Position to go to for assignment
-var holding_ball = false
-var user_is_pitching_team
+var holding_ball:bool = false
+var user_is_pitching_team:bool
 var time_last_began_holding_ball
 var position_holding_ball_reassigned_fielders = null
 var position_assignment_ball_reassigned_fielders = null
@@ -23,7 +23,7 @@ var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var runners = get_tree().get_nodes_in_group("runners")
 @onready var ball = get_tree().get_first_node_in_group("ball")
-var animation = "idle"
+var animation:String = "idle"
 var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
 var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
@@ -898,6 +898,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		throws = player.throws
 		SPEED = player.speed_mps()
 		max_throw_speed = player.throwspeed_mps()
+		catch_max_y = player.height_mult * 2.5
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 		$Char3D.set_glove(throws=="R")

@@ -861,11 +861,11 @@ func find_fielder_to_intercept_ball() -> Array:
 		iii += 1
 		take_steps.call(numsteps, delta)
 		elapsed_time += numsteps * delta
-		# Make it's reachable
-		if tmp_ball.position.y < 2:
-			# Loop over fielder, see if can reach ball
-			for ifielder in range(len(fielders)):
-				var fielderi = fielders[ifielder]
+		# Loop over fielder, see if can reach ball
+		for ifielder in range(len(fielders)):
+			var fielderi = fielders[ifielder]
+			# Needs to be reachable
+			if tmp_ball.position.y < fielderi.catch_max_y:
 				var ballgrounddist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
 				# TODO: fielders don't run at constant speed
 				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
@@ -1121,7 +1121,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 		take_steps.call(numsteps, delta)
 		elapsed_time += numsteps * delta
 		# Make it's reachable
-		if tmp_ball.position.y < 2:
+		if tmp_ball.position.y < fielder.catch_max_y:
 			# See if fielder can reach ball
 			var ballgrounddist = fielder.distance_xz(fielder.position, tmp_ball.position)
 			# TODO: fielders don't run at constant speed
