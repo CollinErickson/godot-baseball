@@ -119,6 +119,7 @@ func is_strike(pos):
 
 signal pitch_completed_unhit
 signal hit_bounced_signal
+signal ball_over_wall_signal
 func _physics_process(delta: float) -> void:
 	elapsed_time += delta
 	if is_frozen:
@@ -170,9 +171,15 @@ func _physics_process(delta: float) -> void:
 			#	assert(false)
 			
 			if wallout[0]: # Crossed wall
-				if wallout[1]: # Over: home run or foul ball
-					pass
-					# TODO: Home run
+				if not is_sim:
+					printt('in ball, crossed wall, should trigger _on_ball_over_wall_signal', wallout)
+				if wallout[1]: # Over: home run or GRD or foul ball
+					if not is_sim:
+						printt('in ball, over wall, should trigger _on_ball_over_wall_signal')
+					if not fair_foul_determined:
+						is_foul = !is_in_fair_territory()
+						fair_foul_determined = true
+					ball_over_wall_signal.emit()
 				else: # Hit wall: fair or foul
 					global_position = wallout[2]
 					if not is_sim:
@@ -252,7 +259,7 @@ func _physics_process(delta: float) -> void:
 			#printt('NOT bounce', delta)
 			bounced_previous_frame = false
 		
-		if not is_sim:
+		if not is_sim and prev_position != null:
 			align_trail(position, prev_position, delta, velocity)
 	#if position.z < 10:
 	#	velocity = Vector3()

@@ -409,7 +409,6 @@ func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
 	var intercept_pos = find_intercept_position_for_fielder(fielder)
 	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
 
-
 func test_mesh_array():
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
@@ -480,12 +479,12 @@ func _ready() -> void:
 		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
 		runner.connect("tag_up_signal", _on_tag_up_by_runner)
 	
+	# Set up signals from pitcher
 	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
 	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
 	
-	# Test mesh array
-	#test_mesh_array()
-	
+	# Set up signals from ball
+	ball.connect("ball_over_wall_signal", _on_ball_over_wall_signal)
 
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()
@@ -581,10 +580,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging
-					if false:
+					if !false:
 						vla = 30
-						hla = 21.5
-						exitvelo = 8.8
+						hla = 45
+						exitvelo = 68.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -1229,12 +1228,11 @@ func check_if_play_done():
 	return near_infield
 
 signal signal_play_done(is_ball: bool, is_strike: bool, outs_on_play: int, runs_on_play: int)
-func play_done(flash=null):
+func play_done(flash=null) -> void:
 	printt('in field: running play_done()')
 	#play_done_fully = true
 	if flash != null:
 		get_node("FlashText").new_text(flash, 3)
-	#get_tree().reload_current_scene()
 	freeze()
 	# Check for swing and miss
 	if pitch_is_ball:
@@ -1242,11 +1240,11 @@ func play_done(flash=null):
 			pitch_is_ball = false
 			pitch_is_strike = true
 	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, is_foul_ball,
-	outs_on_play, runs_on_play,
-	$Headon/Runners/Runner3DHome.end_state(),
-	$Headon/Runners/Runner3D1B.end_state(),
-	$Headon/Runners/Runner3D2B.end_state(),
-	$Headon/Runners/Runner3D3B.end_state())
+		outs_on_play, runs_on_play,
+		$Headon/Runners/Runner3DHome.end_state(),
+		$Headon/Runners/Runner3D1B.end_state(),
+		$Headon/Runners/Runner3D2B.end_state(),
+		$Headon/Runners/Runner3D3B.end_state())
 
 func _on_play_over_timer_timeout() -> void:
 	$PlayOverTimer.stop()
@@ -1286,6 +1284,17 @@ func _on_ball_3d_hit_bounced_signal() -> void:
 	#  they should go invisible and not be able to return to 3rd
 	for runner in runners:
 		runner.may_need_to_tag_up = false
+
+func _on_ball_over_wall_signal():
+	printt('in field _on_ball_over_wall_signal')
+	assert(ball.fair_foul_determined)
+	if ball.is_foul:
+		_on_ball_3d_foul_ball()
+	else: # fair
+		if ball.hit_bounced: # Ground rule double
+			pass
+		else: # Home run
+			pass
 
 func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base
@@ -1457,8 +1466,13 @@ func decide_automatic_runners_actions():
 	# 4-8: Decide base to go to.
 	var min_time_fielder_release_throw:float # Time for fielder to release throw after acquiring ball
 	if fielder_with_ball == null:
-		fielder_with_ball = fielders[fftib[2]]
-		min_time_fielder_release_throw = fielders[fftib[2]].time_throw_animation_release_point
+		printt('in field decide runners', fftib)
+		# Can have bug where no fielder is found
+		if fftib[2] == null:
+			fielder_with_ball = fielders[0]
+		else:
+			fielder_with_ball = fielders[fftib[2]]
+		min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
 	else:
 		# A fielder already has it, they may already have started animation
 		min_time_fielder_release_throw = 0

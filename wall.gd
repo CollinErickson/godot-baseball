@@ -14,7 +14,7 @@ var wall_array:Array = [
 	[30, 370./3, 15./3],
 	[45, 408./3, 16./3],
 	[60, 350./3, 15./3],
-	[90, 310./3, 8./3],
+	[99, 310./3, 8./3],
 	[105, 250./3, 20./3],
 	[180, 90./3, 10./3],
 	[270, 90./3, 10./3]
@@ -101,15 +101,16 @@ func make_wall():
 	#verts.push_back(Vector3(4,4,0))
 	#verts.push_back(Vector3(4,2,0))
 	for i in range(len(wall_array) - 1):
-		if wall_array[i][0] >= wall_array[i+1][0]:
-			printerr("Bad angle in wall")
+		#if wall_array[i][0] >= wall_array[i+1][0]:
+			#printerr("Bad angle in wall\t", wall_array[i], wall_array[i+1])
 		var v1 = wall_array[i][1] * Vector3(0,0,1).rotated(
 			Vector3(0,1,0), (90-wall_array[i][0])*PI/180)
 		var v1up = v1 + Vector3(0, wall_array[i][2],0)
 		var v2 = wall_array[i+1][1] * Vector3(0,0,1).rotated(
 			Vector3(0,1,0), (90-wall_array[i+1][0])*PI/180)
 		var v2up = v2 + Vector3(0, wall_array[i+1][2],0)
-		#printt('WALL VERTEXES', v1, v1up, v2, v2up)
+		#if wall_array[i][0] >= wall_array[i+1][0]:
+			#printt('WALL VERTEXES', v1, v1up, v2, v2up)
 		
 		# First triangle
 		verts.push_back(v1)
@@ -155,6 +156,7 @@ func make_wall():
 
 var restitution_coef = .6 # multiplied by ball restituion_coefv
 func check_object_cross(pos:Vector3, prev_pos:Vector3):
+	# Stopped using this since it wasn't working for foul balls
 	## Check if ball crossed a wall
 	##
 	## Find if the ball crossed a wall. If it did, give the updated position
@@ -171,7 +173,7 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 	prev_ball_angle = fposmod(prev_ball_angle, 360)
 	if prev_ball_angle > 270:
 		prev_ball_angle -= 360
-	#printt('in check_ball_cross ball_angle is', ball_angle)
+	#printt('in wall check_ball_cross ball_angle is', ball_angle, prev_ball_angle)
 	for i in range(len(wall_array) - 1):
 		# Find if between two points and at least as far as the closest point on that section
 		if (
@@ -201,22 +203,85 @@ func check_object_cross(pos:Vector3, prev_pos:Vector3):
 			if not intersect_out[0]:
 				return [false]
 			else:
-				return [true, intersect_out, i, [wall_left_x, wall_left_z, wall_right_x, wall_right_z]]
+				return [true,
+						intersect_out,
+						i,
+						[wall_left_x, wall_left_z, wall_right_x, wall_right_z]]
+	# Found no contact
+	return [false]
+
+func check_object_cross2(pos, prev_pos) -> Array:
+	# Trying to fix check_object_cross, it wasn't working on foul balls
+	#printt('in wall check_object_cross2', pos, prev_pos)
+	var pos_length = pos.length()
+	if pos_length < mindist:
+		return [false]
+	for i in range(len(wall_array) - 1):
+		if pos_length < mindists[i]:
+			continue
+		# Check that the ball position flipped sides of the wall using normal
+		if ((normal_outs[i].dot(Vector3(pos.x,0,pos.z) -
+						Vector3(wall_coords[i].x,0,wall_coords[i].z)) > 0) and
+			(normal_outs[i].dot(Vector3(prev_pos.x,0,prev_pos.z) -
+						Vector3(wall_coords[i].x,0,wall_coords[i].z)) <= 0)):
+			# Use cross product to check if it's within the wall length
+			var pos_diff_xz:Vector3 = Vector3(pos.x - prev_pos.x, 0, pos.z - prev_pos.z)
+			var cross1:Vector3 = pos_diff_xz.cross(
+				Vector3(wall_coords[i].x - prev_pos.x, 0, wall_coords[i].z - prev_pos.z))
+			var cross2:Vector3 = pos_diff_xz.cross(
+				Vector3(wall_coords[i+1].x - prev_pos.x, 0, wall_coords[i+1].z - prev_pos.z))
+			if cross1.y * cross2.y <= 0:
+				# Find the intersection point by solving system of equations
+				# The two line segments must have overlapping point
+				var u1 = prev_pos.x
+				var u2 = prev_pos.z
+				var d1 = pos.x - prev_pos.x
+				var d2 = pos.z - prev_pos.z
+				var v1 = wall_coords[i].x
+				var v2 = wall_coords[i].z
+				var e1 = wall_coords[i+1].x - wall_coords[i].x
+				var e2 = wall_coords[i+1].z - wall_coords[i].z
+				# Find where ball path crossed wall
+				#u1 + t*d1 = v1 + s*e1 # (eqn for x)
+				#u2 + t*d2 = v2 + s*e2 # (eqn for z)
+				# 2 eqns, 2 unknowns
+				# rearrange to matrix form
+				#t*d1 - s*e1 = v1 - u1
+				#t*d2 - s*e2 = v2 - u2
+				#[d1  -e1] [t ] = [v1 - u1]
+				#[d2  -e2] [s ] = [v2 - u2]
+				# Inverse of left matrix
+				#-1/(d1*e2 - d2*e1) [-e2  e1]
+								   #[-d2  d1]
+				var det = d1*-e2 +e1*d2
+				var t = 1/det * (-e2*(v1 - u1) + e1*(v2 - u2))
+				var s = 1/det * (-d2*(v1 - u1) + d1*(v2 - u2))
+				var p_t = prev_pos + t*(pos - prev_pos)
+				var _p_s = wall_coords[i] + s*(wall_coords[i+1] - wall_coords[i])
+				
+				return [true, [true, Vector2(p_t.x, p_t.z)], i, t, p_t]
 	# Found no contact
 	return [false]
 
 func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 						is_sim:bool):
-	var wall_cross_info = check_object_cross(pos, prev_pos)
+	var wall_cross_info = check_object_cross2(pos, prev_pos)
+	#if not is_sim:
+		#printt('in wall check_ball_cross', pos, pos.length(), wall_cross_info,
+			#check_object_cross2(pos, prev_pos))
 	if !wall_cross_info[0]:
 		return [false]
 	# Now we know it crossed the wall in x-z dimensions, but not where on y
 	var i = wall_cross_info[2]
 	var intersect_out = wall_cross_info[1]
-	var wall_left_x = wall_cross_info[3][0]
-	var wall_left_z = wall_cross_info[3][1]
-	var wall_right_x = wall_cross_info[3][2]
-	var wall_right_z = wall_cross_info[3][3]
+	#var wall_left_x = wall_cross_info[3][0]
+	#var wall_left_z = wall_cross_info[3][1]
+	#var wall_right_x = wall_cross_info[3][2]
+	#var wall_right_z = wall_cross_info[3][3]
+	var wall_left_x = wall_coords[i].x
+	var wall_left_z = wall_coords[i].z
+	var wall_right_x = wall_coords[i+1].x
+	var wall_right_z = wall_coords[i+1].z
 	
 	# If the ball went from out of field back into play, don't reflect it
 	# One line segment for wall, one from home plate to current position
@@ -232,20 +297,24 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 		#printt('cross product is wrong way, allowing back through hit wall')
 		return [false]
 	
-	#printt('found intersect', pos, prev_pos, intersect_out)
-	var intersect_x = intersect_out[1].x
-	var intersect_z = intersect_out[1].y
-	# Find y coordinate of crossing
-	var second_intersect = intersect_two_line_segments(
-		Vector2(intersect_x, 0),
-		Vector2(intersect_x, 1e4),
-		Vector2(pos.x, pos.y),
-		Vector2(prev_pos.x, prev_pos.y)
-	)
-	#printt('found 2nd intersect', second_intersect)
-	var intersect_y = second_intersect[1].y
-	# intersect_v is the intersect point
-	var intersect_v = Vector3(intersect_x, intersect_y, intersect_z)
+	##printt('found intersect', pos, prev_pos, intersect_out)
+	#var intersect_x = intersect_out[1].x
+	#var intersect_z = intersect_out[1].y
+	## Find y coordinate of crossing
+	#var second_intersect = intersect_two_line_segments(
+		#Vector2(intersect_x, 0),
+		#Vector2(intersect_x, 1e4),
+		#Vector2(pos.x, pos.y),
+		#Vector2(prev_pos.x, prev_pos.y)
+	#)
+	var second_intersect = null
+	##printt('found 2nd intersect', second_intersect)
+	#var intersect_y = second_intersect[1].y
+	## intersect_v is the intersect point
+	#var intersect_v = Vector3(intersect_x, intersect_y, intersect_z)
+	var intersect_v = wall_cross_info[4]
+	#if not is_sim:
+		#printt('wall intersect_v is', intersect_v, second_intersect, pos, prev_pos)
 	var wall_length_to_left = intersect_out[1].distance_to(
 			Vector2(wall_left_x, wall_left_z))
 	var wall_length_to_right = intersect_out[1].distance_to(
@@ -254,9 +323,10 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 	#var wall_dist = v_intersect.length() #weight * wall_array[i][1] + (1 - weight) * wall_array[i+1][1]
 	var wall_height_ft = weight * wall_array[i][2] + (1 - weight) * wall_array[i+1][2]
 	#printt('check weight', wall_length_to_left, wall_length_to_right, wall_height_ft, weight)
-	var is_over = intersect_y > wall_height_ft
+	var is_over = intersect_v.y > wall_height_ft
 	if is_over:
-		print("in wall: OVER wall")
+		if not is_sim:
+			print("in wall: OVER wall")
 		return [true, is_over]
 	#print('In wall: HIT wall')
 	

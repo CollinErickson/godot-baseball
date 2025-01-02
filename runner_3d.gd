@@ -264,7 +264,6 @@ func end_state() -> String:
 	#printt('runner end_state', start_base, str(round(running_progress)))
 	return str(round(running_progress))
 
-		
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		exists_at_start = true

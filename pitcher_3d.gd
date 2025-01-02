@@ -125,7 +125,6 @@ func _physics_process(delta: float) -> void:
 				pitch_type = ["FB", "2SFB", "SL", "CB"].pick_random()
 				select_pitch_location()
 				timer_action = 'begin_pitch'
-				printt('starting timer')
 				$Timer.wait_time = 1.3
 				$Timer.start()
 		
@@ -266,7 +265,7 @@ func _physics_process(delta: float) -> void:
 var timer_action
 
 func _on_timer_timeout() -> void:
-	printt("Pitcher timeout is done")
+	#printt("Pitcher timeout is done")
 	$Timer.stop()
 	if timer_action == "begin_pitch":
 		begin_pitch()
