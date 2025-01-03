@@ -581,9 +581,9 @@ func _process(delta: float) -> void:
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging
 					if !false:
-						vla = 30
-						hla = 45
-						exitvelo = 68.8
+						vla = 0
+						hla = 60
+						exitvelo = 8.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -991,6 +991,9 @@ func assign_fielders_after_hit() -> Array:
 func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 									intercept_position=null,
 									exclude_fielder_posname_array:Array=[]) -> void:
+	# This can be called right after foul ball after field is reset
+	if !ball_in_play:
+		return
 	printt('Running assign_fielders_to_cover_bases', intercept_position)
 	var assigned_indexes = []
 	intercept_position.y = 0

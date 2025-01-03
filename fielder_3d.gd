@@ -178,8 +178,9 @@ func _physics_process(delta: float) -> void:
 	#	printt('fielder user pit team', posname, user_is_pitching_team)
 	if is_frozen:
 		return
-	#if posname == '2B':
-		#printt('2B fielder', state, assignment, animation, assignment_pos, position)
+	#if posname == 'SS':
+		#printt('SS fielder', state, assignment, animation, assignment_pos,
+			#position, Time.get_ticks_msec())
 	
 	prev_position = position
 	prev_global_position = global_position
