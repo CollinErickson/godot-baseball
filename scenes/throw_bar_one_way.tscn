@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3 uid="uid://ni0m5dff7e5p"]
+
+[ext_resource type="Script" path="res://scripts/throw_bar_one_way.gd" id="1_oykdm"]
+
+[sub_resource type="Gradient" id="Gradient_ls8ot"]
+colors = PackedColorArray(0, 0, 0, 1, 1, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_2jkoq"]
+gradient = SubResource("Gradient_ls8ot")
+width = 512
+
+[node name="ThrowBarOneWay" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_oykdm")
+
+[node name="BackgroundRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 212.0
+offset_bottom = 36.0
+
+[node name="BlackRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 81.0
+offset_bottom = 34.0
+color = Color(0, 0, 0, 1)
+
+[node name="GradientRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 71.0
+offset_right = 1006.0
+offset_bottom = 127.0
+texture = SubResource("GradientTexture1D_2jkoq")
+
+[node name="SelectorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 81.0
+offset_bottom = 34.0

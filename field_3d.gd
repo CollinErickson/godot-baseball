@@ -1037,8 +1037,8 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 					fielders[i].position,
 					base_position
 				) < 1 and base != 6:
-					printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname,
-							base, exclude_fielder_indexes, exclude_fielder_posname_array)
+					#printt('ASSIGNING CLOSE ENOUGH EXCLUDED', fielders[i].posname,
+							#base, exclude_fielder_indexes, exclude_fielder_posname_array)
 					min_time = 0
 					min_i = i
 					min_is_excluded = true

@@ -71,6 +71,8 @@ func reset(throw_mode_:String) -> void:
 	throw_ready_success = true
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
+	$ThrowBarOneWay.visible = false
+	$ThrowBarOneWay.active = false
 	$Timer.stop()
 	timer_action = null
 	timer_args = null
@@ -566,14 +568,20 @@ func start_throw_ball_func(base, fielder, key_check_release):
 	if throw_mode == "Button":
 		start_throw_end()
 		return
-	
-	assert(throw_mode == "Bar")
-	
-	# Turn on throw bar
-	$ThrowBar.visible = true
-	var cam = get_viewport().get_camera_3d()
-	$ThrowBar.position = cam.unproject_position(global_position)
-	$ThrowBar.reset(50, .5)
+	elif throw_mode == "Bar":
+		# Turn on throw bar
+		$ThrowBar.visible = true
+		var cam = get_viewport().get_camera_3d()
+		$ThrowBar.position = cam.unproject_position(global_position)
+		$ThrowBar.reset(50, .5)
+	elif throw_mode == "BarOneWay":
+		# Turn on throw bar
+		$ThrowBarOneWay.visible = true
+		var cam = get_viewport().get_camera_3d()
+		$ThrowBarOneWay.position = cam.unproject_position(global_position)
+		$ThrowBarOneWay.reset(50, .5)
+	else:
+		assert(false)
 
 func cancel_throw():
 	if state == 'throwing':
@@ -588,6 +596,7 @@ func cancel_throw():
 		start_throw_fielder = null
 		start_throw_key_check_release = null
 		$ThrowBar.visible = false
+		$ThrowBarOneWay.visible = false
 	else:
 		push_error("error in fielder cancel_throw")
 
@@ -603,6 +612,10 @@ func start_throw_end():
 	elif throw_mode == "Bar":
 		# Check throw bar
 		throw_ready_success = $ThrowBar.check_success(true, true)
+	elif throw_mode == "BarOneWay":
+		# Check throw bar
+		var barout = $ThrowBarOneWay.check_success(true, true)
+		throw_ready_success = randf() >= barout[1]
 	else:
 		push_error("Fielder throw error 3819249")
 	

@@ -1,7 +1,7 @@
 extends Control
 
 # Settings
-var throw_mode:String = "Button" # "Button", "Bar"
+var throw_mode:String = "BarOneWay" # "Button", "Bar", "BarOneWay"
 var bat_mode:String = "Target" # "Timing", "Target"
 var pitch_mode:String = "Button" # "Button", "Bar"
 

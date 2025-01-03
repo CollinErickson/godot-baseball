@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://d3vo8o7aa5kqp"]
+[gd_scene load_steps=9 format=3 uid="uid://d3vo8o7aa5kqp"]
 
 [ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="3_mscjq"]
 [ext_resource type="PackedScene" uid="uid://dmcpm2vuvwdu8" path="res://scenes/throw_bar.tscn" id="4_qkgbs"]
+[ext_resource type="PackedScene" uid="uid://ni0m5dff7e5p" path="res://scenes/throw_bar_one_way.tscn" id="5_6icxr"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="5_h61vg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_util4"]
@@ -46,6 +47,8 @@ outer_radius = 1.8
 color = Color(0.0431373, 0.529412, 1, 1)
 
 [node name="ThrowBar" parent="." instance=ExtResource("4_qkgbs")]
+
+[node name="ThrowBarOneWay" parent="." instance=ExtResource("5_6icxr")]
 
 [node name="Char3D" parent="." instance=ExtResource("5_h61vg")]
 

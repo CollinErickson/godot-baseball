@@ -778,7 +778,7 @@ func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> vo
 		#printt('trail rotation,', $TrailNode.rotation, $TrailNode.position, $TrailNode/Trail.position, trail_length)
 
 func is_in_fair_territory(pos=position) -> bool:
-	print('in ball is_in_fair_territory, pos:', position)
+	#print('in ball is_in_fair_territory, pos:', position)
 	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
 	return pos.x >= 0 and pos.z >= 0
 	#return global_position.x >= 0 and global_position.z >= 0
