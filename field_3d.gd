@@ -1469,7 +1469,7 @@ func decide_automatic_runners_actions():
 	# 4-8: Decide base to go to.
 	var min_time_fielder_release_throw:float # Time for fielder to release throw after acquiring ball
 	if fielder_with_ball == null:
-		printt('in field decide runners', fftib)
+		#printt('in field decide runners', fftib)
 		# Can have bug where no fielder is found
 		if fftib[2] == null:
 			fielder_with_ball = fielders[0]

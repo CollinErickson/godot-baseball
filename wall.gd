@@ -307,7 +307,7 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 		#Vector2(pos.x, pos.y),
 		#Vector2(prev_pos.x, prev_pos.y)
 	#)
-	var second_intersect = null
+	#var second_intersect = null
 	##printt('found 2nd intersect', second_intersect)
 	#var intersect_y = second_intersect[1].y
 	## intersect_v is the intersect point

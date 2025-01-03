@@ -236,7 +236,19 @@ func _physics_process(delta: float) -> void:
 			#	printt('bounced up, not stopped', position, velocity, position.y + 1./60*velocity.y - .5*gravity*(1./60)**2, ball_radius, next_pos_y)
 			# Stop it if slow enough to avoid infinite bounce
 			if velocity.length_squared() < .5**2:
-				velocity = Vector3()
+				velocity = Vector3.ZERO
+				# Stop animation
+				$AnimatedSprite3D.stop()
+				# Fair/foul can be determined
+				if not fair_foul_determined:
+					fair_foul_determined = true
+					if is_in_fair_territory():
+						is_foul = false
+					else:
+						is_foul = true
+						foul_ball.emit()
+						return
+			
 			if pitch_in_progress:
 				delivery_bounced = true
 			if state == "ball_in_play" and not hit_bounced:
@@ -670,14 +682,14 @@ func ball_fielded(ball_position_before_fielded:Vector3):
 	printt('In ball: in func ball_fielded--', fair_foul_determined, is_foul,
 		is_in_fair_territory(ball_position_before_fielded), ball_position_before_fielded,
 		position, global_position)
+	throw_start_pos = null
+	throw_start_velo = null
+	throw_target = null
 	if not fair_foul_determined:
 		fair_foul_determined = true
 		is_foul = !is_in_fair_territory(ball_position_before_fielded)
 		if is_foul:
 			foul_ball.emit()
-	throw_start_pos = null
-	throw_start_velo = null
-	throw_target = null
 
 var throw_start_pos
 var throw_start_velo
