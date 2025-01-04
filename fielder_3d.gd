@@ -70,6 +70,7 @@ func reset(throw_mode_:String) -> void:
 	start_throw_key_check_release = null
 	throw_ready = false
 	throw_ready_success = true
+	throw_ready_intensity = 1
 	$ThrowBar.visible = false
 	$ThrowBar.active = false
 	$ThrowBarOneWay.visible = false
@@ -434,12 +435,14 @@ func _physics_process(delta: float) -> void:
 				#printt('THROW IS READY')
 				# Execute throw
 				#throw_ball_func(start_throw_base, start_throw_fielder, throw_ready_success)
-				start_throw_ball_animation(start_throw_base, start_throw_fielder, throw_ready_success)
+				start_throw_ball_animation(start_throw_base, start_throw_fielder,
+					throw_ready_success, throw_ready_intensity)
 				# Clear vars
 				start_throw_base = null
 				start_throw_fielder = null
 				throw_ready = false
 				throw_ready_success = true
+				throw_ready_intensity = 1
 			else: # Timed out, clear the throw info
 				throw_ready = false
 		
@@ -611,6 +614,7 @@ func cancel_throw():
 
 var throw_ready:bool = false
 var throw_ready_success:bool = true
+var throw_ready_intensity:float = 1
 var throw_ready_time = null
 func start_throw_end():
 	# This ends getting the throw ready. The throw info will be stored
@@ -618,13 +622,17 @@ func start_throw_end():
 	
 	if throw_mode == "Button":
 		throw_ready_success = randf() < .9
+		throw_ready_intensity = 1
 	elif throw_mode == "Bar":
 		# Check throw bar
 		throw_ready_success = $ThrowBar.check_success(true, true)
+		throw_ready_intensity = 1
 	elif throw_mode == "BarOneWay":
 		# Check throw bar
 		var barout = $ThrowBarOneWay.check_success(true, true)
 		throw_ready_success = randf() >= barout[1]
+		# Put intensity between .7 and 1.
+		throw_ready_intensity = barout[0]/100. * 0.3 + 0.7
 	else:
 		push_error("Fielder throw error 3819249")
 	
@@ -640,9 +648,10 @@ func start_throw_end():
 	start_throw_key_check_release = null
 
 signal throw_ball
-func throw_ball_func(base, fielder=null, success=true) -> void:
-	# This begins the throw.
-	printt('throw_ball_func', base, fielder)
+func throw_ball_func(base, fielder=null, success:bool=true,
+					intensity:float=1) -> void:
+	# This begins the release of the throw.
+	printt('in fielder throw_ball_func', base, fielder)
 	
 	# Only throw if not close to that base
 	if base != null:
@@ -660,7 +669,7 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
 			set_assignment('wait_to_receive')
-			throw_ball.emit(base, self, null, success)
+			throw_ball.emit(base, self, null, success, intensity)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
 			# Change animation to idle
@@ -677,7 +686,7 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
 			set_assignment('wait_to_receive')
-			throw_ball.emit(base, self, fielder, success)
+			throw_ball.emit(base, self, fielder, success, intensity)
 			if user_is_pitching_team:
 				set_not_selected_fielder()
 	
@@ -688,9 +697,10 @@ func throw_ball_func(base, fielder=null, success=true) -> void:
 
 
 # Begin throw animation, ball to be released when animation is ready
-func start_throw_ball_animation(base, fielder=null, success=true) -> void:
+func start_throw_ball_animation(base, fielder=null, success:bool=true,
+								intensity:float=1) -> void:
 	printt('In fielder start_throw_ball_animation', posname, state, Time.get_ticks_msec(),
-		base, fielder, success)
+		base, fielder, success, intensity)
 	# Don't overwrite throw already in progress
 	if timer_action == 'throw' and timer_args != null:
 		printt("In fielder, not overwriting throw", posname, timer_args, base, fielder)
@@ -712,7 +722,7 @@ func start_throw_ball_animation(base, fielder=null, success=true) -> void:
 	$Timer.wait_time = time_throw_animation_release_point # Time for animation to reach release point
 	$Timer.start()
 	timer_action = 'throw'
-	timer_args = [base, fielder, success]
+	timer_args = [base, fielder, success, intensity]
 
 var timer_action
 var timer_args
@@ -721,7 +731,9 @@ func _on_timer_timeout() -> void:
 	if timer_action == "set_visible_true":
 		visible = true
 	elif timer_action == "throw":
-		throw_ball_func(timer_args[0], timer_args[1], timer_args[2])
+		printt('in fielder timer timeout, timer_args is', timer_args)
+		throw_ball_func(timer_args[0], timer_args[1], timer_args[2],
+						timer_args[3])
 	else:
 		push_error("Bad timer_action in fielder", posname, timer_action)
 	timer_action = null

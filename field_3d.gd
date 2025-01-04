@@ -278,7 +278,8 @@ func _on_alt_fielder_selected_by_fielder(fielder, _prev_fielder):
 	min_fielder.set_alt_fielder()
 	#printt('setting new alt fielder', min_fielder.posname, Time.get_ticks_msec())
 
-func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
+func _on_throw_ball_by_fielder(base, fielder, to_fielder, success:bool,
+								throw_intensity:float) -> void:
 	printt('In field_3d, throwing ball to:', base, fielder, to_fielder)
 
 	# Set ball throw
@@ -328,8 +329,10 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success) -> void:
 	noise *= target_distance / 20
 	target += noise
 	
+	throw_intensity = max(0.5, min(1, throw_intensity))
+	var throw_speed = fielder.max_throw_speed * throw_intensity
 	var velo_vec = ball.fit_approx_parabola_to_trajectory(
-		ball_start, target, fielder.max_throw_speed, true)
+		ball_start, target, throw_speed, true)
 	
 	# TODO: Rotate for bad throws, instead of changing target above
 	# If throw is not success, add noise
@@ -580,7 +583,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging
-					if !false:
+					if false:
 						vla = 0
 						hla = 60
 						exitvelo = 8.8

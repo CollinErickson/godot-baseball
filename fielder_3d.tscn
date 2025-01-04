@@ -75,6 +75,7 @@ font_size = 200
 
 [node name="BadThrowLabel3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+visible = false
 billboard = 1
 modulate = Color(1, 0, 0, 1)
 outline_modulate = Color(1, 0, 0, 1)
