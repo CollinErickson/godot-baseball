@@ -29,6 +29,7 @@ var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
 var prev_position:Vector3
 var prev_global_position:Vector3
+var turn_off_bad_throw_label_timer:float = 0
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -77,6 +78,8 @@ func reset(throw_mode_:String) -> void:
 	timer_action = null
 	timer_args = null
 	throw_mode = throw_mode_
+	$BadThrowLabel3D.visible = false
+	turn_off_bad_throw_label_timer = 0
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -187,6 +190,12 @@ func _physics_process(delta: float) -> void:
 	prev_position = position
 	prev_global_position = global_position
 	time_in_state += delta
+	
+	if turn_off_bad_throw_label_timer > 0:
+		turn_off_bad_throw_label_timer -= delta
+		if turn_off_bad_throw_label_timer <= 0:
+			$BadThrowLabel3D.visible = 0
+			turn_off_bad_throw_label_timer = 0
 	
 	if assignment==null:
 		return
@@ -686,6 +695,12 @@ func start_throw_ball_animation(base, fielder=null, success=true) -> void:
 	if timer_action == 'throw' and timer_args != null:
 		printt("In fielder, not overwriting throw", posname, timer_args, base, fielder)
 		return
+	
+	# Throw is starting for real
+	if !throw_ready_success:
+		$BadThrowLabel3D.visible = true
+		turn_off_bad_throw_label_timer = 2
+	
 	# Turn to face target
 	if fielder != null:
 		set_look_at_position(fielder.position)
