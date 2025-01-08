@@ -286,6 +286,7 @@ func _physics_process(delta: float) -> void:
 				ball.position.y = 1.4
 				set_holding_ball(true)
 				set_assignment("holding_ball")
+				set_animation('idle')
 				assignment_pos = null
 				ball_fielded.emit(self, ball_position_before_fielded)
 				if user_is_pitching_team:

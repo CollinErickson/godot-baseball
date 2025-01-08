@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://c7xao527v2us8"]
+[gd_scene load_steps=10 format=3 uid="uid://c7xao527v2us8"]
 
 [ext_resource type="Script" path="res://pitcher_3d.gd" id="1_druss"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_ym1c1"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_y31ut"]
+[ext_resource type="PackedScene" uid="uid://ni0m5dff7e5p" path="res://scenes/throw_bar_one_way.tscn" id="4_ytn3b"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fu166"]
 atlas = ExtResource("2_ym1c1")
@@ -51,5 +52,8 @@ sprite_frames = SubResource("SpriteFrames_rpjyj")
 [node name="Timer" type="Timer" parent="."]
 
 [node name="Char3D" parent="." instance=ExtResource("3_y31ut")]
+
+[node name="ThrowBarOneWay" parent="." instance=ExtResource("4_ytn3b")]
+visible = false
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -15,6 +15,15 @@ var animation = "idle"
 var throws:String = 'R'
 const time_until_pitch_release:float = 1.2
 var pitch_mode:String
+var pitch_select_step:int = 0
+var pitch_select_key = null
+var action_to_pitch_type:Dictionary = {
+	"throwhome": "FB",
+	"throwfirst": "2SFB",
+	"throwsecond": "CB",
+	"throwthird": "SL"
+}
+var pitch_bar_success:bool = true
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -47,7 +56,9 @@ func reset(pitch_mode_:String) -> void:
 	$AnimatedSprite3D.set_frame(0)
 	$AnimatedSprite3D.visible = false
 	pitch_mode = pitch_mode_
-	assert(pitch_mode in ["Button", "Bar"])
+	assert(pitch_mode in ["Button", "Bar", "BarOneWay", "BarTwoWay"])
+	pitch_select_step = 0
+	pitch_select_key = null
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -55,7 +66,7 @@ func reset(pitch_mode_:String) -> void:
 	set_animation("idle")
 	#$Char3D.set_color(color)
 	player = null
-
+	pitch_bar_success = true
 
 func get_spin_acceleration_and_speed():
 	var sign_
@@ -94,6 +105,8 @@ func _physics_process(delta: float) -> void:
 		#$Char3D/charnode/AnimationTree.get("parameters/conditions/idle"))
 	if is_frozen:
 		return
+		
+	#printt('in pitcher:', pitch_mode, pitch_select_key, pitch_select_step)
 	
 	if pitch_in_progress:
 		time_since_pitch_start += delta
@@ -107,18 +120,46 @@ func _physics_process(delta: float) -> void:
 	if not pitch_done and not pitch_in_progress: 
 		if user_is_pitching_team:
 			# Pitch type
-			if Input.is_action_just_pressed("throwhome"):
-				pitch_type = "FB"
-			elif Input.is_action_just_pressed("throwfirst"):
-				pitch_type = "2SFB"
-			elif Input.is_action_just_pressed("throwthird"):
-				pitch_type = "SL"
-			elif Input.is_action_just_pressed("throwsecond"):
-				pitch_type = "CB"
+			if pitch_mode == "Button":
+				# Single press starts pitch
+				for action in action_to_pitch_type.keys():
+					if Input.is_action_just_pressed(action):
+						pitch_type = action_to_pitch_type[action]
+						begin_pitch()
+			elif pitch_mode == "Bar":
+				assert(false)
+			elif pitch_mode == "BarOneWay":
+				# Press (0) and release (1)
+				if pitch_select_step == 0:
+					# Check for press
+					for action in action_to_pitch_type.keys():
+						if Input.is_action_just_pressed(action):
+							pitch_type = action_to_pitch_type[action]
+							pitch_select_step = 1
+							pitch_select_key = action
+							$ThrowBarOneWay.visible = true
+							var cam = get_viewport().get_camera_3d()
+							$ThrowBarOneWay.position = cam.unproject_position(global_position)
+							$ThrowBarOneWay.reset(50, .5)
+				elif pitch_select_step == 1:
+					# Check for release
+					if Input.is_action_just_released(pitch_select_key):
+						pitch_select_step = 2
+						var barout = $ThrowBarOneWay.check_success(true, true)
+						var bar_success = randf() >= barout[1]
+						if !bar_success:
+							#pitch_x += 1
+							#pitch_y += 1
+							pitch_bar_success = false
+						begin_pitch()
+			elif pitch_mode == "BarTwoWay":
+				assert(false)
+			else:
+				assert(false)
 			# Begin pitch
 			#if click and on keyboard thing:
-			if Input.is_action_just_pressed("begin_pitch"):
-				begin_pitch()
+			#if Input.is_action_just_pressed("begin_pitch"):
+				#begin_pitch()
 		else:
 			if timer_action == null:
 				# Start pitch
@@ -169,7 +210,9 @@ func _physics_process(delta: float) -> void:
 		if user_is_pitching_team:
 			pitch_x = catchers_mitt.position.x
 			pitch_y = catchers_mitt.position.y
-		
+		if not pitch_bar_success:
+			pitch_x += randfn(0, 0.5)
+			pitch_y += randfn(0, 0.5)
 		
 		# Test my parabola solution
 		#printt('test parabola solution')

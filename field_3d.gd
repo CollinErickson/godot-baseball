@@ -158,8 +158,12 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
 	$PrepitchFieldOverlay.setup_pitcher(fielding_team.roster[fielding_team.defense_order[1 - 1]])
-
-	$Headon/Cameras/Camera3DBatting.current = true
+	
+	if user_is_batting_team_ or true:
+		$Headon/Cameras/Camera3DBatting.current = true
+	else:
+		$Headon/Cameras/Camera3DPitcherShoulderRight.current = true
+	
 	var mgl = get_node("Headon/MouseGroundLocation")
 	mgl.visible = false
 	mgl.set_process(false)
