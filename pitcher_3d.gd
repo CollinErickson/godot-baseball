@@ -24,6 +24,8 @@ var action_to_pitch_type:Dictionary = {
 	"throwthird": "SL"
 }
 var pitch_bar_success:bool = true
+# [pitch speed multiplier, spin accel multiplier, x modifier, y modifier]
+var pitch_input_modifiers:Array = []
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -59,6 +61,7 @@ func reset(pitch_mode_:String) -> void:
 	assert(pitch_mode in ["Button", "Bar", "BarOneWay", "BarTwoWay"])
 	pitch_select_step = 0
 	pitch_select_key = null
+	pitch_input_modifiers = []
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -126,6 +129,23 @@ func _physics_process(delta: float) -> void:
 				for action in action_to_pitch_type.keys():
 					if Input.is_action_just_pressed(action):
 						pitch_type = action_to_pitch_type[action]
+						var simulate_success = randf() < 0.93
+						if simulate_success:
+							pitch_input_modifiers = [
+								randf_range(.98, 1),
+								 Vector3(randf_range(.96, 1),
+										 randf_range(.96, 1),
+										 randf_range(.96, 1)),
+								randfn(0, 1./12.*3.),
+								randfn(0, 1./12.*3.)]
+						else:
+							pitch_input_modifiers = [
+								randf_range(.92, 1),
+								 Vector3(randf_range(.85, 1),
+										 randf_range(.85, 1),
+										 randf_range(.85, 1)),
+								randfn(0, 1./12.*6.),
+								randfn(0, 1./12.*6.)]
 						begin_pitch()
 			elif pitch_mode == "Bar":
 				assert(false)
@@ -146,12 +166,26 @@ func _physics_process(delta: float) -> void:
 					# Check for release
 					if Input.is_action_just_released(pitch_select_key):
 						pitch_select_step = 2
+						# BarOneWay returns: [selector %, red %]
 						var barout = $ThrowBarOneWay.check_success(true, true)
 						var bar_success = randf() >= barout[1]
-						if !bar_success:
-							#pitch_x += 1
-							#pitch_y += 1
+						if bar_success:
+							pitch_input_modifiers = [
+								randf_range(.98, 1),
+								 Vector3(randf_range(.96, 1),
+										 randf_range(.96, 1),
+										 randf_range(.96, 1)),
+								randfn(0, 1./12.*3.),
+								randfn(0, 1./12.*3.)]
+						else:
 							pitch_bar_success = false
+							pitch_input_modifiers = [
+								randf_range(.92, 1),
+								 Vector3(randf_range(.85, 1),
+										 randf_range(.85, 1),
+										 randf_range(.85, 1)),
+								randfn(0, 1./12.*6.),
+								randfn(0, 1./12.*6.)]
 						begin_pitch()
 			elif pitch_mode == "BarTwoWay":
 				# Press (0) and release (1) and return press (2)
@@ -176,12 +210,26 @@ func _physics_process(delta: float) -> void:
 					if (Input.is_action_just_pressed(pitch_select_key) or 
 							$ThrowBarTwoWay.bar_reached_end_without_forward_release):
 						pitch_select_step = 3
+						# BarTwoWay returns: [function success, selector %, red %, bar success]
 						var barout = $ThrowBarTwoWay.check_success(true, true)
 						var bar_success = barout[3]
-						if !bar_success:
-							#pitch_x += 1
-							#pitch_y += 1
+						if bar_success:
+							pitch_input_modifiers = [
+								randf_range(.98, 1),
+								 Vector3(randf_range(.96, 1),
+										 randf_range(.96, 1),
+										 randf_range(.96, 1)),
+								randfn(0, 1./12.*3.),
+								randfn(0, 1./12.*3.)]
+						else:
 							pitch_bar_success = false
+							pitch_input_modifiers = [
+								randf_range(.92, 1),
+								 Vector3(randf_range(.85, 1),
+										 randf_range(.85, 1),
+										 randf_range(.85, 1)),
+								randfn(0, 1./12.*6.),
+								randfn(0, 1./12.*6.)]
 						begin_pitch()
 			else:
 				assert(false)
@@ -239,9 +287,15 @@ func _physics_process(delta: float) -> void:
 		if user_is_pitching_team:
 			pitch_x = catchers_mitt.position.x
 			pitch_y = catchers_mitt.position.y
-		if not pitch_bar_success:
-			pitch_x += randfn(0, 0.5)
-			pitch_y += randfn(0, 0.5)
+		if len(pitch_input_modifiers) > 0.5:
+			printt('in pitcher using modifiers', pitch_input_modifiers)
+			pitchspeed *= pitch_input_modifiers[0]
+			ball.spin_acceleration *= pitch_input_modifiers[1]
+			pitch_x += pitch_input_modifiers[2]
+			pitch_y += pitch_input_modifiers[3]
+		#if not pitch_bar_success:
+			#pitch_x += randfn(0, 0.5)
+			#pitch_y += randfn(0, 0.5)
 		
 		# Test my parabola solution
 		#printt('test parabola solution')
