@@ -16,18 +16,9 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -94.0
-offset_right = 88.0
+offset_top = -112.0
+offset_right = 187.0
 grow_vertical = 0
-
-[node name="Background" type="ColorRect" parent="Pitcher"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.27451, 0.27451, 0.27451, 0.439216)
 
 [node name="MarginContainer" type="MarginContainer" parent="Pitcher"]
 layout_mode = 1
@@ -36,22 +27,31 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Background" type="ColorRect" parent="Pitcher/MarginContainer"]
+layout_mode = 2
+color = Color(0.27451, 0.27451, 0.27451, 0.439216)
+
+[node name="MarginContainer" type="MarginContainer" parent="Pitcher/MarginContainer"]
+layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Pitcher/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Pitcher/MarginContainer/MarginContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="Line1" type="Label" parent="Pitcher/MarginContainer/VBoxContainer"]
+[node name="Line1" type="Label" parent="Pitcher/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 1"
 
-[node name="Line2" type="Label" parent="Pitcher/MarginContainer/VBoxContainer"]
+[node name="Line2" type="Label" parent="Pitcher/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 2"
 
-[node name="Line3" type="Label" parent="Pitcher/MarginContainer/VBoxContainer"]
+[node name="Line3" type="Label" parent="Pitcher/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 3"
 
@@ -62,19 +62,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -106.0
+offset_left = -192.0
 offset_top = -104.0
 grow_horizontal = 0
 grow_vertical = 0
-
-[node name="Background" type="ColorRect" parent="Batter"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.27451, 0.27451, 0.27451, 0.439216)
 
 [node name="MarginContainer" type="MarginContainer" parent="Batter"]
 layout_mode = 1
@@ -83,24 +74,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Background" type="ColorRect" parent="Batter/MarginContainer"]
+layout_mode = 2
+color = Color(0.27451, 0.27451, 0.27451, 0.439216)
+
+[node name="MarginContainer" type="MarginContainer" parent="Batter/MarginContainer"]
+layout_mode = 2
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Batter/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Batter/MarginContainer/MarginContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="Line1" type="Label" parent="Batter/MarginContainer/VBoxContainer"]
+[node name="Line1" type="Label" parent="Batter/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 1"
 horizontal_alignment = 2
 
-[node name="Line2" type="Label" parent="Batter/MarginContainer/VBoxContainer"]
+[node name="Line2" type="Label" parent="Batter/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 2"
 horizontal_alignment = 2
 
-[node name="Line3" type="Label" parent="Batter/MarginContainer/VBoxContainer"]
+[node name="Line3" type="Label" parent="Batter/MarginContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Line 3"
 horizontal_alignment = 2
