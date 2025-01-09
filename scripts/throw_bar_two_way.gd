@@ -17,6 +17,7 @@ var selector_width_pct:float = 9
 var background_margin:float = 6
 var release_pct:float
 var release_red_pct:float
+var bar_reached_end_without_forward_release:float = false
 
 
 
@@ -68,6 +69,7 @@ func reset(gradient_width_pct_, selector_speed_):
 	visible = true
 	release_pct = -100
 	release_red_pct = -100
+	bar_reached_end_without_forward_release = false
 	dir = 1
 	$GreenRect.visible = false
 	$GradientRect.visible = true
@@ -103,6 +105,7 @@ func _process(delta: float) -> void:
 		# End it
 		if dir < 0 and selector_pct < 0:
 			selector_pct = 0
+			bar_reached_end_without_forward_release = true
 		
 		# Update selector rect pos, align center
 		$SelectorRect.position.x = width * (selector_pct - selector_width_pct / 2)/100.
@@ -122,7 +125,12 @@ func check_success(stop:bool=false,hide_:bool=false) -> Array:
 		success = true
 	return [true, selector_pct, release_red_pct, success]
 
-func forward_release() -> void:
+func forward_release() -> bool:
+	# Returns if it worked successfully
+	# Don't let this happen twice
+	if release_red_pct > -1:
+		return false
+	
 	# Find intensity and % red
 	release_pct = selector_pct
 	
@@ -139,3 +147,4 @@ func forward_release() -> void:
 	$GreenRect.position.x = green_left_pct * width / 100.
 	$GreenRect.visible = true
 	$GradientRect.visible = false
+	return true

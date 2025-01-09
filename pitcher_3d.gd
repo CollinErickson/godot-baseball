@@ -153,7 +153,35 @@ func _physics_process(delta: float) -> void:
 							pitch_bar_success = false
 						begin_pitch()
 			elif pitch_mode == "BarTwoWay":
-				assert(false)
+				# Press (0) and release (1) and return press (2)
+				if pitch_select_step == 0:
+					# Check for press
+					for action in action_to_pitch_type.keys():
+						if Input.is_action_just_pressed(action):
+							pitch_type = action_to_pitch_type[action]
+							pitch_select_step = 1
+							pitch_select_key = action
+							$ThrowBarTwoWay.visible = true
+							var cam = get_viewport().get_camera_3d()
+							$ThrowBarTwoWay.position = cam.unproject_position(global_position)
+							$ThrowBarTwoWay.reset(50, .5)
+				elif pitch_select_step == 1:
+					# Check for release
+					if Input.is_action_just_released(pitch_select_key):
+						pitch_select_step = 2
+						$ThrowBarTwoWay.forward_release()
+				elif pitch_select_step == 2:
+					# Check for return press
+					if (Input.is_action_just_pressed(pitch_select_key) or 
+							$ThrowBarTwoWay.bar_reached_end_without_forward_release):
+						pitch_select_step = 3
+						var barout = $ThrowBarTwoWay.check_success(true, true)
+						var bar_success = barout[3]
+						if !bar_success:
+							#pitch_x += 1
+							#pitch_y += 1
+							pitch_bar_success = false
+						begin_pitch()
 			else:
 				assert(false)
 			# Begin pitch
