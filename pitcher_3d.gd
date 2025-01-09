@@ -92,6 +92,7 @@ func begin_pitch():
 	pitch_frame = 1
 	$AnimatedSprite3D.set_frame(1)
 	#printt('BEGINNING PITCH IN PITCHER')
+	player.update_pitcher_stamina()
 	pitch_started.emit(pitch_x, pitch_y, pitch_t)
 	#printt('signal was emitted.......')
 	

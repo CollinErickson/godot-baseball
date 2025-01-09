@@ -43,6 +43,8 @@ func _ready() -> void:
 	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
+	home_team.prepare_for_game()
+	away_team.prepare_for_game()
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
 	#batter.speed = 1.80

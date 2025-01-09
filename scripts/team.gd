@@ -99,3 +99,11 @@ func randomize_jersey() -> void:
 	# Randomize jersey/hat style
 	jersey_style = ["PP", "PS"].pick_random()
 	hat_style = ["PP", "PS", "SP", "SS"].pick_random()
+
+func prepare_for_game() -> bool:
+	# Prepare team for a game
+	# Reset pitcher stamina
+	for player in roster:
+		player.current_game_pitching_stamina = player.pitching_stamina
+	# Return true if everything worked
+	return true

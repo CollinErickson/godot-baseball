@@ -17,6 +17,8 @@ var throwspeed:float
 var contact:float
 var power:float
 var pitching:float
+var pitching_stamina:float
+var current_game_pitching_stamina:float
 
 func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 			bats_:String, throws_:String):
@@ -33,6 +35,8 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	contact = 0.
 	power = 0.
 	pitching = 0.
+	pitching_stamina = round(randf_range(40, 100))*1.
+	current_game_pitching_stamina = pitching_stamina
 	
 	skin_color = skin_colors.pick_random()
 	height_mult = randfn(1,.1)
@@ -45,8 +49,8 @@ func print_():
 	print('\tSpeed: ', speed)
 
 func create_random(speed_:float=randi_range(20,80)):
-	var f = ["Nick", "Britt", "Greg", "Troy"]
-	var l = ["Farinacci", "Fugett", "Ferrara", 'Vergara']
+	var f = ["Alan", "Alfonso", "Britt", "Greg", "Ollie", "Nick", "Pasqual", "Troy"]
+	var l = ["Bennett", "Caraccioli", "Farinacci", "Fugett", "Ferrara", "Hayden", "Vergara"]
 	setup(f.pick_random(), l.pick_random(), speed_, 39.,
 		["R","L"].pick_random(), 
 		["R","L"].pick_random())
@@ -68,3 +72,9 @@ var skin_colors = [Color( .79, .46, .42),
 					Color(.58, .30, .27),
 					Color(.39, .26, .16),
 				]
+
+func update_pitcher_stamina() -> void:
+	#printt('in player update_pitcher_stamina before:', first, last, current_game_pitching_stamina)
+	current_game_pitching_stamina = max(0,
+										current_game_pitching_stamina - 3)
+	#printt('in player update_pitcher_stamina after:', first, last, current_game_pitching_stamina)
