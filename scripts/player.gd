@@ -14,9 +14,11 @@ var height_mult:float # 1 is average. Scales all dimensions of body
 # Skills
 var speed:float
 var throwspeed:float
+var throwaccuracy:float
 var contact:float
 var power:float
 var pitching:float
+var pitchspeed:float
 var pitching_stamina:float
 var current_game_pitching_stamina:float
 
@@ -32,10 +34,12 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	
 	speed = speed_
 	throwspeed = throwspeed_
+	pitchspeed = 0
 	contact = 0.
 	power = 0.
 	pitching = 0.
-	pitching_stamina = round(randf_range(40, 100))*1.
+	throwaccuracy = round(randf_range(40, 100))*1.
+	pitching_stamina = round(randf_range(40, 100))*1./20
 	current_game_pitching_stamina = pitching_stamina
 	
 	skin_color = skin_colors.pick_random()
@@ -62,8 +66,14 @@ func speed_mps() -> float:
 	return SPEED
 
 func throwspeed_mps() -> float:
+	# Meter per second
 	var throwspeed_mps_ = 40
 	return throwspeed_mps_
+
+func pitchspeed_mps() -> float:
+	# Meter per second
+	var pitchspeed_mps_ = 40
+	return pitchspeed_mps_
 	
 var skin_colors = [Color( .79, .46, .42),
 					Color(.24, .14, .08),

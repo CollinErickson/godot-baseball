@@ -586,11 +586,11 @@ func _process(delta: float) -> void:
 					vla = 15 + [1,-1].pick_random() * pci_distance_from_ball * 80
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
-					# Debugging
+					# Debugging exitvelo/vla/hla
 					if false:
-						vla = 0
-						hla = 60
-						exitvelo = 8.8
+						vla = 88
+						hla = 0
+						exitvelo = 58.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -756,7 +756,9 @@ func _process(delta: float) -> void:
 	
 	# Move camera so that the ball stays in view
 	cam = get_viewport().get_camera_3d()
-	var ball_viewport_2d_position = cam.unproject_position(ball.global_position)
+	var target_position = ball.global_position
+	#target_position.y = 0
+	var ball_viewport_2d_position = cam.unproject_position(target_position)
 	var viewport_size = get_viewport().size
 	if ball_in_play:
 		# Using inertia instead of changing angle based on single frames reduces jitter

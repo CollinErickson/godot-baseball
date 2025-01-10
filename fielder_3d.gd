@@ -30,6 +30,7 @@ var throw_mode:String = "" # "Button", "Bar"
 var prev_position:Vector3
 var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
+var player
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -54,6 +55,7 @@ func reset(throw_mode_:String) -> void:
 	position = start_position
 	velocity = Vector3()
 	
+	player = null
 	assignment = null
 	assignment_pos = null
 	#holding_ball = false
@@ -592,7 +594,10 @@ func start_throw_ball_func(base, fielder, key_check_release):
 		$ThrowBarOneWay.visible = true
 		var cam = get_viewport().get_camera_3d()
 		$ThrowBarOneWay.position = cam.unproject_position(global_position)
-		$ThrowBarOneWay.reset(50, .5)
+		var gradient_width = 80 - 70 * (player.throwaccuracy / 100)
+		#printt('in fielder about to throw, throwacc and gradient_width',
+			#player.throwaccuracy, gradient_width)
+		$ThrowBarOneWay.reset(gradient_width, .5)
 	else:
 		assert(false)
 
@@ -935,15 +940,14 @@ func set_holding_ball(hb:bool) -> void:
 		if !user_is_pitching_team:
 			$Annulus.visible = false
 
-func setup_player(player, team, is_home_team:bool) -> void:
-	if player != null:
-		throws = player.throws
-		SPEED = player.speed_mps()
-		max_throw_speed = player.throwspeed_mps()
-		catch_max_y = player.height_mult * 2.5
-	if team != null:
-		$Char3D.set_color_from_team(player, team, is_home_team)
-		$Char3D.set_glove(throws=="R")
+func setup_player(player_, team, is_home_team:bool) -> void:
+	player = player_
+	throws = player.throws
+	SPEED = player.speed_mps()
+	max_throw_speed = player.throwspeed_mps()
+	catch_max_y = player.height_mult * 2.5
+	$Char3D.set_color_from_team(player, team, is_home_team)
+	$Char3D.set_glove(throws=="R")
 
 var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
 func decide_what_to_do_with_ball() -> Array:

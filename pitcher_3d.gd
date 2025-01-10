@@ -161,7 +161,9 @@ func _physics_process(delta: float) -> void:
 							$ThrowBarOneWay.visible = true
 							var cam = get_viewport().get_camera_3d()
 							$ThrowBarOneWay.position = cam.unproject_position(global_position)
-							$ThrowBarOneWay.reset(50, .5)
+							var gradient_width = 80 - 70 * (player.current_game_pitching_stamina / player.pitching_stamina)
+							#printt('in pitcher setting gradient_width', gradient_width)
+							$ThrowBarOneWay.reset(gradient_width, .5)
 				elif pitch_select_step == 1:
 					# Check for release
 					if Input.is_action_just_released(pitch_select_key):
@@ -199,7 +201,9 @@ func _physics_process(delta: float) -> void:
 							$ThrowBarTwoWay.visible = true
 							var cam = get_viewport().get_camera_3d()
 							$ThrowBarTwoWay.position = cam.unproject_position(global_position)
-							$ThrowBarTwoWay.reset(50, .5)
+							var gradient_width = 80 - 70 * (player.current_game_pitching_stamina / player.pitching_stamina)
+							#printt('in pitcher setting gradient_width', gradient_width)
+							$ThrowBarTwoWay.reset(gradient_width, .5)
 				elif pitch_select_step == 1:
 					# Check for release
 					if Input.is_action_just_released(pitch_select_key):
