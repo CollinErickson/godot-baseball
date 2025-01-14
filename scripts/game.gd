@@ -74,7 +74,7 @@ func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
 					runner1!=null, runner2!=null, runner3!=null,
 					away_team.abbr,
-					home_team.abbr)
+					home_team.abbr, outs_per_inning)
 
 func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike: bool,
 									is_foul_ball: bool,
