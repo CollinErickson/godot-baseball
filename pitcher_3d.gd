@@ -213,28 +213,29 @@ func _physics_process(delta: float) -> void:
 					# Check for return press
 					if (Input.is_action_just_pressed(pitch_select_key) or 
 							$ThrowBarTwoWay.bar_reached_end_without_forward_release):
-						pitch_select_step = 3
 						# BarTwoWay returns: [function success, selector %, red %, bar success]
 						var barout = $ThrowBarTwoWay.check_success(true, true)
-						var bar_success = barout[3]
-						if bar_success:
-							pitch_input_modifiers = [
-								randf_range(.98, 1),
-								 Vector3(randf_range(.96, 1),
-										 randf_range(.96, 1),
-										 randf_range(.96, 1)),
-								randfn(0, 1./12.*3.),
-								randfn(0, 1./12.*3.)]
-						else:
-							pitch_bar_success = false
-							pitch_input_modifiers = [
-								randf_range(.92, 1),
-								 Vector3(randf_range(.85, 1),
-										 randf_range(.85, 1),
-										 randf_range(.85, 1)),
-								randfn(0, 1./12.*6.),
-								randfn(0, 1./12.*6.)]
-						begin_pitch()
+						if barout[1]:
+							pitch_select_step = 3
+							var bar_success = barout[3]
+							if bar_success:
+								pitch_input_modifiers = [
+									randf_range(.98, 1),
+									 Vector3(randf_range(.96, 1),
+											 randf_range(.96, 1),
+											 randf_range(.96, 1)),
+									randfn(0, 1./12.*3.),
+									randfn(0, 1./12.*3.)]
+							else:
+								pitch_bar_success = false
+								pitch_input_modifiers = [
+									randf_range(.92, 1),
+									 Vector3(randf_range(.85, 1),
+											 randf_range(.85, 1),
+											 randf_range(.85, 1)),
+									randfn(0, 1./12.*6.),
+									randfn(0, 1./12.*6.)]
+							begin_pitch()
 			else:
 				assert(false)
 			# Begin pitch
