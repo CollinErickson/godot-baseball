@@ -4,7 +4,7 @@ var is_active:bool = true
 
 signal click_in_rect
 
-func _process(delta: float) -> void:
+func _process(_delta) -> void:
 	if is_active:
 		if Input.is_action_just_pressed("click"):
 			var mpos = get_local_mouse_position()

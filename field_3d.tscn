@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=61 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" path="res://field_3d.gd" id="1_pctx6"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://flash_text.gd" id="14_g2qjr"]
 [ext_resource type="PackedScene" uid="uid://nprqmch1yea5" path="res://scenes/explosion.tscn" id="16_mgd0q"]
 [ext_resource type="PackedScene" uid="uid://ccbr5gjhlqkux" path="res://scenes/prepitch_field_overlay.tscn" id="18_opycq"]
+[ext_resource type="PackedScene" uid="uid://ekrl3y0l42kb" path="res://scenes/mini_field.tscn" id="20_fgd4v"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -476,6 +477,9 @@ script = ExtResource("14_g2qjr")
 [node name="PlayOverTimer" type="Timer" parent="."]
 
 [node name="PrepitchFieldOverlay" parent="." instance=ExtResource("18_opycq")]
+
+[node name="MiniField" parent="." instance=ExtResource("20_fgd4v")]
+position = Vector2(1200, 100)
 
 [connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="ball_overthrown" from="Headon/Ball3D" to="." method="_on_ball_3d_ball_overthrown"]

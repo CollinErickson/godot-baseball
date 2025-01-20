@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://ekrl3y0l42kb"]
+
+[ext_resource type="Script" path="res://scripts/mini_field.gd" id="1_5o3b4"]
+[ext_resource type="Texture2D" uid="uid://p5ds4p0bgk32" path="res://white_rectangle_8_8.png" id="2_7s5p2"]
+
+[node name="MiniField" type="Node2D"]
+script = ExtResource("1_5o3b4")
+
+[node name="Background" type="Sprite2D" parent="."]
+modulate = Color(0.74558, 0.74558, 0.74558, 0.501961)
+position = Vector2(0, -40)
+scale = Vector2(15.07, 16)
+texture = ExtResource("2_7s5p2")
+
+[node name="Base1B" type="Sprite2D" parent="."]
+rotation = 0.785398
+texture = ExtResource("2_7s5p2")
+
+[node name="Base2B" type="Sprite2D" parent="."]
+rotation = 0.785398
+texture = ExtResource("2_7s5p2")
+
+[node name="Base3B" type="Sprite2D" parent="."]
+rotation = 0.785398
+texture = ExtResource("2_7s5p2")
+
+[node name="BaseHome" type="Sprite2D" parent="."]
+rotation = 0.785398
+texture = ExtResource("2_7s5p2")

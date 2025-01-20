@@ -825,6 +825,8 @@ func _process(delta: float) -> void:
 					play_done()
 			else:
 				time_since_play_done_consecutive = 0
+	
+	update_minifield()
 
 var tmp_ball
 var ball_3d_scene = load("res://ball_3d.tscn")
@@ -1595,3 +1597,19 @@ func decide_automatic_runners_actions():
 		if runners[i].is_active() and decisions[i] != null:
 			#runners[i].send_runner(decisions[i], decisions[i] > 1.5)
 			runners[i].send_runner_to_base(decision_bases[i])
+
+func update_minifield() -> void:
+	#printt('in field update_minifield', $MiniField.get_children())
+	for fielder in fielders:
+		#printt('in field update_minifield', "Fielder" + fielder.posname)
+		$MiniField.update_position($MiniField.get_node("Fielder" + fielder.posname),
+									fielder.position)
+	
+	for runner in runners:
+		if runner.is_active():
+			#printt('in field update_minifield runner:', runner.name)
+			$MiniField.get_node(str(runner.name)).visible = true
+			$MiniField.update_position($MiniField.get_node(str(runner.name)),
+										runner.position)
+		else:
+			$MiniField.get_node(str(runner.name)).visible = false
