@@ -108,7 +108,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			fielding_team_is_home:bool,
 			throw_mode_:String,
 			bat_mode_:String,
-			pitch_mode_:String):
+			pitch_mode_:String,
+			user_input_method:String):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Reset children
 	ball.reset()
@@ -153,7 +154,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$PrepitchFieldOverlay.setup_batter(batter)
 
 	# Setup pitcher
-	$Headon/Pitcher3D.reset(pitch_mode_)
+	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)

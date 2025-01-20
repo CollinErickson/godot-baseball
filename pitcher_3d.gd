@@ -8,7 +8,8 @@ var pitch_frame = 0
 var pitch_type = "FB"
 var max_pitch_speed = 34
 var pitch_hand = "L"
-var user_is_pitching_team
+var user_is_pitching_team:bool
+var user_input_method # "mouse", "keyboard", "controller"
 var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
 var animation = "idle"
@@ -21,7 +22,8 @@ var action_to_pitch_type:Dictionary = {
 	"throwhome": "FB",
 	"throwfirst": "2SFB",
 	"throwsecond": "CB",
-	"throwthird": "SL"
+	"throwthird": "SL",
+	"click": "click"
 }
 var pitch_bar_success:bool = true
 # [pitch speed multiplier, spin accel multiplier, x modifier, y modifier]
@@ -45,7 +47,11 @@ func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
 
-func reset(pitch_mode_:String) -> void:
+func _ready() -> void:
+	$PitchSelectClick.connect("click_in_rect", _on_click_in_rect_by_mouse)
+
+
+func reset(pitch_mode_:String, user_input_method_:String) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -54,7 +60,7 @@ func reset(pitch_mode_:String) -> void:
 	pitch_done = false
 	time_since_pitch_start = 0
 	pitch_frame = 0
-	pitch_type = "FB"
+	pitch_type = null
 	$AnimatedSprite3D.set_frame(0)
 	$AnimatedSprite3D.visible = false
 	pitch_mode = pitch_mode_
@@ -62,6 +68,24 @@ func reset(pitch_mode_:String) -> void:
 	pitch_select_step = 0
 	pitch_select_key = null
 	pitch_input_modifiers = []
+	user_input_method = user_input_method_
+	if user_input_method == "mouse":
+		$PitchSelectClick.set_active(true)
+		$PitchSelectKeyboard.visible = false
+		action_to_pitch_type = {
+			"click": "click"
+		}
+	elif user_input_method in ["keyboard", "controller"]:
+		$PitchSelectClick.set_active(false)
+		$PitchSelectKeyboard.visible = true
+		action_to_pitch_type = {
+			"throwhome": "FB",
+			"throwfirst": "2SFB",
+			"throwsecond": "CB",
+			"throwthird": "SL"
+		}
+	else:
+		assert(false)
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -85,7 +109,7 @@ func get_spin_acceleration_and_speed():
 		return [Vector3(4,0,0)*sign_, .85*max_pitch_speed]
 	elif pitch_type == 'CB':
 		return [Vector3(0,-4,0)*sign_, .7*max_pitch_speed]
-	print("BAD PITCH TYPE")
+	printt("in pitcher get_spin_acceleration_and_speed, BAD PITCH TYPE", pitch_type)
 	return [Vector3(0,3,0)*sign_, max_pitch_speed]
 
 signal pitch_started#(pitch_x, pitch_y)
@@ -123,12 +147,16 @@ func _physics_process(delta: float) -> void:
 	# Pre-pitch
 	if not pitch_done and not pitch_in_progress: 
 		if user_is_pitching_team:
-			# Pitch type
-			if pitch_mode == "Button":
+			if user_input_method=="mouse" and pitch_type==null:
+				# Can't start pitch yet
+				pass
+			# Check for pitch start buttons/clicks
+			elif pitch_mode == "Button":
 				# Single press starts pitch
 				for action in action_to_pitch_type.keys():
 					if Input.is_action_just_pressed(action):
-						pitch_type = action_to_pitch_type[action]
+						if action != "click":
+							pitch_type = action_to_pitch_type[action]
 						var simulate_success = randf() < 0.93
 						if simulate_success:
 							pitch_input_modifiers = [
@@ -155,7 +183,8 @@ func _physics_process(delta: float) -> void:
 					# Check for press
 					for action in action_to_pitch_type.keys():
 						if Input.is_action_just_pressed(action):
-							pitch_type = action_to_pitch_type[action]
+							if action != "click":
+								pitch_type = action_to_pitch_type[action]
 							pitch_select_step = 1
 							pitch_select_key = action
 							$ThrowBarOneWay.visible = true
@@ -195,7 +224,8 @@ func _physics_process(delta: float) -> void:
 					# Check for press
 					for action in action_to_pitch_type.keys():
 						if Input.is_action_just_pressed(action):
-							pitch_type = action_to_pitch_type[action]
+							if action != "click":
+								pitch_type = action_to_pitch_type[action]
 							pitch_select_step = 1
 							pitch_select_key = action
 							$ThrowBarTwoWay.visible = true
@@ -440,3 +470,17 @@ func setup_player(player_, team, is_home_team:bool) -> void:
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 		$Char3D.set_glove(throws=="R")
+
+func _on_click_in_rect_by_mouse(num:int) -> void:
+	if num == 0:
+		pitch_type = "CB"
+	elif num == 1:
+		pitch_type = "SL"
+	elif num == 2:
+		pitch_type = "FB"
+	elif num == 3:
+		pitch_type = "2SFB"
+	else:
+		print('in pitcher _on_click_in_rect_by_mouse', num)
+		assert(false)
+	$PitchSelectClick.visible = false

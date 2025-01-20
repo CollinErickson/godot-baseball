@@ -20,6 +20,7 @@ var home_runs:int = 0
 var away_runs:int = 0
 var user_is_away_team:bool = false
 var user_is_home_team:bool = true
+var user_input_method:String = "keyboard" # "mouse", "keyboard", "controller"
 
 var player = preload("res://scenes/player.tscn")
 var batter:Player  = null
@@ -182,7 +183,8 @@ func reset_field() -> void:
 		is_top,
 		throw_mode,
 		bat_mode,
-		pitch_mode)
+		pitch_mode,
+		user_input_method)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()
