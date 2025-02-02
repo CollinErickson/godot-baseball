@@ -245,7 +245,7 @@ func _physics_process(delta: float) -> void:
 							$ThrowBarTwoWay.bar_reached_end_without_forward_release):
 						# BarTwoWay returns: [function success, selector %, red %, bar success]
 						var barout = $ThrowBarTwoWay.check_success(true, true)
-						if barout[1]:
+						if barout[0]:
 							pitch_select_step = 3
 							var bar_success = barout[3]
 							if bar_success:

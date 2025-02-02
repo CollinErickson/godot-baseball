@@ -674,6 +674,7 @@ func _process(delta: float) -> void:
 			#decide_automatic_runners_actions()
 			# Set ball land annulus
 			$Headon/BallBounceAnnulus.position = fftib[5]
+			$Headon/BallBounceAnnulus.position.y = 0.022 # fielder is 0.02
 			$Headon/BallBounceAnnulus.visible = true
 	
 	# Move baserunners
@@ -761,7 +762,21 @@ func _process(delta: float) -> void:
 	#target_position.y = 0
 	var ball_viewport_2d_position = cam.unproject_position(target_position)
 	var viewport_size = get_viewport().size
+	
+	# Move camera to follow ball
 	if ball_in_play:
+		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
+		var cam_center = Vector3(-1, 0, -1).normalized() * 10
+		camhh.global_position = ball.global_position + 60 * (
+			cam_center - 
+			ball.global_position * Vector3(1,0,1)).normalized()
+		camhh.global_position.y = 15
+		#printt("camhh:", cam_center, camhh.global_position)
+		camhh.look_at(Vector3(ball.global_position.x, 0, ball.global_position.z))
+		
+	# Auto adjust cam to keep ball in view
+	# Removing, this never worked well
+	if ball_in_play and false:
 		# Using inertia instead of changing angle based on single frames reduces jitter
 		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
 		# .98 is high. If too high, it goes too far. If too low, it jerks.

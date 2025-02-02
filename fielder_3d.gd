@@ -237,8 +237,9 @@ func _physics_process(delta: float) -> void:
 			return
 	
 	# Move fielder to their assignment
-	if ((assignment in ["cover", "ball_click", "ball_carry"]) or
-		(assignment == 'ball' and not user_is_pitching_team)):
+	if (((assignment in ["cover", "ball_click", "ball_carry"]) or
+		(assignment == 'ball' and not user_is_pitching_team)) and 
+		assignment_pos != null):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		moved_this_process = true
