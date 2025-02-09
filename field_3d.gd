@@ -673,8 +673,8 @@ func _process(delta: float) -> void:
 			# Could use full function instead, but not necessary here
 			#decide_automatic_runners_actions()
 			# Set ball land annulus
-			$Headon/BallBounceAnnulus.position = fftib[5]
-			$Headon/BallBounceAnnulus.position.y = 0.022 # fielder is 0.02
+			$Headon/BallBounceAnnulus.position.x = fftib[5].x
+			$Headon/BallBounceAnnulus.position.z = fftib[5].z
 			$Headon/BallBounceAnnulus.visible = true
 	
 	# Move baserunners
