@@ -22,6 +22,8 @@ func _on_main_menu_selection(index_selected):
 		# Play ball
 		pass
 		# Start game
+		$Game.visible
+		$Game.start_game()
 	elif index_selected == 1:
 		# Settings
 		# Make it active

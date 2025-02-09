@@ -32,6 +32,45 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 @onready var pitcher = $Headon/Pitcher3D
 @onready var ball = $Headon/Ball3D
 
+func _ready() -> void:
+	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
+	
+	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
+	# Set up signals from fielders
+	for fielder in fielders:  
+		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
+		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
+		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
+		fielder.connect("tag_out", _on_tag_out_by_fielder)
+		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
+		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
+		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
+
+	# Set up signals from runners
+	for runner in runners:  
+		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
+		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
+		runner.connect("tag_up_signal", _on_tag_up_by_runner)
+	
+	# Set up signals from pitcher
+	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
+	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
+	
+	# Set up signals from ball
+	ball.connect("ball_over_wall_signal", _on_ball_over_wall_signal)
+	
+	# Start inactive since it will be in the background
+	pause()
+	# Set all invisible
+	set_vis(false)
+
+func set_vis(val:bool):
+	visible = val
+	$Headon/Pitcher3D/PitchSelectKeyboard.visible = val
+	$MiniField.visible = val
+	$PrepitchFieldOverlay.visible = val
+	$Headon/Pitcher3D/PitchSelectClick.visible = val
+
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
 	get_node("FlashText").new_text(desc, duration)
@@ -111,6 +150,10 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			pitch_mode_:String,
 			user_input_method:String):
 	printt('--------\n---- in field_3d reset\n--------')
+	# Make visible
+	set_vis(true)
+	# Unpause
+	unpause()
 	# Reset children
 	ball.reset()
 	
@@ -464,35 +507,6 @@ func test_mesh_array():
 	var your_material = StandardMaterial3D.new()
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	printt('in field_3d ready', $Headon/Defense/Fielder3DC.visible)
-	
-	#get_node('Headon/Batter3D/AnimatedSprite3DIdle').modulate = Color(0,1,0,1)
-	# Set up signals from fielders
-	for fielder in fielders:  
-		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
-		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
-		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
-		fielder.connect("tag_out", _on_tag_out_by_fielder)
-		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
-		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
-		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
-
-	# Set up signals from runners
-	for runner in runners:  
-		runner.connect("signal_scored_on_play", _on_signal_scored_on_play_by_runner)
-		runner.connect("reached_next_base_signal", _on_reached_next_base_by_runner)
-		runner.connect("tag_up_signal", _on_tag_up_by_runner)
-	
-	# Set up signals from pitcher
-	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
-	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
-	
-	# Set up signals from ball
-	ball.connect("ball_over_wall_signal", _on_ball_over_wall_signal)
 
 func get_mouse_sz_pos():
 	var cam = get_viewport().get_camera_3d()

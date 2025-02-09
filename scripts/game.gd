@@ -35,15 +35,25 @@ var home_team_batting_order_index = 0
 var away_team_batting_order_index = 0
 
 var is_paused:bool = false
-
+var this_is_root:bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#printt('test create player:', get_player())
 	printt('in game ready', away_team, home_team)
+	
+	if get_tree().root == get_parent():
+		this_is_root = true
+	
 	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
+	
+	if this_is_root:
+		#$Game.visible()
+		start_game()
+
+func start_game() -> void:
 	home_team.prepare_for_game()
 	away_team.prepare_for_game()
 	#batter = get_player(50)
@@ -53,6 +63,7 @@ func _ready() -> void:
 	#runner2 = get_player(50)
 	#runner3 = get_player(99)
 	reset_field()
+	$Scorebug.visible = true
 	update_scorebug()
 	
 	$PauseMenu.visible = false
@@ -60,9 +71,8 @@ func _ready() -> void:
 	$PauseMenu.connect("return_index_selected", _on_return_index_selected_from_pause_menu)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	pass
+	#printt('in game _process, scorebug visible', $Scorebug.visible)
 	# Check for pause/unpause
 	if Input.is_action_just_pressed("pause_game"):
 		#if is_paused: # Unpause
@@ -164,6 +174,11 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			batter = home_team.roster[home_team.batting_order[home_team_batting_order_index]]
 	#get_node('Field3D').freeze()
 	update_scorebug()
+	
+	# Check if game is over
+	
+	
+	# Otherwise continue the game
 	printt('\n\n\n\n\n\n\n\n\n\n\n\n\nin game, about to reset field')
 	reset_field()
 

@@ -50,7 +50,6 @@ func unpause() -> void:
 func _ready() -> void:
 	$PitchSelectClick.connect("click_in_rect", _on_click_in_rect_by_mouse)
 
-
 func reset(pitch_mode_:String, user_input_method_:String) -> void:
 	is_frozen = false
 	visible = true
@@ -115,10 +114,10 @@ func get_spin_acceleration_and_speed():
 signal pitch_started#(pitch_x, pitch_y)
 signal pitch_released_signal
 func begin_pitch():
+	printt('in pitcher: begin_pitch()')
 	pitch_in_progress = true
 	pitch_frame = 1
 	$AnimatedSprite3D.set_frame(1)
-	#printt('BEGINNING PITCH IN PITCHER')
 	player.update_pitcher_stamina()
 	pitch_started.emit(pitch_x, pitch_y, pitch_t)
 	#printt('signal was emitted.......')
@@ -459,6 +458,7 @@ func set_look_at_position(pos) -> void:
 	$Char3D.look_at(pos, Vector3.UP, true)
 
 func setup_player(player_, team, is_home_team:bool) -> void:
+	printt('in pitcher: setup_player')
 	if player_ == null:
 		push_error("no player in pitcher")
 	player = player_

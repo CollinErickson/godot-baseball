@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://drnqg2k8hgm4d"]
+[gd_scene load_steps=5 format=3 uid="uid://drnqg2k8hgm4d"]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_34fol"]
 [ext_resource type="PackedScene" uid="uid://brk67hbp6gicm" path="res://scenes/generic_menu.tscn" id="1_43yew"]
 [ext_resource type="PackedScene" uid="uid://ddiv7uc2prtft" path="res://scenes/generic_adjustable_menu.tscn" id="2_4ubxq"]
+[ext_resource type="PackedScene" uid="uid://5d25lmj2aoqh" path="res://scenes/game.tscn" id="4_nfld4"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -20,4 +21,8 @@ menu_title = "Baseball"
 options = Array[String](["Play ball!", "Settings"])
 
 [node name="SettingsMenu" parent="." instance=ExtResource("2_4ubxq")]
+layout_mode = 1
+
+[node name="Game" parent="." instance=ExtResource("4_nfld4")]
+visible = false
 layout_mode = 1
