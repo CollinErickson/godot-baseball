@@ -4,9 +4,10 @@ var is_active:bool = false
 var left_indent:float = 300
 
 @export_group("Generic menu")
+@export var start_active:bool = false
 @export var menu_title:String = "(title)"
 @export var options:Array[String] = []
-@export var background_color:Color = Color(3,210,0)
+@export var background_color:Color = "pink"
 @export var text_color:Color = "black"
 @export var fill_color:Color = "yellow"
 @export var hover_color:Color = "green"
@@ -15,7 +16,6 @@ var left_indent:float = 300
 @export var hover_text_color:Color = 'gray'
 var index_selected:int = 0
 signal return_index_selected
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -35,9 +35,11 @@ func _ready() -> void:
 		c2.position = Vector2(left_indent, 250 + 100*i)
 		c2.size = Vector2(560,77)
 		c2.color = shadow_color
+		# Inner box
 		var c = ColorRect.new()
 		c.color = fill_color
 		c.size = Vector2(550,70)
+		# Label
 		var l = Label.new()
 		l.text = "  " + option
 		l.set("theme_override_colors/font_color", text_color)
@@ -47,6 +49,8 @@ func _ready() -> void:
 		add_child(c2)
 		#$MenuTitleHBox.add_child(h)
 		set_hover(0)
+	
+	set_active(start_active)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -65,8 +69,9 @@ func _process(_delta: float) -> void:
 			index_selected = len(options)-1
 		set_hover(index_selected)
 	if Input.is_action_just_pressed("ui_accept"):
+		printt('In generic_menu.gd: option selected', index_selected)
 		return_index_selected.emit(index_selected)
-		is_active = false
+		set_active(false)
 		return
 
 func set_hover(index) -> void:
@@ -84,3 +89,8 @@ func unset_hover(index) -> void:
 
 #func return_selected_index() -> int:
 	#return index_selected
+
+func set_active(is_active_:bool):
+	is_active = is_active_
+	set_process(is_active_)
+	visible = is_active_
