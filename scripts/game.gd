@@ -6,6 +6,7 @@ var bat_mode:String = "Target" # "Timing", "Target"
 var pitch_mode:String = "BarTwoWay" # "Button", "Bar", "BarOneWay", "BarTwoWay"
 
 # Game variables
+var innings_per_game:int = 9
 var outs_per_inning:int = 3
 var strikes_per_pa:int = 3
 var balls_per_pa:int = 4
@@ -225,3 +226,12 @@ func _on_return_index_selected_from_pause_menu(_index_selected):
 	#printt("pause menu index:", index_selected)
 	#get_tree().create_timer(1)
 	unpause_game_menu()
+
+func set_settings(s):
+	innings_per_game = s.innings
+	outs_per_inning = s.outs
+	balls_per_pa = s.balls
+	strikes_per_pa = s.strikes
+	bat_mode = s.bat_mode
+	pitch_mode = s.pitch_mode
+	throw_mode = s.throw_mode

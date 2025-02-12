@@ -8,7 +8,7 @@ var is_active:bool = false
 # Default to main settings menu
 @export var menu_title:String = "Settings"
 @export var options_names:Array[String] = ['Difficulty', 'Innings', 'Outs', 
-	'Balls', 'Strikes']
+	'Balls', 'Strikes', 'Bat mode', 'Pitch mode', 'Throw mode']
 func range_to_str_array(low:int, high:int) -> Array:
 	return range(low, high + 1).map(func(x): return str(x))
 func combine_arrays(x:Array, y:Array) -> Array:
@@ -20,9 +20,12 @@ func double_range_to_str_array(a:int, b:int, c:int) -> Array:
 @export var options_values:Array[Array] = [
 	['Easy', 'Medium', 'Hard'],
 	double_range_to_str_array(9, 27, 1),
-	double_range_to_str_array(9, 27, 1),
+	double_range_to_str_array(3, 27, 1),
 	double_range_to_str_array(4, 10, 1),
 	double_range_to_str_array(3, 10, 1),
+	['Timing', 'Target'], # bat mode
+	['Bar two way', 'Button', 'Bar one way'], # pitch mode
+	['Bar one way', 'Bar two way', 'Button', 'Bar'], # throw mode
 ]
 var index_selected:int = 0
 var values_selected:Array = []

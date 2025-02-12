@@ -23,6 +23,7 @@ func _on_main_menu_selection(index_selected):
 		pass
 		# Start game
 		$Game.visible
+		$Game.set_settings(main_menu_settings)
 		$Game.start_game()
 	elif index_selected == 1:
 		# Settings
@@ -34,10 +35,35 @@ func _on_main_menu_selection(index_selected):
 func _on_settings_menu_selection(out_array:Array):
 	# Set values
 	main_menu_settings['difficulty'] = out_array[0]
-	main_menu_settings['innings'] = out_array[1]
-	main_menu_settings['outs'] = out_array[2]
-	main_menu_settings['balls'] = out_array[3]
-	main_menu_settings['strikes'] = out_array[4]
+	main_menu_settings['innings'] = int(out_array[1])
+	main_menu_settings['outs'] = int(out_array[2])
+	main_menu_settings['balls'] = int(out_array[3])
+	main_menu_settings['strikes'] = int(out_array[4])
+	main_menu_settings['bat_mode'] = out_array[5]
+	# Pitch mode
+	match out_array[6]:
+		'Bar':
+			main_menu_settings['pitch_mode'] = 'Bar'
+		'Button':
+			main_menu_settings['pitch_mode'] = 'Button'
+		'Bar one way':
+			main_menu_settings['pitch_mode'] = 'BarOneWay'
+		'Bar two way':
+			main_menu_settings['pitch_mode'] = 'BarTwoWay'
+		_:
+			push_warning('Bad pitch_mode from main menu settings')
+	# Throw mode
+	match out_array[7]:
+		'Bar':
+			main_menu_settings['throw_mode'] = 'Bar'
+		'Button':
+			main_menu_settings['throw_mode'] = 'Button'
+		'Bar one way':
+			main_menu_settings['throw_mode'] = 'BarOneWay'
+		'Bar two way':
+			main_menu_settings['throw_mode'] = 'BarTwoWay'
+		_:
+			push_warning('Bad throw_mode from main menu settings')
 	
 	# Restart main menu
 	$StartMenu.set_active(true)
