@@ -600,6 +600,7 @@ func start_throw_ball_func(base, fielder, key_check_release):
 			#player.throwaccuracy, gradient_width)
 		$ThrowBarOneWay.reset(gradient_width, .5)
 	else:
+		printt('in fielder: invalid throw_mode', throw_mode)
 		assert(false)
 
 func cancel_throw():

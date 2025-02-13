@@ -25,7 +25,7 @@ func double_range_to_str_array(a:int, b:int, c:int) -> Array:
 	double_range_to_str_array(3, 10, 1),
 	['Timing', 'Target'], # bat mode
 	['Bar two way', 'Button', 'Bar one way'], # pitch mode
-	['Bar one way', 'Bar two way', 'Button', 'Bar'], # throw mode
+	['Bar one way', 'Button', 'Bar'], # throw mode
 ]
 var index_selected:int = 0
 var values_selected:Array = []

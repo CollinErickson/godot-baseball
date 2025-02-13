@@ -13,6 +13,8 @@ func _ready() -> void:
 	$StartMenu.connect("return_index_selected", _on_main_menu_selection)
 	# Connect settings menu
 	$SettingsMenu.connect("menu_selected", _on_settings_menu_selection)
+	# Connect game
+	$Game.connect("game_over", _on_game_over_from_game)
 
 #func _process(delta: float) -> void:
 	#pass
@@ -22,7 +24,7 @@ func _on_main_menu_selection(index_selected):
 		# Play ball
 		pass
 		# Start game
-		$Game.visible
+		$Game.set_vis(true)
 		$Game.set_settings(main_menu_settings)
 		$Game.start_game()
 	elif index_selected == 1:
@@ -66,4 +68,8 @@ func _on_settings_menu_selection(out_array:Array):
 			push_warning('Bad throw_mode from main menu settings')
 	
 	# Restart main menu
+	$StartMenu.set_active(true)
+
+func _on_game_over_from_game():
+	$Game.set_vis(false)
 	$StartMenu.set_active(true)

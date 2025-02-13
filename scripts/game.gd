@@ -32,8 +32,8 @@ var runner3:Player = null
 var team_class = preload("res://scenes/team.tscn")
 var home_team:Team = team_class.instantiate().create_random()
 var away_team:Team = team_class.instantiate().create_random()
-var home_team_batting_order_index = 0
-var away_team_batting_order_index = 0
+var home_team_batting_order_index:int = 0
+var away_team_batting_order_index:int = 0
 
 var is_paused:bool = false
 var this_is_root:bool = false
@@ -50,11 +50,25 @@ func _ready() -> void:
 		user_is_away_team = true
 		user_is_home_team = false
 	
+	$PauseMenu.connect("return_index_selected", _on_return_index_selected_from_pause_menu)
+
 	if this_is_root:
 		#$Game.visible()
 		start_game()
 
 func start_game() -> void:
+	# Reset game params
+	inning = 1
+	is_top = true
+	outs = 0
+	balls = 0
+	strikes = 0
+	home_runs = 0
+	away_runs = 0
+	home_team_batting_order_index = 0
+	away_team_batting_order_index = 0
+	
+	# Prepare teams/players
 	home_team.prepare_for_game()
 	away_team.prepare_for_game()
 	#batter = get_player(50)
@@ -69,8 +83,6 @@ func start_game() -> void:
 	
 	$PauseMenu.visible = false
 	$PauseMenu.is_active = false
-	$PauseMenu.connect("return_index_selected", _on_return_index_selected_from_pause_menu)
-
 
 func _process(_delta: float) -> void:
 	#printt('in game _process, scorebug visible', $Scorebug.visible)
@@ -88,6 +100,7 @@ func update_scorebug() -> void:
 					away_team.abbr,
 					home_team.abbr, outs_per_inning)
 
+signal game_over
 func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike: bool,
 									is_foul_ball: bool,
 									outs_on_play: int, runs_on_play: int,
@@ -96,8 +109,9 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	printt('game received signal from field', ball_in_play, is_ball, is_strike, outs_on_play, runs_on_play)
 	#assert(int(ball_in_play) + int(is_ball) + int(is_strike) == 1) fails
 	
-	var new_batter = false
-	var was_top = is_top
+	var new_batter:bool = false
+	var was_inning:int = inning
+	var was_top:bool = is_top
 	
 	if ball_in_play:
 		# Ball must have been in play
@@ -176,8 +190,11 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	#get_node('Field3D').freeze()
 	update_scorebug()
 	
-	# Check if game is over
-	
+	# Check if game is over 
+	if ((inning > innings_per_game and away_runs != home_runs and was_inning < inning) or
+		(inning >= innings_per_game and not is_top and away_runs < home_runs)):
+		game_over.emit()
+		return
 	
 	# Otherwise continue the game
 	printt('\n\n\n\n\n\n\n\n\n\n\n\n\nin game, about to reset field')
@@ -227,7 +244,7 @@ func _on_return_index_selected_from_pause_menu(_index_selected):
 	#get_tree().create_timer(1)
 	unpause_game_menu()
 
-func set_settings(s):
+func set_settings(s:Dictionary) -> void:
 	innings_per_game = s.innings
 	outs_per_inning = s.outs
 	balls_per_pa = s.balls
@@ -235,3 +252,7 @@ func set_settings(s):
 	bat_mode = s.bat_mode
 	pitch_mode = s.pitch_mode
 	throw_mode = s.throw_mode
+
+func set_vis(val:bool) -> void:
+	visible = val
+	$Field3D.set_vis(val)
