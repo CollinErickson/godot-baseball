@@ -5,7 +5,10 @@ var main_menu_settings:Dictionary = {
 	'innings': 3,
 	'outs': 3,
 	'balls': 4,
-	'strikes': 3
+	'strikes': 3,
+	'bat_mode': 'Timing',
+	'pitch_mode': 'BarTwoWay',
+	'throw_mode': 'BarOneWay',
 }
 
 func _ready() -> void:

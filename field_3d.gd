@@ -602,10 +602,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
-					if false:
-						vla = 88
+					if !true:
+						vla = -20
 						hla = 0
-						exitvelo = 58.8
+						exitvelo = 18.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -780,10 +780,34 @@ func _process(delta: float) -> void:
 	# Move camera to follow ball
 	if ball_in_play:
 		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
-		var cam_center = Vector3(-1, 0, -1).normalized() * 10
-		camhh.global_position = ball.global_position + 60 * (
-			cam_center - 
-			ball.global_position * Vector3(1,0,1)).normalized()
+		# Put 20 yards behind home plate (prev -10)
+		var z1:float = -20
+		# Stop rotating once past 0 (prev -5)
+		var z2:float = 0
+		var cam_center = Vector3(1, 0, 1).normalized() * z1
+		var cam_center45 = cam_center.rotated(Vector3(0,1,0), 45.*PI/180)
+		#printt('in cam stuff', ball.position.z)
+		var cam_delta = null
+		if ball.position.z > z2:
+			# Put cam 60 yards behind the ball
+			camhh.global_position = ball.global_position + 60 * (
+				cam_center - 
+				ball.global_position * Vector3(1,0,1)).normalized()
+		else:
+			# 
+			var baltp:Vector3 = ball.position + Vector3(0,0,z2-ball.position.z)
+			var balgp:Vector3 = baltp.rotated(Vector3(0,1,0), 45.*PI/180)
+			var camgp:Vector3 = balgp + 60 * (
+				cam_center - 
+				balgp * Vector3(1,0,1)).normalized()
+			var camtp:Vector3 = camgp.rotated(Vector3(0,1,0), -45.*PI/180)
+			camtp.z -= (z2 - ball.position.z)
+			var camgp2 = camtp.rotated(Vector3(0,1,0), 45.*PI/180)
+			#printt('cam calcs', baltp, balgp, camtp)
+			#camhh.global_position = ball.global_position - 60 * (
+				#cam_center - 
+				#ball.global_position * Vector3(1,0,1)).normalized()
+			camhh.global_position = camgp2
 		camhh.global_position.y = 15
 		#printt("camhh:", cam_center, camhh.global_position)
 		camhh.look_at(Vector3(ball.global_position.x, 0, ball.global_position.z))
@@ -847,7 +871,7 @@ func _process(delta: float) -> void:
 			if check_if_play_done():
 				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
-				if time_since_play_done_consecutive > .6:
+				if time_since_play_done_consecutive > 0.6:
 					#play_done_fully = true
 					#get_node("FlashText").new_text("Play is done!", 3)
 					#get_tree().reload_current_scene()

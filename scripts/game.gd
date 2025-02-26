@@ -245,6 +245,7 @@ func _on_return_index_selected_from_pause_menu(_index_selected):
 	unpause_game_menu()
 
 func set_settings(s:Dictionary) -> void:
+	printt('in game set_settings:', s)
 	innings_per_game = s.innings
 	outs_per_inning = s.outs
 	balls_per_pa = s.balls
