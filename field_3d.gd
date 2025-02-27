@@ -780,38 +780,36 @@ func _process(delta: float) -> void:
 	# Move camera to follow ball
 	if ball_in_play:
 		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
+		# Camera follows ball by placing itself between ball and point z1.
+		#  Unless behind z2, then it is adjusted to be smoother.
 		# Put 20 yards behind home plate (prev -10)
 		var z1:float = -20
 		# Stop rotating once past 0 (prev -5)
 		var z2:float = 0
 		var cam_center = Vector3(1, 0, 1).normalized() * z1
-		var cam_center45 = cam_center.rotated(Vector3(0,1,0), 45.*PI/180)
-		#printt('in cam stuff', ball.position.z)
-		var cam_delta = null
 		if ball.position.z > z2:
-			# Put cam 60 yards behind the ball
+			# Put cam 60 yards behind the ball toward cam center.
 			camhh.global_position = ball.global_position + 60 * (
 				cam_center - 
 				ball.global_position * Vector3(1,0,1)).normalized()
 		else:
-			# 
+			# Since ball is behind z2, move camera straight back.
+			#  This avoids sharp rotations when the ball is near z1.
+			# Move ball up to z=z2
 			var baltp:Vector3 = ball.position + Vector3(0,0,z2-ball.position.z)
 			var balgp:Vector3 = baltp.rotated(Vector3(0,1,0), 45.*PI/180)
+			# Find camera center if ball were at that point
 			var camgp:Vector3 = balgp + 60 * (
 				cam_center - 
 				balgp * Vector3(1,0,1)).normalized()
 			var camtp:Vector3 = camgp.rotated(Vector3(0,1,0), -45.*PI/180)
+			# Move camera straight back from there
 			camtp.z -= (z2 - ball.position.z)
 			var camgp2 = camtp.rotated(Vector3(0,1,0), 45.*PI/180)
-			#printt('cam calcs', baltp, balgp, camtp)
-			#camhh.global_position = ball.global_position - 60 * (
-				#cam_center - 
-				#ball.global_position * Vector3(1,0,1)).normalized()
 			camhh.global_position = camgp2
 		camhh.global_position.y = 15
-		#printt("camhh:", cam_center, camhh.global_position)
 		camhh.look_at(Vector3(ball.global_position.x, 0, ball.global_position.z))
-		
+	
 	# Auto adjust cam to keep ball in view
 	# Removing, this never worked well
 	if ball_in_play and false:
