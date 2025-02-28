@@ -162,6 +162,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		fielder.reset(throw_mode_)
 		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
 		#printt('setup fielder', fielder.posnum, fielding_team.defense_order, fielding_team.roster)
+		# Change speed of a fielder for testing (200 is super fast)
+		#if fielder.posnum == 1:
+			#fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]].speed = 200
 		fielder.setup_player(
 			fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]],
 			fielding_team,
@@ -1061,8 +1064,16 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	var assigned_indexes = []
 	intercept_position.y = 0
 	
+	var bases_to_skip:Array = []
+	var fielders_runner_with_ball_to_base:Array = get_tree().get_nodes_in_group(
+		"fielder_running_with_ball_to_base")
+	for fielder in fielders_runner_with_ball_to_base:
+		bases_to_skip.push_back(int(fielder.running_with_ball_to_base))
+	
 	# Assign nearest fielder to cover bases and cutoff and alt
-	for base in [2,1,3,4, 5, 6]:
+	for base:int in [2,1,3,4, 5, 6]:
+		if bases_to_skip.has(base):
+			continue
 		var base_position:Vector3 = Vector3(0,0,20)
 		# Assign cutoff
 		if base == 5:
@@ -1077,7 +1088,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			# Find relevant base to cover
 			# TODO: this should be based on current active runners. Also pass this location.
 			base_position = .5 * (fielders[0].base_positions[2 - 1] + intercept_position)
-
+		
 			# Only do if cutoff won't be near intercept position
 			if fielders[0].distance_xz(intercept_position, base_position) < 15:
 				continue

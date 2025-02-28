@@ -19,6 +19,7 @@ var user_is_pitching_team:bool
 var time_last_began_holding_ball
 var position_holding_ball_reassigned_fielders = null
 var position_assignment_ball_reassigned_fielders = null
+var running_with_ball_to_base = null
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var runners = get_tree().get_nodes_in_group("runners")
@@ -83,6 +84,8 @@ func reset(throw_mode_:String) -> void:
 	throw_mode = throw_mode_
 	$BadThrowLabel3D.visible = false
 	turn_off_bad_throw_label_timer = 0
+	running_with_ball_to_base = null
+	remove_from_group("fielder_running_with_ball_to_base")
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -425,7 +428,10 @@ func _physics_process(delta: float) -> void:
 		var step_on_base = is_stepping_on_base()
 		#printt(posname, step_on_base)
 		if step_on_base[0]:
+			# If wasn't stepping on base before
 			if not stepping_on_base_with_ball:
+				remove_from_group("fielder_running_with_ball_to_base")
+				running_with_ball_to_base = null
 				#print("STEPPING ON BASE!!!", posname, step_on_base)
 				stepped_on_base_with_ball.emit(self, step_on_base[1])
 				stepping_on_base_with_ball = true
@@ -471,6 +477,8 @@ func _physics_process(delta: float) -> void:
 					printt('  decide_what_to_do_with_ball result:', posname, decision_out)
 					if decision_out[0] == null:
 						# No decision, keep holding
+						remove_from_group("fielder_running_with_ball_to_base")
+						running_with_ball_to_base = null
 						pass
 					else: # Throw or run ball
 						var throw_to = decision_out[0]
@@ -479,8 +487,12 @@ func _physics_process(delta: float) -> void:
 						if run_it:
 							assignment_pos = base_positions[throw_to-1]
 							set_assignment("ball_carry")
+							add_to_group("fielder_running_with_ball_to_base")
+							running_with_ball_to_base = throw_to
 							#printt('fielder running to base', throw_to, posname)
 						else:
+							remove_from_group("fielder_running_with_ball_to_base")
+							running_with_ball_to_base = null
 							if throw_to > 4.5:
 								# Throw to a fielder
 								start_throw_ball_animation(null, decision_out[2])
@@ -966,6 +978,8 @@ func decide_what_to_do_with_ball() -> Array:
 	# Check which bases are covered for throws
 	var base_covered:Array = [false, false, false, false] # 1B, 2B, 3B, Home
 	var base_will_be_covered:Array = [false, false, false, false]
+	#var base_covered_by:Array = [null, null, null, null]
+	var base_will_be_covered_by:Array = [null, null, null, null]
 	for base in range(1,5):
 		for fielder in fielders:
 			if fielder.posname != posname: # Can't be this fielder
@@ -973,6 +987,7 @@ func decide_what_to_do_with_ball() -> Array:
 				if distance_xz(fielder.position, base_positions[base - 1]) < 1:
 					base_covered[base-1] = true
 					base_will_be_covered[base-1] = true
+					base_will_be_covered_by[base-1] = fielder
 					break
 				# Check if they would be covering before throw could arrive
 				if (fielder.assignment == 'cover' and
@@ -981,8 +996,9 @@ func decide_what_to_do_with_ball() -> Array:
 						distance_xz(fielder.position, base_positions[base - 1]
 							) / max_throw_speed + time_throw_animation_release_point):
 					base_will_be_covered[base-1] = true
+					base_will_be_covered_by[base-1] = fielder
 	#printt('\tin fielder decide_what_to_do_with_ball: runners_ and base_covered',
-		#runners_, base_covered, base_will_be_covered)
+		#runners_, base_covered, base_will_be_covered, base_will_be_covered_by)
 	
 	# Calculate time to throw in front+behind, to run in front+behind
 	var time_throw_front = []
@@ -1020,7 +1036,6 @@ func decide_what_to_do_with_ball() -> Array:
 
 	# Check if there's a fielder covering each base
 	
-	# TODO: All these should use time diff to pick quicker
 	# 1. If runner needs to tag up:
 	#  a. If throw can get them, throw behind.
 	#  b. If can beat them to base, run behind.
@@ -1038,6 +1053,10 @@ func decide_what_to_do_with_ball() -> Array:
 				base_will_be_covered[runners_[i].start_base - 1]):
 				return [runners_[i].start_base, false]
 			if run_beat > 0:
+				var cover_fielder = base_will_be_covered_by[runners_[i].start_base - 1]
+				if cover_fielder != null:
+					cover_fielder.set_assignment('cover')
+					cover_fielder.assignment_pos = cover_fielder.position + Vector3(0,0,5)
 				return [runners_[i].start_base, true]
 	
 	# 2. If runner can be force out:
@@ -1059,6 +1078,10 @@ func decide_what_to_do_with_ball() -> Array:
 				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
 			if run_beat > 0:
+				var cover_fielder = base_will_be_covered_by[base_front[i] - 1]
+				if cover_fielder != null:
+					cover_fielder.set_assignment('cover')
+					cover_fielder.assignment_pos = cover_fielder.position + Vector3(2,0,2)
 				return [base_front[i], true]
 	
 	# 3. If runner is between bases and no force out:
