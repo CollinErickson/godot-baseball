@@ -26,9 +26,12 @@ var runners_after :Array = []
 var runner_before = null
 var runner_after = null
 var animation:String = "idle"
+#var state:String = "nonexistant" # nonexistant, 
+var post_play_target_position:Vector3 = Vector3(10, 0, -5)
 
 signal signal_scored_on_play
 signal reached_next_base_signal
+@onready var ball = get_tree().get_first_node_in_group("ball")
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -80,14 +83,16 @@ func is_active():
 
 func runner_is_out() -> void:
 	out_on_play = true
-	set_physics_process(false)
+	#set_physics_process(false)
 	is_running = false
-	visible = false
+	#visible = !false
 
 func _ready() -> void:
 	running_progress = start_base*1.
 	max_running_progress = running_progress
 	target_base = start_base + 1
+	
+	post_play_target_position += Vector3(2, 0, 2) * start_base
 	
 	runners = get_tree().get_nodes_in_group('runners')
 	runners_before = []
@@ -99,7 +104,39 @@ func _ready() -> void:
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
-	if is_frozen or out_on_play or scored_on_play:
+	if is_frozen:
+		return
+	
+	# If out, scored, or on home and won't need to go back, move to end pos
+	if out_on_play or scored_on_play or (
+		(running_progress >= 4 and not scored_on_play)
+		and (#able_to_score and
+			(not needs_to_tag_up or tagged_up_after_catch))
+	):
+		# If was waiting to score and now can score, do that
+		#  (since lower code block is skipped)
+		if not out_on_play and not scored_on_play:
+			check_scored()
+		#printt('In runner: out on play or scored')
+		# Move towards bench?
+		if position.distance_to(post_play_target_position) > 1e-4:
+			if animation == 'idle':
+				set_animation('running')
+			var dist = position.distance_to(post_play_target_position)
+			var distance_can_move = delta * SPEED * .7 # (Jog)
+			if distance_can_move >= dist:
+				# Move to end point
+				position = post_play_target_position
+				# Stop animation
+				set_animation('idle')
+			else:
+				# Move towards target
+				position += distance_can_move * (post_play_target_position - position).normalized()
+				# Face target
+				set_look_at_pos(post_play_target_position)
+		else:
+			# On target, watch ball
+			set_look_at_pos(ball.position * Vector3(1,0,1))
 		return
 	
 	#print('running needs to tag', needs_to_tag_up, start_base)
@@ -159,7 +196,9 @@ func _physics_process(delta: float) -> void:
 	# Reset max_running_progress if need to return
 	if needs_to_tag_up and not tagged_up_after_catch:
 		max_running_progress = start_base
-	
+	check_scored()
+
+func check_scored() -> void:
 	# Scored run. Can't do it when they first reach 4 since they may not be eligible then
 	if (running_progress >= 4 and not scored_on_play):
 		if (able_to_score and
@@ -168,7 +207,7 @@ func _physics_process(delta: float) -> void:
 			is_running = false
 			running_progress = 4
 			scored_on_play = true
-			visible = false
+			#visible = false
 			signal_scored_on_play.emit()
 			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
 		else:
@@ -177,7 +216,8 @@ func _physics_process(delta: float) -> void:
 			running_progress = 4
 			# If they are done with play (no reason to ever go back), make invisible
 			if not may_need_to_tag_up and visible:
-				visible = false
+				#visible = false
+				pass # No longer making invis, they jog to sideline
 
 func update_position():
 	# Update location on field based on running_progress
@@ -274,6 +314,8 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		visible = false
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
+	if is_home_team and post_play_target_position.x > 0:
+		post_play_target_position.x *= 1
 
 
 func is_done_for_play() -> bool:
@@ -335,12 +377,20 @@ func set_look_at():
 	else:
 		push_error("Error in runner_3d.gd, set_look_at()", animation)
 	
+	# Skip if already at point, otherwise gives error
+	if lookat.distance_to(position) < .2:
+		return
 	# Set it
 	#lookat = to_global(lookat)
 	lookat = lookat.rotated(Vector3(0,1,0), 45.*PI/180)
 	#printt('set_look_at() 2', start_base, lookat)
 	$Char3D.look_at(lookat, Vector3.UP, true)
 
+func set_look_at_pos(pos:Vector3) -> void:
+	if pos.distance_to(position) < .2:
+		return
+	pos = pos.rotated(Vector3(0,1,0), 45.*PI/180)
+	$Char3D.look_at(pos, Vector3.UP, true)
 
 var base_positions = [
 	Vector3(-1,0,1)*30/sqrt(2), # 1
