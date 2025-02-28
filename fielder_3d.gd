@@ -960,8 +960,8 @@ func decide_what_to_do_with_ball() -> Array:
 	# Return [base to throw to, run_it, fielder to throw to]
 	
 	# Runners that are active, first one should be furthest ahead
-	runners = runners.filter(func(r): return r.is_active())
-	runners.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
+	var runners_ = runners.filter(func(r): return r.is_active())
+	runners_.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
 	
 	# Check which bases are covered for throws
 	var base_covered:Array = [false, false, false, false] # 1B, 2B, 3B, Home
@@ -981,8 +981,8 @@ func decide_what_to_do_with_ball() -> Array:
 						distance_xz(fielder.position, base_positions[base - 1]
 							) / max_throw_speed + time_throw_animation_release_point):
 					base_will_be_covered[base-1] = true
-	#printt('in fielder decide_what_to_do_with_ball: runners and base_covered',
-		#runners, base_covered, base_will_be_covered)
+	#printt('\tin fielder decide_what_to_do_with_ball: runners_ and base_covered',
+		#runners_, base_covered, base_will_be_covered)
 	
 	# Calculate time to throw in front+behind, to run in front+behind
 	var time_throw_front = []
@@ -999,8 +999,8 @@ func decide_what_to_do_with_ball() -> Array:
 	var base_front_pos = []
 	var base_behind_pos = []
 	var base_start_pos = []
-	for i in range(len(runners)):
-		var runner = runners[i]
+	for i in range(len(runners_)):
+		var runner = runners_[i]
 		base_front.push_back(min(floor(runner.running_progress) + 1, 4))
 		base_behind.push_back(floor(runner.running_progress))
 		base_front_pos.push_back(base_positions[base_front[i] - 1])
@@ -1024,36 +1024,46 @@ func decide_what_to_do_with_ball() -> Array:
 	# 1. If runner needs to tag up:
 	#  a. If throw can get them, throw behind.
 	#  b. If can beat them to base, run behind.
-	for i in range(len(runners)):
-		if runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
+	for i in range(len(runners_)):
+		if runners_[i].needs_to_tag_up and not runners_[i].tagged_up_after_catch:
 			if (time_throw_start[i] < time_runner_run_back[i] and
-				base_will_be_covered[runners[i].start_base - 1]):
-				return [runners[i].start_base, false]
+				base_will_be_covered[runners_[i].start_base - 1]):
+				return [runners_[i].start_base, false]
 			if time_run_start[i] < time_runner_run_back[i]:
-				return [runners[i].start_base, true]
+				return [runners_[i].start_base, true]
 	
 	# 2. If runner can be force out:
 	#  a. If throw can get them, throw ahead.
 	#  b. If can beat them to base, run ahead.
-	for i in range(len(runners)):
-		if runners[i].can_be_force_out():
-			if (time_throw_front[i] < time_runner_run_forward[i] and
+	for i in range(len(runners_)):
+		if runners_[i].can_be_force_out():
+			#if (time_throw_front[i] < time_runner_run_forward[i] and
+				#base_will_be_covered[base_front[i] - 1]):
+				#return [base_front[i], false]
+			#if time_run_front[i] < time_runner_run_forward[i]:
+				#return [base_front[i], true]
+			var throw_beat = time_runner_run_forward[i] - time_throw_front[i]
+			var run_beat = time_runner_run_forward[i] - time_run_front[i]
+			printt('in fielder decide checking force out', throw_beat, run_beat,
+				time_runner_run_forward[i], time_throw_front[i], time_run_front[i])
+			if (throw_beat > 0 and
+				throw_beat > run_beat and
 				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
-			if time_run_front[i] < time_runner_run_forward[i]:
+			if run_beat > 0:
 				return [base_front[i], true]
 	
 	# 3. If runner is between bases and no force out:
 	#  a. If ahead of them in baseline, run them back
 	#  b. If throw can beat them to next base, throw ahead.
 	#  c. If can beat them to next base, run ahead.
-	for i in range(len(runners)):
+	for i in range(len(runners_)):
 		# Only do something if they are off base
-		if abs(runners[i].running_progress - round(runners[i].running_progress)) > .02:
+		if abs(runners_[i].running_progress - round(runners_[i].running_progress)) > .02:
 			# If ahead of them in path to next base, run them back
 			if distance_to_line(position, base_behind_pos[i], base_front_pos[i]) < 0.5:
 				var fielder_progress = progress_on_line(position, base_behind_pos[i], base_front_pos[i])
-				if fielder_progress <= 1.02 and fielder_progress > runners[i].running_progress - (runners[i].running_progress):
+				if fielder_progress <= 1.02 and fielder_progress > runners_[i].running_progress - (runners_[i].running_progress):
 					return [base_behind[i], true]
 			# Throw in front of them if can beat them
 			if (time_throw_front[i] < time_runner_run_forward[i] and
@@ -1065,7 +1075,7 @@ func decide_what_to_do_with_ball() -> Array:
 	# Can't beat them to base, not in front of them in baseline
 	# X. If in outfield, throw it in front of lead runner
 	if abs(position.x) + abs(position.z - 20) > 25:
-		for i in range(len(runners)):
+		for i in range(len(runners_)):
 			# Throw in front of them if can beat them
 			if (time_throw_front[i] < time_runner_run_forward[i] and
 				base_will_be_covered[base_front[i] - 1]):
