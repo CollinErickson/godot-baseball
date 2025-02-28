@@ -465,7 +465,7 @@ func _physics_process(delta: float) -> void:
 				#   Avoids issue of fielder running long distance when they shouldn't
 				# Make sure that some frames passed while holding
 				if (Time.get_ticks_msec() - time_last_began_holding_ball > 1000.*0.10
-					and Time.get_ticks_msec() - time_last_decide_what_to_do_with_ball > 1000.*1.):
+					and Time.get_ticks_msec() - time_last_decide_what_to_do_with_ball > 1000.*0.20):
 					# Decide what to do with ball
 					var decision_out = decide_what_to_do_with_ball()
 					printt('  decide_what_to_do_with_ball result:', posname, decision_out)
@@ -954,7 +954,8 @@ func setup_player(player_, team, is_home_team:bool) -> void:
 var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
 func decide_what_to_do_with_ball() -> Array:
 	time_last_decide_what_to_do_with_ball = Time.get_ticks_msec()
-	printt('Starting decide_what_to_do_with_ball in fielder', posname, time_last_decide_what_to_do_with_ball)
+	printt('Starting decide_what_to_do_with_ball in fielder', posname,
+		time_last_decide_what_to_do_with_ball)
 	# When CPU fielder has ball, decide where to throw/run it to
 	# Return [base to throw to, run_it, fielder to throw to]
 	
@@ -963,15 +964,25 @@ func decide_what_to_do_with_ball() -> Array:
 	runners.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
 	
 	# Check which bases are covered for throws
-	var base_covered = [false, false, false, false]
+	var base_covered:Array = [false, false, false, false] # 1B, 2B, 3B, Home
+	var base_will_be_covered:Array = [false, false, false, false]
 	for base in range(1,5):
 		for fielder in fielders:
-			if fielder.posname != posname:
+			if fielder.posname != posname: # Can't be this fielder
+				# Check if they are covering
 				if distance_xz(fielder.position, base_positions[base - 1]) < 1:
 					base_covered[base-1] = true
+					base_will_be_covered[base-1] = true
 					break
-	#printt('BASES COVERED', base_covered)
-	
+				# Check if they would be covering before throw could arrive
+				if (fielder.assignment == 'cover' and
+					distance_xz(fielder.assignment_pos, base_positions[base - 1]) < 1 and
+					distance_xz(fielder.position, base_positions[base - 1]) / fielder.SPEED < 
+						distance_xz(fielder.position, base_positions[base - 1]
+							) / max_throw_speed + time_throw_animation_release_point):
+					base_will_be_covered[base-1] = true
+	#printt('in fielder decide_what_to_do_with_ball: runners and base_covered',
+		#runners, base_covered, base_will_be_covered)
 	
 	# Calculate time to throw in front+behind, to run in front+behind
 	var time_throw_front = []
@@ -1015,7 +1026,8 @@ func decide_what_to_do_with_ball() -> Array:
 	#  b. If can beat them to base, run behind.
 	for i in range(len(runners)):
 		if runners[i].needs_to_tag_up and not runners[i].tagged_up_after_catch:
-			if time_throw_start[i] < time_runner_run_back[i] and base_covered[runners[i].start_base - 1]:
+			if (time_throw_start[i] < time_runner_run_back[i] and
+				base_will_be_covered[runners[i].start_base - 1]):
 				return [runners[i].start_base, false]
 			if time_run_start[i] < time_runner_run_back[i]:
 				return [runners[i].start_base, true]
@@ -1025,7 +1037,8 @@ func decide_what_to_do_with_ball() -> Array:
 	#  b. If can beat them to base, run ahead.
 	for i in range(len(runners)):
 		if runners[i].can_be_force_out():
-			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
+			if (time_throw_front[i] < time_runner_run_forward[i] and
+				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
@@ -1043,7 +1056,8 @@ func decide_what_to_do_with_ball() -> Array:
 				if fielder_progress <= 1.02 and fielder_progress > runners[i].running_progress - (runners[i].running_progress):
 					return [base_behind[i], true]
 			# Throw in front of them if can beat them
-			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
+			if (time_throw_front[i] < time_runner_run_forward[i] and
+				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
 			if time_run_front[i] < time_runner_run_forward[i]:
 				return [base_front[i], true]
@@ -1053,11 +1067,12 @@ func decide_what_to_do_with_ball() -> Array:
 	if abs(position.x) + abs(position.z - 20) > 25:
 		for i in range(len(runners)):
 			# Throw in front of them if can beat them
-			if time_throw_front[i] < time_runner_run_forward[i] and base_covered[base_front[i] - 1]:
+			if (time_throw_front[i] < time_runner_run_forward[i] and
+				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
 			
 			# Otherwise throw to next next base, using cutoff if far
-			if base_front[i] < 3.5:
+			if base_front[i] < 3.5 and base_will_be_covered[base_front[i]+1-1]:
 				# Throw at next next base
 				if distance_xz(position, base_positions[base_front[i]+1-1]) > 50:
 					var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
@@ -1065,7 +1080,7 @@ func decide_what_to_do_with_ball() -> Array:
 						return [5, false, cutoff_fielders[0]]
 				return [base_front[i] + 1, false]
 			# Otherwise throw to current base if covered
-			if base_covered[base_front[i]-1]:
+			if base_will_be_covered[base_front[i]-1]:
 				if distance_xz(position, base_front_pos[i]) > 50:
 					var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
 					if len(cutoff_fielders) > 0.5:
