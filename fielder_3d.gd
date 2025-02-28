@@ -1026,10 +1026,18 @@ func decide_what_to_do_with_ball() -> Array:
 	#  b. If can beat them to base, run behind.
 	for i in range(len(runners_)):
 		if runners_[i].needs_to_tag_up and not runners_[i].tagged_up_after_catch:
-			if (time_throw_start[i] < time_runner_run_back[i] and
+			#if (time_throw_start[i] < time_runner_run_back[i] and
+				#base_will_be_covered[runners_[i].start_base - 1]):
+				#return [runners_[i].start_base, false]
+			#if time_run_start[i] < time_runner_run_back[i]:
+				#return [runners_[i].start_base, true]
+			var throw_beat = time_runner_run_back[i] - time_throw_start[i]
+			var run_beat = time_runner_run_back[i] - time_run_start[i]
+			if (throw_beat > 0 and
+				throw_beat > run_beat and
 				base_will_be_covered[runners_[i].start_base - 1]):
 				return [runners_[i].start_base, false]
-			if time_run_start[i] < time_runner_run_back[i]:
+			if run_beat > 0:
 				return [runners_[i].start_base, true]
 	
 	# 2. If runner can be force out:
@@ -1044,8 +1052,8 @@ func decide_what_to_do_with_ball() -> Array:
 				#return [base_front[i], true]
 			var throw_beat = time_runner_run_forward[i] - time_throw_front[i]
 			var run_beat = time_runner_run_forward[i] - time_run_front[i]
-			printt('in fielder decide checking force out', throw_beat, run_beat,
-				time_runner_run_forward[i], time_throw_front[i], time_run_front[i])
+			#printt('in fielder decide checking force out', throw_beat, run_beat,
+				#time_runner_run_forward[i], time_throw_front[i], time_run_front[i])
 			if (throw_beat > 0 and
 				throw_beat > run_beat and
 				base_will_be_covered[base_front[i] - 1]):
@@ -1062,14 +1070,25 @@ func decide_what_to_do_with_ball() -> Array:
 		if abs(runners_[i].running_progress - round(runners_[i].running_progress)) > .02:
 			# If ahead of them in path to next base, run them back
 			if distance_to_line(position, base_behind_pos[i], base_front_pos[i]) < 0.5:
-				var fielder_progress = progress_on_line(position, base_behind_pos[i], base_front_pos[i])
-				if fielder_progress <= 1.02 and fielder_progress > runners_[i].running_progress - (runners_[i].running_progress):
+				var fielder_progress = progress_on_line(position,
+					base_behind_pos[i], base_front_pos[i])
+				if (fielder_progress <= 1.02 and
+					fielder_progress > runners_[i].running_progress -
+						(runners_[i].running_progress)):
 					return [base_behind[i], true]
-			# Throw in front of them if can beat them
-			if (time_throw_front[i] < time_runner_run_forward[i] and
+			# Throw/run in front of them if can beat them
+			#if (time_throw_front[i] < time_runner_run_forward[i] and
+				#base_will_be_covered[base_front[i] - 1]):
+				#return [base_front[i], false]
+			#if time_run_front[i] < time_runner_run_forward[i]:
+				#return [base_front[i], true]
+			var throw_beat = time_runner_run_forward[i] - time_throw_front[i]
+			var run_beat = time_runner_run_forward[i] - time_run_front[i]
+			if (throw_beat > 0 and
+				throw_beat > run_beat and
 				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
-			if time_run_front[i] < time_runner_run_forward[i]:
+			if run_beat > 0:
 				return [base_front[i], true]
 	
 	# Can't beat them to base, not in front of them in baseline
