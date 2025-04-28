@@ -46,7 +46,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if !true:
+	if true:
 		user_is_away_team = true
 		user_is_home_team = false
 	
@@ -86,13 +86,11 @@ func start_game() -> void:
 
 func _process(_delta: float) -> void:
 	#printt('in game _process, scorebug visible', $Scorebug.visible)
-	# Check for pause/unpause
+	# Check for pause
 	if Input.is_action_just_pressed("pause_game"):
-		#if is_paused: # Unpause
-			#unpause_game_menu()
 		if not is_paused: # Pause
 			pause_game_menu()
-			is_paused = true
+		# Unpause is done in the pause menu and returned to game as a signal
 
 func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
@@ -228,15 +226,17 @@ func get_player(speed:float=50) -> Player:
 func unpause_game_menu() -> void:
 	#printt('Game unpaused!!!')
 	$Field3D.unpause()
-	$PauseMenu.visible = false
-	$PauseMenu.is_active = false
+	#$PauseMenu.visible = false
+	#$PauseMenu.is_active = false
+	$PauseMenu.set_active(true)
 	is_paused = false
 
 func pause_game_menu() -> void:
 	#printt('Game paused!!!')
 	$Field3D.pause()
-	$PauseMenu.visible = true
-	$PauseMenu.is_active = true
+	#$PauseMenu.visible = true
+	#$PauseMenu.is_active = true
+	$PauseMenu.set_active(true)
 	is_paused = true
 
 func _on_return_index_selected_from_pause_menu(_index_selected):

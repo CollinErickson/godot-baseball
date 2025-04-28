@@ -1232,11 +1232,13 @@ func _on_batter_3d_start_runner() -> void:
 	get_node("Headon/Batter3D").set_process(false)
 
 func _on_pause_button_pressed():
-	get_tree().paused = true
+	pass
+	#get_tree().paused = true
 	#show()
 
 func _on_resume_button_pressed():
-	get_tree().paused = false
+	pass
+	#get_tree().paused = false
 
 func _on_pitcher_3d_pitch_started(_pitch_x, _pitch_y, _pitch_t) -> void:
 	# Replaced with pitch_released since pitch_t isn't known until then

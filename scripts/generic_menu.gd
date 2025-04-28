@@ -54,6 +54,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	#printt('in generic menu, is active', is_active)
 	if not is_active:
 		return
 	if Input.is_action_just_pressed("movedown"):
