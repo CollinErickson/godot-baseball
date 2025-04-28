@@ -1054,9 +1054,7 @@ func decide_what_to_do_with_ball() -> Array:
 				return [runners_[i].start_base, false]
 			if run_beat > 0:
 				var cover_fielder = base_will_be_covered_by[runners_[i].start_base - 1]
-				if cover_fielder != null:
-					cover_fielder.set_assignment('cover')
-					cover_fielder.assignment_pos = cover_fielder.position + Vector3(0,0,5)
+				divert_cover_fielder(cover_fielder)
 				return [runners_[i].start_base, true]
 	
 	# 2. If runner can be force out:
@@ -1078,10 +1076,9 @@ func decide_what_to_do_with_ball() -> Array:
 				base_will_be_covered[base_front[i] - 1]):
 				return [base_front[i], false]
 			if run_beat > 0:
+				# Move fielder assigned to cover away from base
 				var cover_fielder = base_will_be_covered_by[base_front[i] - 1]
-				if cover_fielder != null:
-					cover_fielder.set_assignment('cover')
-					cover_fielder.assignment_pos = cover_fielder.position + Vector3(2,0,2)
+				divert_cover_fielder(cover_fielder)
 				return [base_front[i], true]
 	
 	# 3. If runner is between bases and no force out:
@@ -1163,6 +1160,13 @@ func decide_what_to_do_with_ball() -> Array:
 	#   in infield
 	#printt('in fielder, pos from center returning no action', posname)
 	return [null, null, null]
+
+func divert_cover_fielder(cover_fielder) -> void:
+	# Move fielder assigned to cover away from base to avoid player overlap
+	# The assignment will have assignment changed again when reassigning defense
+	if cover_fielder != null:
+		cover_fielder.set_assignment('cover')
+		cover_fielder.assignment_pos = cover_fielder.position + Vector3(4,0,-4)
 
 func distance_to_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
 	# Ignore height dim

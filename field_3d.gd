@@ -1064,6 +1064,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	var assigned_indexes = []
 	intercept_position.y = 0
 	
+	# Don't assign anyone to cover a base if fielder is running there with ball
 	var bases_to_skip:Array = []
 	var fielders_runner_with_ball_to_base:Array = get_tree().get_nodes_in_group(
 		"fielder_running_with_ball_to_base")
