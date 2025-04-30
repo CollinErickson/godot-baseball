@@ -39,11 +39,9 @@ var elapsed_time = 0
 var fair_foul_determined:bool = false
 var is_foul:bool = false
 
-#var ball_trail_array = range(60)
-#var ball_trail_this_trail = ra
-
 signal ball_overthrown
 @onready var wallnodes = get_tree().get_nodes_in_group("walls")
+@onready var cylinder_trail_node = get_parent().get_node('MeshInstance3DTube')
 
 func freeze() -> void:
 	is_frozen = true
@@ -93,6 +91,7 @@ func reset() -> void:
 	hit_bounced_time = null
 	elapsed_time = 0
 	$TrailNode.visible = false
+	cylinder_trail_node.reset()
 	throw_start_pos = null
 	throw_start_velo = null
 	throw_target = null
@@ -273,9 +272,12 @@ func _physics_process(delta: float) -> void:
 		
 		if not is_sim and prev_position != null:
 			align_trail(position, prev_position, delta, velocity)
+		if not is_sim and pitch_already_done:
+			#printt('adding cyl value', position, state)
+			cylinder_trail_node.add_value(position, .5, 1)
+			cylinder_trail_node.update_mesh(true, 2)
 	#if position.z < 10:
 	#	velocity = Vector3()
-	
 	if pitch_in_progress:
 		# Cross strikezone
 		if not already_crossed_sz and position.z < sz_z:
@@ -690,6 +692,8 @@ func ball_fielded(ball_position_before_fielded:Vector3):
 		is_foul = !is_in_fair_territory(ball_position_before_fielded)
 		if is_foul:
 			foul_ball.emit()
+	
+	cylinder_trail_node.reset()
 
 var throw_start_pos
 var throw_start_velo
@@ -749,6 +753,9 @@ func _on_timer_timeout() -> void:
 		dot.visible = false
 
 func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> void:
+	# Not using this anymore
+	if true:
+		return
 	if not pitch_already_done:
 		return
 	#$Trail.rotation = Vector3.ZERO
@@ -771,11 +778,8 @@ func align_trail(pos:Vector3, pos_prev:Vector3, _delta:float, vel:Vector3) -> vo
 		var trail_length = 1. * speed / 80.
 		$TrailNode/Trail.mesh.height = trail_length
 		$TrailNode/Trail.position.z = -0.1 - trail_length / 2.
-		#$TrailNode/Trail.mesh.height = $TrailNode/Trail.mesh.height * .9 + trail_length*.1
-		#$TrailNode/Trail.position.z = -0.1 - $TrailNode/Trail.mesh.height / 2.
-	
-	#if randf() < 1.1:
-		#printt('trail rotation,', $TrailNode.rotation, $TrailNode.position, $TrailNode/Trail.position, trail_length)
+	if speed <= 1e-8:
+		cylinder_trail_node.reset()
 
 func is_in_fair_territory(pos=position) -> bool:
 	#print('in ball is_in_fair_territory, pos:', position)

@@ -46,7 +46,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if true:
+	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
 	

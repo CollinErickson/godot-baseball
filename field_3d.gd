@@ -555,6 +555,11 @@ func _process(delta: float) -> void:
 		get_tree().reload_current_scene()
 		return
 	
+	# Q key slows down speed for debugging
+	if Input.is_action_just_pressed("SLOWMO"):
+		Engine.time_scale *= 0.8
+
+	
 	## Pause game
 	#if Input.is_action_just_pressed("startbutton"):
 		#print('start button pressed')
@@ -1390,9 +1395,9 @@ func _on_tag_up_by_runner() -> void:
 	update_max_force_outs_left()
 
 func update_max_force_outs_left() -> void:
-	printt('In update_max_force_outs_left...')
+	#printt('In update_max_force_outs_left...')
 	if ball_caught_in_air:
-		print('.... ball caught in air')
+		#print('.... ball caught in air')
 		max_force_outs_left = 0
 		# Number of active runners that haven't tagged up
 		for i in [1,2,3]:
@@ -1419,7 +1424,7 @@ func update_max_force_outs_left() -> void:
 			int($Headon/Runners/Runner3D2B.exists_at_start) +
 			int($Headon/Runners/Runner3D3B.exists_at_start)
 		)
-	printt('Updated max_force_outs_left: ', max_force_outs_left, ball_hit_bounced)
+	#printt('Updated max_force_outs_left: ', max_force_outs_left, ball_hit_bounced)
 	assert(max_force_outs_left <= max_force_outs_at_start)
 	assert(max_force_outs_left <= 4)
 	check_runners_able_to_score()
