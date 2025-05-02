@@ -6,12 +6,13 @@ var bat_mode:String = "Target" # "Timing", "Target"
 var pitch_mode:String = "BarTwoWay" # "Button", "Bar", "BarOneWay", "BarTwoWay"
 
 # Game variables
-var innings_per_game:int = 9
-var outs_per_inning:int = 3
+var innings_per_game:int = 1
+var outs_per_inning:int = 1
 var strikes_per_pa:int = 3
 var balls_per_pa:int = 4
 
 # State variables
+var state:String = "pregame" # pregame, ingame, postgame
 var inning:int = 1
 var is_top:bool = true
 var outs:int = 0
@@ -58,13 +59,14 @@ func _ready() -> void:
 
 func start_game() -> void:
 	# Reset game params
+	state = 'ingame'
 	inning = 1
 	is_top = true
 	outs = 0
 	balls = 0
 	strikes = 0
 	home_runs = 0
-	away_runs = 0
+	away_runs = 01
 	home_team_batting_order_index = 0
 	away_team_batting_order_index = 0
 	
@@ -86,11 +88,16 @@ func start_game() -> void:
 
 func _process(_delta: float) -> void:
 	#printt('in game _process, scorebug visible', $Scorebug.visible)
-	# Check for pause
-	if Input.is_action_just_pressed("pause_game"):
-		if not is_paused: # Pause
-			pause_game_menu()
-		# Unpause is done in the pause menu and returned to game as a signal
+	if state == "ingame":
+		# Check for pause
+		if Input.is_action_just_pressed("pause_game"):
+			if not is_paused: # Pause
+				pause_game_menu()
+			# Unpause is done in the pause menu and returned to game as a signal
+	elif state == 'postgame':
+		if Input.is_action_just_pressed("ui_accept"):
+			$PostGame.visible = false
+			game_over.emit()
 
 func update_scorebug() -> void:
 	$Scorebug.update(inning, is_top, outs, balls, strikes, home_runs, away_runs,
@@ -191,7 +198,19 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	# Check if game is over 
 	if ((inning > innings_per_game and away_runs != home_runs and was_inning < inning) or
 		(inning >= innings_per_game and not is_top and away_runs < home_runs)):
-		game_over.emit()
+		#game_over.emit()
+		state = 'postgame'
+		$Field3D.visible = false
+		$Scorebug.visible = false
+		$PostGame.visible = true
+		var game_data = {
+			'home_team':'Home',
+			'away_team':'Away',
+			'innings': inning,
+			'away_score_by_inning':[0,1,2,3,0,1,2,3],
+			'home_score_by_inning':[1,2,1,2,3,4,3,4]
+		}
+		$PostGame.set_values(game_data)
 		return
 	
 	# Otherwise continue the game

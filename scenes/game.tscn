@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://5d25lmj2aoqh"]
+[gd_scene load_steps=6 format=3 uid="uid://5d25lmj2aoqh"]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_62u1t"]
 [ext_resource type="PackedScene" uid="uid://cvloyxg0g0o58" path="res://field_3d.tscn" id="2_f7g2t"]
+[ext_resource type="PackedScene" uid="uid://bc4drgk0epvk2" path="res://scenes/post_game.tscn" id="3_5k0wc"]
 [ext_resource type="PackedScene" uid="uid://b0bfhb6hwd41" path="res://scorebug.tscn" id="3_6tnba"]
 [ext_resource type="PackedScene" uid="uid://brk67hbp6gicm" path="res://scenes/generic_menu.tscn" id="4_axasq"]
 
@@ -20,6 +21,10 @@ menu_title = "Game paused"
 options = Array[String](["Resume", "Quit"])
 background_color = Color(0.0588235, 0.792157, 0.0509804, 0.529412)
 fill_color = Color(1, 0.709804, 0, 1)
+
+[node name="PostGame" parent="." instance=ExtResource("3_5k0wc")]
+visible = false
+layout_mode = 1
 
 [node name="Scorebug" parent="." instance=ExtResource("3_6tnba")]
 layout_mode = 1
