@@ -692,8 +692,13 @@ func _process(delta: float) -> void:
 				for runner in runners:
 					runner.send_runner(1)
 			else:
+				# Ball will be caught
+				# Go back unless N-1 outs
 				for runner in runners:
-					runner.send_runner(-1)
+					if outs_before_play >= outs_per_inning - 1:
+						runner.send_runner(1)
+					else:
+						runner.send_runner(-1)
 			# Could use full function instead, but not necessary here
 			#decide_automatic_runners_actions()
 			# Set ball land annulus
