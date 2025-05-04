@@ -20,13 +20,11 @@ func _ready() -> void:
 
 func set_values(data):
 	var gc = $VBoxContainer/GridContainer
-	gc.columns = 1 + data.innings
+	gc.columns = 1 + data.innings + 1
 	var child_copy = gc.get_child(0).duplicate()
 	
 	# Delete all existing children to avoid duplicating
-	gc.get_child(10)
-	printt('tenth child', gc.get_child(10))
-	while gc.get_child(0) != null:
+	while gc.get_child_count() > 0:
 		gc.remove_child(gc.get_child(0))
 
 	# Row 1: inning count
@@ -34,16 +32,25 @@ func set_values(data):
 	#gc.get_child(0).text = ''
 	for i in range(data.innings):
 		gc.add_child(dup_label(child_copy, i+1))
+	gc.add_child(dup_label(child_copy, "R"))
 
 	# Row 2: Away team
-	gc.add_child(dup_label(child_copy, data.away_team))
+	gc.add_child(dup_label(child_copy, data.away_team.city_name + " " +
+		data.away_team.team_name))
+	# Runs by inning
 	for i in range(data.innings):
 		gc.add_child(dup_label(child_copy, data.away_score_by_inning[i]))
+	# Summary
+	gc.add_child(dup_label(child_copy, data.away_runs))
 	
 	# Row 3: Home team
-	gc.add_child(dup_label(child_copy, data.home_team))
+	gc.add_child(dup_label(child_copy, data.home_team.city_name + " " +
+		data.home_team.team_name))
+	# Runs by inning
 	for i in range(data.innings):
 		gc.add_child(dup_label(child_copy, data.home_score_by_inning[i]))
+	# Summary
+	gc.add_child(dup_label(child_copy, data.home_runs))
 
 func dup_label(node:Node, text):
 	var x = node.duplicate()

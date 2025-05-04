@@ -70,6 +70,7 @@ func set_vis(val:bool):
 	$MiniField.visible = val
 	$PrepitchFieldOverlay.visible = val
 	$Headon/Pitcher3D/PitchSelectClick.visible = val
+	$FlashText.visible = val
 
 func record_out(desc : String, duration : float = 3) -> void:
 	outs_on_play += 1
@@ -559,7 +560,6 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("SLOWMO"):
 		Engine.time_scale *= 0.8
 
-	
 	## Pause game
 	#if Input.is_action_just_pressed("startbutton"):
 		#print('start button pressed')

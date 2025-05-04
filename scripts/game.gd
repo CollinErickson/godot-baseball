@@ -23,6 +23,7 @@ var away_runs:int = 0
 var user_is_away_team:bool = false
 var user_is_home_team:bool = true
 var user_input_method:String = "keyboard" # "mouse", "keyboard", "controller"
+var game_data:Dictionary = {}
 
 var player = preload("res://scenes/player.tscn")
 var batter:Player  = null
@@ -85,6 +86,13 @@ func start_game() -> void:
 	
 	$PauseMenu.visible = false
 	$PauseMenu.is_active = false
+	
+	game_data = {
+		'home_team':home_team,
+		'away_team':away_team,
+		'away_score_by_inning':[],
+		'home_score_by_inning':[]
+	}
 
 func _process(_delta: float) -> void:
 	#printt('in game _process, scorebug visible', $Scorebug.visible)
@@ -167,8 +175,18 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	# End of half inning, change side and clear bases
 	if outs > outs_per_inning - 0.5:
 		if is_top:
+			if inning == 1:
+				game_data.away_score_by_inning.push_back(away_runs)
+			else:
+				game_data.away_score_by_inning.push_back(
+					away_runs - game_data.away_score_by_inning.back())
 			is_top = false
 		else:
+			if inning == 1:
+				game_data.home_score_by_inning.push_back(home_runs)
+			else:
+				game_data.home_score_by_inning.push_back(
+					home_runs - game_data.home_score_by_inning.back())
 			inning += 1
 			is_top = true
 		outs = 0
@@ -200,17 +218,16 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		(inning >= innings_per_game and not is_top and away_runs < home_runs)):
 		#game_over.emit()
 		state = 'postgame'
-		$Field3D.visible = false
+		$Field3D.set_vis(false)
 		$Scorebug.visible = false
 		$PostGame.visible = true
-		var game_data = {
-			'home_team':'Home',
-			'away_team':'Away',
-			'innings': inning,
-			'away_score_by_inning':[0,1,2,3,0,1,2,3],
-			'home_score_by_inning':[1,2,1,2,3,4,3,4]
-		}
+		
+		# Finalize game_data and give to Postgame
+		game_data['innings'] = inning - (1 if is_top else 0)
+		game_data['home_runs'] = home_runs
+		game_data['away_runs'] = away_runs
 		$PostGame.set_values(game_data)
+		
 		return
 	
 	# Otherwise continue the game
