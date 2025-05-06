@@ -31,6 +31,7 @@ var throw_mode:String = "" # "Button", "Bar"
 var prev_position:Vector3
 var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
+var turn_off_bad_catch_label_timer:float = 0
 var player
 
 var is_frozen:bool = false
@@ -84,6 +85,7 @@ func reset(throw_mode_:String) -> void:
 	throw_mode = throw_mode_
 	$BadThrowLabel3D.visible = false
 	turn_off_bad_throw_label_timer = 0
+	turn_off_bad_catch_label_timer = 0
 	running_with_ball_to_base = null
 	remove_from_group("fielder_running_with_ball_to_base")
 	
@@ -200,8 +202,14 @@ func _physics_process(delta: float) -> void:
 	if turn_off_bad_throw_label_timer > 0:
 		turn_off_bad_throw_label_timer -= delta
 		if turn_off_bad_throw_label_timer <= 0:
-			$BadThrowLabel3D.visible = 0
+			$BadThrowLabel3D.visible = false
 			turn_off_bad_throw_label_timer = 0
+	
+	if turn_off_bad_catch_label_timer > 0:
+		turn_off_bad_catch_label_timer -= delta
+		if turn_off_bad_catch_label_timer <= 0:
+			$BadThrowLabel3D.visible = false
+			turn_off_bad_catch_label_timer = 0
 	
 	if assignment==null:
 		return
@@ -242,7 +250,8 @@ func _physics_process(delta: float) -> void:
 	# Move fielder to their assignment
 	if (((assignment in ["cover", "ball_click", "ball_carry"]) or
 		(assignment == 'ball' and not user_is_pitching_team)) and 
-		assignment_pos != null):
+		assignment_pos != null and 
+		turn_off_bad_catch_label_timer <= 0):
 		var distance_from_target = distance_xz(position, assignment_pos)
 		var distance_can_move = delta * SPEED
 		moved_this_process = true
@@ -283,23 +292,45 @@ func _physics_process(delta: float) -> void:
 			var distance_from_ball_xz = distance_xz(position, ball.position)
 			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
 				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
-				(ball.throw_start_pos==null or ball.throw_progress >= .9)):
-				printt('FIELD BALL', posname, distance_from_ball_xz, position,
-					ball.position, Time.get_ticks_msec() - ball.time_last_thrown,
-					ball.throw_progress, Time.get_ticks_msec())
-				var ball_position_before_fielded = ball.position
-				ball.position = position
-				ball.position.y = 1.4
-				set_holding_ball(true)
-				set_assignment("holding_ball")
-				set_animation('idle')
-				assignment_pos = null
-				ball_fielded.emit(self, ball_position_before_fielded)
-				if user_is_pitching_team:
-					set_selected_fielder()
+				(ball.throw_start_pos==null or ball.throw_progress >= .9) and
+				turn_off_bad_catch_label_timer <= 0):
+				var catch_prob = 0.95
+				if randf() <= catch_prob:
+					# Catch successful
+					printt('In fielder, caught ball', posname,
+						distance_from_ball_xz, position,
+						ball.position,
+						Time.get_ticks_msec() - ball.time_last_thrown,
+						ball.throw_progress, Time.get_ticks_msec())
+					var ball_position_before_fielded = ball.position
+					ball.position = position
+					ball.position.y = 1.4
+					set_holding_ball(true)
+					set_assignment("holding_ball")
+					set_animation('idle')
+					assignment_pos = null
+					ball_fielded.emit(self, ball_position_before_fielded)
+					if user_is_pitching_team:
+						set_selected_fielder()
+				else:
+					# Catch dropped
+					printt('in fielder: catch dropped')
+					ball.velocity = Vector3(randfn(0,1),randfn(0,1),randfn(0,1)
+						).normalized() * max_throw_speed / 10
+					turn_off_bad_catch_label_timer = 1
+					$BadThrowLabel3D.visible = true
+					# Stop them
+					set_animation('idle')
+					if not user_is_pitching_team:
+						set_assignment("wait_to_receive")
+						assignment_pos = null
+					
 
 	# Check if user moves
-	if user_is_pitching_team and (holding_ball or assignment in ["ball", "ball_click"]) and is_selected_fielder:
+	if (user_is_pitching_team and
+		(holding_ball or assignment in ["ball", "ball_click"]) and
+		is_selected_fielder and
+		turn_off_bad_catch_label_timer <= 0):
 		# Check for movement
 		var anymovement = false
 		var move = Vector3()
