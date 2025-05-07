@@ -2,10 +2,10 @@ extends Node3D
 
 @export var Type: String
 
-#var wall_color = "Red"
 var wall_color:Color = Color(0,0,1,1)
 # Can't use the same color as dirt, this shows up too bright
 var warning_track_color:Color = Color("#2b2b00")
+var stands_color:Color = Color(1,0,0)
 
 # wall_array is array with:
 # (angle: 0 is LF, 90 is RF, distance from home in YD, height in YD)
@@ -55,6 +55,9 @@ func _ready() -> void:
 	# Create the warning track
 	make_warning_track()
 	
+	# Create the stands
+	#make_stands()
+	
 	# Find min distance to each wall segment
 	for i in range(len(wall_array)-1):
 		var u1 = Vector2(cosd(wall_array[i][0]), sind(wall_array[i][0])) * wall_array[i][1]
@@ -94,17 +97,11 @@ func make_wall():
 	
 	var verts = PackedVector3Array()
 	#var uvs = PackedVector2Array()
-	#var normals = PackedVector3Array()
+	var normals = PackedVector3Array()
 	#var indices = PackedInt32Array()
 	var colors = PackedColorArray()
 	
 	# Vertices
-	#verts.push_back(Vector3(0,0,0))
-	#verts.push_back(Vector3(2,0,0))
-	#verts.push_back(Vector3(2,2,0))
-	#verts.push_back(Vector3(2,2,0))
-	#verts.push_back(Vector3(4,4,0))
-	#verts.push_back(Vector3(4,2,0))
 	for i in range(len(wall_array) - 1):
 		#if wall_array[i][0] >= wall_array[i+1][0]:
 			#printerr("Bad angle in wall\t", wall_array[i], wall_array[i+1])
@@ -126,23 +123,22 @@ func make_wall():
 		verts.push_back(v2up)
 		verts.push_back(v2)
 		
-	
-	#uvs.push_back(Vector2(.3,.4))
-	#uvs.push_back(Vector2(.3,.4))
-	#uvs.push_back(Vector2(.3,.4))
-	
-	#normals.push_back(Vector3(0,0,1))
-	#normals.push_back(Vector3(0,0,1))
-	#normals.push_back(Vector3(0,0,1))
-	
+		#uvs.push_back(Vector2(.3,.4))
+		
+		var norm_vec:Vector3 = (v1 - v2).cross(v1up - v1).normalized()
+		for j in range(6):
+			normals.push_back(norm_vec)
+		
 	# Colors
 	for i in range(len(verts)):
 		#colors.push_back(Color(0,0,1,1))
 		colors.push_back(wall_color)
 	
+	assert(len(normals) == len(verts))
+	
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
-	#surface_array[Mesh.ARRAY_NORMAL] = normals
+	surface_array[Mesh.ARRAY_NORMAL] = normals
 	#surface_array[Mesh.ARRAY_INDEX] = indices
 	surface_array[Mesh.ARRAY_COLOR] = colors
 	#printt('new mesh is', surface_array)
@@ -220,6 +216,69 @@ func make_warning_track():
 
 	# No blendshapes, lods, or compression used.
 	var meshnode = get_node("WarningTrackMeshInstance3D")
+	meshnode.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
+	
+	var your_material = StandardMaterial3D.new()
+	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
+	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
+	#print("Finished make warning track")
+
+func make_stands():
+	print("Running make_stands")
+	var stands_depth = 10
+	var stands_slope = 1
+	var surface_array = []
+	surface_array.resize(Mesh.ARRAY_MAX)
+	
+	var verts = PackedVector3Array()
+	#var uvs = PackedVector2Array()
+	var normals = PackedVector3Array()
+	#var indices = PackedInt32Array()
+	var colors = PackedColorArray()
+	
+	# Vertices
+	for i in range(len(wall_array) - 1):
+		#if wall_array[i][0] >= wall_array[i+1][0]:
+			#printerr("Bad angle in wall\t", wall_array[i], wall_array[i+1])
+		var v1base:Vector3 = wall_array[i][1] * Vector3(0,0,1).rotated(
+			Vector3(0,1,0), (90-wall_array[i][0])*PI/180)
+		var v1up = v1base + Vector3(0, wall_array[i][2],0)
+		var v1back = v1up + v1base.normalized() * stands_depth + stands_depth * stands_slope * Vector3(0,1,0)
+		var v2base:Vector3 = wall_array[i+1][1] * Vector3(0,0,1).rotated(
+			Vector3(0,1,0), (90-wall_array[i+1][0])*PI/180)
+		var v2up = v2base + Vector3(0, wall_array[i+1][2],0)
+		var v2back = v2up + v2base.normalized() * stands_depth + stands_depth * stands_slope * Vector3(0,1,0)
+		
+		# First triangle
+		verts.push_back(v1up)
+		verts.push_back(v1back)
+		verts.push_back(v2up)
+		# Second triangle
+		verts.push_back(v1back)
+		verts.push_back(v2back)
+		verts.push_back(v2up)
+		
+		var norm_vec:Vector3 = (v2up - v1up).cross(v1back - v1up).normalized()
+		for j in range(6):
+			normals.push_back(norm_vec)
+			#uvs.push_back(Vector2(.3,.4))
+			#normals.push_back(Vector3(0,1,0))
+			#indices.push_back(i)
+	
+	# Colors
+	for i in range(len(verts)):
+		#colors.push_back(Color(0,0,1,1))
+		colors.push_back(stands_color)
+	
+	surface_array[Mesh.ARRAY_VERTEX] = verts
+	#surface_array[Mesh.ARRAY_TEX_UV] = uvs
+	#surface_array[Mesh.ARRAY_NORMAL] = normals
+	#surface_array[Mesh.ARRAY_INDEX] = indices
+	surface_array[Mesh.ARRAY_COLOR] = colors
+	#printt('new mesh is', surface_array)
+
+	# No blendshapes, lods, or compression used.
+	var meshnode = get_node("StandsMeshInstance3D")
 	meshnode.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	
 	var your_material = StandardMaterial3D.new()
