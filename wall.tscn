@@ -1,11 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://dmcetu0b5itrl"]
+[gd_scene load_steps=4 format=3 uid="uid://dmcetu0b5itrl"]
 
 [ext_resource type="Script" path="res://wall.gd" id="1_lcops"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_51pxn"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_18bpp"]
 
 [node name="Wall" type="Node3D" groups=["walls"]]
 script = ExtResource("1_lcops")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("ArrayMesh_51pxn")
+
+[node name="WarningTrackMeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("ArrayMesh_18bpp")
