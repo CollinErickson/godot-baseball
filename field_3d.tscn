@@ -38,7 +38,7 @@ color_ramp = SubResource("Gradient_8rhyr")
 noise = SubResource("FastNoiseLite_gcaba")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tww2n"]
-albedo_color = Color(0.0980392, 0.533333, 0.0862745, 1)
+albedo_color = Color(0.0590808, 0.369669, 0.0503423, 1)
 albedo_texture = SubResource("NoiseTexture2D_s72fw")
 subsurf_scatter_strength = 1.0
 
