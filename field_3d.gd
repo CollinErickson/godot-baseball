@@ -610,10 +610,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
-					if !true:
-						vla = -20
+					if true:
+						vla = 20
 						hla = 0
-						exitvelo = 18.8
+						exitvelo = 38.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -1083,7 +1083,12 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	for fielder in fielders_runner_with_ball_to_base:
 		bases_to_skip.push_back(int(fielder.running_with_ball_to_base))
 	
-	# Assign nearest fielder to cover bases and cutoff and alt
+	# Don't assign alt fielder if a fielder is already holding the ball
+	var fielders_holding_ball:Array = get_tree().get_nodes_in_group("fielder_holding_ball")
+	if len(fielders_holding_ball) > 0.5:
+		bases_to_skip.push_back(6)
+	
+	# Assign nearest fielder to cover bases (1-4) and cutoff (5) and alt (6)
 	for base:int in [2,1,3,4, 5, 6]:
 		if bases_to_skip.has(base):
 			continue
