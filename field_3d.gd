@@ -7,6 +7,7 @@ var ball_in_play_state_time = 0
 const sz_z = 0.6
 var is_foul_ball:bool = false
 var ball_touched_by_fielder:bool = false
+var ball_over_wall:bool = false
 
 var outs_per_inning = 3
 var outs_on_play = 0
@@ -252,6 +253,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_hit_bounced = false
 	ball_caught_in_air = false
 	ball_touched_by_fielder = false
+	ball_over_wall = false
 	outs_on_play = 0
 	outs_before_play = outs_before_play_
 	outs_per_inning = outs_per_inning_
@@ -611,9 +613,9 @@ func _process(delta: float) -> void:
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
 					if true:
-						vla = 30
+						vla = -45
 						hla = 0
-						exitvelo = 88.8
+						exitvelo = 188.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -707,7 +709,7 @@ func _process(delta: float) -> void:
 			$Headon/BallBounceAnnulus.visible = true
 	
 	# Move baserunners
-	if ball_in_play:
+	if ball_in_play and not ball_over_wall:
 		if user_is_batting_team:
 			if Input.is_action_just_pressed("throwfirst"):
 				#
@@ -1072,6 +1074,9 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	# This can be called right after foul ball after field is reset
 	if !ball_in_play:
 		return
+	# Don't call if ball over wall
+	if ball_over_wall:
+		return
 	printt('Running assign_fielders_to_cover_bases', intercept_position)
 	var assigned_indexes = []
 	intercept_position.y = 0
@@ -1298,11 +1303,6 @@ func check_if_play_done():
 			return false
 		if runner.is_active():
 			n_runners_active += 1
-		#if runner.exists_at_start:
-			#if runner.is_running:
-				#return false
-			#if runner.is_active() and abs(runner.running_progress - round(runner.running_progress)) > 1e-4:
-				#return false
 	if n_runners_active == 0:
 		return true
 	# None are running, all are near base
@@ -1386,6 +1386,10 @@ func _on_ball_3d_hit_bounced_signal() -> void:
 func _on_ball_over_wall_signal():
 	printt('in field _on_ball_over_wall_signal')
 	assert(ball.fair_foul_determined)
+	
+	# Prevent user from changing runners
+	ball_over_wall = true
+	
 	# Tell all fielders to stand
 	for fielder in fielders:
 		fielder.ball_over_wall()
@@ -1393,10 +1397,12 @@ func _on_ball_over_wall_signal():
 		_on_ball_3d_foul_ball()
 	else: # fair
 		if ball.hit_bounced: # Ground rule double
-			pass
+			for runner in runners:
+				runner.ball_over_wall(runner.start_base + 2)
 		else: # Home run
-			pass
 			# Tell all runners to run home
+			for runner in runners:
+				runner.ball_over_wall(4)
 
 func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base

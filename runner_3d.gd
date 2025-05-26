@@ -28,6 +28,7 @@ var runner_after = null
 var animation:String = "idle"
 #var state:String = "nonexistant" # nonexistant, 
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
+var force_to_base = null # When ball is over wall
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -68,6 +69,7 @@ func reset(color) -> void:
 	max_running_progress = running_progress
 	target_base = start_base + 1
 	able_to_score = false
+	force_to_base = null
 	
 	$Char3D.reset() # Resets rotation
 	set_look_at()
@@ -79,7 +81,11 @@ func reset(color) -> void:
 	
 
 func is_active():
-	return exists_at_start and not out_on_play and not scored_on_play
+	return (exists_at_start and
+			not out_on_play and
+			not scored_on_play and
+			not (force_to_base != null and
+				abs(force_to_base - running_progress) < 1e-8))
 
 func runner_is_out() -> void:
 	out_on_play = true
@@ -323,6 +329,8 @@ func is_done_for_play() -> bool:
 		return true
 	if out_on_play or scored_on_play:
 		return true
+	if force_to_base != null and abs(force_to_base - running_progress) < 1e-8:
+		return true
 	if needs_to_tag_up and not tagged_up_after_catch:
 		return false
 	if is_running:
@@ -398,3 +406,8 @@ var base_positions = [
 	Vector3(1,0,1)*30/sqrt(2), # 3
 	Vector3(0,0,0) # Home
 ]
+
+func ball_over_wall(base:int) -> void:
+	if is_active():
+		force_to_base = base
+		send_runner_to_base(force_to_base)
