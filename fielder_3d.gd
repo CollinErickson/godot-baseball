@@ -12,7 +12,7 @@ var catch_max_y:float = 2.5
 var throws:String = 'R'
 const time_throw_animation_release_point:float = 0.75
 
-var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball
+var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball, over_wall
 var assignment_pos # Position to go to for assignment
 var holding_ball:bool = false
 var user_is_pitching_team:bool
@@ -212,6 +212,9 @@ func _physics_process(delta: float) -> void:
 			turn_off_bad_catch_label_timer = 0
 	
 	if assignment==null:
+		return
+	
+	if assignment == 'over_wall':
 		return
 
 	if state == 'throwing':
@@ -936,7 +939,7 @@ func set_state(state_:String):
 
 func set_assignment(assignment_):
 	assert(assignment_ in ['cover', 'ball', 'ball_click', 'ball_carry',
-							'wait_to_receive', 'holding_ball'])
+							'wait_to_receive', 'holding_ball', 'over_wall'])
 	
 	if assignment == assignment_:
 		return
@@ -1227,3 +1230,10 @@ func progress_on_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
 	var q_proj_on_l = q.dot(l) / l.dot(l) * l
 	
 	return q_proj_on_l.length() / l.length()
+
+func ball_over_wall() -> void:
+	if not user_is_pitching_team:
+		# Set assignment to have them stand
+		set_assignment('over_wall')
+		# Set animation to sad
+		set_animation('idle')

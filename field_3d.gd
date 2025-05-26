@@ -611,9 +611,9 @@ func _process(delta: float) -> void:
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
 					if true:
-						vla = 20
+						vla = 30
 						hla = 0
-						exitvelo = 38.8
+						exitvelo = 88.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -1389,10 +1389,15 @@ func _on_ball_over_wall_signal():
 	if ball.is_foul:
 		_on_ball_3d_foul_ball()
 	else: # fair
+		# Tell all fielders to stand
+		for fielder in fielders:
+			fielder.ball_over_wall()
 		if ball.hit_bounced: # Ground rule double
 			pass
 		else: # Home run
 			pass
+			
+			# Tell all runners to run home
 
 func _on_reached_next_base_by_runner() -> void:
 	# Only for first time they reached the base after start_base
