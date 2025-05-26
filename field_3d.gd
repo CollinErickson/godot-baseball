@@ -1386,17 +1386,16 @@ func _on_ball_3d_hit_bounced_signal() -> void:
 func _on_ball_over_wall_signal():
 	printt('in field _on_ball_over_wall_signal')
 	assert(ball.fair_foul_determined)
+	# Tell all fielders to stand
+	for fielder in fielders:
+		fielder.ball_over_wall()
 	if ball.is_foul:
 		_on_ball_3d_foul_ball()
 	else: # fair
-		# Tell all fielders to stand
-		for fielder in fielders:
-			fielder.ball_over_wall()
 		if ball.hit_bounced: # Ground rule double
 			pass
 		else: # Home run
 			pass
-			
 			# Tell all runners to run home
 
 func _on_reached_next_base_by_runner() -> void:
