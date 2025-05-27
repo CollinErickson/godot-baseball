@@ -76,3 +76,12 @@ func make_arrow():
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	#print("Finished make arrow")
+
+func set_color(new_color:Color, new_angle_degrees:float) -> void:
+	if new_color == color and abs(angle_degrees-new_angle_degrees) < 1:
+		return
+	color = new_color
+	angle_degrees = new_angle_degrees
+	# Delete existing arrow
+	get_child(0).queue_free()
+	make_arrow()

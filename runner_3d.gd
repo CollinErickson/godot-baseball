@@ -70,6 +70,7 @@ func reset(color) -> void:
 	target_base = start_base + 1
 	able_to_score = false
 	force_to_base = null
+	$ClickToRunArrow.visible = false
 	
 	$Char3D.reset() # Resets rotation
 	set_look_at()
@@ -240,10 +241,12 @@ func update_position():
 	#printt('RUN', is_running, running_progress, position)
 		
 func send_runner(direction: int, can_go_past:bool=true) -> void:
+	# direction: 1 if forward, -1 if backward
+	# can_go_past: If near next base, should they go to following base?
 	#printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
-	if direction > 0.5:
+	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
 		#if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
 			#target_base = floor(running_progress) + 1
@@ -411,3 +414,52 @@ func ball_over_wall(base:int) -> void:
 	if is_active():
 		force_to_base = base
 		send_runner_to_base(force_to_base)
+
+func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
+	# Returns:
+	#  0 - click not used
+	#  1 - send forward
+	#  -1 - send backward
+	# Runner must be active
+	# Mouse must be close to runner
+	# Can't be too close, hard to tell direction
+	if ((not is_active()) or
+		(mpos.distance_to(position) > 7.5) or 
+		(mpos.distance_to(position) <= 1e-8)
+		):
+		$ClickToRunArrow.visible = false
+		return 0
+	var front_base:int = floor(running_progress) + 1
+	var back_base:int = ceil(running_progress) - 1
+	var diff:Vector3 = mpos - position
+	if front_base <= 4:
+		var front_base_pos:Vector3 = base_positions[front_base - 1]
+		var a:Vector3 = front_base_pos - position
+		var angle_forward:float = angle_between(a, diff)
+		#printt('angle_forward', angle_forward, back_base)
+		if angle_forward <= 45*PI/180:
+			#var arrow_angle = angle_between(a, Vector3(0,0,1))
+			var arrow_angle_deg = -135 + 90 * front_base
+			$ClickToRunArrow.visible = true
+			$ClickToRunArrow.set_color(Color(1.,1.,0.5,1.), arrow_angle_deg)
+			if just_clicked:
+				send_runner(+1, true)
+			return 1
+	if back_base >= 1 and back_base <= 3:
+		var back_base_pos:Vector3 = base_positions[back_base - 1]
+		var a:Vector3 = back_base_pos - position
+		var angle_backward:float = angle_between(a, diff)
+		#printt('angle_backward is', angle_backward)
+		if angle_backward <= 45*PI/180:
+			var arrow_angle_deg = 135 + 90 * back_base
+			$ClickToRunArrow.visible = true
+			$ClickToRunArrow.set_color(Color('red'), arrow_angle_deg)
+			if just_clicked:
+				send_runner(-1, false)
+			return -1
+	$ClickToRunArrow.visible = false
+	# No action taken
+	return 0
+
+func angle_between(a:Vector3, b:Vector3) -> float:
+	return acos((a.dot(b)) / (a.length() * b.length()))

@@ -181,6 +181,7 @@ signal ball_fielded
 signal tag_out
 signal new_fielder_selected_signal
 signal fielder_moved_reassign_fielders_signal
+signal fielder_dropped_catch_reassign_fielders_signal
 signal alt_fielder_selected_signal
 @onready var wallnodes = get_tree().get_nodes_in_group("walls")
 
@@ -210,6 +211,9 @@ func _physics_process(delta: float) -> void:
 		if turn_off_bad_catch_label_timer <= 0:
 			$BadThrowLabel3D.visible = false
 			turn_off_bad_catch_label_timer = 0
+			if not user_is_pitching_team:
+				if len(get_tree().get_nodes_in_group('fielder_holding_ball')) < 0.5:
+					fielder_dropped_catch_reassign_fielders_signal.emit(self)
 	
 	if assignment==null:
 		return
@@ -318,6 +322,7 @@ func _physics_process(delta: float) -> void:
 				else:
 					# Catch dropped
 					printt('in fielder: catch dropped')
+					# Move ball in random direction
 					ball.velocity = Vector3(randfn(0,1),randfn(0,1),randfn(0,1)
 						).normalized() * max_throw_speed / 10
 					turn_off_bad_catch_label_timer = 1
@@ -327,6 +332,9 @@ func _physics_process(delta: float) -> void:
 					if not user_is_pitching_team:
 						set_assignment("wait_to_receive")
 						assignment_pos = null
+						# Reassign fielders since no one is chasing ball
+						#fielder_moved_reassign_fielders_signal.emit(self)
+
 					
 
 	# Check if user moves

@@ -45,6 +45,8 @@ func _ready() -> void:
 		fielder.connect("tag_out", _on_tag_out_by_fielder)
 		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
 		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
+		fielder.connect("fielder_dropped_catch_reassign_fielders_signal", _on_fielder_dropped_catch_reassign_fielders_by_fielder)
+		
 		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
 
 	# Set up signals from runners
@@ -466,6 +468,9 @@ func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
 	var intercept_pos = find_intercept_position_for_fielder(fielder)
 	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
 
+func _on_fielder_dropped_catch_reassign_fielders_by_fielder(fielder) -> void:
+	assign_fielders_to_loose_ball()
+
 func test_mesh_array():
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
@@ -613,9 +618,9 @@ func _process(delta: float) -> void:
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
 					if true:
-						vla = -45
+						vla = 65
 						hla = 0
-						exitvelo = 188.8
+						exitvelo = 28.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -724,6 +729,11 @@ func _process(delta: float) -> void:
 				# Move all forward
 				for runner in runners:
 					runner.send_runner(-1)
+			# Check for user click
+			var mpos = get_mouse_y0_pos()
+			var just_clicked = Input.is_action_just_pressed('click')
+			for runner in runners:
+				var out = runner.set_click_arrow(mpos, just_clicked)
 		else:
 			# Redo runner decisions every 0.166 sec (10 frames)
 			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
@@ -1181,6 +1191,22 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			fielders[i].set_animation('idle')
 	
 	return
+
+func assign_fielders_to_loose_ball() -> void:
+	var fftib = find_fielder_to_intercept_ball()
+	var found_someone = fftib[0]
+	#var tmp_ball_bounced = fftib[1]
+	var min_ifielder = fftib[2]
+	var intercept_position = fftib[3]
+	if found_someone:
+		# Find fielder to get the ball
+		fielders[min_ifielder].assign_to_field_ball(intercept_position)
+		fielders[fftib[7]].set_alt_fielder()
+	else:
+		printt('WARNING: in assign_fielders_to_loose_ball, no fielder found')
+
+	# Assign remaining to cover bases
+	assign_fielders_to_cover_bases([min_ifielder], intercept_position, [])
 
 func get_fielder_with_posname(posname):
 	var f1 = fielders.filter(func(f): return f.posname == posname)
