@@ -97,6 +97,7 @@ func reset(throw_mode_:String) -> void:
 	else:
 		set_look_at_position(Vector3(0,0,0))
 	set_animation("idle")
+	force_animation_idle()
 	#$Char3D.set_color(color)
 	
 	set_not_selected_fielder()
@@ -940,6 +941,11 @@ func set_animation(new_anim):
 		#pass
 	#if new_anim == "moving":
 	$Char3D.start_animation(new_anim, false, throws=='R')
+
+func force_animation_idle() -> void:
+	printt('in player force_animation_idle')
+	animation = 'idle'
+	$Char3D.force_animation_idle()
 
 func set_state(state_:String):
 	state = state_

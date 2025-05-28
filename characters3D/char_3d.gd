@@ -89,6 +89,20 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 
+func force_animation_idle() -> void:
+	printt('start force_animation_idle')
+	# Set parameters for idle
+	$charnode/AnimationTree.set("parameters/conditions/moving", false)
+	$charnode/AnimationTree.set("parameters/conditions/idle", true)
+	$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+	$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+	$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+	$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
+	$charnode/AnimationTree.set("parameters/conditions/throw", false)
+	# https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachineplayback.html#class-animationnodestatemachineplayback-method-start
+	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	state_machine.start("idle")
+
 func set_color(col):
 	#printt('\t\t\t\tIN SET COLOR FOR CHAR3D')
 	var mat = StandardMaterial3D.new()
