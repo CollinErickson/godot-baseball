@@ -943,7 +943,6 @@ func set_animation(new_anim):
 	$Char3D.start_animation(new_anim, false, throws=='R')
 
 func force_animation_idle() -> void:
-	printt('in player force_animation_idle')
 	animation = 'idle'
 	$Char3D.force_animation_idle()
 

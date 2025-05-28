@@ -7,6 +7,7 @@ var char_AJ = load("res://characters3D/AJ/AJ.tscn")
 var char_Player1 = load("res://characters3D/Player1/player_1.tscn")
 
 var current_animation_rotation:float = 0
+var pause_info = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -37,6 +38,7 @@ func reset() -> void:
 	# Undo current animation rotation
 	rotate_y(-current_animation_rotation)
 	current_animation_rotation = 0
+	pause_info = null
 	
 
 func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
@@ -90,7 +92,6 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 
 func force_animation_idle() -> void:
-	printt('start force_animation_idle')
 	# Set parameters for idle
 	$charnode/AnimationTree.set("parameters/conditions/moving", false)
 	$charnode/AnimationTree.set("parameters/conditions/idle", true)
@@ -216,13 +217,24 @@ func pause() -> void:
 	#$charnode/AnimationTree.set_physics_process(false)
 	#$charnode/AnimationPlayer.set_process(false)
 	#$charnode/AnimationPlayer.set_physics_process(false)
-	$charnode/AnimationTree.set_callback_mode_process(2)
+	###$charnode/AnimationTree.set_callback_mode_process(2)
 	#printt('char3d callback mode', $charnode/AnimationTree.get_callback_mode_process())
+	
+	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	
+	pause_info = [state_machine.get_current_node()]
+	state_machine.start("idle")
 
 func unpause() -> void:
 	#$charnode/AnimationTree.active = true
 	#$charnode/AnimationTree.set_process_callback(1)
-	$charnode/AnimationTree.set_callback_mode_process(1)
+	###$charnode/AnimationTree.set_callback_mode_process(1)
+	if pause_info == null:
+		return
+	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	state_machine.start(pause_info[0], false)
+	pause_info = null
+
 
 func set_glove(throwsR:bool) -> void:
 	$charnode/Armature/Skeleton3D/gloveL.visible = throwsR
