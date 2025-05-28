@@ -470,7 +470,7 @@ func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
 	var intercept_pos = find_intercept_position_for_fielder(fielder)
 	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
 
-func _on_fielder_dropped_catch_reassign_fielders_by_fielder(fielder) -> void:
+func _on_fielder_dropped_catch_reassign_fielders_by_fielder(_fielder) -> void:
 	assign_fielders_to_loose_ball()
 
 func test_mesh_array():
@@ -735,7 +735,11 @@ func _process(delta: float) -> void:
 			var mpos = get_mouse_y0_pos()
 			var just_clicked = Input.is_action_just_pressed('click')
 			for runner in runners:
-				var out = runner.set_click_arrow(mpos, just_clicked)
+				var out:int = runner.set_click_arrow(mpos, just_clicked)
+				if out != 0:
+					# Click was used by that runner
+					# Don't break since it needs to update all runners
+					just_clicked = false
 			
 			# Check for buttons/left stick to send single runner
 			var ax1 = Input.get_axis("moveleft", "moveright")
