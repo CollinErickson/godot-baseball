@@ -736,6 +736,35 @@ func _process(delta: float) -> void:
 			var just_clicked = Input.is_action_just_pressed('click')
 			for runner in runners:
 				var out = runner.set_click_arrow(mpos, just_clicked)
+			
+			# Check for buttons/left stick to send single runner
+			var ax1 = Input.get_axis("moveleft", "moveright")
+			var ax2 = Input.get_axis("movedown", "moveup")
+			if ax1*ax1 + ax2*ax2 > 0.5:
+				var angle_deg = atan(ax2 / ax1) * 180/PI
+				if ax1 < 0:
+					angle_deg += 180
+				if angle_deg < 0:
+					angle_deg += 360
+				#printt('runner axis', ax1, ax2, angle_deg)
+				# Find nearest runner in direction
+				var min_runner = null
+				var min_angle_deg_diff = 36000
+				for runner in runners:
+					if runner.is_active():
+						var runner_angle_deg = (runner.running_progress - 1) * 90
+						if runner_angle_deg < 0:
+							runner_angle_deg += 360
+						var angle_deg_diff = abs(angle_deg - runner_angle_deg)
+						if angle_deg_diff < min_angle_deg_diff:
+							min_angle_deg_diff = angle_deg_diff
+							min_runner = runner
+				# If runner is in direction close enough, send them
+				if min_angle_deg_diff < 135:
+					if Input.is_action_just_pressed("throwfirst"):
+						min_runner.send_runner(-1)
+					if Input.is_action_just_pressed("throwthird"):
+						min_runner.send_runner(+1, true)
 		else:
 			# Redo runner decisions every 0.166 sec (10 frames)
 			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:

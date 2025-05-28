@@ -305,6 +305,8 @@ func send_runner_to_base(base:float) -> void:
 	#printt('in runner send_runner_to_base', start_base, base)
 	if base < .9999 or base > 4.0001:
 		return
+	if not is_active():
+		return
 	target_base = base
 	if abs(target_base - running_progress) < 1e-12:
 		is_running = false
