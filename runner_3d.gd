@@ -25,6 +25,8 @@ var runners_before :Array = []
 var runners_after :Array = []
 var runner_before = null
 var runner_after = null
+var active_runner_before = null
+var active_runner_after = null
 var animation:String = "idle"
 #var state:String = "nonexistant" # nonexistant, 
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
@@ -108,6 +110,13 @@ func _ready() -> void:
 			runners_before.append(runner)
 		elif runner.start_base > start_base:
 			runners_after.append(runner)
+	runners_before.sort_custom(sort_runners)
+	runners_after.sort_custom(sort_runners)
+	#printt('sorted runners_after', runners_after)
+	#printt('sorted runners_before', runners_before)
+
+func sort_runners(a,b) -> bool:
+	return a.start_base < b.start_base
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
@@ -294,6 +303,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 
 func send_runner_to_base(base:float) -> void:
 	#printt('in runner send_runner_to_base', start_base, base)
+	if base < .9999 or base > 4.0001:
+		return
 	target_base = base
 	if abs(target_base - running_progress) < 1e-12:
 		is_running = false
@@ -326,6 +337,20 @@ func setup_player(player, team, is_home_team:bool) -> void:
 	if is_home_team and post_play_target_position.x > 0:
 		post_play_target_position.x *= 1
 
+func setup_runner_relations() -> void:
+	active_runner_before = null
+	active_runner_after = null
+	if not is_active():
+		return
+	for i in range(len(runners_before)-1,-1, -1):
+		var r = runners_before[i]
+		if r.is_active():
+			active_runner_before = r
+			break
+	for r in runners_after:
+		if r.is_active():
+			active_runner_after = r
+			break
 
 func is_done_for_play() -> bool:
 	if not exists_at_start:
@@ -444,6 +469,16 @@ func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 			$ClickToRunArrow.set_color(Color(1.,1.,0.5,1.), arrow_angle_deg)
 			if just_clicked:
 				send_runner(+1, true)
+				var base1 = target_base
+				var runner_temp = active_runner_after
+				while true:
+					if runner_temp == null:
+						break
+					if runner_temp.target_base > base1:
+						break
+					runner_temp.send_runner_to_base(base1 + 1)
+					runner_temp = runner_temp.active_runner_after
+					base1 = base1 + 1
 			return 1
 	if back_base >= 1 and back_base <= 3:
 		var back_base_pos:Vector3 = base_positions[back_base - 1]
@@ -456,6 +491,16 @@ func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 			$ClickToRunArrow.set_color(Color('red'), arrow_angle_deg)
 			if just_clicked:
 				send_runner(-1, false)
+				var base1 = target_base
+				var runner_temp = active_runner_before
+				while true:
+					if runner_temp == null:
+						break
+					if runner_temp.target_base < base1:
+						break
+					runner_temp.send_runner_to_base(base1 - 1)
+					runner_temp = runner_temp.active_runner_before
+					base1 = base1 - 1
 			return -1
 	$ClickToRunArrow.visible = false
 	# No action taken

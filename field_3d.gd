@@ -196,6 +196,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			runner.setup_player(runner3, batting_team, !fielding_team_is_home)
 		else:
 			assert(runner.start_base == 0)
+	for runner in runners:
+		runner.setup_runner_relations()
 
 	# Setup batter
 	bat_mode = bat_mode_
