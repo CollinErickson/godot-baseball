@@ -50,11 +50,13 @@ func unpause() -> void:
 func _ready() -> void:
 	$PitchSelectClick.connect("click_in_rect", _on_click_in_rect_by_mouse)
 
-func reset(pitch_mode_:String, user_input_method_:String) -> void:
+func reset(pitch_mode_:String, user_input_method_:String,
+			user_is_pitching_team_:bool) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
 	# Reset vars
+	user_is_pitching_team = user_is_pitching_team_
 	pitch_in_progress = false
 	pitch_done = false
 	time_since_pitch_start = 0
@@ -68,23 +70,27 @@ func reset(pitch_mode_:String, user_input_method_:String) -> void:
 	pitch_select_key = null
 	pitch_input_modifiers = []
 	user_input_method = user_input_method_
-	if user_input_method == "mouse":
-		$PitchSelectClick.set_active(true)
-		$PitchSelectKeyboard.visible = false
-		action_to_pitch_type = {
-			"click": "click"
-		}
-	elif user_input_method in ["keyboard", "controller"]:
+	if user_is_pitching_team_:
+		if user_input_method == "mouse":
+			$PitchSelectClick.set_active(true)
+			$PitchSelectKeyboard.visible = false
+			action_to_pitch_type = {
+				"click": "click"
+			}
+		elif user_input_method in ["keyboard", "controller"]:
+			$PitchSelectClick.set_active(false)
+			$PitchSelectKeyboard.visible = true
+			action_to_pitch_type = {
+				"throwhome": "FB",
+				"throwfirst": "2SFB",
+				"throwsecond": "CB",
+				"throwthird": "SL"
+			}
+		else:
+			assert(false)
+	else: # CPU is pitching team
 		$PitchSelectClick.set_active(false)
-		$PitchSelectKeyboard.visible = true
-		action_to_pitch_type = {
-			"throwhome": "FB",
-			"throwfirst": "2SFB",
-			"throwsecond": "CB",
-			"throwthird": "SL"
-		}
-	else:
-		assert(false)
+		$PitchSelectKeyboard.visible = false
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)

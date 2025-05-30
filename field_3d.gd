@@ -209,7 +209,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$PrepitchFieldOverlay.setup_batter(batter)
 
 	# Setup pitcher
-	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method)
+	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method, user_is_pitching_team_)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
 	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
@@ -281,7 +281,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	assert(max_force_outs_at_start <= 4)
 	
 	# Set variables in children
-	$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
+	#$Headon/Pitcher3D.user_is_pitching_team = user_is_pitching_team
 	for fielder in fielders:
 		fielder.user_is_pitching_team = user_is_pitching_team
 	if not user_is_pitching_team:
