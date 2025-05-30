@@ -169,6 +169,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		# Change speed of a fielder for testing (200 is super fast)
 		#if fielder.posnum == 1:
 			#fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]].speed = 200
+		# Change size of a fielder for testing
+		#if fielder.posnum == 3:
+			#fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]].height_mult = 3
 		fielder.setup_player(
 			fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]],
 			fielding_team,
@@ -981,6 +984,8 @@ func find_fielder_to_intercept_ball() -> Array:
 	var found_someone = false
 	var min_timetoreach = 1e9
 	var min_ifielder
+	var min_distance_fielder_moved:float = 1e9
+	var min_intercept_position:Vector3 = Vector3()
 	while iii < 1000:
 		iii += 1
 		take_steps.call(numsteps, delta)
@@ -995,15 +1000,23 @@ func find_fielder_to_intercept_ball() -> Array:
 				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
 				
 				if timetoreach <= elapsed_time:
-					if timetoreach < min_timetoreach:
+					# Use them if they get to ball fastest
+					# Or if ball hasn't bounced then whoever moves least
+					if ((timetoreach < min_timetoreach) or
+						(not tmp_ball.hit_bounced and ballgrounddist < min_distance_fielder_moved)
+					):
 						min_timetoreach = timetoreach
 						min_ifielder = ifielder
+						min_distance_fielder_moved = ballgrounddist
 						found_someone = true
-		if found_someone:
+						min_intercept_position = tmp_ball.position
+		# Keep running if ball hasn't bounced to maybe find someone closer
+		if found_someone and tmp_ball.hit_bounced:
 			#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
 			break
 	
 	# Find 2nd fielder to set as alt fielder
+	# Just use distance, don't do full simulation
 	var min2_dist = 1e8
 	var min2_ifielder = null
 	for ifielder in range(len(fielders)):
@@ -1014,8 +1027,8 @@ func find_fielder_to_intercept_ball() -> Array:
 				min2_ifielder = ifielder
 	
 	# Save important things to return
-	var intercept_position = tmp_ball.position
-	var hit_bounced = tmp_ball.hit_bounced
+	var intercept_position:Vector3 = min_intercept_position
+	var hit_bounced:bool = tmp_ball.hit_bounced
 	# Find where the hit would bounce if not fielded
 	for iiii in range(1e3):
 		if tmp_ball.hit_bounced_position == null:
