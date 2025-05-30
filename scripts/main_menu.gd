@@ -18,6 +18,8 @@ func _ready() -> void:
 	$SettingsMenu.connect("menu_selected", _on_settings_menu_selection)
 	# Connect game
 	$Game.connect("game_over", _on_game_over_from_game)
+	# Connect About page
+	$About.connect("button_pressed_signal", _on_button_pressed_signal_from_about)
 
 #func _process(delta: float) -> void:
 	#pass
@@ -34,6 +36,10 @@ func _on_main_menu_selection(index_selected):
 		# Settings
 		# Make it active
 		$SettingsMenu.set_active(true)
+	elif index_selected == 2:
+		# About
+		# Make it active
+		$About.set_active(true)
 	else:
 		push_error('bad selection in main menu', index_selected)
 
@@ -76,3 +82,7 @@ func _on_settings_menu_selection(out_array:Array):
 func _on_game_over_from_game():
 	$Game.set_vis(false)
 	$StartMenu.set_active(true)
+
+func _on_button_pressed_signal_from_about() -> void:
+	$StartMenu.set_active(true)
+	$About.set_active(false)

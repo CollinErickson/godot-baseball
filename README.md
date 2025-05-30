@@ -10,3 +10,8 @@
 
 [![2D prototype](https://img.youtube.com/vi/2VNMVn1-OUU/0.jpg)](https://www.youtube.com/watch?v=2VNMVn1-OUU)
 
+## About
+
+Copyright © 2025 Collin Erickson. All Rights Reserved.
+
+Made with Godot Engine.
