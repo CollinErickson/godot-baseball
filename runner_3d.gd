@@ -324,7 +324,7 @@ func end_state() -> String:
 	if out_on_play:
 		return "out"
 	#printt('runner end_state', start_base, str(round(running_progress)))
-	return str(round(running_progress))
+	return str(roundi(running_progress))
 
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:

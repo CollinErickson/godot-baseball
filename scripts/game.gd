@@ -48,7 +48,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if true:
+	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
 	
@@ -119,7 +119,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 									outs_on_play: int, runs_on_play: int,
 									runner0state: String, runner1state: String,
 									runner2state: String, runner3state: String) -> void:
-	printt('game received signal from field', ball_in_play, is_ball, is_strike, outs_on_play, runs_on_play)
+	printt('game received signal from field', ball_in_play, is_ball, is_strike,
+		outs_on_play, runs_on_play, runner0state)
 	#assert(int(ball_in_play) + int(is_ball) + int(is_strike) == 1) fails
 	
 	var new_batter:bool = false
@@ -168,6 +169,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 				r2 = pair[0]
 			elif pair[1] == '3':
 				r3 = pair[0]
+			else:
+				assert(pair[1] in ["", "out", "scored", "0"])
 		runner1 = r1
 		runner2 = r2
 		runner3 = r3
