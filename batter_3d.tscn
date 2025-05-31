@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://cluomdr4nxc7v"]
 
-[ext_resource type="Script" path="res://batter_3d.gd" id="1_ot85n"]
+[ext_resource type="Script" uid="uid://cpptneulh2um4" path="res://batter_3d.gd" id="1_ot85n"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_uhmnc"]
 [ext_resource type="Texture2D" uid="uid://b1em3xy0pbuq5" path="res://sprites/batter4.png" id="3_xkgqo"]
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ccbr5gjhlqkux"]
 
-[ext_resource type="Script" path="res://scripts/prepitch_field_overlay.gd" id="1_sxyml"]
+[ext_resource type="Script" uid="uid://6orrotii6hs4" path="res://scripts/prepitch_field_overlay.gd" id="1_sxyml"]
 
 [node name="PitcherFieldOverlay" type="Control"]
 layout_mode = 3

@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://cpobb8pjdcvp4"]
 
-[ext_resource type="Script" path="res://runner_3d.gd" id="1_lpabj"]
+[ext_resource type="Script" uid="uid://b0obm2ye46884" path="res://runner_3d.gd" id="1_lpabj"]
 [ext_resource type="PackedScene" uid="uid://bv7wuv6u2uy4w" path="res://scenes/mesh_instance_3d_arrow.tscn" id="2_63o4w"]
 [ext_resource type="Texture2D" uid="uid://bqbwl8hnx3i8x" path="res://sprites/batter.png" id="2_cutj8"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_tnlrt"]

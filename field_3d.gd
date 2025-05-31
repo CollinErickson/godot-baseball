@@ -622,7 +622,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
-					if true:
+					if !true:
 						vla = 65
 						hla = 0
 						exitvelo = 28.8

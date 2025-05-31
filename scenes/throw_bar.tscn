@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dmcpm2vuvwdu8"]
 
-[ext_resource type="Script" path="res://scripts/throw_bar.gd" id="1_2ulkn"]
+[ext_resource type="Script" uid="uid://bax7ranhqxol3" path="res://scripts/throw_bar.gd" id="1_2ulkn"]
 
 [node name="ThrowBar" type="Control"]
 layout_mode = 3

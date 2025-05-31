@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b4afxv7m021o2"]
 
-[ext_resource type="Script" path="res://scripts/pitch_select_click.gd" id="1_vjua5"]
+[ext_resource type="Script" uid="uid://d4cixo35joibm" path="res://scripts/pitch_select_click.gd" id="1_vjua5"]
 
 [node name="PitchSelectClick" type="Control"]
 layout_mode = 3

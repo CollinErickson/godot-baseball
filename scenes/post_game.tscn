@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bc4drgk0epvk2"]
 
-[ext_resource type="Script" path="res://scripts/post_game.gd" id="1_23mew"]
+[ext_resource type="Script" uid="uid://b7ahqhvk2k2q1" path="res://scripts/post_game.gd" id="1_23mew"]
 
 [node name="PostGame" type="Control"]
 layout_mode = 3

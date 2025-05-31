@@ -2,14 +2,11 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbbw7a1vxafhm"
+uid="uid://b6x4cr78rvoyn"
 path.s3tc="res://.godot/imported/Player1_jersey.png-7360698033600645a4326f358b2078ec.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
-}
-generator_parameters={
-"md5": "eb121982afb25ea3dac2c2490f42318c"
 }
 
 [deps]

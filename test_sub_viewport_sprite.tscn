@@ -1,8 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://das47ldl6jn04"]
 
-[ext_resource type="Texture2D" uid="uid://clwmy5p04a1je" path="res://batter.png" id="1_0u2rc"]
+[sub_resource type="Resource" id="Resource_mlibk"]
+metadata/__load_path__ = "res://batter.png"
 
 [node name="TestSubViewportSprite" type="SubViewport"]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_0u2rc")
+texture = SubResource("Resource_mlibk")

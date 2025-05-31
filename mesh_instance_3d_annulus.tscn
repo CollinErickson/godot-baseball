@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b7sdkylsmikjw"]
 
-[ext_resource type="Script" path="res://mesh_instance_3d_annulus.gd" id="1_43gt4"]
+[ext_resource type="Script" uid="uid://moj1o4oy7vta" path="res://mesh_instance_3d_annulus.gd" id="1_43gt4"]
 
 [node name="MeshInstance3DAnnulus" type="Node3D"]
 script = ExtResource("1_43gt4")

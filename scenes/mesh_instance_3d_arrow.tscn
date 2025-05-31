@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bv7wuv6u2uy4w"]
 
-[ext_resource type="Script" path="res://scripts/mesh_instance_3d_arrow.gd" id="1_yj16q"]
+[ext_resource type="Script" uid="uid://nqay845cj07g" path="res://scripts/mesh_instance_3d_arrow.gd" id="1_yj16q"]
 
 [node name="MeshInstance3DArrow" type="Node3D"]
 script = ExtResource("1_yj16q")

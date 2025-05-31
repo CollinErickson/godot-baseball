@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://dmcetu0b5itrl"]
 
-[ext_resource type="Script" path="res://wall.gd" id="1_lcops"]
+[ext_resource type="Script" uid="uid://bt380jrw2raak" path="res://wall.gd" id="1_lcops"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_51pxn"]
 

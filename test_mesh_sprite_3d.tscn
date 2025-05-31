@@ -1,9 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://d2u5xg584fowv"]
-
-[ext_resource type="Texture2D" uid="uid://clwmy5p04a1je" path="res://batter.png" id="1_q23fb"]
+[gd_scene load_steps=3 format=3 uid="uid://d2u5xg584fowv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_80nxt"]
-albedo_texture = ExtResource("1_q23fb")
 billboard_mode = 1
 
 [sub_resource type="QuadMesh" id="QuadMesh_puls6"]

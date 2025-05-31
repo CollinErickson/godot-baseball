@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://c7xao527v2us8"]
 
-[ext_resource type="Script" path="res://pitcher_3d.gd" id="1_druss"]
+[ext_resource type="Script" uid="uid://ces1ig6q5gliq" path="res://pitcher_3d.gd" id="1_druss"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_ym1c1"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="3_y31ut"]
 [ext_resource type="PackedScene" uid="uid://ni0m5dff7e5p" path="res://scenes/throw_bar_one_way.tscn" id="4_ytn3b"]

@@ -19,8 +19,8 @@ func double_range_to_str_array(a:int, b:int, c:int) -> Array:
 	return combine_arrays(range_to_str_array(a, b), range_to_str_array(c, a-1))
 @export var options_values:Array[Array] = [
 	['Easy', 'Medium', 'Hard'],
-	double_range_to_str_array(9, 27, 1),
-	double_range_to_str_array(3, 27, 1),
+	double_range_to_str_array(1, 27, 1),
+	double_range_to_str_array(1, 27, 1),
 	double_range_to_str_array(4, 10, 1),
 	double_range_to_str_array(3, 10, 1),
 	['Timing', 'Target'], # bat mode

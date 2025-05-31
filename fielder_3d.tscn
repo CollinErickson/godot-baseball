@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://d3vo8o7aa5kqp"]
 
-[ext_resource type="Script" path="res://fielder_3d.gd" id="1_bfowq"]
+[ext_resource type="Script" uid="uid://d0cj42366ok74" path="res://fielder_3d.gd" id="1_bfowq"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
 [ext_resource type="PackedScene" uid="uid://b7sdkylsmikjw" path="res://mesh_instance_3d_annulus.tscn" id="3_mscjq"]
 [ext_resource type="PackedScene" uid="uid://dmcpm2vuvwdu8" path="res://scenes/throw_bar.tscn" id="4_qkgbs"]

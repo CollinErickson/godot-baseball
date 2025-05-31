@@ -7,7 +7,7 @@ var pitch_mode:String = "BarTwoWay" # "Button", "Bar", "BarOneWay", "BarTwoWay"
 
 # Game variables
 var innings_per_game:int = 1
-var outs_per_inning:int = 1
+var outs_per_inning:int = 3
 var strikes_per_pa:int = 3
 var balls_per_pa:int = 4
 
@@ -48,7 +48,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if !true:
+	if true:
 		user_is_away_team = true
 		user_is_home_team = false
 	

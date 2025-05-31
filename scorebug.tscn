@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://b0bfhb6hwd41"]
 
-[ext_resource type="Script" path="res://scripts/scorebug.gd" id="1_kehoy"]
+[ext_resource type="Script" uid="uid://br4f500s7xtve" path="res://scripts/scorebug.gd" id="1_kehoy"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_vq1it"]
 

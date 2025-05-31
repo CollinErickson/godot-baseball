@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://dsb1e4kc4120x"]
 
-[ext_resource type="Script" path="res://ball_3d.gd" id="1_royqy"]
+[ext_resource type="Script" uid="uid://d2lemf5odh7n8" path="res://ball_3d.gd" id="1_royqy"]
 [ext_resource type="Texture2D" uid="uid://88gqpbx0xaan" path="res://sprites/baseball320x4.png" id="2_3fcf0"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_3v07e"]
