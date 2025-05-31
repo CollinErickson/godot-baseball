@@ -721,19 +721,24 @@ func _process(delta: float) -> void:
 	# Move baserunners
 	if ball_in_play and not ball_over_wall:
 		if user_is_batting_team:
-			if Input.is_action_just_pressed("throwfirst"):
-				#
-				pass
-			elif Input.is_action_just_pressed("throwsecond"):
+			if Input.is_action_just_pressed("send_all_runners_forward"):
 				# Move all forward
 				for runner in runners:
 					runner.send_runner(1)
-			elif Input.is_action_just_pressed("throwthird"):
-				pass
-			elif Input.is_action_just_pressed("throwhome"):
-				# Move all forward
+			elif Input.is_action_just_pressed("send_all_runners_backward"):
+				# Move all backward
 				for runner in runners:
 					runner.send_runner(-1)
+			elif Input.is_action_just_pressed("send_lead_runner_forward"):
+				for i in range(3,-1,-1):
+					if runners[i].is_active():
+						runners[i].send_runner(1)
+						break
+			elif Input.is_action_just_pressed("send_trail_runner_backward"):
+				for runner in runners:
+					if runner.is_active():
+						runner.send_runner(-1)
+						break
 			# Check for user click
 			var mpos = get_mouse_y0_pos()
 			var just_clicked = Input.is_action_just_pressed('click')
