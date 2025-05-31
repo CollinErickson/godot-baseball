@@ -15,6 +15,8 @@ var outs_before_play = 0
 var runs_on_play = 0
 var max_force_outs_at_start:int
 var max_force_outs_left:int
+var potential_strikeout:bool
+var potential_walk:bool
 
 var user_is_pitching_team = true
 var user_is_batting_team = !true
@@ -152,7 +154,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			throw_mode_:String,
 			bat_mode_:String,
 			pitch_mode_:String,
-			user_input_method:String):
+			user_input_method:String,
+			potential_strikeout_:bool,
+			potential_walk_:bool):
 	printt('--------\n---- in field_3d reset\n--------')
 	# Make visible
 	set_vis(true)
@@ -241,6 +245,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	$Headon/BallBounceAnnulus.visible = false
 	
 	$PrepitchFieldOverlay.visible = true
+	get_node("FlashText").clear_text()
 
 	# Reset this
 	is_frozen = false
@@ -265,6 +270,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	runs_on_play = 0
 	user_is_batting_team = user_is_batting_team_
 	user_is_pitching_team = user_is_pitching_team_
+	potential_strikeout = potential_strikeout_
+	potential_walk = potential_walk_
 	rotate_camera_inertia = Vector2(0,0)
 	#_ready()
 	# Align fielders with the camera
@@ -1413,11 +1420,10 @@ func play_done(flash=null) -> void:
 	if flash != null:
 		get_node("FlashText").new_text(flash, 3)
 	freeze()
-	# Check for swing and miss
-	if pitch_is_ball:
-		if $Headon/Batter3D.swing_started:
-			pitch_is_ball = false
-			pitch_is_strike = true
+	
+	
+	
+	# Return play results to game
 	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, is_foul_ball,
 		outs_on_play, runs_on_play,
 		$Headon/Runners/Runner3DHome.end_state(),
@@ -1436,9 +1442,24 @@ func _on_ball_3d_ball_overthrown() -> void:
 var pitch_is_ball:bool = false
 var pitch_is_strike:bool = false
 func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:bool) -> void:
+	printt('play completed pitch unhit')
 	pitch_is_ball = pitch_is_ball_
 	pitch_is_strike = pitch_is_strike_
 	assert(int(pitch_is_ball_) + int(pitch_is_strike_) == 1)
+	
+	# Switch to strike if there was a swing and miss
+	if pitch_is_ball:
+		if $Headon/Batter3D.swing_started:
+			pitch_is_ball = false
+			pitch_is_strike = true
+	
+	# Check for strike out or walk
+	if pitch_is_ball and potential_walk:
+		get_node("FlashText").new_text("Base on balls!", 3)
+	elif pitch_is_strike and potential_strikeout:
+		get_node("FlashText").new_text("Strike out!", 3)
+	
+	# Start end of play timer
 	$PlayOverTimer.wait_time = 1
 	$PlayOverTimer.start()
 

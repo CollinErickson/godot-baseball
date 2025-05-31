@@ -9,7 +9,7 @@ var pitch_mode:String = "BarTwoWay" # "Button", "Bar", "BarOneWay", "BarTwoWay"
 var innings_per_game:int = 1
 var outs_per_inning:int = 3
 var strikes_per_pa:int = 3
-var balls_per_pa:int = 4
+var balls_per_pa:int = 1
 
 # State variables
 var state:String = "pregame" # pregame, ingame, postgame
@@ -48,7 +48,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if !true:
+	if true:
 		user_is_away_team = true
 		user_is_home_team = false
 	
@@ -140,7 +140,18 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		if is_strike:
 			strikes += 1
 		if balls > balls_per_pa - 0.5:
-			#TODO: walk
+			# Walk
+			# Move runners, it isn't done in field
+			runner0state = '1'
+			if runner1state == '1':
+				runner1state = '2'
+				if runner2state == '2':
+					runner2state = '3'
+					if runner3state == '3':
+						runner3state = 'scored'
+						runs_on_play += 1
+			
+			# Prepare for next
 			balls = 0
 			new_batter = true
 		elif strikes > strikes_per_pa - 0.5:
@@ -254,7 +265,10 @@ func reset_field() -> void:
 		throw_mode,
 		bat_mode,
 		pitch_mode,
-		user_input_method)
+		user_input_method,
+		strikes + 1 >= strikes_per_pa - 0.5, # potential strikeout
+		balls + 1 >= balls_per_pa - 0.5 # potential walk
+		)
 
 func get_player(speed:float=50) -> Player:
 	var p = player.instantiate()
