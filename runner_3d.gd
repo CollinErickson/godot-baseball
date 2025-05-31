@@ -25,8 +25,6 @@ var runners_before :Array = []
 var runners_after :Array = []
 var runner_before = null
 var runner_after = null
-var active_runner_before = null
-var active_runner_after = null
 var animation:String = "idle"
 #var state:String = "nonexistant" # nonexistant, 
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
@@ -339,20 +337,18 @@ func setup_player(player, team, is_home_team:bool) -> void:
 	if is_home_team and post_play_target_position.x > 0:
 		post_play_target_position.x *= 1
 
-func setup_runner_relations() -> void:
-	active_runner_before = null
-	active_runner_after = null
-	if not is_active():
-		return
+func active_runner_before():
 	for i in range(len(runners_before)-1,-1, -1):
 		var r = runners_before[i]
 		if r.is_active():
-			active_runner_before = r
-			break
+			return r
+	return null
+
+func active_runner_after():
 	for r in runners_after:
 		if r.is_active():
-			active_runner_after = r
-			break
+			return r
+	return null
 
 func is_done_for_play() -> bool:
 	if not exists_at_start:
@@ -472,14 +468,14 @@ func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 			if just_clicked:
 				send_runner(+1, true)
 				var base1 = target_base
-				var runner_temp = active_runner_after
+				var runner_temp = active_runner_after()
 				while true:
 					if runner_temp == null:
 						break
 					if runner_temp.target_base > base1:
 						break
 					runner_temp.send_runner_to_base(base1 + 1)
-					runner_temp = runner_temp.active_runner_after
+					runner_temp = runner_temp.active_runner_after()
 					base1 = base1 + 1
 			return 1
 	if back_base >= 1 and back_base <= 3:
@@ -494,14 +490,14 @@ func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 			if just_clicked:
 				send_runner(-1, false)
 				var base1 = target_base
-				var runner_temp = active_runner_before
+				var runner_temp = active_runner_before()
 				while true:
 					if runner_temp == null:
 						break
 					if runner_temp.target_base < base1:
 						break
 					runner_temp.send_runner_to_base(base1 - 1)
-					runner_temp = runner_temp.active_runner_before
+					runner_temp = runner_temp.active_runner_before()
 					base1 = base1 - 1
 			return -1
 	$ClickToRunArrow.visible = false
