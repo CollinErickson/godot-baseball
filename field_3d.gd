@@ -774,9 +774,13 @@ func _process(delta: float) -> void:
 				# If runner is in direction close enough, send them
 				if min_angle_deg_diff < 135:
 					if Input.is_action_just_pressed("throwfirst"):
-						min_runner.send_runner(-1)
-					if Input.is_action_just_pressed("throwthird"):
-						min_runner.send_runner(+1, true)
+						min_runner.send_runner_to_base(1)
+					elif Input.is_action_just_pressed("throwsecond"):
+						min_runner.send_runner_to_base(2)
+					elif Input.is_action_just_pressed("throwthird"):
+						min_runner.send_runner_to_base(3)
+					elif Input.is_action_just_pressed("throwhome"):
+						min_runner.send_runner_to_base(4)
 		else:
 			# Redo runner decisions every 0.166 sec (10 frames)
 			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
