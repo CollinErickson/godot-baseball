@@ -344,8 +344,9 @@ func _physics_process(delta: float) -> void:
 		is_selected_fielder and
 		turn_off_bad_catch_label_timer <= 0):
 		# Check for movement
-		var anymovement = false
-		var move = Vector3()
+		var anymovement:bool = false
+		var move:Vector3 = Vector3()
+		var move_needs_cam_fix:bool = true
 		if Input.is_action_pressed("moveleft"):
 			move.x += 1
 			anymovement = true
@@ -358,15 +359,33 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_pressed("movedown"):
 			move.z -= 1
 			anymovement = true
+		if Input.is_action_pressed("run_to_base"):
+			var target_base:int = -1
+			if Input.is_action_pressed("throwfirst"):
+				target_base = 1
+			if Input.is_action_pressed("throwsecond"):
+				target_base = 2
+			if Input.is_action_pressed("throwthird"):
+				target_base = 3
+			if Input.is_action_pressed("throwhome"):
+				target_base = 4
+			if target_base > 0:
+				# Don't do it if already standing on location
+				var run_diff:Vector3 = base_positions[target_base - 1] - position
+				if run_diff.length() > 0.1:
+					move_needs_cam_fix = false
+					anymovement = true
+					move = run_diff
 		if anymovement:
 			if move.length() > 0: # Could press opposite directions
 				moved_this_process = true
 				#move = move.normalized() * delta * SPEED
 				# move is the move direction
 				move = move.normalized()
-				# Rotate move based on camera angle
-				var cam = get_viewport().get_camera_3d()
-				move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
+				if move_needs_cam_fix:
+					# Rotate move based on camera angle
+					var cam = get_viewport().get_camera_3d()
+					move = move.rotated(Vector3(0,1,0), cam.rotation.y - PI)
 				# Update velocity with acceleration, but keep under max
 				velocity += delta * MAX_ACCEL * move
 				if velocity.length() > SPEED:
@@ -408,7 +427,10 @@ func _physics_process(delta: float) -> void:
 					start_throw_end()
 			
 			# Check for throwing ball start
-			if Input.is_action_just_pressed("throwfirst"):
+			if Input.is_action_pressed("run_to_base"):
+				# Don't let the throw start
+				pass
+			elif Input.is_action_just_pressed("throwfirst"):
 				#printt('throw to first')
 				#throw_ball_func(1)
 				start_throw_ball_func(1, null, "throwfirst")
