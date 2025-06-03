@@ -652,6 +652,11 @@ func _process(delta: float) -> void:
 						ball.velocity = ball.velocity.rotated(Vector3(-1,0,0), (vla)*PI/180)
 						ball.velocity = ball.velocity.rotated(Vector3(0,1,0), -(hla)*PI/180)
 						printt('hit velo vec is', ball.velocity)
+						# Set frame rotation
+						if hla < -20:
+							ball.frame_rotation = Vector2(.05, 0)
+						if hla > 20:
+							ball.frame_rotation = Vector2(-.05, 0)
 						ball.state = "ball_in_play"
 						
 						# Start running after .5 seconds
@@ -978,6 +983,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	tmp_ball.pitch_already_done = true 
 	tmp_ball.hit_bounced_position = ball.hit_bounced_position
 	tmp_ball.hit_bounced_time = ball.hit_bounced_time
+	tmp_ball.frame_rotation = ball.frame_rotation
 	
 	#printt('pos before', tmp_ball.position)
 	#tmp_ball._physics_process(1)

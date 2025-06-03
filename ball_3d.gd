@@ -8,6 +8,14 @@ const restitution_coef = 0.546 # MLB rules
 var time_last_thrown = Time.get_ticks_msec()
 
 var spin_acceleration = Vector3(0,0,0) # Acceleration from pitch type
+var frame_rotation:Vector2 = Vector2.ZERO
+# Rotation of ball (essentially spin, but already using spin for pitches),
+#  done after movement
+# Values in radians / second
+# X: rotation left/right 
+# Y: rotation up/down
+# These match what you expect if ball has velo (0,0,1) (straight out)
+# 0.1 is fairly large number, 1 is insanely large
 
 var ball_sz_dot_scene = load("res://ball_sz_dot.tscn")
 const sz_z = 0.6
@@ -62,6 +70,7 @@ func reset() -> void:
 	position = Vector3()
 	velocity = Vector3()
 	spin_acceleration = Vector3()
+	frame_rotation = Vector2()
 	
 	already_crossed_sz = false
 
@@ -269,6 +278,25 @@ func _physics_process(delta: float) -> void:
 		else:
 			#printt('NOT bounce', delta)
 			bounced_previous_frame = false
+
+		# Do frame rotation after hit, not on pitch
+		if pitch_already_done:# and frame_rotation.length_squared() > 1e-8:
+			# Rotate velocity vector
+			# If ball is directly out, vel (0,0,1),
+			#  a is in +X direction
+			if abs(velocity.x) + abs(velocity.z) > 1e-12:
+				var a = -velocity.cross(Vector3(0,1,0)).normalized()
+				#  b is in +Y direction
+				var b = velocity.cross(a).normalized()
+				#printt('test ab', velocity.normalized(), a, b, delta)
+				if abs(frame_rotation.x) > 1e-12:
+					velocity = velocity.rotated(b, frame_rotation.x * delta)
+				if abs(frame_rotation.y) > 1e-12:
+					velocity = velocity.rotated(a, frame_rotation.y * delta)
+				# Dampen frame rotation if it bounced
+				#print('fix this frame rot')
+				if bounced_previous_frame:
+					frame_rotation *= 0.1
 		
 		if not is_sim and prev_position != null:
 			align_trail(position, prev_position, delta, velocity)
@@ -729,6 +757,7 @@ func ball_fielded(ball_position_before_fielded:Vector3):
 			foul_ball.emit()
 	
 	cylinder_trail_node.reset()
+	frame_rotation = Vector2()
 
 var throw_start_pos
 var throw_start_velo
