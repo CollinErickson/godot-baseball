@@ -302,7 +302,21 @@ func _physics_process(delta: float) -> void:
 				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
 				(ball.throw_start_pos==null or ball.throw_progress >= .9) and
 				turn_off_bad_catch_label_timer <= 0):
-				var catch_prob = 0.95
+				# Catch prob depends on throw speed and distance since last bounce
+				var catch_prob:float = 1
+				var catch_prob_mult:float = 1
+				# Bounces are harder to catch
+				if ball.previous_bounce_pos != null:
+					if ball.previous_bounce_pos.distance_to(ball.position) < 4:
+						catch_prob_mult *= 4
+					else:
+						catch_prob_mult *= 2
+				# Hard hits/throws harder to catch
+				catch_prob -= (ball.velocity.length() - 5) * .001 * catch_prob_mult
+				printt('in fielder: catch prob = ', catch_prob,
+					ball.velocity.length(),
+					ball.previous_bounce_pos,
+					catch_prob_mult)
 				if randf() <= catch_prob:
 					# Catch successful
 					printt('In fielder, caught ball', posname,

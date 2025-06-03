@@ -38,6 +38,7 @@ var prev_global_position
 var prev_global_velocity
 var throw_progress
 var bounced_previous_frame = false
+var previous_bounce_pos = null
 var pitch_is_strike:bool = false
 var pitch_is_ball:bool = false
 var touched_by_fielder:bool = false
@@ -89,6 +90,7 @@ func reset() -> void:
 	prev_global_velocity = null
 	throw_progress = null
 	bounced_previous_frame = false
+	previous_bounce_pos = null
 	pitch_is_strike = false
 	pitch_is_ball = false
 	touched_by_fielder = false
@@ -275,6 +277,7 @@ func _physics_process(delta: float) -> void:
 				if not is_sim:
 					hit_bounced_signal.emit()
 			bounced_previous_frame = true
+			previous_bounce_pos = position
 		else:
 			#printt('NOT bounce', delta)
 			bounced_previous_frame = false
@@ -758,6 +761,7 @@ func ball_fielded(ball_position_before_fielded:Vector3):
 	
 	cylinder_trail_node.reset()
 	frame_rotation = Vector2()
+	previous_bounce_pos = null
 
 var throw_start_pos
 var throw_start_velo
