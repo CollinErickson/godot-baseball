@@ -340,27 +340,32 @@ func _physics_process(delta: float) -> void:
 		# Test my parabola solution
 		#printt('test parabola solution')
 		#printt('velo from optimization', velo_vec)
-		var parabola_approx_velo = ball.fit_approx_parabola_to_trajectory(
-			ball.position,
-			Vector3(pitch_x, pitch_y, ball.sz_z),
-			pitchspeed, false
-		)
-		printt("Now fit with drag")
+		#var parabola_approx_velo = ball.fit_approx_parabola_to_trajectory(
+			#ball.position,
+			#Vector3(pitch_x, pitch_y, ball.sz_z),
+			#pitchspeed, false
+		#)
+		#printt("Now fit with drag")
 		
-		var parabola_approx_velo_with_drag = ball.fit_approx_parabola_to_trajectory(
-			ball.position,
-			Vector3(pitch_x, pitch_y, ball.sz_z),
-			pitchspeed, true
-		)
-		printt("compare drag", parabola_approx_velo_with_drag,
-		" to", parabola_approx_velo)
+		#var parabola_approx_velo_with_drag = ball.fit_approx_parabola_to_trajectory(
+			#ball.position,
+			#Vector3(pitch_x, pitch_y, ball.sz_z),
+			#pitchspeed, true
+		#)
+		#printt("compare drag", parabola_approx_velo_with_drag,
+		#" to", parabola_approx_velo)
 		#print('velo from parabola approx', parabola_approx_velo)
 		#printt('from optimization', ball.simulate_delivery(ball.position, velo_vec))
 		#printt('from approx', ball.simulate_delivery(ball.position, parabola_approx_velo))
 		#printt('target was', Vector3(pitch_x, pitch_y, ball.sz_z))
+		# Test new optim
+		#var velo_vec_with_start_test = ball.find_starting_velocity_vector_test(pitchspeed, ball.position, 
+			#pitch_x, pitch_y, 1./36/36, parabola_approx_velo)
+		#printt('optim test: is this better? (fewer steps?)', velo_vec_with_start_test)
+		
 		#printt('now find start velo with good starting point')
 		var velo_vec_with_start = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
-			pitch_x, pitch_y, 1./36/36, parabola_approx_velo)
+			pitch_x, pitch_y, 1./36/36, null)
 		#printt('is this better? (fewer steps?)', velo_vec_with_start)
 		printt("Pitch start velo is", velo_vec_with_start)
 		catchers_mitt.get_node("Sprite3D").visible=false

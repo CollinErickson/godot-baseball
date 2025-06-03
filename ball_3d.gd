@@ -369,10 +369,13 @@ func secant_step(x0, x1, f0, f1, step_size = 1, max_mult=10) -> float:
 
 var best_dist2 = 1e9
 var best_v
-func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, vel0=null):
+func find_starting_velocity_vector_old(speed0, pos0, xfinal, yfinal, tol=1./36/36, vel0=null):
+	# Find pitch velo vector using coordinate descent
+	# It was never implemented well, failed often, and was slow.
 	printt('starting find_starting_velocity_vector, tol is', tol)
 	#return
-	
+	var time1 = Time.get_ticks_msec()
+
 	
 	# Function to evaluate a velocity vector
 	#var last_pf
@@ -532,6 +535,8 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 				if best_dist2 < tol:
 					printt('found good solution, return', best_v, best_dist2)
 					printt('num steps was', nsteps)
+					#var time2 = Time.get_ticks_msec()
+					#printt('ball test optim OLD bad solution: run time msec is', time2 - time1)
 					return best_v
 			# After for loop, make sure best is in index0 now
 			if eval1 < eval0:
@@ -541,10 +546,40 @@ func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal, tol=1./36/36, v
 					x0 = x1
 				else:
 					y0 = y1
-				
-			
+	
 	printt('couldnt find good solution, returning', best_v, best_dist2, nsteps)
+	var time2 = Time.get_ticks_msec()
+	printt('ball test optim OLD bad solution: run time msec is', time2 - time1)
 	return best_v
+
+func find_starting_velocity_vector(speed0, pos0, xfinal, yfinal,
+										tol=1./36/36, _vel0=null) -> Vector3:
+	# New idea: use error from zero drag sim iteratively to reduce the error
+	# no_drag_target[i]: where no drag pitch should end at
+	# no_drag_vel[i]: velocity vec to get to no_drag_target[i]
+	# drag_end_point_for_no_drag_vel[i]: end point when using drag
+	# Start no_drag_target_0 = desired endpoint
+	# no_drag_target[i+1] += (target - drag_end_point_for_no_drag_vel[i])
+	#printt('ball test optim: start')
+	#var time1 = Time.get_ticks_msec()
+	var pos_final:Vector3 = Vector3(xfinal, yfinal, sz_z)
+	var no_drag_target:Vector3 = pos_final
+	var no_drag_vel_vec:Vector3 = Vector3()
+	var drag_end_point_for_no_drag_vel:Vector3 = Vector3()
+	for i in range(10):
+		#printt('ball test optim: starting i=', i)
+		no_drag_vel_vec = fit_approx_parabola_to_trajectory(pos0, no_drag_target, speed0, false)
+
+		drag_end_point_for_no_drag_vel = simulate_delivery(pos0, no_drag_vel_vec, .001)
+		var err:Vector3 = drag_end_point_for_no_drag_vel - pos_final
+		#printt('ball test optim: error is', err.length(), err)
+		if err.length() < tol:
+			break
+		no_drag_target += pos_final - drag_end_point_for_no_drag_vel
+	
+	#var time2 = Time.get_ticks_msec()
+	#printt('ball test optim: run time msec is', time2 - time1)
+	return no_drag_vel_vec
 
 func fit_approx_parabola_to_trajectory(pos1, pos2, speed1, use_drag):
 	# Fit parabola starting from pos1 going to pos2 with speed1
