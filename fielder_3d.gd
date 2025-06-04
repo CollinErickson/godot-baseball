@@ -243,8 +243,9 @@ func _physics_process(delta: float) -> void:
 	assert(state == 'free')
 	var moved_this_process = false
 	
-	# Check if user changed to alt fielder
-	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder"):
+	# Check if user changed to alt fielder (only check from current selected fielder)
+	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder") \
+		and is_selected_fielder:
 		var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
 		if (len(alt_fielders) > 0.5 and
 			Time.get_ticks_msec() - alt_fielders[0].time_set_alt_fielder > 1./10 * 1000):
