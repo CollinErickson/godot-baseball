@@ -198,6 +198,7 @@ func _physics_process(delta: float) -> void:
 					velocity = wallout[3]
 					if check_if_foul_on_bounce():
 						# If foul, exit. Otherwise it returns later, or something weird.
+						# It emits a foul ball signal, so field should take over
 						return
 					if not hit_bounced:
 						hit_bounced = true
@@ -281,7 +282,11 @@ func _physics_process(delta: float) -> void:
 		else:
 			#printt('NOT bounce', delta)
 			bounced_previous_frame = false
-
+		
+		# Check if ball crossed 1st/3rd base fair/foul
+		if check_if_foul_on_passing_base():
+			return
+		
 		# Do frame rotation after hit, not on pitch
 		if pitch_already_done:# and frame_rotation.length_squared() > 1e-8:
 			# Rotate velocity vector
@@ -804,10 +809,42 @@ func check_if_foul_on_bounce(emit:bool=true):
 		#printt('in check_if_foul_on_bounce, setting foul', fair_foul_determined, is_foul, emit)
 		fair_foul_determined = true
 		is_foul = true
-		printt('in ball, emitting signal FOUL BALL')
+		printt('in ball check_if_foul_on_bounce, emitting signal FOUL BALL')
 		if emit:
 			foul_ball.emit()
 		return true
+	return false
+
+func check_if_foul_on_passing_base(emit:bool = true) -> bool:
+	# Only determines fair/foul if already bounced but fair foul not determined
+	if is_sim:
+		return false
+	if fair_foul_determined:
+		return is_foul
+	if not hit_bounced:
+		return false
+	if global_position.x >= 30 and prev_global_position.x < 30:
+		fair_foul_determined = true
+		if global_position.z >= 0:
+			is_foul = false
+			return false
+		else:
+			is_foul = true
+			printt('in ball check_if_foul_on_passing_base, emitting signal FOUL BALL')
+			if emit:
+				foul_ball.emit()
+			return true
+	if global_position.z >= 30 and prev_global_position.z < 30:
+		fair_foul_determined = true
+		if global_position.x >= 0:
+			is_foul = false
+			return false
+		else:
+			is_foul = true
+			printt('in ball check_if_foul_on_passing_base, emitting signal FOUL BALL')
+			if emit:
+				foul_ball.emit()
+			return true
 	return false
 
 func remove_dot(seconds):
