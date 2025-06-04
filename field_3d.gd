@@ -1006,6 +1006,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	var min_ifielder
 	var min_distance_fielder_moved:float = 1e9
 	var min_intercept_position:Vector3 = Vector3()
+	var hit_bounced:bool = false # update later
 	while iii < 1000:
 		iii += 1
 		take_steps.call(numsteps, delta)
@@ -1030,6 +1031,7 @@ func find_fielder_to_intercept_ball() -> Array:
 						min_distance_fielder_moved = ballgrounddist
 						found_someone = true
 						min_intercept_position = tmp_ball.position
+						hit_bounced = tmp_ball.hit_bounced
 		# Keep running if ball hasn't bounced to maybe find someone closer
 		if found_someone and tmp_ball.hit_bounced:
 			#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
@@ -1048,7 +1050,6 @@ func find_fielder_to_intercept_ball() -> Array:
 	
 	# Save important things to return
 	var intercept_position:Vector3 = min_intercept_position
-	var hit_bounced:bool = tmp_ball.hit_bounced
 	# Find where the hit would bounce if not fielded
 	for iiii in range(1e3):
 		if tmp_ball.hit_bounced_position == null:
