@@ -181,7 +181,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			elif pair[1] == '3':
 				r3 = pair[0]
 			else:
-				assert(pair[1] in ["", "out", "scored", "0"])
+				# "" is used when runner doesn't exist
+				assert(pair[1] in ["", "out", "scored", "0"], "pair[1] = " + pair[1])
 		runner1 = r1
 		runner2 = r2
 		runner3 = r3

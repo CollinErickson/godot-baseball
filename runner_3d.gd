@@ -321,6 +321,9 @@ func end_state() -> String:
 		return "scored"
 	if out_on_play:
 		return "out"
+	if needs_to_tag_up and not tagged_up_after_catch:
+		# This covers cases where final out is fly out
+		return str(start_base)
 	#printt('runner end_state', start_base, str(round(running_progress)))
 	return str(roundi(running_progress))
 
