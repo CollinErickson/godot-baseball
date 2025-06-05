@@ -467,7 +467,7 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			#	printt('not force out, prev runner not there')
 	return
 
-func _on_tagged_runner_by_fielder(fielder, runner):
+func _on_tagged_runner_by_fielder(_fielder, runner):
 	if is_foul_ball:
 		return
 	runner.runner_is_out()
