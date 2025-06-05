@@ -180,7 +180,7 @@ func _ready():
 	start_position = position
 
 signal ball_fielded
-signal tag_out
+signal tagged_runner
 signal new_fielder_selected_signal
 signal fielder_moved_reassign_fielders_signal
 signal fielder_dropped_catch_reassign_fielders_signal
@@ -502,8 +502,8 @@ func _physics_process(delta: float) -> void:
 					(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
 						runner.running_progress - runner.start_base > .15)) and
 				distance_xz(position, runner.position) < 1):
-				runner.runner_is_out()
-				tag_out.emit()
+				#runner.runner_is_out()
+				tagged_runner.emit(self, runner)
 		
 		# Check if step on base
 		var step_on_base = is_stepping_on_base()

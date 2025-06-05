@@ -44,7 +44,7 @@ func _ready() -> void:
 		fielder.connect("ball_fielded", _on_ball_fielded_by_fielder)
 		fielder.connect("throw_ball", _on_throw_ball_by_fielder)
 		fielder.connect("stepped_on_base_with_ball", _on_stepped_on_base_with_ball_by_fielder)
-		fielder.connect("tag_out", _on_tag_out_by_fielder)
+		fielder.connect("tagged_runner", _on_tagged_runner_by_fielder)
 		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
 		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
 		fielder.connect("fielder_dropped_catch_reassign_fielders_signal", _on_fielder_dropped_catch_reassign_fielders_by_fielder)
@@ -306,16 +306,13 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 				runners[3].can_be_force_out_before_play = true
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
-	if is_foul_ball:
-		return
-	
 	ball_touched_by_fielder = true
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
-	if ball.state == "ball_in_play" and not ball.hit_bounced:
+	
+	# Fly out
+	if ball.state == "ball_in_play" and not ball.hit_bounced and not is_foul_ball:
 		ball_caught_in_air = true
 		printt("fly Out recorded!!!")
-		#outs_on_play += 1
-		#get_node("FlashText").new_text("Fly out!", 3)
 		get_node("Headon/Runners/Runner3DHome").runner_is_out()
 		record_out("Fly out!")
 		
@@ -470,10 +467,10 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			#	printt('not force out, prev runner not there')
 	return
 
-func _on_tag_out_by_fielder():
-	push_error('need to make sure this is not after foul ball')
-	#outs_on_play += 1
-	#get_node("FlashText").new_text("tag out!", 3)
+func _on_tagged_runner_by_fielder(fielder, runner):
+	if is_foul_ball:
+		return
+	runner.runner_is_out()
 	record_out('Tag out!')
 
 func _on_new_fielder_selected_signal_by_fielder(fielder):
@@ -1489,7 +1486,7 @@ func _on_ball_3d_foul_ball() -> void:
 	get_node("FlashText").new_text("Foul ball", 1)
 	
 	# Start end of play timer
-	$PlayOverTimer.wait_time = 3
+	$PlayOverTimer.wait_time = 1
 	$PlayOverTimer.start()
 
 var ball_hit_bounced:bool = false
