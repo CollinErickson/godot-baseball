@@ -1003,7 +1003,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	var elapsed_time = 0
 	var found_someone = false
 	var min_timetoreach = 1e9
-	var min_ifielder
+	var min_ifielder = null
 	var min_distance_fielder_moved:float = 1e9
 	var min_intercept_position:Vector3 = Vector3()
 	var hit_bounced:bool = false # update later
@@ -1021,9 +1021,12 @@ func find_fielder_to_intercept_ball() -> Array:
 				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
 				
 				if timetoreach <= elapsed_time:
-					# Use them if they get to ball fastest
+					# Use them if they get to bounced ball fastest
 					# Or if ball hasn't bounced then whoever moves least
-					if ((timetoreach < min_timetoreach) or
+					if ((min_ifielder == null) or # First person found
+						# Reached bounced ball faster
+						(hit_bounced and timetoreach < min_timetoreach) or 
+						# Closer fielder and ball won't bounce
 						(not tmp_ball.hit_bounced and ballgrounddist < min_distance_fielder_moved)
 					):
 						min_timetoreach = timetoreach
@@ -1624,7 +1627,7 @@ func decide_automatic_runners_actions():
 				decisions[i] = coalesce(decisions[i], -1)
 				decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
 		
-	# 2. If ball can be caught and less than 2 outs:
+	# 2. If ball can be caught and less than 2 outs (except for hitter):
 	#  a. If can reach next base safely, wait on start base to tag up.
 	#  b. Else, go as far as is safe and stop.
 	if fielder_with_ball == null:
