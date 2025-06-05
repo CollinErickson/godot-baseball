@@ -790,10 +790,11 @@ func distance_xz(a:Vector3, b:Vector3) -> float:
 
 signal foul_ball
 func check_if_foul_on_bounce(emit:bool=true):
+	# Return true if newly foul, otherwise false
 	if is_sim:
 		return false
 	if fair_foul_determined:
-		return is_foul
+		return false
 	#printt('in check if foul', global_position, hit_bounced, touched_by_fielder)
 	# If it bounces in fair territory past the base lines, it's fair
 	if ((global_position.x >= 0 and global_position.z >= 30) or
@@ -816,11 +817,12 @@ func check_if_foul_on_bounce(emit:bool=true):
 	return false
 
 func check_if_foul_on_passing_base(emit:bool = true) -> bool:
+	# Return true if newly foul, otherwise false
 	# Only determines fair/foul if already bounced but fair foul not determined
 	if is_sim:
 		return false
 	if fair_foul_determined:
-		return is_foul
+		return false
 	if not hit_bounced:
 		return false
 	if global_position.x >= 30 and prev_global_position.x < 30:
