@@ -88,6 +88,7 @@ func reset(throw_mode_:String) -> void:
 	turn_off_bad_catch_label_timer = 0
 	running_with_ball_to_base = null
 	remove_from_group("fielder_running_with_ball_to_base")
+	$Arrow2DOffscreenDirection.visible = false
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -635,6 +636,9 @@ func _physics_process(delta: float) -> void:
 			var cfcs = wallnode.check_fielder_correct_side(global_position, prev_global_position, 1)
 			if !cfcs[0]:
 				global_position = cfcs[1]
+	
+	# If selected fielder is offscreen, have arrow point where they are
+	update_offscreen_arrow()
 
 var stepping_on_base_with_ball = false
 
@@ -1287,3 +1291,44 @@ func ball_over_wall() -> void:
 		set_assignment('over_wall')
 		# Set animation to sad
 		set_animation('idle')
+
+func update_offscreen_arrow() -> void:
+	# If selected fielder is offscreen, have arrow point where they are
+	if $Arrow2DOffscreenDirection.visible:
+		$Arrow2DOffscreenDirection.visible = false
+	if is_selected_fielder and not holding_ball:
+		# Find their location
+		var pos2d:Vector2 = get_viewport().get_camera_3d().unproject_position(global_position)
+		var vpsize:Vector2 = get_viewport().size
+		var vpcenter:Vector2 = vpsize / 2.
+		# If off-screen, add arrow and put in right space with right rotation
+		if pos2d.x < -50 or pos2d.y < -50 or \
+			pos2d.x > vpsize.x + 50 or pos2d.y > vpsize.y + 50:
+			# Make visible
+			$Arrow2DOffscreenDirection.visible = true
+			var dx = pos2d.x - vpsize.x / 2.
+			var dy = pos2d.y - vpsize.y / 2.
+			# Give correct rotation
+			$Arrow2DOffscreenDirection.rotation = atan(dy / dx) + PI/2. + (0. if dx > 0 else PI)
+			# Put in correct location
+			var arrowpos:Vector2 = pos2d
+			var marg:float = 50
+			if arrowpos.x < marg:
+				var shrink:float = abs(vpcenter.x - marg) / abs(vpcenter.x - arrowpos.x)
+				arrowpos = vpcenter + shrink * (arrowpos - vpcenter)
+			if arrowpos.y < marg:
+				var shrink:float = abs(vpcenter.y - marg) / abs(vpcenter.y - arrowpos.y)
+				arrowpos = vpcenter + shrink * (arrowpos - vpcenter)
+			if arrowpos.x > vpsize.x - marg:
+				var shrink:float = abs(vpcenter.x - marg) / abs(vpcenter.x - arrowpos.x)
+				arrowpos = vpcenter + shrink * (arrowpos - vpcenter)
+			if arrowpos.y > vpsize.y - marg:
+				var shrink:float = abs(vpcenter.y - marg) / abs(vpcenter.y - arrowpos.y)
+				arrowpos = vpcenter + shrink * (arrowpos - vpcenter)
+			$Arrow2DOffscreenDirection.position = arrowpos
+			# Change scale based on how far they are
+			# For now using 2D distance, would be better to use 3D distance
+			#get_viewport().get_camera_3d().project_position(arrowpos)
+			var arrowscale:float = 5 - arrowpos.distance_to(pos2d) / 400
+			arrowscale = max(2, min(5, arrowscale))
+			$Arrow2DOffscreenDirection.scale = Vector2(1,1) * arrowscale

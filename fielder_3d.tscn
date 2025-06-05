@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://d3vo8o7aa5kqp"]
+[gd_scene load_steps=10 format=3 uid="uid://d3vo8o7aa5kqp"]
 
 [ext_resource type="Script" uid="uid://d0cj42366ok74" path="res://fielder_3d.gd" id="1_bfowq"]
 [ext_resource type="Texture2D" uid="uid://qjv13l1vr6go" path="res://sprites/pitcher.png" id="2_sqr5y"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dmcpm2vuvwdu8" path="res://scenes/throw_bar.tscn" id="4_qkgbs"]
 [ext_resource type="PackedScene" uid="uid://ni0m5dff7e5p" path="res://scenes/throw_bar_one_way.tscn" id="5_6icxr"]
 [ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="5_h61vg"]
+[ext_resource type="Texture2D" uid="uid://0pdl3nj1gf8" path="res://sprites/arrow_white_16_16.png" id="7_c3e4a"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_util4"]
 atlas = ExtResource("2_sqr5y")
@@ -81,5 +82,12 @@ modulate = Color(1, 0, 0, 1)
 outline_modulate = Color(1, 0, 0, 1)
 text = "#@$&!?!"
 font_size = 100
+
+[node name="Arrow2DOffscreenDirection" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(0.845684, 0.794932, 1.15514e-06, 1)
+position = Vector2(50, 50)
+scale = Vector2(5, 5)
+texture = ExtResource("7_c3e4a")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
