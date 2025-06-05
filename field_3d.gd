@@ -306,6 +306,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 				runners[3].can_be_force_out_before_play = true
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
+	if is_foul_ball:
+		return
+	
 	ball_touched_by_fielder = true
 	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
 	if ball.state == "ball_in_play" and not ball.hit_bounced:
@@ -429,6 +432,9 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success:bool,
 
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
+	if is_foul_ball:
+		return
+	
 	# Check for force out
 	#printt('in field3D, stepped on base with ball!!!!')
 	for runner in runners:
@@ -465,6 +471,7 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 	return
 
 func _on_tag_out_by_fielder():
+	push_error('need to make sure this is not after foul ball')
 	#outs_on_play += 1
 	#get_node("FlashText").new_text("tag out!", 3)
 	record_out('Tag out!')
@@ -472,7 +479,6 @@ func _on_tag_out_by_fielder():
 func _on_new_fielder_selected_signal_by_fielder(fielder):
 	var intercept_pos = find_intercept_position_for_fielder(fielder)
 	assign_fielders_to_cover_bases([], intercept_pos, [fielder.posname])
-
 
 func _on_fielder_moved_reassign_fielders_by_fielder(fielder):
 	var intercept_pos = find_intercept_position_for_fielder(fielder)
@@ -1479,7 +1485,12 @@ func _on_signal_scored_on_play_by_runner() -> void:
 
 func _on_ball_3d_foul_ball() -> void:
 	is_foul_ball = true
-	play_done('Foul ball!')
+	#play_done('Foul ball!')
+	get_node("FlashText").new_text("Foul ball", 1)
+	
+	# Start end of play timer
+	$PlayOverTimer.wait_time = 3
+	$PlayOverTimer.start()
 
 var ball_hit_bounced:bool = false
 var ball_caught_in_air:bool = false
