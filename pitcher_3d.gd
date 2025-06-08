@@ -12,6 +12,7 @@ var user_is_pitching_team:bool
 var user_input_method # "mouse", "keyboard", "controller"
 var prev_mouse_sz_pos
 var catchermitt_speed = 0.5 # non-mouse movement
+var catchermitt_speed_recenter:float = 1.0
 var animation = "idle"
 var throws:String = 'R'
 const time_until_pitch_release:float = 1.2
@@ -28,6 +29,9 @@ var action_to_pitch_type:Dictionary = {
 var pitch_bar_success:bool = true
 # [pitch speed multiplier, spin accel multiplier, x modifier, y modifier]
 var pitch_input_modifiers:Array = []
+@onready var catchers_mitt = get_parent().get_node("CatchersMitt")
+var catchers_mitt_frozen:bool = false
+@onready var ball_recenter = get_parent().get_node("BallSprite3DRecenter")
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -65,7 +69,7 @@ func reset(pitch_mode_:String, user_input_method_:String,
 	$AnimatedSprite3D.set_frame(0)
 	$AnimatedSprite3D.visible = false
 	pitch_mode = pitch_mode_
-	assert(pitch_mode in ["Button", "Bar", "BarOneWay", "BarTwoWay"])
+	assert(pitch_mode in ["Button", "Bar", "BarOneWay", "BarTwoWay", "Recenter"])
 	pitch_select_step = 0
 	pitch_select_key = null
 	pitch_input_modifiers = []
@@ -99,6 +103,8 @@ func reset(pitch_mode_:String, user_input_method_:String,
 	#$Char3D.set_color(color)
 	player = null
 	pitch_bar_success = true
+	catchers_mitt.get_node("Sprite3D").modulate.a = 1
+	catchers_mitt_frozen = false
 
 func get_spin_acceleration_and_speed():
 	var sign_
@@ -271,12 +277,73 @@ func _physics_process(delta: float) -> void:
 									randfn(0, 1./12.*6.),
 									randfn(0, 1./12.*6.)]
 							begin_pitch()
+			elif pitch_mode == 'Recenter':
+				# Press (0) and recenter (1)
+				if pitch_select_step == 0:
+					# Check for press
+					for action in action_to_pitch_type.keys():
+						if Input.is_action_just_pressed(action):
+							if action != "click":
+								pitch_type = action_to_pitch_type[action]
+							pitch_select_step = 1
+							#pitch_select_key = action # Not needed
+							# Hide glove, show target and spot
+							ball_recenter.visible = true
+							ball_recenter.position = catchers_mitt.position
+							# Need ball visible in front of mitt
+							ball_recenter.position.z -= .0001
+							#catchers_mitt.visible = false
+							catchers_mitt_frozen = true
+							catchers_mitt.get_node("Sprite3D").modulate.a = .5
+							pitch_select_key = {vel = Vector2(),
+								angle=randf_range(0,2*PI),
+								speed = 1,
+								dir = 1,
+								duration = 0}
+				elif pitch_select_step == 1:
+					pitch_select_key.duration += delta
+					# Update location with input
+					var LR = Input.get_axis("moveleft", "moveright")
+					var DU = Input.get_axis("movedown", "moveup")
+					ball_recenter.position.x += delta*catchermitt_speed_recenter * LR * (-1)
+					ball_recenter.position.y += delta*catchermitt_speed_recenter * DU
+					if pitch_select_key.duration <= 2:
+						# Move spot randomly
+						pitch_select_key.speed += randfn(0,1)/1. * delta
+						# Randomly change direction, can't be too often
+						if randf() < delta:
+							pitch_select_key.angle = randf_range(0,2*PI)
+						pitch_select_key.angle += pitch_select_key.dir * 1 * delta
+						# Speed should stay below mitt speed so user has chance
+						pitch_select_key.speed = max(0.35, min(.35, pitch_select_key.speed))
+						ball_recenter.position.x += sin(pitch_select_key.angle) * pitch_select_key.speed * delta
+						ball_recenter.position.y += cos(pitch_select_key.angle) * pitch_select_key.speed * delta
+					else:
+						# End step, begin pitch
+						ball_recenter.visible = false
+						pitch_select_step = 2
+						if ball_recenter.position.distance_to(catchers_mitt.position) < 5. / 36.:
+							# Success
+							pitch_input_modifiers = [
+								randf_range(.92, 1), # Speed
+								 Vector3(randf_range(.85, 1), # Accel
+										 randf_range(.85, 1),
+										 randf_range(.85, 1))]
+						else: # Failure
+							pitch_input_modifiers = [
+								randf_range(.92, 1), # Speed
+								 Vector3(randf_range(.85, 1), # Accel
+										 randf_range(.85, 1),
+										 randf_range(.85, 1))]
+						pitch_input_modifiers.push_back(
+							ball_recenter.position.x - catchers_mitt.position.x # X
+						)
+						pitch_input_modifiers.push_back(
+							ball_recenter.position.y - catchers_mitt.position.y # Y
+						)
+						begin_pitch()
 			else:
-				assert(false)
-			# Begin pitch
-			#if click and on keyboard thing:
-			#if Input.is_action_just_pressed("begin_pitch"):
-				#begin_pitch()
+				assert(false, "Invalid pitch_mode in pitcher")
 		else:
 			if timer_action == null:
 				# Start pitch
@@ -320,7 +387,6 @@ func _physics_process(delta: float) -> void:
 		var spin_and_speed = get_spin_acceleration_and_speed()
 		ball.spin_acceleration = spin_and_speed[0]
 		var pitchspeed = spin_and_speed[1]
-		var catchers_mitt = get_parent().get_node("CatchersMitt")
 		
 		#var velo_vec = ball.find_starting_velocity_vector(pitchspeed, ball.position, 
 		#	pitch_x, pitch_y)
@@ -407,31 +473,19 @@ func _physics_process(delta: float) -> void:
 		
 	
 	# Place catcher's mitt for pitch target
-	if not pitch_done and not pitch_in_progress:
+	if not pitch_done and not pitch_in_progress and not catchers_mitt_frozen:
 		var mouse_sz_pos = get_parent().get_parent().get_mouse_sz_pos()
-		#printt('glove pos', mouse_sz_pos)
-		#printt('catmitt is', get_tree().root.get_node("Field3D/Headon/CatchersMitt"))
 		mouse_sz_pos.z -= .001 # Move so it is behind the strike zone
 		if prev_mouse_sz_pos==null or prev_mouse_sz_pos != mouse_sz_pos:
-			get_parent().get_node("CatchersMitt").position = mouse_sz_pos
-		else: # No mouse movement
-			var mitt = get_parent().get_node("CatchersMitt")
-			#if Input.is_action_pressed("movedown"):
-				#mitt.position.y -= delta*catchermitt_speed
-			#if Input.is_action_pressed("moveup"):
-				#mitt.position.y += delta*catchermitt_speed
-			#if Input.is_action_pressed("moveleft"):
-				#mitt.position.x += delta*catchermitt_speed
-			#if Input.is_action_pressed("moveright"):
-				#mitt.position.x -= delta*catchermitt_speed
+			#get_parent().get_node("CatchersMitt").position = mouse_sz_pos
+			catchers_mitt.position = mouse_sz_pos
+		else: # No mouse movement, check for keyboard/controller input
 			var LR = Input.get_axis("moveleft", "moveright")
 			var DU = Input.get_axis("movedown", "moveup")
-			#printt('LR DU', LR, DU)
-			mitt.position.x += delta*catchermitt_speed * LR * (-1)
-			mitt.position.y += delta*catchermitt_speed * DU
+			catchers_mitt.position.x += delta*catchermitt_speed * LR * (-1)
+			catchers_mitt.position.y += delta*catchermitt_speed * DU
 		
 		prev_mouse_sz_pos = mouse_sz_pos
-
 
 var timer_action
 

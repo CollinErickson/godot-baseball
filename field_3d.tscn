@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=63 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" uid="uid://bl3nlh5ft1jhu" path="res://field_3d.gd" id="1_pctx6"]
@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" uid="uid://nprqmch1yea5" path="res://scenes/explosion.tscn" id="16_mgd0q"]
 [ext_resource type="PackedScene" uid="uid://5gqpqmapqogt" path="res://scenes/mesh_instance_3d_tube.tscn" id="18_2d1m5"]
 [ext_resource type="PackedScene" uid="uid://ccbr5gjhlqkux" path="res://scenes/prepitch_field_overlay.tscn" id="18_opycq"]
+[ext_resource type="Texture2D" uid="uid://bk56gldhalnup" path="res://sprites/baseball320.png" id="19_uw0wu"]
 [ext_resource type="PackedScene" uid="uid://ekrl3y0l42kb" path="res://scenes/mini_field.tscn" id="20_fgd4v"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
@@ -452,6 +453,11 @@ color = Color(0.640704, 0.0660575, 0.437794, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1)
 
 [node name="MeshInstance3DTube" parent="Headon" instance=ExtResource("18_2d1m5")]
+
+[node name="BallSprite3DRecenter" type="Sprite3D" parent="Headon"]
+visible = false
+pixel_size = 0.0002
+texture = ExtResource("19_uw0wu")
 
 [node name="TimerCameraChange" type="Timer" parent="."]
 

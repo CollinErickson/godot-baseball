@@ -3,7 +3,7 @@ extends Control
 # Settings
 var throw_mode:String = "BarOneWay" # "Button", "Bar", "BarOneWay"
 var bat_mode:String = "Target" # "Timing", "Target"
-var pitch_mode:String = "BarTwoWay" # "Button", "Bar", "BarOneWay", "BarTwoWay"
+var pitch_mode:String = "Recenter" # "Button", "Bar", "BarOneWay", "BarTwoWay", "Recenter"
 
 # Game variables
 var innings_per_game:int = 1
@@ -48,7 +48,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if true:
+	if !true:
 		user_is_away_team = true
 		user_is_home_team = false
 	
