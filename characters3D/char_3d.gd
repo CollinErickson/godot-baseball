@@ -50,6 +50,8 @@ func _ready() -> void:
 	# https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachineplayback.html#class-animationnodestatemachineplayback-method-start
 	state_machine = $charnode/AnimationTree.get("parameters/playback")
 
+	$charnode/AnimationTree.set("parameters/conditions/true", true)
+
 
 func reset() -> void:
 	# Undo current animation rotation
@@ -117,6 +119,10 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		$charnode/AnimationTree.set("parameters/conditions/moving", false)
 		$charnode/AnimationTree.set("parameters/conditions/throw", true)
+		if throwsR:
+			state_machine.start(ap('Throw Object R'))
+		else:
+			state_machine.start(ap('Throw Object L'))
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 
@@ -130,7 +136,7 @@ func force_animation_idle() -> void:
 	$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
 	$charnode/AnimationTree.set("parameters/conditions/throw", false)
 
-	state_machine.start("idle")
+	state_machine.start(ap("idle"))
 
 func set_color(col):
 	#printt('\t\t\t\tIN SET COLOR FOR CHAR3D')

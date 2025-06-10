@@ -10,7 +10,7 @@ var max_throw_speed:float = 30.0
 const catch_radius_xz:float = 2
 var catch_max_y:float = 2.5
 var throws:String = 'R'
-const time_throw_animation_release_point:float = 0.75
+const time_throw_animation_release_point:float = 0.41
 
 var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball, over_wall
 var assignment_pos # Position to go to for assignment

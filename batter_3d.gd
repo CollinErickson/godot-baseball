@@ -89,7 +89,6 @@ func begin_swing():
 	swing_state = 'prezone'
 
 func _process(delta: float) -> void:
-	printt('in batter, bats=', bats)
 	#if randf_range(0,1) < .04:
 		#printt('batter process conditions',
 		#$Char3D/charnode/AnimationTree.get("parameters/conditions/batter_idle"),
