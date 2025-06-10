@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://ir008iuvgy63"]
+
+[ext_resource type="PackedScene" uid="uid://mdqa7cp15dr5" path="res://characters3D/Player2/animated/Player2Animated.glb" id="1_uff8a"]
+[ext_resource type="AnimationLibrary" uid="uid://boyyhebxej5ot" path="res://characters3D/Player2/animated/Player2AnimPack.res" id="2_bsggp"]
+
+[node name="Player2Animated" instance=ExtResource("1_uff8a")]
+
+[node name="AnimationPlayer" parent="." index="1"]
+libraries = {
+&"Player2AnimPack": ExtResource("2_bsggp")
+}

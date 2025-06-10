@@ -1049,7 +1049,7 @@ func setup_player(player_, team, is_home_team:bool) -> void:
 	max_throw_speed = player.throwspeed_mps()
 	catch_max_y = player.height_mult * 2.5
 	$Char3D.set_color_from_team(player, team, is_home_team)
-	$Char3D.set_glove(throws=="R")
+	$Char3D.set_glove_visible(throws)
 
 var time_last_decide_what_to_do_with_ball = Time.get_ticks_msec() - 30*1e3
 func decide_what_to_do_with_ball() -> Array:

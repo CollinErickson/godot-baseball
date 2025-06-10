@@ -26,6 +26,10 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/gdterm/plugin.cfg")
 
+[filesystem]
+
+import/blender/enabled=false
+
 [input]
 
 reload={

@@ -58,6 +58,7 @@ func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 	get_node('AnimatedSprite3D').set_frame(0)
 	get_node('AnimatedSprite3D').visible = false
 	get_node('AnimatedSprite3DIdle').visible = false
+	$Char3D.set_glove_visible('none')
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
@@ -88,6 +89,7 @@ func begin_swing():
 	swing_state = 'prezone'
 
 func _process(delta: float) -> void:
+	printt('in batter, bats=', bats)
 	#if randf_range(0,1) < .04:
 		#printt('batter process conditions',
 		#$Char3D/charnode/AnimationTree.get("parameters/conditions/batter_idle"),
@@ -156,6 +158,7 @@ func set_animation(new_anim):
 	#if new_anim == "idle":
 		#pass
 	#if new_anim == "moving":
+	printt('in batter, bats', bats, bats=='R', bats=='')
 	$Char3D.start_animation(new_anim, bats=="R", false)
 
 func set_look_at_position(pos) -> void:
@@ -171,20 +174,19 @@ func set_look_at_position(pos) -> void:
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		bats = player.bats
+		assert(['R', 'L'].has(bats))
+		printt('in batter setting bats', bats, player.bats)
 		position = Vector3(1, 0, 0.5)
 		if bats == 'R':
-			set_look_at_position(Vector3(-100,0,0))
-			
+			#set_look_at_position(Vector3(0,0,-100))
 			# Make bat visible
-			get_node('Char3D/charnode/Armature/Skeleton3D/batR').visible = true
-			get_node('Char3D/charnode/Armature/Skeleton3D/batL').visible = false
+			get_node('Char3D').set_bat_visible('R')
 		else:
 			position.x *= -1
-			set_look_at_position(Vector3(100,0,0))
+			#set_look_at_position(Vector3(0,0,100))
 			
 			# Make bat visible
-			get_node('Char3D/charnode/Armature/Skeleton3D/batR').visible = false
-			get_node('Char3D/charnode/Armature/Skeleton3D/batL').visible = true
+			get_node('Char3D').set_bat_visible('L')
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 

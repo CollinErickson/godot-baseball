@@ -1,17 +1,24 @@
 extends Node3D
 
-enum char_options {AJ, Player1, none}
+enum char_options {AJ, Player1, Player2, none}
 @export var character:char_options = char_options.Player1
 
 var char_AJ = load("res://characters3D/AJ/AJ.tscn")
 var char_Player1 = load("res://characters3D/Player1/player_1.tscn")
+var char_Player2 = load("res://characters3D/Player2/unanimated/player_2_unanimated.tscn")
 
 var current_animation_rotation:float = 0
 var pause_info = null
+var skeleton_node
+var state_machine
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
+	printt('char_Player1', char_Player1)
+	printt('char_Player1', char_Player1.instantiate())
+	printt('char_Player2', char_Player2)
+	printt('char_Player2', char_Player2.instantiate())
 	
 	var charnode = null
 	if character == char_options.AJ:
@@ -24,15 +31,25 @@ func _ready() -> void:
 		#print('In char3d, no character selected!!!!')
 		#charnode = char_AJ.instantiate()
 	
-	charnode = char_Player1.instantiate()
-	#print('charnode', charnode)
+	#charnode = char_Player1.instantiate()
+	charnode = char_Player2.instantiate()
+	print('charnode', charnode)
 	charnode.name = 'charnode'
 	add_child(charnode)
 	#start_animation('a')
 	
 	# Hide bats by default, the batter will need to turn them on
-	charnode.get_node('Armature/Skeleton3D/batR').visible = false
-	charnode.get_node('Armature/Skeleton3D/batL').visible = false
+	if character == char_options.Player2 or true:
+		skeleton_node = charnode.get_node('Armature/GeneralSkeleton')
+	else:
+		skeleton_node = charnode.get_node('Armature/Skeleton3D')
+	skeleton_node.get_node('batR').visible = false
+	skeleton_node.get_node('batL').visible = false
+	
+	# This will let us jump to a specific state in the AnimationTree state machine
+	# https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachineplayback.html#class-animationnodestatemachineplayback-method-start
+	state_machine = $charnode/AnimationTree.get("parameters/playback")
+
 
 func reset() -> void:
 	# Undo current animation rotation
@@ -67,14 +84,24 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
 		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
 		$charnode/AnimationTree.set("parameters/conditions/batter_idle", true)
+		
+		if batsR:
+			state_machine.start(ap('Baseball Idle R'))
+		else:
+			state_machine.start(ap('Baseball Idle L'))
+		current_animation_rotation = PI/2 #* (1 if batsR else -1)
+		rotate_y(current_animation_rotation)
+	
 	elif anim_name == "swing":
-		current_animation_rotation = PI/2 * (1 if batsR else -1)
+		current_animation_rotation = PI/2 #* (1 if batsR else -1)
 		rotate_y(current_animation_rotation)
 		$charnode/AnimationTree.set("parameters/conditions/batter_idle", false)
 		if batsR:
 			$charnode/AnimationTree.set("parameters/conditions/swingR", true)
+			state_machine.start(ap('Baseball Hit R'))
 		else:
 			$charnode/AnimationTree.set("parameters/conditions/swingL", true)
+			state_machine.start(ap('Baseball Hit L'))
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 	elif anim_name == "pitch":
 		#current_animation_rotation = PI/2 * (1 if !batsR else -1)
@@ -82,8 +109,10 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		if throwsR:
 			$charnode/AnimationTree.set("parameters/conditions/pitchR", true)
+			state_machine.start(ap('Baseball Pitching R'))
 		else:
 			$charnode/AnimationTree.set("parameters/conditions/pitchL", true)
+			state_machine.start(ap('Baseball Pitching L'))
 	elif anim_name == "throw":
 		$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		$charnode/AnimationTree.set("parameters/conditions/moving", false)
@@ -100,8 +129,7 @@ func force_animation_idle() -> void:
 	$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
 	$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
 	$charnode/AnimationTree.set("parameters/conditions/throw", false)
-	# https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachineplayback.html#class-animationnodestatemachineplayback-method-start
-	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+
 	state_machine.start("idle")
 
 func set_color(col):
@@ -111,12 +139,12 @@ func set_color(col):
 	#mat.vertex_color_use_as_albedo = true # will need this for the array of colors
 	#meshnode.mesh.surface_set_material(0, mat)   # will need uvs if using a texture
 	#if character == char_options.AJ:
-		#$charnode/Armature/Skeleton3D/Boy01_Body_Geo.set_material_override(mat)
+		#skeleton_node.get_node('Boy01_Body_Geo.set_material_override(mat)
 	#elif character == char_options.Player1:
 	#printt('exists', $charnode/Armature/Skeleton3D.get_children())
-	$charnode/Armature/Skeleton3D/torso.set_material_override(mat)
-	$charnode/Armature/Skeleton3D/shoulders.set_material_override(mat)
-	$charnode/Armature/Skeleton3D/hat.set_material_override(mat)
+	skeleton_node.get_node('torso').set_material_override(mat)
+	skeleton_node.get_node('shoulders').set_material_override(mat)
+	skeleton_node.get_node('hat').set_material_override(mat)
 
 	#print('dir mat', dir(mat))
 	#printt('char test', $charnode/Armature/Skeleton3D/Boy01_Body_Geo.set_material_override)
@@ -157,12 +185,12 @@ func set_color_from_team(player, team, is_home_team:bool) -> void:
 	var mat_primary = StandardMaterial3D.new()
 	mat_primary.albedo_color = team.color_primary
 	for bp in primary_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_primary)
+		skeleton_node.get_node(bp).set_material_override(mat_primary)
 	
 	var mat_secondary = StandardMaterial3D.new()
 	mat_secondary.albedo_color = team.color_secondary
 	for bp in secondary_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_secondary)
+		skeleton_node.get_node(bp).set_material_override(mat_secondary)
 	
 	# Change pants color based on home/away
 	var matha = StandardMaterial3D.new()
@@ -172,7 +200,7 @@ func set_color_from_team(player, team, is_home_team:bool) -> void:
 		matha.albedo_color = Color('gray')
 	var ha_body = ["hips", "leg_left", "leg_right"]
 	for bp in ha_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(matha)
+		skeleton_node.get_node(bp).set_material_override(matha)
 	
 	# Set skin color
 	var skin_body = ["arm_left", "arm_right", 
@@ -182,10 +210,10 @@ func set_color_from_team(player, team, is_home_team:bool) -> void:
 	var mat_skin = StandardMaterial3D.new()
 	mat_skin.albedo_color = player.skin_color
 	for bp in skin_body:
-		$charnode/Armature/Skeleton3D.get_node(bp).set_material_override(mat_skin)
+		skeleton_node.get_node(bp).set_material_override(mat_skin)
 	
 	# Set height
-	$charnode/Armature/Skeleton3D.scale = Vector3.ONE * player.height_mult
+	skeleton_node.scale = Vector3.ONE * player.height_mult
 
 func dir(class_instance):
 	var output = {}
@@ -236,10 +264,26 @@ func unpause() -> void:
 	pause_info = null
 
 
-func set_glove(throwsR:bool) -> void:
-	$charnode/Armature/Skeleton3D/gloveL.visible = throwsR
-	$charnode/Armature/Skeleton3D/gloveR.visible = !throwsR
-	$charnode/Armature/Skeleton3D/hand_left.visible = !throwsR
-	$charnode/Armature/Skeleton3D/hand_right.visible = throwsR
-	$charnode/Armature/Skeleton3D/thumb_left.visible = !throwsR
-	$charnode/Armature/Skeleton3D/thumb_left.visible = throwsR
+func set_glove_visible(throws:String) -> void:
+	assert(['R', 'L', 'none'].has(throws))
+	skeleton_node.get_node('gloveL').visible = (throws == 'R')
+	skeleton_node.get_node('gloveR').visible = (throws == 'L')
+	skeleton_node.get_node('hand_left').visible = (throws != 'R')
+	skeleton_node.get_node('hand_right').visible = (throws != 'L')
+	skeleton_node.get_node('thumb_left').visible = (throws != 'R')
+	skeleton_node.get_node('thumb_right').visible = (throws != 'L')
+
+func set_bat_visible(bats) -> void:
+	assert(['R', 'L', 'none'].has(bats))
+	skeleton_node.get_node('batR').visible = (bats=='R')
+	skeleton_node.get_node('batL').visible = (bats=='L')
+
+func ap(x:String) -> String:
+	return 'Player2AnimPack_' + x
+
+func get_hand_global_position(throws:String) -> Vector3:
+	assert(['L', 'R'].has(throws))
+	var bone_idx : int = skeleton_node.find_bone("glove" + throws)
+	var local_bone_transform : Transform3D = skeleton_node.get_bone_global_pose(bone_idx)
+	var global_bone_pos : Vector3 = skeleton_node.to_global(local_bone_transform.origin)
+	return global_bone_pos

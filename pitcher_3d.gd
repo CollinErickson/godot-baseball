@@ -15,7 +15,7 @@ var catchermitt_speed = 0.5 # non-mouse movement
 var catchermitt_speed_recenter:float = 1.0
 var animation = "idle"
 var throws:String = 'R'
-const time_until_pitch_release:float = 1.2
+const time_until_pitch_release:float = 0.94
 var pitch_mode:String
 var pitch_select_step:int = 0
 var pitch_select_key = null
@@ -373,13 +373,14 @@ func _physics_process(delta: float) -> void:
 		#print('headon basis'); print($Headon)
 		#ball.transform = transform
 		#ball.basis = basis
-		ball.position.x = 0.35 # put in righty hand
-		if throws == "L":
-			ball.position.x *= -1 # put in lefty hand
-		ball.position.y=position.y + 1.7 # 1.5 yards higher than ground of pitcher
+		#ball.position.x = 0.35 # put in righty hand
+		#if throws == "L":
+		#ball.position.x *= -1 # put in lefty hand
+		#ball.position.y=position.y + 1.7 # 1.5 yards higher than ground of pitcher
 		# Adjust ball height for pitcher height
-		ball.position.y *= player.height_mult
-		ball.position.z= position.z - 2 # 2 yards closer than pitcher
+		#ball.position.y *= player.height_mult
+		#ball.position.z= position.z - 2 # 2 yards closer than pitcher
+		ball.global_position = $Char3D.get_hand_global_position(throws)
 		#ball.velocity.z = -40*.75 # 40 is about about 90 mph
 		#ball.velocity.x=1 # to get over home plate
 		#ball.velocity.y = .62+1.6 # downward throw
@@ -534,7 +535,7 @@ func setup_player(player_, team, is_home_team:bool) -> void:
 		set_look_at_position(Vector3(-100,0,position.z))
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
-		$Char3D.set_glove(throws=="R")
+		$Char3D.set_glove_visible(throws)
 
 func _on_click_in_rect_by_mouse(num:int) -> void:
 	if num == 0:

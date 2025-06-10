@@ -206,8 +206,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 
 	# Setup batter
 	bat_mode = bat_mode_
-	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
 	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
+	# Reset after setup since player info is needed to set up handedness
+	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
 	$PrepitchFieldOverlay.setup_batter(batter)
 
 	# Setup pitcher
