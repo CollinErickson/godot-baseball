@@ -51,7 +51,13 @@ func _ready() -> void:
 	state_machine = $charnode/AnimationTree.get("parameters/playback")
 
 	$charnode/AnimationTree.set("parameters/conditions/true", true)
+	
+	# Testing signal on animation done (works, but also gives idle/walking)
+	#$charnode/AnimationTree.connect('animation_finished', _on_anim_fin)
+	
 
+func _on_anim_fin(anim_name:String):
+	printt('in char 3D, animation finished', anim_name)
 
 func reset() -> void:
 	# Undo current animation rotation

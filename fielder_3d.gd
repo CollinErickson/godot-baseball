@@ -327,8 +327,7 @@ func _physics_process(delta: float) -> void:
 						Time.get_ticks_msec() - ball.time_last_thrown,
 						ball.throw_progress, Time.get_ticks_msec())
 					var ball_position_before_fielded = ball.position
-					ball.position = position
-					ball.position.y = 1.4
+					ball.global_position = $Char3D.get_hand_global_position(throws)
 					set_holding_ball(true)
 					set_assignment("holding_ball")
 					set_animation('idle')
@@ -493,7 +492,7 @@ func _physics_process(delta: float) -> void:
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
 		# Update ball position
-		ball.position = position + Vector3(0,1.4,0)
+		ball.global_position = $Char3D.get_hand_global_position(throws)
 		
 		# Check if tagging active runner not on base
 		for runner in runners:
@@ -766,9 +765,8 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 			#holding_ball = false
 			#remove_from_group('fielder_holding_ball')
 			set_holding_ball(false)
-			#var ball = get_tree().get_first_node_in_group("ball")
-			ball.position = position
-			ball.position.y = 1.4
+			# Put ball at release point
+			ball.global_position = $Char3D.get_hand_global_position(throws)
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
@@ -783,9 +781,8 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 			#holding_ball = false
 			#remove_from_group('fielder_holding_ball')
 			set_holding_ball(false)
-			#var ball = get_tree().get_first_node_in_group("ball")
-			ball.position = position
-			ball.position.y = 1.4
+			# Set ball release point
+			ball.global_position = $Char3D.get_hand_global_position(throws)
 			ball.throw_start_pos = null
 			ball.throw_target = null
 			# This needs to be before throw_ball.emit() since that can reassign this fielder
