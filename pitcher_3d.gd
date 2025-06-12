@@ -152,8 +152,8 @@ func _physics_process(delta: float) -> void:
 	
 	# If it started the pitch animation, change to idle. It will finish the 
 	#  pitch animation before transitioning.
-	if animation == 'pitch':
-		set_animation('idle')
+	#if animation == 'pitch':
+		#set_animation('idle')
 	
 	# Pre-pitch
 	if not pitch_done and not pitch_in_progress: 

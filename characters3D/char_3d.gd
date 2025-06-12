@@ -11,6 +11,7 @@ var current_animation_rotation:float = 0
 var pause_info = null
 var skeleton_node
 var state_machine
+var anim_player:AnimationPlayer = AnimationPlayer.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -48,9 +49,10 @@ func _ready() -> void:
 	
 	# This will let us jump to a specific state in the AnimationTree state machine
 	# https://docs.godotengine.org/en/stable/classes/class_animationnodestatemachineplayback.html#class-animationnodestatemachineplayback-method-start
-	state_machine = $charnode/AnimationTree.get("parameters/playback")
+	#state_machine = $charnode/AnimationTree.get("parameters/playback")
 
-	$charnode/AnimationTree.set("parameters/conditions/true", true)
+	#$charnode/AnimationTree.set("parameters/conditions/true", true)
+	anim_player = $charnode/AnimationPlayer
 	
 	# Testing signal on animation done (works, but also gives idle/walking)
 	#$charnode/AnimationTree.connect('animation_finished', _on_anim_fin)
@@ -73,76 +75,87 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	
 	#$charnode
 	if anim_name == "idle":
-		$charnode/AnimationTree.set("parameters/conditions/moving", false)
-		$charnode/AnimationTree.set("parameters/conditions/idle", true)
-		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
-		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
-		$charnode/AnimationTree.set("parameters/conditions/throw", false)
+		#$charnode/AnimationTree.set("parameters/conditions/moving", false)
+		#$charnode/AnimationTree.set("parameters/conditions/idle", true)
+		#$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		#$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+		#$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+		#$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
+		#$charnode/AnimationTree.set("parameters/conditions/throw", false)
+		anim_player.play(ap('idle'))
 	elif anim_name == "running":
-		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
-		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
-		$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
-		$charnode/AnimationTree.set("parameters/conditions/moving", true)
+		#$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		#$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		#$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+		#$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+		#$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
+		#$charnode/AnimationTree.set("parameters/conditions/moving", true)
+		anim_player.play(ap('standard run'))
 	elif anim_name == "batter_idle":
-		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/swingR", false)
-		$charnode/AnimationTree.set("parameters/conditions/swingL", false)
-		$charnode/AnimationTree.set("parameters/conditions/batter_idle", true)
+		#$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		#$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+		#$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+		#$charnode/AnimationTree.set("parameters/conditions/batter_idle", true)
 		
 		if batsR:
-			state_machine.start(ap('Baseball Idle R'))
+			#state_machine.start(ap('Baseball Idle R'))
+			anim_player.play(ap('Baseball Idle R'))
 		else:
-			state_machine.start(ap('Baseball Idle L'))
+			#state_machine.start(ap('Baseball Idle L'))
+			anim_player.play(ap('Baseball Idle L'))
 		current_animation_rotation = PI/2 #* (1 if batsR else -1)
 		rotate_y(current_animation_rotation)
 	
 	elif anim_name == "swing":
 		current_animation_rotation = PI/2 #* (1 if batsR else -1)
 		rotate_y(current_animation_rotation)
-		$charnode/AnimationTree.set("parameters/conditions/batter_idle", false)
+		#$charnode/AnimationTree.set("parameters/conditions/batter_idle", false)
 		if batsR:
-			$charnode/AnimationTree.set("parameters/conditions/swingR", true)
-			state_machine.start(ap('Baseball Hit R'))
+			#$charnode/AnimationTree.set("parameters/conditions/swingR", true)
+			#state_machine.start(ap('Baseball Hit R'))
+			anim_player.play(ap('Baseball Hit R'))
 		else:
-			$charnode/AnimationTree.set("parameters/conditions/swingL", true)
-			state_machine.start(ap('Baseball Hit L'))
-		$charnode/AnimationTree.set("parameters/conditions/idle", false)
+			#$charnode/AnimationTree.set("parameters/conditions/swingL", true)
+			#state_machine.start(ap('Baseball Hit L'))
+			anim_player.play(ap('Baseball Hit L'))
+		#$charnode/AnimationTree.set("parameters/conditions/idle", false)
 	elif anim_name == "pitch":
 		#current_animation_rotation = PI/2 * (1 if !batsR else -1)
 		#rotate_y(current_animation_rotation)
-		$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		#$charnode/AnimationTree.set("parameters/conditions/idle", false)
 		if throwsR:
-			$charnode/AnimationTree.set("parameters/conditions/pitchR", true)
-			state_machine.start(ap('Baseball Pitching R'))
+			#$charnode/AnimationTree.set("parameters/conditions/pitchR", true)
+			#state_machine.start(ap('Baseball Pitching R'))
+			anim_player.play(ap('Baseball Pitching R'))
 		else:
-			$charnode/AnimationTree.set("parameters/conditions/pitchL", true)
-			state_machine.start(ap('Baseball Pitching L'))
+			#$charnode/AnimationTree.set("parameters/conditions/pitchL", true)
+			#state_machine.start(ap('Baseball Pitching L'))
+			anim_player.play(ap('Baseball Pitching L'))
 	elif anim_name == "throw":
-		$charnode/AnimationTree.set("parameters/conditions/idle", false)
-		$charnode/AnimationTree.set("parameters/conditions/moving", false)
-		$charnode/AnimationTree.set("parameters/conditions/throw", true)
+		#$charnode/AnimationTree.set("parameters/conditions/idle", false)
+		#$charnode/AnimationTree.set("parameters/conditions/moving", false)
+		#$charnode/AnimationTree.set("parameters/conditions/throw", true)
 		if throwsR:
-			state_machine.start(ap('Throw Object R'))
+			#state_machine.start(ap('Throw Object R'))
+			anim_player.play(ap('Throw Object R'))
 		else:
-			state_machine.start(ap('Throw Object L'))
+			#state_machine.start(ap('Throw Object L'))
+			anim_player.play(ap('Throw Object L'))
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 
 func force_animation_idle() -> void:
 	# Set parameters for idle
-	$charnode/AnimationTree.set("parameters/conditions/moving", false)
-	$charnode/AnimationTree.set("parameters/conditions/idle", true)
-	$charnode/AnimationTree.set("parameters/conditions/swingR", false)
-	$charnode/AnimationTree.set("parameters/conditions/swingL", false)
-	$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
-	$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
-	$charnode/AnimationTree.set("parameters/conditions/throw", false)
+	#$charnode/AnimationTree.set("parameters/conditions/moving", false)
+	#$charnode/AnimationTree.set("parameters/conditions/idle", true)
+	#$charnode/AnimationTree.set("parameters/conditions/swingR", false)
+	#$charnode/AnimationTree.set("parameters/conditions/swingL", false)
+	#$charnode/AnimationTree.set("parameters/conditions/pitchR", false)
+	#$charnode/AnimationTree.set("parameters/conditions/pitchL", false)
+	#$charnode/AnimationTree.set("parameters/conditions/throw", false)
 
-	state_machine.start(ap("idle"))
+	#state_machine.start(ap("idle"))
+	anim_player.play(ap("idle"))
 
 func set_color(col):
 	#printt('\t\t\t\tIN SET COLOR FOR CHAR3D')
@@ -262,17 +275,20 @@ func pause() -> void:
 	
 	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
 	
-	pause_info = [state_machine.get_current_node(),
-	$charnode/AnimationPlayer.current_animation_position,
-		state_machine.get_current_play_position()]
-	printt('char 3d pause info', pause_info, $charnode/AnimationTree.anim_player)
+	#pause_info = [state_machine.get_current_node(),
+	#$charnode/AnimationPlayer.current_animation_position,
+		#state_machine.get_current_play_position()]
+	#printt('char 3d pause info', pause_info, $charnode/AnimationTree.anim_player)
 	#state_machine.start(ap("idle"))
-	state_machine.stop()
+	#state_machine.stop()
 	#var char3d:AnimationPlayer
 	#$charnode/AnimationPlayer.stop()
 	#var x:AnimationTree
-	$charnode/AnimationTree.active = false
-	$charnode/AnimationPlayer.active = false
+	#$charnode/AnimationTree.active = false
+	#$charnode/AnimationPlayer.active = false
+	printt('anim pause info', anim_player.assigned_animation, anim_player.get_current_animation())
+	pause_info = [anim_player.get_current_animation()]
+	anim_player.pause()
 	
 	
 
@@ -281,13 +297,17 @@ func unpause() -> void:
 	#$charnode/AnimationTree.set_process_callback(1)
 	###$charnode/AnimationTree.set_callback_mode_process(1)
 	
-	$charnode/AnimationTree.active = true
-	$charnode/AnimationPlayer.active = true
+	#$charnode/AnimationTree.active = true
+	#$charnode/AnimationPlayer.active = true
 	if pause_info == null:
 		return
-	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
-	state_machine.start(pause_info[0], false)
-	$charnode/AnimationPlayer.seek(pause_info[1])
+	if pause_info[0] == "":
+		pause_info = null
+		return
+	##var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	#state_machine.start(pause_info[0], false)
+	#$charnode/AnimationPlayer.seek(pause_info[1])
+	anim_player.play(pause_info[0])
 	pause_info = null
 
 
@@ -306,7 +326,8 @@ func set_bat_visible(bats) -> void:
 	skeleton_node.get_node('batL').visible = (bats=='L')
 
 func ap(x:String) -> String:
-	return 'Player2AnimPack_' + x
+	#return 'Player2AnimPack_' + x
+	return 'Player2AnimPack/' + x
 
 func get_hand_global_position(throws:String) -> Vector3:
 	assert(['L', 'R'].has(throws))
