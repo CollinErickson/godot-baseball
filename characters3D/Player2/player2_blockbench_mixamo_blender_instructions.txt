@@ -18,13 +18,10 @@ Put all these downloads in the Player2/mixamo folder.
 
 ### Blender
 
-
-## Blender
-
 - Blender: install the Mixamo root add-on, make sure it's enabled (Preferences -> Add-ons).
 I'm no longer using root bone since it messes up for some animations, but this imports animations.
 
-- New blender: delete objects on right
+- New blender project, then delete objects on right
 
 - File -> Import -> (.glb) -> (select your character .glb file)
 
@@ -35,6 +32,7 @@ Make sure there is NOT a bone beneath the character (root bone).
 
 - Delete all the armatures except one that has the body (downward triangle in the object list). Delete hierarchy if more than one have the body.
 Don't worry about deleting the animations in the top right section, they will still show up in the animation section in the next step.
+Now what I do is select Armature.001 through Armature.XXX and delete hierarchy.
 
 - Click on Animation tab. Change "Dope sheet" to "Action editor."
 Select an action ("Browse action" in bottom section, icon is almost like a face).
@@ -44,9 +42,16 @@ Click on the armature on the top right. Press the play button at the bottom and 
 In the Action section, delete the duplicated animations.
 I filtered for "Armature" (case sensitive), and delete all in the "Action" section.
 
+- To get the animations to happen in place, install the "In Placer" Blender add-on and enable it.
+On the animation tab, select each animation (one at a time) that should be in place, and click "Make it in place!" from the add-on.
+Do this for most animations that move off center, including walking, standard run, Soccer Tackle, Running Slide, 
+Goalkeeper Diving Save, Change Direction
+Don't do it for some animations that move off center but return to where they start, including Rifle Punch, Baseball Pitching,
+Baseball Hit, etc. You don't want to have their feet sliding when they should be stationary.
+
 - File -> Export -> as .glb/.gltf -> save in correct folder as .glb file.
 Save to Player2/animated/Player2Animated.glb.
-The Blender session is saved as Player2/animated/blender/Player2Animated.blend.
+The Blender session is saved as Player2/animated/blender/Player2Animated.blend (not anymore, too large a file size for git).
 
 ### Godot
 
@@ -77,6 +82,8 @@ We don't want them to walk forward, we want to do root motion.
 	- Click on Manage Animations. Rename the top of the list to be Player2AnimPack.
 	- Click on the save button on the right of it, click on "Make Unique", it will do that for all aniations.
 	- Click on the save button on the right of it again, this time click on "Save As" and save it to Player2/animated/Player2AnimPack.res.
+
+
 
 ## Unanimated model
 
