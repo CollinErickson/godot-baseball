@@ -286,21 +286,27 @@ offset_top = 100.0
 offset_right = 120.0
 offset_bottom = -300.0
 
-[node name="StrikeZoneLeft" type="MeshInstance3D" parent="Headon"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.75, 0.6)
-mesh = SubResource("BoxMesh_7m2dq")
-
-[node name="StrikeZoneRight" type="MeshInstance3D" parent="Headon"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, 0.75, 0.6)
-mesh = SubResource("BoxMesh_7m2dq")
-
-[node name="StrikeZoneTop" type="MeshInstance3D" parent="Headon"]
+[node name="StrikeZone" type="Node3D" parent="Headon"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0.6)
-mesh = SubResource("BoxMesh_yxmap")
 
-[node name="StrikeZoneBottom" type="MeshInstance3D" parent="Headon"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.6)
+[node name="StrikeZoneLeft" type="MeshInstance3D" parent="Headon/StrikeZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.3, -5.96046e-08)
+mesh = SubResource("BoxMesh_7m2dq")
+skeleton = NodePath("../..")
+
+[node name="StrikeZoneRight" type="MeshInstance3D" parent="Headon/StrikeZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25, -0.3, -5.96046e-08)
+mesh = SubResource("BoxMesh_7m2dq")
+skeleton = NodePath("../..")
+
+[node name="StrikeZoneTop" type="MeshInstance3D" parent="Headon/StrikeZone"]
 mesh = SubResource("BoxMesh_yxmap")
+skeleton = NodePath("../..")
+
+[node name="StrikeZoneBottom" type="MeshInstance3D" parent="Headon/StrikeZone"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+mesh = SubResource("BoxMesh_yxmap")
+skeleton = NodePath("../..")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Headon"]
 transform = Transform3D(1, 0, 0, 0, -0.25038, 0.968148, 0, -0.968148, -0.25038, 0, 10, -10)

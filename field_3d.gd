@@ -244,6 +244,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		$Headon/CatchersMitt.set_process(false)
 	$Headon/Cameras.reset()
 	$Headon/BallBounceAnnulus.visible = false
+	$Headon/StrikeZone.visible = true
 	
 	$PrepitchFieldOverlay.visible = true
 	get_node("FlashText").clear_text()
@@ -687,6 +688,8 @@ func _process(delta: float) -> void:
 						var mgl = get_node("Headon/MouseGroundLocation")
 						mgl.visible = true
 						mgl.set_process(true)
+						
+						$Headon/StrikeZone.visible = false
 						
 						# Explosion if good hit
 						if ((exitvelo > 95 * .48889 and vla > 10 and vla < 40) or
@@ -1332,7 +1335,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 var next_camera = null
 func _on_timer_camera_change_timeout() -> void:
 	print('changing camera')
-	pass # Replace with function body.
+	
 	if next_camera != null:
 		next_camera.current = true
 		next_camera = null
