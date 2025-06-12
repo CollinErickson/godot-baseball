@@ -27,10 +27,12 @@ func freeze() -> void:
 func pause() -> void:
 	$Char3D.pause()
 	set_physics_process(false)
+	set_process(false)
 
 func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
+	set_process(true)
 
 func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 	is_frozen = false
@@ -96,6 +98,8 @@ func _process(delta: float) -> void:
 		#$Char3D/charnode/AnimationTree.get("parameters/conditions/idle"))
 	if is_frozen:
 		return
+	if randf() < .1:
+		printt('in batter running process', Time.get_ticks_msec())
 	if (not swing_started and not swing_done and 
 		user_is_batting_team and 
 		Input.is_action_just_pressed("swing")):
