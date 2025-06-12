@@ -98,8 +98,7 @@ func _process(delta: float) -> void:
 		#$Char3D/charnode/AnimationTree.get("parameters/conditions/idle"))
 	if is_frozen:
 		return
-	if randf() < .1:
-		printt('in batter running process', Time.get_ticks_msec())
+	
 	if (not swing_started and not swing_done and 
 		user_is_batting_team and 
 		Input.is_action_just_pressed("swing")):

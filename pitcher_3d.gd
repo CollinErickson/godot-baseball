@@ -99,7 +99,7 @@ func reset(pitch_mode_:String, user_input_method_:String,
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
 	set_look_at_position(Vector3(100,0,position.z))
-	set_animation("idle")
+	set_animation("idle", true)
 	#$Char3D.set_color(color)
 	player = null
 	pitch_bar_success = true
@@ -505,8 +505,8 @@ func select_pitch_location():
 	pitch_y = randf_range(0.5,1.2)
 
 
-func set_animation(new_anim):
-	if new_anim == animation:
+func set_animation(new_anim:String, force:bool = false):
+	if new_anim == animation and not force:
 		return
 	animation = new_anim
 	#if new_anim == "idle":
