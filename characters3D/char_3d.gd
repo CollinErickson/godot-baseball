@@ -262,17 +262,32 @@ func pause() -> void:
 	
 	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
 	
-	pause_info = [state_machine.get_current_node()]
-	state_machine.start(ap("idle"))
+	pause_info = [state_machine.get_current_node(),
+	$charnode/AnimationPlayer.current_animation_position,
+		state_machine.get_current_play_position()]
+	printt('char 3d pause info', pause_info, $charnode/AnimationTree.anim_player)
+	#state_machine.start(ap("idle"))
+	state_machine.stop()
+	#var char3d:AnimationPlayer
+	#$charnode/AnimationPlayer.stop()
+	#var x:AnimationTree
+	$charnode/AnimationTree.active = false
+	$charnode/AnimationPlayer.active = false
+	
+	
 
 func unpause() -> void:
 	#$charnode/AnimationTree.active = true
 	#$charnode/AnimationTree.set_process_callback(1)
 	###$charnode/AnimationTree.set_callback_mode_process(1)
+	
+	$charnode/AnimationTree.active = true
+	$charnode/AnimationPlayer.active = true
 	if pause_info == null:
 		return
 	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
 	state_machine.start(pause_info[0], false)
+	$charnode/AnimationPlayer.seek(pause_info[1])
 	pause_info = null
 
 
