@@ -260,10 +260,10 @@ func pause() -> void:
 	###$charnode/AnimationTree.set_callback_mode_process(2)
 	#printt('char3d callback mode', $charnode/AnimationTree.get_callback_mode_process())
 	
-	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
 	
 	pause_info = [state_machine.get_current_node()]
-	state_machine.start("idle")
+	state_machine.start(ap("idle"))
 
 func unpause() -> void:
 	#$charnode/AnimationTree.active = true
@@ -271,7 +271,7 @@ func unpause() -> void:
 	###$charnode/AnimationTree.set_callback_mode_process(1)
 	if pause_info == null:
 		return
-	var state_machine = $charnode/AnimationTree.get("parameters/playback")
+	#var state_machine = $charnode/AnimationTree.get("parameters/playback")
 	state_machine.start(pause_info[0], false)
 	pause_info = null
 
