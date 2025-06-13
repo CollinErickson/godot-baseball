@@ -34,6 +34,10 @@ var turn_off_bad_throw_label_timer:float = 0
 var turn_off_bad_catch_label_timer:float = 0
 var player
 
+var timers_to_restart_on_unpause:Array = []
+var timer_action
+var timer_args
+
 var is_frozen:bool = false
 func freeze() -> void:
 	set_not_selected_fielder()
@@ -44,10 +48,23 @@ func freeze() -> void:
 func pause() -> void:
 	$Char3D.pause()
 	set_physics_process(false)
+	
+	# Pause timers
+	for timer in [$Timer]:
+		if timer.time_left > 0:
+			timers_to_restart_on_unpause += [[$Timer, timer.time_left]]
+			timer.stop()
 
 func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
+	
+	# Unpause timers
+	for i in range(len(timers_to_restart_on_unpause)):
+		var timer = timers_to_restart_on_unpause[i][0]
+		timer.wait_time = timers_to_restart_on_unpause[i][1]
+		timer.start()
+	timers_to_restart_on_unpause = []
 
 func reset(throw_mode_:String) -> void:
 	is_frozen = false
@@ -82,6 +99,7 @@ func reset(throw_mode_:String) -> void:
 	$Timer.stop()
 	timer_action = null
 	timer_args = null
+	timers_to_restart_on_unpause = []
 	throw_mode = throw_mode_
 	$BadThrowLabel3D.visible = false
 	turn_off_bad_throw_label_timer = 0
@@ -826,14 +844,11 @@ func start_throw_ball_animation(base, fielder=null, success:bool=true,
 	timer_action = 'throw'
 	timer_args = [base, fielder, success, intensity]
 
-var timer_action
-var timer_args
 func _on_timer_timeout() -> void:
 	$Timer.stop()
 	if timer_action == "set_visible_true":
 		visible = true
 	elif timer_action == "throw":
-		printt('in fielder timer timeout, timer_args is', timer_args)
 		throw_ball_func(timer_args[0], timer_args[1], timer_args[2],
 						timer_args[3])
 	else:

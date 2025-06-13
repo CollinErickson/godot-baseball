@@ -95,7 +95,7 @@ func force_animation_idle() -> void:
 
 func queue_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	# Add anim to the AnimPlayer queue
-	anim_player.queue(ap(anim_name))
+	anim_player.queue(ap(map_anim_name(anim_name, batsR, throwsR)))
 
 func set_color(col):
 	var mat = StandardMaterial3D.new()
