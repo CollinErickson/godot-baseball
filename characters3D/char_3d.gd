@@ -51,49 +51,51 @@ func reset() -> void:
 	# Undo current animation rotation
 	rotate_y(-current_animation_rotation)
 	current_animation_rotation = 0
+	
 	pause_info = null
-	
 
-func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
-	# Undo current animation rotation
-	rotate_y(-current_animation_rotation)
-	current_animation_rotation = 0
-	
+func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 	if anim_name == "idle":
-		anim_player.play(ap('idle'))
+		return 'idle'
 	elif anim_name == "running":
-		anim_player.play(ap('standard run'))
+		return 'standard run'
 	elif anim_name == "batter_idle":
 		if batsR:
-			anim_player.play(ap('Baseball Idle R'))
+			return 'Baseball Idle R'
 		else:
-			anim_player.play(ap('Baseball Idle L'))
-		current_animation_rotation = PI/2 #* (1 if batsR else -1)
-		rotate_y(current_animation_rotation)
-	
+			return 'Baseball Idle L'
 	elif anim_name == "swing":
-		current_animation_rotation = PI/2 #* (1 if batsR else -1)
-		rotate_y(current_animation_rotation)
 		if batsR:
-			anim_player.play(ap('Baseball Hit R'))
+			return 'Baseball Hit R'
 		else:
-			anim_player.play(ap('Baseball Hit L'))
+			return 'Baseball Hit L'
 	elif anim_name == "pitch":
 		if throwsR:
-			anim_player.play(ap('Baseball Pitching R'))
+			return 'Baseball Pitching R'
 		else:
-			anim_player.play(ap('Baseball Pitching L'))
+			return 'Baseball Pitching L'
 	elif anim_name == "throw":
 		if throwsR:
-			anim_player.play(ap('Throw Object R'))
+			return 'Throw Object R'
 		else:
-			anim_player.play(ap('Throw Object L'))
+			return 'Throw Object L'
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
+		# Returning something that won't break
+		return 'idle'
 
+
+func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
+	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)))
+	
 func force_animation_idle() -> void:
+	# No longer useful, does same thing as start_animation('idle')
 	# Set parameters for idle
 	anim_player.play(ap("idle"))
+
+func queue_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
+	# Add anim to the AnimPlayer queue
+	anim_player.queue(ap(anim_name))
 
 func set_color(col):
 	var mat = StandardMaterial3D.new()

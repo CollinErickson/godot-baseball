@@ -64,7 +64,7 @@ func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 	
 	$Char3D.reset() # Resets rotation
 	#$Char3D.look_at(Vector3(0,0,0), Vector3.UP, true)
-	set_look_at_position(Vector3(-100,0,0))
+	set_look_at_position(Vector3(0,0,100))
 	#$Char3D/charnode/AnimationTree.set("parameters/conditions/swing", false)
 	#set_animation("idle")
 	set_animation("batter_idle")

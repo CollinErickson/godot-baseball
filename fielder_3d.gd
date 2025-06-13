@@ -775,7 +775,8 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 			if user_is_pitching_team:
 				set_not_selected_fielder()
 			# Change animation to idle
-			set_animation('idle')
+			#set_animation('idle')
+			queue_animation('idle')
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
 			#holding_ball = false
@@ -975,14 +976,14 @@ func set_animation(new_anim):
 	if new_anim == animation:
 		return
 	animation = new_anim
-	#if new_anim == "idle":
-		#pass
-	#if new_anim == "moving":
 	$Char3D.start_animation(new_anim, false, throws=='R')
 
 func force_animation_idle() -> void:
 	animation = 'idle'
 	$Char3D.force_animation_idle()
+
+func queue_animation(new_anim):
+	$Char3D.queue_animation(new_anim, false, throws=='R')
 
 func set_state(state_:String):
 	state = state_
