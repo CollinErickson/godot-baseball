@@ -1197,7 +1197,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 			# Assign cutoff fielder
 			# Only do if ball is far away from infield
 			if (abs(intercept_position.x) + abs(intercept_position.z - 20) < 30
-				or intercept_position.z < 15):
+				or intercept_position.z < 30):
 				continue
 			
 			# Find relevant base to cover
