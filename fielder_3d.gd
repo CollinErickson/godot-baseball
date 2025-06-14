@@ -256,15 +256,12 @@ func _physics_process(delta: float) -> void:
 
 	if state == 'catching':
 		#printt('in fielder state is catching', time_in_state)
-		#if time_in_state > 0.15:
-			#set_state('free')
-			#set_animation('idle')
-		#else: 
-		# Remain in catching state until anim finishes
 		check_stepping_on_base()
 		check_tagging_runner()
 		# Need to update ball's position every frame for camera
 		ball.global_position = $Char3D.get_hand_global_position(throws)
+		check_user_throw_input()
+		# Remain in catching state until anim finishes
 		return
 
 	assert(state == 'free')
@@ -475,64 +472,7 @@ func _physics_process(delta: float) -> void:
 	
 	var click_used = false
 	
-	# Check if user is starting throw. Can be done before holding ball, but only by selected fielder
-	if is_selected_fielder or is_targeted_fielder:
-		# Check for throw
-		if user_is_pitching_team:
-			# Check for throwing ball end, this will start throw
-			if start_throw_started:
-				if Input.is_action_just_pressed("cancel_throw"):
-					cancel_throw()
-				elif Input.is_action_just_released(start_throw_key_check_release):
-					start_throw_end()
-			
-			# Check for throwing ball start
-			if Input.is_action_pressed("run_to_base"):
-				# Don't let the throw start
-				pass
-			elif Input.is_action_just_pressed("throwfirst"):
-				#printt('throw to first')
-				#throw_ball_func(1)
-				start_throw_ball_func(1, null, "throwfirst")
-			elif Input.is_action_just_pressed("throwsecond"):
-				#throw_ball_func(2)
-				start_throw_ball_func(2, null, "throwsecond")
-			elif Input.is_action_just_pressed("throwthird"):
-				#throw_ball_func(3)
-				start_throw_ball_func(3, null, "throwthird")
-			elif Input.is_action_just_pressed("throwhome"):
-				#throw_ball_func(4)
-				start_throw_ball_func(4, null, "throwhome")
-			elif Input.is_action_just_pressed("throwcutoff"):
-				var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
-				if len(cutoff_fielders) > 0.5:
-					start_throw_ball_func(null, cutoff_fielders[0], "throwcutoff")
-				#for cutoff_fielder in cutoff_fielders:
-					#cutoff_fielder.set_not_cutoff_fielder()
-			
-			# Check for click that throws ball
-			if Input.is_action_just_pressed("click"):
-				var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
-				#printt('in fielder, mgl pos is', mgl, mgl.position)
-				# Throw to base
-				for i in range(4):
-					if distance_xz(mgl.position, base_positions[i]) < 2:
-						# This func determines whether to run or throw to that position
-						#throw_ball_func(i+1)
-						start_throw_ball_func(i+1, null, "click")
-						click_used = true
-						break
-					#else:
-					#	printt('click not near base')
-				# Throw to teammate
-				if not click_used:
-					for fielder in fielders:
-						#printt('checking click throw to fielder', distance_xz(mgl.position, fielder.position))
-						if fielder.posname != posname and distance_xz(mgl.position, fielder.position) < 2:
-							#throw_ball_func(null, fielder)
-							start_throw_ball_func(null, fielder, "click")
-							click_used = true
-							break
+	click_used = check_user_throw_input()
 	
 	# If holding, check if they throw it or step on base or move
 	if holding_ball:
@@ -1423,3 +1363,67 @@ func check_tagging_runner() -> void:
 			distance_xz(position, runner.position) < 1):
 			#runner.runner_is_out()
 			tagged_runner.emit(self, runner)
+
+func check_user_throw_input() -> bool:
+	# Returns whether the click of mouse was used
+	var click_used:bool = false
+	
+	# Check if user is starting throw. Can be done before holding ball, but only by selected fielder
+	if is_selected_fielder or is_targeted_fielder:
+		# Check for throw
+		if user_is_pitching_team:
+			# Check for throwing ball end, this will start throw
+			if start_throw_started:
+				if Input.is_action_just_pressed("cancel_throw"):
+					cancel_throw()
+				elif Input.is_action_just_released(start_throw_key_check_release):
+					start_throw_end()
+			
+			# Check for throwing ball start
+			if Input.is_action_pressed("run_to_base"):
+				# Don't let the throw start
+				pass
+			elif Input.is_action_just_pressed("throwfirst"):
+				#printt('throw to first')
+				#throw_ball_func(1)
+				start_throw_ball_func(1, null, "throwfirst")
+			elif Input.is_action_just_pressed("throwsecond"):
+				#throw_ball_func(2)
+				start_throw_ball_func(2, null, "throwsecond")
+			elif Input.is_action_just_pressed("throwthird"):
+				#throw_ball_func(3)
+				start_throw_ball_func(3, null, "throwthird")
+			elif Input.is_action_just_pressed("throwhome"):
+				#throw_ball_func(4)
+				start_throw_ball_func(4, null, "throwhome")
+			elif Input.is_action_just_pressed("throwcutoff"):
+				var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
+				if len(cutoff_fielders) > 0.5:
+					start_throw_ball_func(null, cutoff_fielders[0], "throwcutoff")
+				#for cutoff_fielder in cutoff_fielders:
+					#cutoff_fielder.set_not_cutoff_fielder()
+			
+			# Check for click that throws ball
+			if Input.is_action_just_pressed("click"):
+				var mgl = get_parent().get_parent().get_node("MouseGroundLocation")
+				#printt('in fielder, mgl pos is', mgl, mgl.position)
+				# Throw to base
+				for i in range(4):
+					if distance_xz(mgl.position, base_positions[i]) < 2:
+						# This func determines whether to run or throw to that position
+						#throw_ball_func(i+1)
+						start_throw_ball_func(i+1, null, "click")
+						click_used = true
+						break
+					#else:
+					#	printt('click not near base')
+				# Throw to teammate
+				if not click_used:
+					for fielder in fielders:
+						#printt('checking click throw to fielder', distance_xz(mgl.position, fielder.position))
+						if fielder.posname != posname and distance_xz(mgl.position, fielder.position) < 2:
+							#throw_ball_func(null, fielder)
+							start_throw_ball_func(null, fielder, "click")
+							click_used = true
+							break
+	return click_used
