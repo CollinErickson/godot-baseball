@@ -254,3 +254,6 @@ func get_hand_global_position(throws:String) -> Vector3:
 	var local_bone_transform : Transform3D = skeleton_node.get_bone_global_pose(bone_idx)
 	var global_bone_pos : Vector3 = skeleton_node.to_global(local_bone_transform.origin)
 	return global_bone_pos
+
+func time_left_in_current_anim() -> float:
+	return anim_player.current_animation_length - anim_player.current_animation_position

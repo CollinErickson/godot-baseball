@@ -250,7 +250,7 @@ func _physics_process(delta: float) -> void:
 				# Cancel throw
 				cancel_throw()
 		# Remain in throwing state
-		# Exit state happens when animation ends
+		# Exit state happens when animation ends, not here
 		return
 
 	if state == 'catching':
