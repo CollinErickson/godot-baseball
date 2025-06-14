@@ -88,6 +88,11 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 			return 'Frisbee Throw R'
 		else:
 			return 'Frisbee Throw L'
+	elif anim_name == "catch":
+		if throwsR:
+			return 'Rifle Punch L'
+		else:
+			return 'Rifle Punch R'
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 		# Returning something that won't break
@@ -108,13 +113,18 @@ func map_anim_name_back(anim_name:String) -> String:
 		return 'throw'
 	if anim_name in ['Frisbee Throw R', 'Frisbee Throw L']:
 		return 'toss'
+	if anim_name in ['Rifle Punch R', 'Rifle Punch L']:
+		return 'catch'
 	#if anim_name == '':
 		#return ''
 	push_error("In char3D, no result for map_anim_name_back", anim_name)
 	return ''
 
 func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
-	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)))
+	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)),
+		-1,
+		1.5 if map_anim_name(anim_name, batsR, throwsR).begins_with("Rifle")
+			else 1.)
 
 func force_animation_idle() -> void:
 	# No longer useful, does same thing as start_animation('idle')

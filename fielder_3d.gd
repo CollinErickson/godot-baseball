@@ -255,11 +255,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if state == 'catching':
-		if time_in_state > 0.15:
-			set_state('free')
-			set_animation('idle')
-		else: # Remain in catching state
-			return
+		printt('in fielder state is catching', time_in_state)
+		#if time_in_state > 0.15:
+			#set_state('free')
+			#set_animation('idle')
+		#else: 
+		# Remain in catching state until anim finishes
+		return
 
 	assert(state == 'free')
 	var moved_this_process = false
@@ -353,11 +355,15 @@ func _physics_process(delta: float) -> void:
 					ball.global_position = $Char3D.get_hand_global_position(throws)
 					set_holding_ball(true)
 					set_assignment("holding_ball")
-					set_animation('idle')
+					printt('in fielder, caught ball, set anim to catch and state to catching')
+					set_animation('catch')
+					set_state('catching')
 					assignment_pos = null
 					ball_fielded.emit(self, ball_position_before_fielded)
 					if user_is_pitching_team:
 						set_selected_fielder()
+					# Since new state, return (avoid movement anim change)
+					return
 				else:
 					# Catch dropped
 					printt('in fielder: catch dropped')
@@ -1011,6 +1017,7 @@ func time_to_reach_point(to:Vector3):
 		time += delta
 
 func set_animation(new_anim):
+	printt('in fielder setting animation', new_anim)
 	if new_anim == animation:
 		return
 	animation = new_anim
@@ -1025,6 +1032,8 @@ func queue_animation(new_anim):
 
 func set_state(state_:String):
 	assert(state_ in ["free", "throwing", "catching"])
+	if state_ == 'catching':
+		printt('in fielder set state catching')
 	state = state_
 	time_in_state = 0
 
@@ -1371,8 +1380,17 @@ func update_offscreen_arrow() -> void:
 			$Arrow2DOffscreenDirection.scale = Vector2(1,1) * arrowscale
 
 func _on_animation_finished_from_char3d(anim_name) -> void:
+	printt('in fielder anim finished', anim_name)
 	if anim_name in ["throw", "toss"]:
 		# End of throw: change state and anim.
 		# Should already have assignment wait_to_receive
 		set_state('free')
+		set_animation('idle')
+	elif anim_name in ["catch"]:
+		# End of catch: change state and anim.
+		# Should already have assignment holding_ball
+		set_state('free')
+		set_animation('idle')
+	elif anim_name == 'pitch':
+		# State is already free, assignment should be fine too
 		set_animation('idle')

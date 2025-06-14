@@ -399,6 +399,9 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success:bool,
 	
 	throw_intensity = max(0.5, min(1, throw_intensity))
 	var throw_speed = fielder.max_throw_speed * throw_intensity
+	# Don't throw too fast if close to target
+	if target_distance / throw_speed < 0.3:
+		throw_speed = target_distance / 0.3
 	var velo_vec = ball.fit_approx_parabola_to_trajectory(
 		ball_start, target, throw_speed, true)
 	
@@ -960,7 +963,7 @@ func _process(delta: float) -> void:
 			if check_if_play_done():
 				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
-				if time_since_play_done_consecutive > 0.6:
+				if time_since_play_done_consecutive > 10.6:
 					#play_done_fully = true
 					#get_node("FlashText").new_text("Play is done!", 3)
 					#get_tree().reload_current_scene()
