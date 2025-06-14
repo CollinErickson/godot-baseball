@@ -123,7 +123,7 @@ func map_anim_name_back(anim_name:String) -> String:
 func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)),
 		-1,
-		1.5 if map_anim_name(anim_name, batsR, throwsR).begins_with("Rifle")
+		2.5 if map_anim_name(anim_name, batsR, throwsR).begins_with("Rifle")
 			else 1.)
 
 func force_animation_idle() -> void:

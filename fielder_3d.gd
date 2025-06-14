@@ -255,12 +255,14 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if state == 'catching':
-		printt('in fielder state is catching', time_in_state)
+		#printt('in fielder state is catching', time_in_state)
 		#if time_in_state > 0.15:
 			#set_state('free')
 			#set_animation('idle')
 		#else: 
 		# Remain in catching state until anim finishes
+		check_stepping_on_base()
+		check_tagging_runner()
 		return
 
 	assert(state == 'free')
@@ -522,31 +524,11 @@ func _physics_process(delta: float) -> void:
 	if holding_ball:
 		# Update ball position
 		ball.global_position = $Char3D.get_hand_global_position(throws)
+	check_stepping_on_base()
+	check_tagging_runner()
+	
 		
-		# Check if tagging active runner not on base
-		for runner in runners:
-			if (runner.is_active() and
-				(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
-					(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
-						runner.running_progress - runner.start_base > .15)) and
-				distance_xz(position, runner.position) < 1):
-				#runner.runner_is_out()
-				tagged_runner.emit(self, runner)
-		
-		# Check if step on base
-		var step_on_base = is_stepping_on_base()
-		#printt(posname, step_on_base)
-		if step_on_base[0]:
-			# If wasn't stepping on base before
-			if not stepping_on_base_with_ball:
-				remove_from_group("fielder_running_with_ball_to_base")
-				running_with_ball_to_base = null
-				#print("STEPPING ON BASE!!!", posname, step_on_base)
-				stepped_on_base_with_ball.emit(self, step_on_base[1])
-				stepping_on_base_with_ball = true
-		elif not step_on_base[0]: # Not holding ball
-				stepping_on_base_with_ball = false
-		
+	if holding_ball:
 		# Throw is ready
 		if user_is_pitching_team and throw_ready:
 			# Only if throw was completed recently
@@ -613,8 +595,6 @@ func _physics_process(delta: float) -> void:
 							else:
 								pass #printt('deciding not to throw', posname)
 	else: # Not holding ball
-		stepping_on_base_with_ball = false
-		
 		# If user ran a distance while chasing the ball, reassign fielders to
 		# maybe cover base they vacated.
 		if (assignment == "ball" and
@@ -1394,3 +1374,38 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 	elif anim_name == 'pitch':
 		# State is already free, assignment should be fine too
 		set_animation('idle')
+
+func check_stepping_on_base() -> void:
+	if not holding_ball:
+		stepping_on_base_with_ball = false
+		return
+	
+	# Check if step on base
+	var step_on_base = is_stepping_on_base()
+	# Returns [false] if not, [true, base] if true
+	
+	if step_on_base[0]:
+		# If wasn't stepping on base before
+		if not stepping_on_base_with_ball:
+			remove_from_group("fielder_running_with_ball_to_base")
+			running_with_ball_to_base = null
+			#print("STEPPING ON BASE!!!", posname, step_on_base)
+			stepped_on_base_with_ball.emit(self, step_on_base[1])
+			stepping_on_base_with_ball = true
+		# If was stepping on base last frame, there can be no new outs
+	else: # Not holding ball
+		stepping_on_base_with_ball = false
+
+func check_tagging_runner() -> void:
+	if not holding_ball:
+		return
+	
+	# Check if tagging active runner not on base
+	for runner in runners:
+		if (runner.is_active() and
+			(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
+				(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
+					runner.running_progress - runner.start_base > .15)) and
+			distance_xz(position, runner.position) < 1):
+			#runner.runner_is_out()
+			tagged_runner.emit(self, runner)
