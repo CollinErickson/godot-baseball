@@ -263,6 +263,8 @@ func _physics_process(delta: float) -> void:
 		# Remain in catching state until anim finishes
 		check_stepping_on_base()
 		check_tagging_runner()
+		# Need to update ball's position every frame for camera
+		ball.global_position = $Char3D.get_hand_global_position(throws)
 		return
 
 	assert(state == 'free')
@@ -358,7 +360,19 @@ func _physics_process(delta: float) -> void:
 					set_holding_ball(true)
 					set_assignment("holding_ball")
 					printt('in fielder, caught ball, set anim to catch and state to catching')
-					set_animation('catch')
+					var anim_name:String = ''
+					if Time.get_ticks_msec() -  ball.time_last_thrown < 3000 and \
+						 ball_position_before_fielded.y > player.height()*.25 and \
+						 ball_position_before_fielded.y < player.height()*.95:
+						# If ball was thrown and in chest region, do 1B style catch
+						anim_name = 'catch'
+					elif ball_position_before_fielded.y < player.height()*.5:
+						anim_name = 'catch_grounder'
+					elif ball_position_before_fielded.y < player.height()*1.05:
+						anim_name = 'catch_chest'
+					else:
+						anim_name = 'catch_jump'
+					set_animation(anim_name)
 					set_state('catching')
 					assignment_pos = null
 					ball_fielded.emit(self, ball_position_before_fielded)
@@ -997,7 +1011,7 @@ func time_to_reach_point(to:Vector3):
 		time += delta
 
 func set_animation(new_anim):
-	printt('in fielder setting animation', new_anim)
+	#printt('in fielder setting animation', new_anim)
 	if new_anim == animation:
 		return
 	animation = new_anim
@@ -1366,7 +1380,7 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 		# Should already have assignment wait_to_receive
 		set_state('free')
 		set_animation('idle')
-	elif anim_name in ["catch"]:
+	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump']:
 		# End of catch: change state and anim.
 		# Should already have assignment holding_ball
 		set_state('free')

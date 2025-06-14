@@ -88,3 +88,7 @@ func update_pitcher_stamina() -> void:
 	current_game_pitching_stamina = max(0,
 										current_game_pitching_stamina - 3)
 	#printt('in player update_pitcher_stamina after:', first, last, current_game_pitching_stamina)
+
+func height() -> float:
+	# Return player height in meters
+	return 1.7 * height_mult
