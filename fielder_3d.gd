@@ -196,6 +196,8 @@ func begin_chase():
 
 func _ready():
 	start_position = position
+	
+	$Char3D.connect("animation_finished_signal", _on_animation_finished_from_char3d)
 
 signal ball_fielded
 signal tagged_runner
@@ -242,15 +244,14 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if state == 'throwing':
-		if time_in_state > time_throw_animation_release_point + 0.35:
-			set_state('free')
-			set_animation('idle')
-		else:
+		# If not released, check for cancel throw
+		if holding_ball:
 			if Input.is_action_just_pressed("cancel_throw"):
 				# Cancel throw
 				cancel_throw()
-			# Remain in throwing state
-			return
+		# Remain in throwing state
+		# Exit state happens when animation ends
+		return
 
 	if state == 'catching':
 		if time_in_state > 0.15:
@@ -717,7 +718,7 @@ func start_throw_ball_func(base, fielder, key_check_release):
 		assert(false)
 
 func cancel_throw():
-	if state == 'throwing':
+	if state == 'throwing' and holding_ball:
 		$Timer.stop()
 		timer_action = null
 		timer_args = null
@@ -794,7 +795,7 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 				set_not_selected_fielder()
 			# Change animation to idle
 			#set_animation('idle')
-			queue_animation('idle')
+			#queue_animation('idle')
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
 			#holding_ball = false
@@ -1001,6 +1002,7 @@ func queue_animation(new_anim):
 	$Char3D.queue_animation(new_anim, false, throws=='R')
 
 func set_state(state_:String):
+	assert(state_ in ["free", "throwing", "catching"])
 	state = state_
 	time_in_state = 0
 
@@ -1345,3 +1347,10 @@ func update_offscreen_arrow() -> void:
 			var arrowscale:float = 5 - arrowpos.distance_to(pos2d) / 400
 			arrowscale = max(2, min(5, arrowscale))
 			$Arrow2DOffscreenDirection.scale = Vector2(1,1) * arrowscale
+
+func _on_animation_finished_from_char3d(anim_name) -> void:
+	if anim_name == "throw":
+		# End of throw: change state and anim.
+		# Should already have assignment wait_to_receive
+		set_state('free')
+		set_animation('idle')

@@ -42,10 +42,14 @@ func _ready() -> void:
 	anim_player = $charnode/AnimationPlayer
 	
 	# Testing signal on animation done (works, but also gives idle/walking)
-	#$charnode/AnimationTree.connect('animation_finished', _on_anim_fin)
+	$charnode/AnimationPlayer.connect('animation_finished', _on_anim_fin)
 
-func _on_anim_fin(anim_name:String):
-	printt('in char 3D, animation finished', anim_name)
+signal animation_finished_signal
+func _on_anim_fin(anim_name:String) -> void:
+	var anim_name2 = anim_name.split("/")[1]
+	var anim_name3 = map_anim_name_back(anim_name2)
+	printt('in char 3D, animation finished', anim_name, anim_name2, anim_name3)
+	animation_finished_signal.emit(anim_name3)
 
 func reset() -> void:
 	# Undo current animation rotation
@@ -84,10 +88,27 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 		# Returning something that won't break
 		return 'idle'
 
+func map_anim_name_back(anim_name:String) -> String:
+	if anim_name == "idle":
+		return 'idle'
+	if anim_name == 'standard run':
+		return 'running'
+	if anim_name in ['Baseball Idle R', 'Baseball Idle L']:
+		return 'batter_idle'
+	if anim_name in ['Baseball Hit R', 'Baseball Hit L']:
+		return 'swing'
+	if anim_name in ['Baseball Pitching R', 'Baseball Pitching L']:
+		return 'pitch'
+	if anim_name in ['Throw Object R', 'Throw Object L']:
+		return 'throw'
+	#if anim_name == '':
+		#return ''
+	push_error("In char3D, no result for map_anim_name_back", anim_name)
+	return ''
 
 func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)))
-	
+
 func force_animation_idle() -> void:
 	# No longer useful, does same thing as start_animation('idle')
 	# Set parameters for idle
