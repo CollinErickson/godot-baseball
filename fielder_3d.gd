@@ -11,6 +11,7 @@ const catch_radius_xz:float = 2
 var catch_max_y:float = 2.5
 var throws:String = 'R'
 const time_throw_animation_release_point:float = 0.41
+const time_toss_animation_release_point:float = 0.31
 
 var assignment # cover, ball, ball_click, ball_carry, wait_to_receive, holding_ball, over_wall
 var assignment_pos # Position to go to for assignment
@@ -319,8 +320,11 @@ func _physics_process(delta: float) -> void:
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
 		if ball.state in ["ball_in_play", "thrown"]:
 			var distance_from_ball_xz = distance_xz(position, ball.position)
+			#if posname == '2B':
+				#printt('in fielder 2B checking catch', distance_from_ball_xz,
+				#1)
 			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
-				Time.get_ticks_msec() - ball.time_last_thrown > 300 and
+				Time.get_ticks_msec() - ball.time_last_thrown > 250 and
 				(ball.throw_start_pos==null or ball.throw_progress >= .9) and
 				turn_off_bad_catch_label_timer <= 0):
 				# Catch prob depends on throw speed and distance since last bounce
@@ -779,6 +783,7 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 	if base != null:
 		if base == 5:
 			# Cutoff
+			# Why is this pass, does this ever happen?
 			pass
 		elif distance_xz(position, base_positions[base-1]) > 3:
 			#holding_ball = false
@@ -827,6 +832,17 @@ func start_throw_ball_animation(base, fielder=null, success:bool=true,
 		printt("In fielder, not overwriting throw", posname, timer_args, base, fielder)
 		return
 	
+	# Determine if throw is throw or toss based on distance
+	var throw_type:String = 'throw'
+	if fielder != null:
+		if distance_xz(position, fielder.position) < 8:
+			throw_type = 'toss'
+	else:
+		assert(base >= 1)
+		assert(base <= 4)
+		if distance_xz(position, base_positions[base-1]) < 8:
+			throw_type = 'toss'
+	
 	# Throw is starting for real
 	if !throw_ready_success:
 		$BadThrowLabel3D.visible = true
@@ -838,9 +854,15 @@ func start_throw_ball_animation(base, fielder=null, success:bool=true,
 	else:
 		set_look_at_position(base_positions[base-1])
 	set_state('throwing')
-	set_animation('throw')
 	$Timer.stop()
-	$Timer.wait_time = time_throw_animation_release_point # Time for animation to reach release point
+	if throw_type == 'throw':
+		set_animation('throw')
+		$Timer.wait_time = time_throw_animation_release_point # Time for animation to reach release point
+	elif throw_type == 'toss':
+		set_animation('toss')
+		$Timer.wait_time = time_toss_animation_release_point # Time for animation to reach release point
+	else:
+		assert(false)
 	$Timer.start()
 	timer_action = 'throw'
 	timer_args = [base, fielder, success, intensity]
@@ -1349,7 +1371,7 @@ func update_offscreen_arrow() -> void:
 			$Arrow2DOffscreenDirection.scale = Vector2(1,1) * arrowscale
 
 func _on_animation_finished_from_char3d(anim_name) -> void:
-	if anim_name == "throw":
+	if anim_name in ["throw", "toss"]:
 		# End of throw: change state and anim.
 		# Should already have assignment wait_to_receive
 		set_state('free')

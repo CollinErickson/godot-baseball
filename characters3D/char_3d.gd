@@ -48,7 +48,7 @@ signal animation_finished_signal
 func _on_anim_fin(anim_name:String) -> void:
 	var anim_name2 = anim_name.split("/")[1]
 	var anim_name3 = map_anim_name_back(anim_name2)
-	printt('in char 3D, animation finished', anim_name, anim_name2, anim_name3)
+	#printt('in char 3D, animation finished', anim_name, anim_name2, anim_name3)
 	animation_finished_signal.emit(anim_name3)
 
 func reset() -> void:
@@ -83,6 +83,11 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 			return 'Throw Object R'
 		else:
 			return 'Throw Object L'
+	elif anim_name == "toss":
+		if throwsR:
+			return 'Frisbee Throw R'
+		else:
+			return 'Frisbee Throw L'
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 		# Returning something that won't break
@@ -101,6 +106,8 @@ func map_anim_name_back(anim_name:String) -> String:
 		return 'pitch'
 	if anim_name in ['Throw Object R', 'Throw Object L']:
 		return 'throw'
+	if anim_name in ['Frisbee Throw R', 'Frisbee Throw L']:
+		return 'toss'
 	#if anim_name == '':
 		#return ''
 	push_error("In char3D, no result for map_anim_name_back", anim_name)
