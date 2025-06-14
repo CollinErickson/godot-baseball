@@ -720,47 +720,35 @@ func throw_ball_func(base, fielder=null, success:bool=true,
 	printt('in fielder throw_ball_func', base, fielder)
 	
 	# Only throw if not close to that base
+	var do_throw:bool = false
 	if base != null:
 		if base == 5:
 			# Cutoff
 			# Why is this pass, does this ever happen?
-			pass
+			assert(false,
+				'in fielder throw_ball_funcshould not throw to base 5, delete this?')
 		elif distance_xz(position, base_positions[base-1]) > 3:
-			#holding_ball = false
-			#remove_from_group('fielder_holding_ball')
-			set_holding_ball(false)
-			# Put ball at release point
-			ball.global_position = $Char3D.get_hand_global_position(throws)
-			ball.throw_start_pos = null
-			ball.throw_target = null
-			# This needs to be before throw_ball.emit() since that can reassign this fielder
-			set_assignment('wait_to_receive')
-			throw_ball.emit(base, self, null, success, intensity)
-			if user_is_pitching_team:
-				set_not_selected_fielder()
-			# Change animation to idle
-			#set_animation('idle')
-			#queue_animation('idle')
+			do_throw = true
 	elif fielder != null: # Throw to a fielder
 		if distance_xz(position, fielder.position) > 3:
-			#holding_ball = false
-			#remove_from_group('fielder_holding_ball')
-			set_holding_ball(false)
-			# Set ball release point
-			ball.global_position = $Char3D.get_hand_global_position(throws)
-			ball.throw_start_pos = null
-			ball.throw_target = null
-			# This needs to be before throw_ball.emit() since that can reassign this fielder
-			set_assignment('wait_to_receive')
-			throw_ball.emit(base, self, fielder, success, intensity)
-			if user_is_pitching_team:
-				set_not_selected_fielder()
+			do_throw = true
+			
+	if do_throw:
+		set_holding_ball(false)
+		# Set ball release point
+		ball.global_position = $Char3D.get_hand_global_position(throws)
+		ball.throw_start_pos = null
+		ball.throw_target = null
+		# This needs to be before throw_ball.emit() since that can reassign this fielder
+		set_assignment('wait_to_receive')
+		throw_ball.emit(base, self, fielder, success, intensity)
+		if user_is_pitching_team:
+			set_not_selected_fielder()
 	
 	# Remove cutoff status from any fielder
 	var cutoff_fielders = get_tree().get_nodes_in_group("cutoff_fielder")
 	for cutoff_fielder in cutoff_fielders:
 		cutoff_fielder.set_not_cutoff_fielder()
-
 
 # Begin throw animation, ball to be released when animation is ready
 func start_throw_ball_animation(base, fielder=null, success:bool=true,
