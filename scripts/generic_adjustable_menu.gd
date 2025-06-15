@@ -24,7 +24,7 @@ func double_range_to_str_array(a:int, b:int, c:int) -> Array:
 	double_range_to_str_array(4, 10, 1),
 	double_range_to_str_array(3, 10, 1),
 	['Timing', 'Target'], # bat mode
-	['Bar two way', 'Button', 'Bar one way'], # pitch mode
+	['Bar two way', 'Button', 'Bar one way', 'Recenter'], # pitch mode
 	['Bar one way', 'Button', 'Bar'], # throw mode
 ]
 var index_selected:int = 0
@@ -37,7 +37,10 @@ func _ready() -> void:
 		this_is_root = true
 		start_active = true
 		#options_na
-	assert(len(options_names) == len(options_values))
+	printt('in main menu options_names', options_names)
+	printt('in main menu options_values', options_values)
+	assert(len(options_names) == len(options_values),
+		str(len(options_names)) + " " + str(len(options_values)))
 	assert(len(options_names) > 0.5)
 	values_selected = []
 	# Start all on 0 (first in array)

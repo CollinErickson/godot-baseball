@@ -61,6 +61,8 @@ func _on_settings_menu_selection(out_array:Array):
 			main_menu_settings['pitch_mode'] = 'BarOneWay'
 		'Bar two way':
 			main_menu_settings['pitch_mode'] = 'BarTwoWay'
+		'Recenter':
+			main_menu_settings['pitch_mode'] = 'Recenter'
 		_:
 			push_warning('Bad pitch_mode from main menu settings')
 	# Throw mode
