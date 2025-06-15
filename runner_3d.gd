@@ -30,8 +30,9 @@ var animation:String = "idle"
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
 var force_to_base = null # When ball is over wall
 var slide_prop:float = -1
-const slide_anim_duration:float = 0.6 # full is 1.2
-const slide_speed_multiplier:float = 1.5
+const slide_anim_duration:float = 1.2
+const slide_anim_play_speed:float = 2.
+const slide_speed_multiplier:float = 1.1
 var sliding_to_base = -1 # -1 if not, otherwise int to base
 
 const possible_states:Array = [
@@ -251,12 +252,6 @@ func _physics_process(delta: float) -> void:
 		check_will_reach_next_base(next_running_progress)
 		
 		# Check if they will reach or cross a base or neither
-		if randf() < .01:
-			printt('in runner checking for slide', start_base, running_progress, target_base, slide_prop,
-			 target_base - running_progress > slide_prop and 
-					target_base - next_running_progress < slide_prop and 
-					!needs_to_tag_up and target_base > 1.5
-			)
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			# Reaching target base, stop them there
@@ -271,11 +266,12 @@ func _physics_process(delta: float) -> void:
 			set_look_at()
 		elif ((dir > 0  and target_base - running_progress > slide_prop and 
 					target_base - next_running_progress < slide_prop and 
+					!may_need_to_tag_up and
 					!needs_to_tag_up and target_base > 1.5) or
 			(dir < 0 and running_progress - target_base > slide_prop and
 					next_running_progress - target_base < slide_prop)):
 			printt('in runner starting to slide', start_base, running_progress, next_running_progress, target_base, slide_prop)
-			# Cross a sliding position, change state
+			# Cross a sliding position, change state and start sliding
 			running_progress = next_running_progress
 			sliding_to_base = roundi(target_base)
 			set_state('sliding_not_out')
@@ -438,7 +434,8 @@ func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		exists_at_start = true
 		SPEED = player.speed_mps()
-		slide_prop = slide_speed_multiplier * SPEED * slide_anim_duration / 30
+		slide_prop = slide_speed_multiplier * SPEED * slide_anim_duration / \
+			(30 * slide_anim_play_speed)
 	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)

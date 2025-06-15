@@ -293,4 +293,5 @@ func get_hand_global_position(throws:String) -> Vector3:
 	return global_bone_pos
 
 func time_left_in_current_anim() -> float:
+	# Note that this ignores playback speed, length won't change based on speed
 	return anim_player.current_animation_length - anim_player.current_animation_position
