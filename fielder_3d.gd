@@ -26,7 +26,8 @@ var start_position = Vector3()
 @onready var runners = get_tree().get_nodes_in_group("runners")
 @onready var ball = get_tree().get_first_node_in_group("ball")
 var animation:String = "idle"
-var state:String = "free" # State is related to animation: free (idle/running), throwing, catching
+const possible_states:Array = ['free', 'throwing', 'catching']
+var state:String = "free"
 var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
 var prev_position:Vector3
@@ -211,8 +212,8 @@ signal alt_fielder_selected_signal
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
 	#printt('selected fielder', posname, assignment)
-	#if randf_range(0,1)<.01:
-	#	printt('fielder user pit team', posname, user_is_pitching_team)
+	#if randf_range(0,1)<.01 and posname == '2B':
+		#printt('fielder user pit team', posname, user_is_pitching_team, state, is_selected_fielder)
 	if is_frozen:
 		return
 	#if posname == 'SS':
@@ -250,7 +251,10 @@ func _physics_process(delta: float) -> void:
 			if Input.is_action_just_pressed("cancel_throw"):
 				# Cancel throw
 				cancel_throw()
-		# Remain in throwing state
+		# Exit state if there's a bug
+		if time_in_state > 5000:
+			set_state('free')
+			push_error('error in fielder, was in throwing state too long', posname)
 		# Exit state happens when animation ends, not here
 		return
 
@@ -261,6 +265,10 @@ func _physics_process(delta: float) -> void:
 		# Need to update ball's position every frame for camera
 		ball.global_position = $Char3D.get_hand_global_position(throws)
 		check_user_throw_input()
+		# Exit state if there's a bug
+		if time_in_state > 5000:
+			set_state('free')
+			push_error('error in fielder, was in catching state too long', posname)
 		# Remain in catching state until anim finishes
 		return
 
@@ -321,7 +329,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
-		if ball.state in ["ball_in_play", "thrown"]:
+		if ball.can_be_caught():
 			var distance_from_ball_xz = distance_xz(position, ball.position)
 			#if posname == '2B':
 				#printt('in fielder 2B checking catch', distance_from_ball_xz,
@@ -949,13 +957,18 @@ func force_animation_idle() -> void:
 	animation = 'idle'
 	$Char3D.force_animation_idle()
 
+func set_animation_if_free(new_anim:String) -> void:
+	# Used to avoid overwriting throw/catch animations
+	if state == 'free':
+		set_animation(new_anim)
+
 func queue_animation(new_anim):
 	$Char3D.queue_animation(new_anim, false, throws=='R')
 
 func set_state(state_:String):
-	assert(state_ in ["free", "throwing", "catching"])
-	if state_ == 'catching':
-		printt('in fielder set state catching')
+	assert(state_ in possible_states)
+	#if state_ == 'catching':
+		#printt('in fielder set state catching', posname)
 	state = state_
 	time_in_state = 0
 
@@ -1305,7 +1318,7 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 	#printt('in fielder anim finished', anim_name)
 	if anim_name in ["throw", "toss"]:
 		# End of throw: change state and anim.
-		# Should already have assignment wait_to_receive
+		# Should already have assignment wait_to_receive or assigned to base
 		set_state('free')
 		set_animation('idle')
 	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump']:

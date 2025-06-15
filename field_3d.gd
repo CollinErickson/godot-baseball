@@ -309,11 +309,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	ball_touched_by_fielder = true
-	printt("in field_3d: _on_ball_fielded_by_fielder", ball.state, ball.hit_bounced,
-	is_foul_ball,
-	ball.state == "ball_in_play" and not ball.hit_bounced and not is_foul_ball,
-	(ball.state == "ball_in_play") and not ball.hit_bounced and not is_foul_ball,
-	ball.state == "ball_in_play")
+	#printt("in field_3d: _on_ball_fielded_by_fielder", ball.state, ball.hit_bounced,)
 	
 	# Fly out
 	if ball.state == "ball_in_play" and not ball.hit_bounced and not is_foul_ball:
@@ -644,7 +640,7 @@ func _process(delta: float) -> void:
 					if true:
 						vla = 45
 						hla = 10
-						exitvelo = 18.8
+						exitvelo = 28.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -671,7 +667,7 @@ func _process(delta: float) -> void:
 							ball.frame_rotation = Vector2(.05, 0)
 						if hla > 20:
 							ball.frame_rotation = Vector2(-.05, 0)
-						ball.state = "ball_in_play"
+						ball.set_state("ball_in_play")
 						
 						# Start running after .5 seconds
 						var batter = get_node("Headon/Batter3D")
@@ -996,7 +992,7 @@ func find_fielder_to_intercept_ball() -> Array:
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball_from_find_fielder_to_intercept_ball"
 	tmp_ball.is_sim = true
-	tmp_ball.state = "ball_in_play"
+	tmp_ball.set_state("ball_in_play")
 	tmp_ball.hit_bounced = ball.hit_bounced
 	get_node("Headon").add_child(tmp_ball)
 	#printt('tmp_ball', tmp_ball, tmp_ball.state, tmp_ball.hit_bounced)
@@ -1282,7 +1278,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 	for i in range(len(fielders)):
 		if fielders[i].assignment == 'cover' and not assigned_indexes.has(i):
 			fielders[i].set_assignment('wait_to_receive')
-			fielders[i].set_animation('idle')
+			fielders[i].set_animation_if_free('idle')
 	
 	return
 
@@ -1314,7 +1310,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball_from_find_intercept_position_for_fielder"
 	tmp_ball.is_sim = true
-	tmp_ball.state = "ball_in_play"
+	tmp_ball.set_state("ball_in_play")
 	tmp_ball.hit_bounced = ball.hit_bounced
 	get_node("Headon").add_child(tmp_ball)
 	tmp_ball.position = ball.position
@@ -1338,7 +1334,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 		# Make sure it's reachable
 		if reach_ball_info[0]:
 			var timetoreach = reach_ball_info[1]
-			var ballgrounddist = reach_ball_info[2]
+			#var ballgrounddist = reach_ball_info[2]
 				
 			if timetoreach <= elapsed_time:
 				tmp_ball.queue_free()

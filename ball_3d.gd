@@ -30,7 +30,11 @@ var hit_bounced = false
 var is_frozen = false
 var is_sim = false # simulation
 
-var state = 'prepitch' # prepitch, ball_in_play, thrown, fielded
+var state = 'prepitch'
+const possible_states:Array = [
+	'prepitch', 'ball_in_play', # Hit and not fielded yet
+	'fielded',
+	'thrown', 'thrown_loose']
 
 var prev_position
 var prev_velocity
@@ -82,7 +86,7 @@ func reset() -> void:
 
 	is_sim = false # simulation
 
-	state = 'prepitch' # prepitch, ball_in_play, thrown, fielded
+	set_state('prepitch')
 
 	prev_position = null
 	prev_velocity = null
@@ -223,7 +227,7 @@ func _physics_process(delta: float) -> void:
 					(throw_start_velo!=null and
 						velocity.length()/throw_start_velo.length() < .25)):
 					printt('ball throw prog over 1', throw_progress)
-					state = 'ball_in_play'
+					set_state('thrown_loose')
 					throw_start_pos = null
 					throw_target = null
 					if not is_sim:
@@ -749,7 +753,7 @@ func ball_fielded(ball_position_before_fielded:Vector3):
 	visible = false
 	velocity = Vector3()
 	is_frozen = true
-	state = "fielded"
+	set_state("fielded")
 	set_process(false)
 	touched_by_fielder = true
 	printt('In ball: in func ball_fielded--', fair_foul_determined, is_foul,
@@ -779,7 +783,7 @@ func throw_to_base(_base, velo_vec, start_pos, target):
 	throw_start_pos = start_pos
 	throw_start_velo = velo_vec
 	throw_target = target
-	state = "thrown"
+	set_state("thrown")
 	time_last_thrown = Time.get_ticks_msec()
 	throw_progress = 0
 	set_process(true)
@@ -905,3 +909,10 @@ func find_where_ball_will_hit_ground() -> Vector3:
 		vel += dt*Vector3(0,-gravity, 0)
 	pos.y = 0
 	return pos
+
+func set_state(new_state:String) -> void:
+	assert(possible_states.has(new_state))
+	state = new_state
+
+func can_be_caught() -> bool:
+	return state in ['ball_in_play', 'thrown', 'thrown_loose']
