@@ -55,3 +55,18 @@ offset_bottom = 55.0
 texture = SubResource("ViewportTexture_8symy")
 
 [node name="Char3D" parent="." instance=ExtResource("3_tnlrt")]
+
+[node name="OutLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+visible = false
+billboard = 1
+modulate = Color(1, 0.192157, 0.192157, 1)
+text = "OUT"
+font_size = 200
+
+[node name="ScoredLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+visible = false
+billboard = 1
+text = "SCORED"
+font_size = 200

@@ -89,6 +89,8 @@ func reset(color) -> void:
 	force_to_base = null
 	sliding_to_base = -1
 	$ClickToRunArrow.visible = false
+	$OutLabel3D.visible = false
+	$ScoredLabel3D.visible = false
 	
 	$Char3D.reset() # Resets rotation
 	set_look_at()
@@ -117,6 +119,7 @@ func runner_is_out() -> void:
 		set_state('sliding_out')
 	else:
 		set_state('out_running_to_sideline')
+	$OutLabel3D.visible = true
 
 func _ready() -> void:
 	running_progress = start_base*1.
@@ -309,6 +312,7 @@ func check_scored() -> void:
 			#visible = false
 			signal_scored_on_play.emit()
 			set_state('scored_running_to_sideline')
+			$ScoredLabel3D.visible = true
 			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
 		elif needs_to_tag_up and not tagged_up_after_catch:
 			# Doesn't score, needs to go back, stays in play
@@ -674,6 +678,7 @@ func now_able_to_score() -> void:
 		#visible = false
 		signal_scored_on_play.emit()
 		set_state('scored_running_to_sideline')
+		$ScoredLabel3D.visible = true
 
 func check_tag_up() -> void:
 	if not tagged_up_after_catch and needs_to_tag_up and running_progress - start_base < 1e-8:
