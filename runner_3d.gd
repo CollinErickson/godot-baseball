@@ -40,7 +40,8 @@ const possible_states:Array = [
 	'not_exist', 'out_done', 'out_running_to_sideline',
 	'scored_done', 'scored_running_to_sideline', 'sliding_out',
 	# Active states (except sliding could be out, check after anim done)
-	'standing_on_base', 'running', 'sliding_not_out', 'changing_direction',
+	'standing_on_base', 'standing_not_on_base',
+	'running', 'sliding_not_out', 'changing_direction',
 	# Waiting to score states: if may have to tag up, then potentially active
 	'waiting_to_score_done', 'waiting_to_score_running_to_sideline',
 	'waiting_to_score_may_need_to_tag']
@@ -107,8 +108,8 @@ func is_active():
 
 func runner_is_out() -> void:
 	assert(state in [
-		'standing_on_base', 'running', 'sliding_not_out', 'changing_direction',
-		'waiting_to_score_may_need_to_tag'
+		'standing_on_base', 'standing_not_on_base', 'running',
+		'sliding_not_out', 'changing_direction', 'waiting_to_score_may_need_to_tag'
 	])
 	out_on_play = true
 	is_running = false
@@ -143,18 +144,20 @@ func sort_runners(a,b) -> bool:
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
-	if start_base == 2 and randf() < .1:
-		printt('in runner pp', start_base, state, animation, is_running, running_progress, target_base, able_to_score)
+	#if start_base == 2 and randf() < .1:
+		#printt('in runner pp', start_base, state, animation, is_running,
+			#running_progress, target_base, able_to_score)
 	if is_frozen:
 		return
 	
 	# States that do nothing
 	if state in [
 		'not_exist', 
-		'waiting_to_score_may_need_to_tag'
+		'waiting_to_score_may_need_to_tag',
+		'standing_not_on_base'
 		]:
 		return
-	# Standing on base can only 
+	# Standing on base doesn't move but can tag up 
 	if state == 'standing_on_base':
 		check_tag_up()
 		return
@@ -257,7 +260,10 @@ func _physics_process(delta: float) -> void:
 			# Reaching target base, stop them there
 			running_progress = target_base
 			is_running = false
-			set_state('standing_on_base')
+			if abs(target_base - round(target_base)) < 1e-8:
+				set_state('standing_on_base')
+			else:
+				set_state('standing_not_on_base')
 			set_animation('idle')
 			set_look_at()
 		elif floor(running_progress) < floor(next_running_progress):
@@ -337,8 +343,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	#printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
-	assert(state in ['standing_on_base', 'running', 'sliding_not_out',
-		'waiting_to_score_may_need_to_tag'])
+	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
+		'sliding_not_out', 'waiting_to_score_may_need_to_tag'])
 	var new_target_base:int = -1
 	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
@@ -373,19 +379,20 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 				new_target_base = roundi(running_progress)
 			else:
 				# In between bases, go back
-				assert(state in ['running', 'sliding_not_out'], state)
+				assert(state in ['running', 'sliding_not_out',
+								'standing_not_on_base'], state)
 				#printt('going back?', running_progress, target_base, may_need_to_tag_up)
 				new_target_base = floor(running_progress)
 	else:
 		printerr("bad in send_runner, should be +1 or -1", direction)
 	
 	if new_target_base > -0.5:
-		printt("in runner send_runner, new target base is", new_target_base)
+		#printt("in runner send_runner, new target base is", new_target_base)
 		send_runner_to_base(new_target_base)
 
 func send_runner_to_base(base:float) -> void:
-	printt('in runner send_runner_to_base', start_base, base)
-	assert(state in ['standing_on_base', 'running',
+	#printt('in runner send_runner_to_base', start_base, base, Time.get_ticks_msec())
+	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
 		'sliding_not_out',
 		'waiting_to_score_may_need_to_tag'], state)
 	if base < .9999 or base > 4.0001:
@@ -405,7 +412,8 @@ func send_runner_to_base(base:float) -> void:
 		else:
 			# Already in state that knows it's standing on base
 			assert(state in
-				['standing_on_base', 'waiting_to_score_may_need_to_tag',
+				['standing_on_base', 'standing_not_on_base',
+				'waiting_to_score_may_need_to_tag',
 				'running', 'sliding_not_out'],
 				state)
 	else:
@@ -445,7 +453,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 	if is_home_team and post_play_target_position.x > 0:
 		post_play_target_position.x *= 1
 	if exists_at_start:
-		set_state('standing_on_base')
+		set_state('standing_not_on_base')
 		set_animation('idle')
 	else:
 		set_state('not_exist')

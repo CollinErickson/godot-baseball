@@ -156,7 +156,7 @@ func unpause() -> void:
 	set_process(true)
 
 func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter,
+			batter_,
 			runner1, runner2, runner3,
 			outs_before_play_,
 			outs_per_inning_:int,
@@ -205,7 +205,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		runner.reset(batting_team.color_primary)
 		if runner.start_base == 0:
 			runner.visible = false
-			runner.setup_player(batter, batting_team, !fielding_team_is_home)
+			runner.setup_player(batter_, batting_team, !fielding_team_is_home)
 			#printt('INVISIBLE RUNNER 0')
 		if runner.start_base == 1:
 			runner.setup_player(runner1, batting_team, !fielding_team_is_home)
@@ -218,10 +218,10 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 
 	# Setup batter
 	bat_mode = bat_mode_
-	$Headon/Batter3D.setup_player(batter, batting_team, !fielding_team_is_home)
+	$Headon/Batter3D.setup_player(batter_, batting_team, !fielding_team_is_home)
 	# Reset after setup since player info is needed to set up handedness
 	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
-	$PrepitchFieldOverlay.setup_batter(batter)
+	$PrepitchFieldOverlay.setup_batter(batter_)
 
 	# Setup pitcher
 	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method, user_is_pitching_team_)
