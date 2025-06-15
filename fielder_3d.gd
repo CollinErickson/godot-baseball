@@ -1415,3 +1415,25 @@ func check_user_throw_input() -> bool:
 							click_used = true
 							break
 	return click_used
+
+func reach_ball_info(ball_pos:Vector3) -> Array:
+	# Returns array of length 1 or 2
+	# If can't reach ball ever at that position, then [false]
+	# If can reach ball ever, then [true, time_to_reach]
+	if ball_pos.y < catch_max_y:
+		var ballgrounddist = distance_xz(position, ball_pos)
+		# TODO: fielders don't run at constant speed
+		var timetoreach = max(0, (ballgrounddist - catch_radius_xz) / SPEED)
+		# Add time if still in a catch animation
+		if state == 'catching':
+			timetoreach += $Char3D.time_left_in_current_anim() / 2.5
+		return [true, timetoreach, ballgrounddist]
+	else:
+		return [false]
+
+func reach_cover_info(base_position:Vector3) -> float:
+	# Returns time it would take for fielder to cover pos
+	var timetoreach = distance_xz(position,base_position) / SPEED
+	if state == 'catching':
+		timetoreach += $Char3D.time_left_in_current_anim() / 2.5
+	return timetoreach

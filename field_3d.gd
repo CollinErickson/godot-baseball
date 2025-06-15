@@ -309,7 +309,11 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 
 func _on_ball_fielded_by_fielder(fielder, ball_position_before_fielded:Vector3):
 	ball_touched_by_fielder = true
-	#printt("in field: Ball fielded", ball.state, ball.hit_bounced)
+	printt("in field_3d: _on_ball_fielded_by_fielder", ball.state, ball.hit_bounced,
+	is_foul_ball,
+	ball.state == "ball_in_play" and not ball.hit_bounced and not is_foul_ball,
+	(ball.state == "ball_in_play") and not ball.hit_bounced and not is_foul_ball,
+	ball.state == "ball_in_play")
 	
 	# Fly out
 	if ball.state == "ball_in_play" and not ball.hit_bounced and not is_foul_ball:
@@ -637,10 +641,10 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
-					if !true:
-						vla = 65
-						hla = 0
-						exitvelo = 28.8
+					if true:
+						vla = 45
+						hla = 10
+						exitvelo = 18.8
 						actual_contact = true
 					printt('hit exitvelo/vla/hla:', exitvelo, vla, hla)
 					
@@ -1033,13 +1037,16 @@ func find_fielder_to_intercept_ball() -> Array:
 		# Loop over fielder, see if can reach ball
 		for ifielder in range(len(fielders)):
 			var fielderi = fielders[ifielder]
+			
+			var reach_ball_info = fielderi.reach_ball_info(tmp_ball.position)
+			# reach_ball_info is [can reach ball, 
+			#  if yes then time to reach ball, distance fielder has to travel]
 			# Needs to be reachable
-			if tmp_ball.position.y < fielderi.catch_max_y:
-				var ballgrounddist = fielderi.distance_xz(fielderi.position, tmp_ball.position)
-				# TODO: fielders don't run at constant speed
-				var timetoreach = max(0, (ballgrounddist - fielderi.catch_radius_xz) / fielderi.SPEED)
+			if reach_ball_info[0]:
+				var timetoreach = reach_ball_info[1]
 				
 				if timetoreach <= elapsed_time:
+					var ballgrounddist = reach_ball_info[2]
 					# Use them if they get to bounced ball fastest
 					# Or if ball hasn't bounced then whoever moves least
 					if ((min_ifielder == null) or # First person found
@@ -1056,7 +1063,6 @@ func find_fielder_to_intercept_ball() -> Array:
 						hit_bounced = tmp_ball.hit_bounced
 		# Keep running if ball hasn't bounced to maybe find someone closer
 		if found_someone and tmp_ball.hit_bounced:
-			#fielders[min_ifielder].assign_to_field_ball(tmp_ball.position)
 			break
 	
 	# Find 2nd fielder to set as alt fielder
@@ -1246,10 +1252,7 @@ func assign_fielders_to_cover_bases(exclude_fielder_indexes:Array=[],
 				if (!(base == 6 and !(fielders[i].posname  in ["LF", "CF", "RF"])) and 
 					!(!ball_touched_by_fielder and base == 5 and
 						(fielders[i].posname  in ["LF", "CF", "RF"]))):
-					var fielder_time = (
-						fielders[i].distance_xz(fielders[i].position,
-												base_position) /
-						fielders[i].SPEED)
+					var fielder_time = fielders[i].reach_cover_info(base_position)
 					if fielder_time < min_time:
 						min_time = fielder_time
 						min_i = i
@@ -1307,6 +1310,7 @@ func get_fielder_with_posname(posname):
 
 func find_intercept_position_for_fielder(fielder) -> Vector3:
 	# For specific fielder, find where they will intercept ball's path
+	# Used when user selects a fielder
 	tmp_ball = ball_3d_scene.instantiate()
 	tmp_ball.name = "tmp_ball_from_find_intercept_position_for_fielder"
 	tmp_ball.is_sim = true
@@ -1322,7 +1326,6 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 	var take_steps = func(nsteps, delta_):
 		for istep in range(nsteps):
 			tmp_ball._physics_process(delta_)
-	# Check every ~.5 second to see if each fielder can reach the ball
 	var iii = 0
 	var numsteps = 1
 	var delta = 1./30
@@ -1331,12 +1334,11 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 		iii += 1
 		take_steps.call(numsteps, delta)
 		elapsed_time += numsteps * delta
-		# Make it's reachable
-		if tmp_ball.position.y < fielder.catch_max_y:
-			# See if fielder can reach ball
-			var ballgrounddist = fielder.distance_xz(fielder.position, tmp_ball.position)
-			# TODO: fielders don't run at constant speed
-			var timetoreach = max(0, (ballgrounddist - fielder.catch_radius_xz) / fielder.SPEED)
+		var reach_ball_info:Array = fielder.reach_ball_info(tmp_ball.position)
+		# Make sure it's reachable
+		if reach_ball_info[0]:
+			var timetoreach = reach_ball_info[1]
+			var ballgrounddist = reach_ball_info[2]
 				
 			if timetoreach <= elapsed_time:
 				tmp_ball.queue_free()
