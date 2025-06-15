@@ -30,6 +30,17 @@ var animation:String = "idle"
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
 var force_to_base = null # When ball is over wall
 
+const possible_states:Array = [
+	# Done for play states
+	'not_exist', 'out_done', 'out_running_to_sideline',
+	'scored_done', 'scored_running_to_sideline', 'sliding_out',
+	# Active states (except sliding could be out, check after anim done)
+	'standing_on_base', 'running', 'sliding_not_out', 'changing_direction',
+	# Waiting to score states: if may have to tag up, then potentially active
+	'waiting_to_score_done', 'waiting_to_score_running_to_sideline',
+	'waiting_to_score_may_need_to_tag']
+var state:String = 'standing_on_base'
+
 signal signal_scored_on_play
 signal reached_next_base_signal
 @onready var ball = get_tree().get_first_node_in_group("ball")
@@ -89,10 +100,16 @@ func is_active():
 				abs(force_to_base - running_progress) < 1e-8))
 
 func runner_is_out() -> void:
+	assert(state in [
+		'standing_on_base', 'running', 'sliding_not_out', 'changing_direction',
+		'waiting_to_score_may_need_to_tag'
+	])
 	out_on_play = true
-	#set_physics_process(false)
 	is_running = false
-	#visible = !false
+	if state == 'sliding_not_out':
+		set_state('sliding_out')
+	else:
+		set_state('out_running_to_sideline')
 
 func _ready() -> void:
 	running_progress = start_base*1.
@@ -112,126 +129,155 @@ func _ready() -> void:
 	runners_after.sort_custom(sort_runners)
 	#printt('sorted runners_after', runners_after)
 	#printt('sorted runners_before', runners_before)
+	
+	$Char3D.connect("animation_finished_signal", _on_animation_finished_from_char3d)
 
 func sort_runners(a,b) -> bool:
 	return a.start_base < b.start_base
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
+	if start_base == 0 and randf() < .1:
+		printt('in runner pp', start_base, state, animation, is_running, running_progress, target_base)
 	if is_frozen:
 		return
 	
-	# If out, scored, or on home and won't need to go back, move to end pos
-	if out_on_play or scored_on_play or (
-		(running_progress >= 4 and not scored_on_play)
-		and (#able_to_score and
-			(not needs_to_tag_up or tagged_up_after_catch))
-	):
-		# If was waiting to score and now can score, do that
-		#  (since lower code block is skipped)
-		if not out_on_play and not scored_on_play:
-			check_scored()
-		#printt('In runner: out on play or scored')
-		# Move towards bench?
-		if position.distance_to(post_play_target_position) > 1e-4:
-			if animation == 'idle':
-				set_animation('running')
-			var dist = position.distance_to(post_play_target_position)
-			var distance_can_move = delta * SPEED * .7 # (Jog)
-			if distance_can_move >= dist:
-				# Move to end point
-				position = post_play_target_position
-				# Stop animation
-				set_animation('idle')
-			else:
-				# Move towards target
-				position += distance_can_move * (post_play_target_position - position).normalized()
-				# Face target
-				set_look_at_pos(post_play_target_position)
+	# States that do nothing
+	if state in [
+		'not_exist', 
+		'waiting_to_score_may_need_to_tag'
+		]:
+		return
+	# Standing on base can only 
+	if state == 'standing_on_base':
+		check_tag_up()
+		return
+	# States that watch ball but don't ever move
+	if state in ['out_done',
+		'scored_done', 'waiting_to_score_done']:
+		# On target, watch ball
+		look_at_ball()
+		return
+	# States that run to sideline
+	if state in ['out_running_to_sideline', 'scored_running_to_sideline',
+		'waiting_to_score_running_to_sideline']:
+		if animation == 'idle':
+			set_animation('running')
+		var dist = position.distance_to(post_play_target_position)
+		var distance_can_move = delta * SPEED * .7 # (Jog)
+		if distance_can_move >= dist:
+			# Move to end point
+			position = post_play_target_position
+			# Stop animation
+			set_animation('idle')
+			# Update state
+			if state == 'out_running_to_sideline':
+				set_state('out_done')
+			elif state == 'scored_running_to_sideline':
+				set_state('scored_done')
+			elif state == 'waiting_to_score_running_to_sideline':
+				set_state('waiting_to_score_done')
+			# Look at ball
+			look_at_ball()
 		else:
-			# On target, watch ball
-			set_look_at_pos(ball.position * Vector3(1,0,1))
+			# Move towards target
+			position += distance_can_move * (post_play_target_position - position).normalized()
+			# Face target
+			set_look_at_pos(post_play_target_position)
 		return
 	
-	#print('running needs to tag', needs_to_tag_up, start_base)
-	# Tag up
-	if not tagged_up_after_catch and needs_to_tag_up and running_progress - start_base < 1e-8:
-		tagged_up_after_catch = true
-		tag_up_signal.emit()
+	assert(state in ['running', 'sliding_not_out', 'sliding_out', 'changing_direction'])
+	
+	assert(state == 'running')
+	
+	# Check for tag up in case ball was just caught and they are close enough to base
+	check_tag_up()
+	
+	assert(is_running)
 	# Base running
 	if is_running:
 		#printt('is running, running progress', running_progress, start_base, target_base)
-		# Check if they will cross target_base
+		# Find next position
 		var dir = 1
 		if target_base < running_progress:
 			dir = -1
 		var next_running_progress = running_progress + delta*SPEED/30 * dir
 		
-		# TODO: Check if they will get to close to next or previous runner
+		# Check if they will get to close to next or previous runner,
+		#  don't get closer than certain distance
 		var blocked = false
 		if dir > 0:
-			for runner in runners_after:
-				if runner.is_active():
-					if runner.running_progress - next_running_progress < 0.1:
-						blocked = true
+			var runner_in_front = active_runner_after()
+			if runner_in_front != null:
+				if runner_in_front.running_progress - next_running_progress < 0.1:
+					blocked = true
 		else:
-			for runner in runners_before:
-				if runner.is_active():
-					if next_running_progress - runner.running_progress < 0.1:
-						blocked = true
+			var runner_behind = active_runner_before()
+			if runner_behind != null:
+				if next_running_progress - runner_behind.running_progress < 0.1:
+					blocked = true
 		if blocked:
 			next_running_progress = running_progress
 		
+		# Check if they will cross base after start base
+		#  Field needs to know for force out reasons
 		if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
 			reached_next_base = true
 			reached_next_base_signal.emit()
 		
-		# Check if they will reach the target base, if yes, stop them there
+		# Check if they will reach or cross a base or neither
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
+			# Reaching target base, stop them there
 			running_progress = target_base
-			max_running_progress = max(max_running_progress, running_progress)
 			is_running = false
+			set_state('standing_on_base')
 			set_animation('idle')
-			update_position()
 			set_look_at()
 		elif floor(running_progress) < floor(next_running_progress):
-			# Crossing a base, update look position
+			# Crossing a base in forward direction, update look position
 			running_progress = next_running_progress
-			max_running_progress = max(max_running_progress, running_progress)
-			update_position()
 			set_look_at()
 		else: # Not crossing any base
 			# Update progress
 			running_progress = next_running_progress
-			max_running_progress = max(running_progress, max_running_progress)
-			update_position()
+		max_running_progress = max(running_progress, max_running_progress)
+		update_position()
 	
 	# Reset max_running_progress if need to return
 	if needs_to_tag_up and not tagged_up_after_catch:
 		max_running_progress = start_base
+	
+	# Check for tag up in case they went back
+	check_tag_up()
+	
 	check_scored()
 
 func check_scored() -> void:
 	# Scored run. Can't do it when they first reach 4 since they may not be eligible then
 	if (running_progress >= 4 and not scored_on_play):
+		running_progress = 4
 		if (able_to_score and
 			(not needs_to_tag_up or tagged_up_after_catch)):
 			# Runner scores
 			is_running = false
-			running_progress = 4
 			scored_on_play = true
 			#visible = false
 			signal_scored_on_play.emit()
+			set_state('scored_running_to_sideline')
 			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
+		elif needs_to_tag_up and not tagged_up_after_catch:
+			# Doesn't score, needs to go back, stays in play
+			set_state('standing_on_base')
+		elif may_need_to_tag_up:
+			# May need to tag up, so stay there
+			set_state('waiting_to_score_may_need_to_tag')
 		else:
-			# Runner can't score yet, stays at 4
+			# Runner can't score yet, but is done with baserunning
+			#   (never need to go back)
+			assert(not able_to_score)
+			set_state('waiting_to_score_running_to_sideline')
 			#printt("RUNNER IS WAITING TO SCORE", start_base, able_to_score, needs_to_tag_up, tagged_up_after_catch)
-			running_progress = 4
-			# If they are done with play (no reason to ever go back), make invisible
-			if not may_need_to_tag_up and visible:
-				#visible = false
-				pass # No longer making invis, they jog to sideline
 
 func update_position():
 	# Update location on field based on running_progress
@@ -253,6 +299,9 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	#printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
+	assert(state in ['standing_on_base', 'running',
+		'waiting_to_score_may_need_to_tag_up'])
+	var new_target_base:int = -1
 	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
 		#if running_progress-1e-8 - floor(running_progress-1e-8) > .5 or target_base < running_progress:
@@ -265,55 +314,62 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 			# If made it home and just waiting, don't send forward
 			pass
 		else:
-			is_running = true
+			# Run forward
 			if target_base < running_progress:
 				# If going backward, send forward to next
-				target_base = ceil(running_progress)
-			elif can_go_past and running_progress > target_base - .3:
+				new_target_base = ceil(running_progress)
+			elif can_go_past and running_progress > floor(running_progress) + 1 - .3:
 				# If already going forward and near next base, send to following base
-				target_base += 1
-			elif not can_go_past:
-				target_base = floor(running_progress) + 1
+				new_target_base = floor(running_progress)
 			else:
-				pass
+				# Can't go past, only go to next
+				new_target_base = floor(running_progress) + 1
 	elif direction == -1:
 		#print('sending backward!!!')
-		if running_progress > 1 and running_progress > start_base: # Can't go back to home
+		if running_progress > 1 and running_progress > start_base:
+			# Can't go back to home or if standing where started
 			# Standing on base, go to previous
-			if abs(running_progress - floor(running_progress)) < 1e-16:
+			if state in ['standing_on_base', 'waiting_to_score_may_need_to_tag_up']:
 				# Go to previous base, unless reached home and no reason to return
-				if running_progress >= 4 and not may_need_to_tag_up:
-					pass
-				else:
-					target_base = floor(running_progress) - 1
-					is_running = true
+				assert(abs(running_progress - round(running_progress)) < 1e-8)
+				new_target_base = roundi(running_progress)
 			else:
 				# In between bases, go back
+				assert(state == 'running')
 				#printt('going back?', running_progress, target_base, may_need_to_tag_up)
-				target_base = floor(running_progress)
-				is_running = true
+				new_target_base = floor(running_progress)
 	else:
-		printerr("bad in send_runner", direction)
-	if is_running:
-		set_animation('running')
-	else:
-		set_animation('idle')
+		printerr("bad in send_runner, should be +1 or -1", direction)
+	
+	if new_target_base > -0.5:
+		send_runner_to_base(new_target_base)
 
 func send_runner_to_base(base:float) -> void:
 	#printt('in runner send_runner_to_base', start_base, base)
+	assert(state in ['standing_on_base', 'running',
+		'waiting_to_score_may_need_to_tag_up'])
 	if base < .9999 or base > 4.0001:
+		push_warning('in runner send_runner_to_base bad value for base', base)
 		return
 	if not is_active():
 		return
 	target_base = base
 	if abs(target_base - running_progress) < 1e-12:
-		is_running = false
-		set_animation('idle')
+		# No need to run, already where want to be
+		if state in ['running']:
+			is_running = false
+			set_animation('idle')
+		else:
+			# Already in state that knows it's standing on base
+			assert(state in ['standing_on_base', 'waiting_to_score_may_need_to_tag_up'])
 	else:
+		#printt('in runner send_runner_to_base changing state to running')
 		is_running = true 
 		set_animation('running')
+		set_state('running')
 
 func end_state() -> String:
+	# Not related to the state variable, maybe need to rename
 	#printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
 	if not exists_at_start:
 		return ''
@@ -339,6 +395,11 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 	if is_home_team and post_play_target_position.x > 0:
 		post_play_target_position.x *= 1
+	if exists_at_start:
+		set_state('standing_on_base')
+		set_animation('idle')
+	else:
+		set_state('not_exist')
 
 func active_runner_before():
 	for i in range(len(runners_before)-1,-1, -1):
@@ -509,3 +570,43 @@ func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 
 func angle_between(a:Vector3, b:Vector3) -> float:
 	return acos((a.dot(b)) / (a.length() * b.length()))
+
+func _on_animation_finished_from_char3d(anim_name) -> void:
+	printt('in runner anim finished', anim_name)
+	if anim_name == 'slide':
+		set_animation('idle')
+		set_state('standing_on_base')
+		is_running = false
+		if state == 'sliding_out':
+			set_state('out_running_to_sideline')
+		elif state == 'sliding_not_out':
+			set_state('standing_on_base')
+		else:
+			assert(false, 'runner state cannot be here')
+
+func set_state(new_state:String) -> void:
+	if !possible_states.has(new_state):
+		printt('in runner set_state error with new state', new_state)
+	assert(possible_states.has(new_state))
+	state = new_state
+
+func look_at_ball() -> void:
+	set_look_at_pos(ball.position * Vector3(1,0,1))
+
+func now_able_to_score() -> void:
+	able_to_score = true
+	if state in ['waiting_to_score_done',
+		'waiting_to_score_running_to_sideline',
+		'waiting_to_score_may_need_to_tag']:
+		# Runner scores
+		is_running = false
+		running_progress = 4
+		scored_on_play = true
+		#visible = false
+		signal_scored_on_play.emit()
+		set_state('scored_running_to_sideline')
+
+func check_tag_up() -> void:
+	if not tagged_up_after_catch and needs_to_tag_up and running_progress - start_base < 1e-8:
+		tagged_up_after_catch = true
+		tag_up_signal.emit()

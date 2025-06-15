@@ -99,6 +99,8 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 		return 'Goalkeeper Catch Face'
 	elif anim_name == "catch_jump":
 		return 'Goalkeeper Catch Jump Straight'
+	elif anim_name == "slide":
+		return 'Running slide'
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 		# Returning something that won't break
@@ -127,6 +129,8 @@ func map_anim_name_back(anim_name:String) -> String:
 		return 'catch_chest'
 	if anim_name == 'Goalkeeper Catch Jump Straight':
 		return 'catch_jump'
+	if anim_name == 'Running Slide':
+		return 'slide'
 	#if anim_name == '':
 		#return ''
 	push_error("In char3D, no result for map_anim_name_back", anim_name)

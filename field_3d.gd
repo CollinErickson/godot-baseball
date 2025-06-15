@@ -1584,7 +1584,7 @@ func check_runners_able_to_score():
 		(ball_hit_bounced or ball_caught_in_air)):
 		printt('RUNNERS CAN SCORE NOW')
 		for runner in runners:
-			runner.able_to_score = true
+			runner.now_able_to_score()
 
 func coalesce_array(x:Array):
 	for i in range(len(x) - 1):

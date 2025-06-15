@@ -1302,7 +1302,7 @@ func update_offscreen_arrow() -> void:
 			$Arrow2DOffscreenDirection.scale = Vector2(1,1) * arrowscale
 
 func _on_animation_finished_from_char3d(anim_name) -> void:
-	printt('in fielder anim finished', anim_name)
+	#printt('in fielder anim finished', anim_name)
 	if anim_name in ["throw", "toss"]:
 		# End of throw: change state and anim.
 		# Should already have assignment wait_to_receive
