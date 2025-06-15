@@ -495,7 +495,3 @@ script = ExtResource("14_g2qjr")
 
 [node name="MiniField" parent="." instance=ExtResource("20_fgd4v")]
 position = Vector2(1200, 100)
-
-[connection signal="timeout" from="TimerCameraChange" to="." method="_on_timer_camera_change_timeout"]
-[connection signal="timeout" from="FlashText/Timer" to="FlashText" method="_on_timer_timeout"]
-[connection signal="timeout" from="PlayOverTimer" to="." method="_on_play_over_timer_timeout"]

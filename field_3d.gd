@@ -49,7 +49,6 @@ func _ready() -> void:
 		fielder.connect("new_fielder_selected_signal", _on_new_fielder_selected_signal_by_fielder)
 		fielder.connect("fielder_moved_reassign_fielders_signal", _on_fielder_moved_reassign_fielders_by_fielder)
 		fielder.connect("fielder_dropped_catch_reassign_fielders_signal", _on_fielder_dropped_catch_reassign_fielders_by_fielder)
-		
 		fielder.connect("alt_fielder_selected_signal", _on_alt_fielder_selected_by_fielder)
 
 	# Set up signals from runners
@@ -71,6 +70,11 @@ func _ready() -> void:
 	ball.connect("foul_ball", _on_ball_3d_foul_ball)
 	ball.connect("hit_bounced_signal", _on_ball_3d_hit_bounced_signal)
 	ball.connect("pitch_completed_unhit", _on_ball_3d_pitch_completed_unhit)
+	
+	# Set up signals from timers
+	$TimerCameraChange.connect("timeout", _on_timer_camera_change_timeout)
+	$FlashText/Timer.connect("timeout", get_node("FlashText")._on_timer_timeout)
+	$PlayOverTimer.connect("timeout", _on_play_over_timer_timeout)
 	
 	# Start inactive since it will be in the background
 	pause()
@@ -1352,7 +1356,7 @@ func find_intercept_position_for_fielder(fielder) -> Vector3:
 
 var next_camera = null
 func _on_timer_camera_change_timeout() -> void:
-	print('changing camera')
+	print('In field _on_timer_camera_change_timeout, changing camera')
 	
 	if next_camera != null:
 		next_camera.current = true
