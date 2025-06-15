@@ -868,7 +868,14 @@ func _process(delta: float) -> void:
 	
 	# Move camera so that the ball stays in view
 	cam = get_viewport().get_camera_3d()
-	var target_position = ball.global_position
+	# Target position is the ball's position
+	var target_position:Vector3 = ball.global_position
+	# Tried setting to fielder position to avoid animation jitter, but not better
+	#var fielders_holding_ball:Array = get_tree().get_nodes_in_group("fielder_holding_ball")
+	#if len(fielders_holding_ball) > 0.5:
+		#printt('in field_3d, changing cam target pos', target_position,
+			#fielders_holding_ball[0].global_position)
+		#target_position = fielders_holding_ball[0].global_position
 	#target_position.y = 0
 	var ball_viewport_2d_position = cam.unproject_position(target_position)
 	var viewport_size = get_viewport().size
