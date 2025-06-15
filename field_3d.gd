@@ -67,6 +67,10 @@ func _ready() -> void:
 	
 	# Set up signals from ball
 	ball.connect("ball_over_wall_signal", _on_ball_over_wall_signal)
+	ball.connect("ball_overthrown", _on_ball_3d_ball_overthrown)
+	ball.connect("foul_ball", _on_ball_3d_foul_ball)
+	ball.connect("hit_bounced_signal", _on_ball_3d_hit_bounced_signal)
+	ball.connect("pitch_completed_unhit", _on_ball_3d_pitch_completed_unhit)
 	
 	# Start inactive since it will be in the background
 	pause()
