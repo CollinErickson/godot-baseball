@@ -455,6 +455,8 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			not runner.out_on_play and 
 			runner.is_active() and 
 			runner.max_running_progress < base - 1e-8):
+			printt('in field_3d recording force out', runner.start_base, base,
+				runner.state, runner.max_running_progress)
 			# Would be out, need to make sure that all previous runners are still active
 			var prev_runner_out = false
 			for otherrunner in runners:
@@ -1582,7 +1584,7 @@ func check_runners_able_to_score():
 	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
 	if (outs_before_play + outs_on_play + max_force_outs_left < outs_per_inning - 0.5 and
 		(ball_hit_bounced or ball_caught_in_air)):
-		printt('RUNNERS CAN SCORE NOW')
+		printt('In check_runners_able_to_score, RUNNERS CAN SCORE NOW')
 		for runner in runners:
 			runner.now_able_to_score()
 

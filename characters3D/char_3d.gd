@@ -100,7 +100,7 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 	elif anim_name == "catch_jump":
 		return 'Goalkeeper Catch Jump Straight'
 	elif anim_name == "slide":
-		return 'Running slide'
+		return 'Running Slide'
 	else:
 		push_error("Error in char_3d.gd, start_animation:  \t", anim_name)
 		# Returning something that won't break
@@ -141,6 +141,8 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	if map_anim_name(anim_name, batsR, throwsR).begins_with("Rifle") or \
 		map_anim_name(anim_name, batsR, throwsR).begins_with("Goalkeeper"):
 			anim_speed = 2.5
+	if map_anim_name(anim_name, batsR, throwsR) == 'Running Slide':
+		anim_speed = 2.
 	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)),
 		-1, anim_speed)
 

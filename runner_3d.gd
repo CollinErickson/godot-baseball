@@ -29,6 +29,10 @@ var animation:String = "idle"
 #var state:String = "nonexistant" # nonexistant, 
 var post_play_target_position:Vector3 = Vector3(10, 0, -5)
 var force_to_base = null # When ball is over wall
+var slide_prop:float = -1
+const slide_anim_duration:float = 0.6 # full is 1.2
+const slide_speed_multiplier:float = 1.5
+var sliding_to_base = -1 # -1 if not, otherwise int to base
 
 const possible_states:Array = [
 	# Done for play states
@@ -81,6 +85,7 @@ func reset(color) -> void:
 	target_base = start_base + 1
 	able_to_score = false
 	force_to_base = null
+	sliding_to_base = -1
 	$ClickToRunArrow.visible = false
 	
 	$Char3D.reset() # Resets rotation
@@ -137,8 +142,8 @@ func sort_runners(a,b) -> bool:
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
-	if start_base == 0 and randf() < .1:
-		printt('in runner pp', start_base, state, animation, is_running, running_progress, target_base)
+	if start_base == 2 and randf() < .1:
+		printt('in runner pp', start_base, state, animation, is_running, running_progress, target_base, able_to_score)
 	if is_frozen:
 		return
 	
@@ -188,6 +193,28 @@ func _physics_process(delta: float) -> void:
 	
 	assert(state in ['running', 'sliding_not_out', 'sliding_out', 'changing_direction'])
 	
+	if state in ['sliding_not_out', 'sliding_out']:
+		assert(sliding_to_base > 0.5)
+		var time_left_in_slide = max(0,
+			min($Char3D.time_left_in_current_anim(), slide_anim_duration))
+		# Update position
+		if sliding_to_base > running_progress:
+			printt('in runner sliding forward rprog before is', running_progress, slide_anim_duration,
+				slide_prop, time_left_in_slide, slide_anim_duration)
+			# Sliding forward
+			var next_running_progress = sliding_to_base - \
+				slide_prop * time_left_in_slide / slide_anim_duration
+			check_will_reach_next_base(next_running_progress)
+			running_progress = next_running_progress
+			printt('in runner sliding forward rprog after is', running_progress, slide_anim_duration, slide_prop)
+		else:
+			# Sliding backward
+			running_progress = sliding_to_base + \
+				slide_prop * time_left_in_slide / slide_anim_duration
+		update_position()
+		max_running_progress = max(max_running_progress, running_progress)
+		return
+	
 	assert(state == 'running')
 	
 	# Check for tag up in case ball was just caught and they are close enough to base
@@ -221,11 +248,15 @@ func _physics_process(delta: float) -> void:
 		
 		# Check if they will cross base after start base
 		#  Field needs to know for force out reasons
-		if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
-			reached_next_base = true
-			reached_next_base_signal.emit()
+		check_will_reach_next_base(next_running_progress)
 		
 		# Check if they will reach or cross a base or neither
+		if randf() < .01:
+			printt('in runner checking for slide', start_base, running_progress, target_base, slide_prop,
+			 target_base - running_progress > slide_prop and 
+					target_base - next_running_progress < slide_prop and 
+					!needs_to_tag_up and target_base > 1.5
+			)
 		if ((running_progress <= target_base and next_running_progress >= target_base) or
 			(running_progress >= target_base and next_running_progress <= target_base)):
 			# Reaching target base, stop them there
@@ -238,6 +269,17 @@ func _physics_process(delta: float) -> void:
 			# Crossing a base in forward direction, update look position
 			running_progress = next_running_progress
 			set_look_at()
+		elif ((dir > 0  and target_base - running_progress > slide_prop and 
+					target_base - next_running_progress < slide_prop and 
+					!needs_to_tag_up and target_base > 1.5) or
+			(dir < 0 and running_progress - target_base > slide_prop and
+					next_running_progress - target_base < slide_prop)):
+			printt('in runner starting to slide', start_base, running_progress, next_running_progress, target_base, slide_prop)
+			# Cross a sliding position, change state
+			running_progress = next_running_progress
+			sliding_to_base = roundi(target_base)
+			set_state('sliding_not_out')
+			set_animation('slide')
 		else: # Not crossing any base
 			# Update progress
 			running_progress = next_running_progress
@@ -299,8 +341,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	#printt('In runner send_runner', start_base, direction, can_go_past)
 	if not is_active():
 		return
-	assert(state in ['standing_on_base', 'running',
-		'waiting_to_score_may_need_to_tag_up'])
+	assert(state in ['standing_on_base', 'running', 'sliding_not_out',
+		'waiting_to_score_may_need_to_tag'])
 	var new_target_base:int = -1
 	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
@@ -329,25 +371,27 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 		if running_progress > 1 and running_progress > start_base:
 			# Can't go back to home or if standing where started
 			# Standing on base, go to previous
-			if state in ['standing_on_base', 'waiting_to_score_may_need_to_tag_up']:
+			if state in ['standing_on_base', 'waiting_to_score_may_need_to_tag']:
 				# Go to previous base, unless reached home and no reason to return
 				assert(abs(running_progress - round(running_progress)) < 1e-8)
 				new_target_base = roundi(running_progress)
 			else:
 				# In between bases, go back
-				assert(state == 'running')
+				assert(state in ['running', 'sliding_not_out'], state)
 				#printt('going back?', running_progress, target_base, may_need_to_tag_up)
 				new_target_base = floor(running_progress)
 	else:
 		printerr("bad in send_runner, should be +1 or -1", direction)
 	
 	if new_target_base > -0.5:
+		printt("in runner send_runner, new target base is", new_target_base)
 		send_runner_to_base(new_target_base)
 
 func send_runner_to_base(base:float) -> void:
-	#printt('in runner send_runner_to_base', start_base, base)
+	printt('in runner send_runner_to_base', start_base, base)
 	assert(state in ['standing_on_base', 'running',
-		'waiting_to_score_may_need_to_tag_up'])
+		'sliding_not_out',
+		'waiting_to_score_may_need_to_tag'], state)
 	if base < .9999 or base > 4.0001:
 		push_warning('in runner send_runner_to_base bad value for base', base)
 		return
@@ -357,16 +401,23 @@ func send_runner_to_base(base:float) -> void:
 	if abs(target_base - running_progress) < 1e-12:
 		# No need to run, already where want to be
 		if state in ['running']:
+			# Switch from running to standing
 			is_running = false
 			set_animation('idle')
+			set_state('standing_on_base')
+			running_progress = target_base
 		else:
 			# Already in state that knows it's standing on base
-			assert(state in ['standing_on_base', 'waiting_to_score_may_need_to_tag_up'])
+			assert(state in
+				['standing_on_base', 'waiting_to_score_may_need_to_tag',
+				'running', 'sliding_not_out'],
+				state)
 	else:
 		#printt('in runner send_runner_to_base changing state to running')
-		is_running = true 
-		set_animation('running')
-		set_state('running')
+		if state != 'sliding_not_out':
+			is_running = true 
+			set_animation('running')
+			set_state('running')
 
 func end_state() -> String:
 	# Not related to the state variable, maybe need to rename
@@ -387,6 +438,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		exists_at_start = true
 		SPEED = player.speed_mps()
+		slide_prop = slide_speed_multiplier * SPEED * slide_anim_duration / 30
 	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)
@@ -465,7 +517,7 @@ func set_look_at():
 			lookat += Vector3(-30,0,-30)
 		else: # Running to Home
 			lookat += Vector3(-30,0,30)
-	elif animation == "running":
+	elif animation in ["running", "slide"]:
 		#lookat = base_positions[min(round(target_base), 4) - 1]
 		if target_base < running_progress:
 			lookat = base_positions[min(round(target_base), 4) - 1]
@@ -575,12 +627,24 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 	printt('in runner anim finished', anim_name)
 	if anim_name == 'slide':
 		set_animation('idle')
-		set_state('standing_on_base')
+		running_progress = sliding_to_base
+		sliding_to_base = -1
+		check_will_reach_next_base(running_progress)
+		max_running_progress = running_progress
 		is_running = false
 		if state == 'sliding_out':
 			set_state('out_running_to_sideline')
 		elif state == 'sliding_not_out':
-			set_state('standing_on_base')
+			if running_progress > 3.5:
+				# Standing on home, maybe scored, let this func figure it out
+				set_state('standing_on_base')
+				check_scored()
+			elif abs(target_base - running_progress) < 1e-8:
+				set_state('standing_on_base')
+			else:
+				# Input was given to update target base
+				set_state('running')
+				is_running = true
 		else:
 			assert(false, 'runner state cannot be here')
 
@@ -610,3 +674,10 @@ func check_tag_up() -> void:
 	if not tagged_up_after_catch and needs_to_tag_up and running_progress - start_base < 1e-8:
 		tagged_up_after_catch = true
 		tag_up_signal.emit()
+
+func check_will_reach_next_base(next_running_progress:float) -> void:
+	# Check if they will cross base after start base
+	#  Field needs to know for force out reasons
+	if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
+		reached_next_base = true
+		reached_next_base_signal.emit()
