@@ -496,7 +496,6 @@ script = ExtResource("14_g2qjr")
 [node name="MiniField" parent="." instance=ExtResource("20_fgd4v")]
 position = Vector2(1200, 100)
 
-[connection signal="start_runner" from="Headon/Batter3D" to="." method="_on_batter_3d_start_runner"]
 [connection signal="ball_overthrown" from="Headon/Ball3D" to="." method="_on_ball_3d_ball_overthrown"]
 [connection signal="foul_ball" from="Headon/Ball3D" to="." method="_on_ball_3d_foul_ball"]
 [connection signal="hit_bounced_signal" from="Headon/Ball3D" to="." method="_on_ball_3d_hit_bounced_signal"]

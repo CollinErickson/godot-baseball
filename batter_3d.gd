@@ -201,3 +201,7 @@ func enable_minibat() -> void:
 	minibat.visible = true
 	minibat.get_node("Sprite3D").visible = true
 	minibat.set_process(true)
+
+
+func _on_start_runner() -> void:
+	pass # Replace with function body.

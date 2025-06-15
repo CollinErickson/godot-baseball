@@ -33,6 +33,7 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 ]
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var pitcher = $Headon/Pitcher3D
+@onready var batter = $Headon/Batter3D
 @onready var ball = $Headon/Ball3D
 
 func _ready() -> void:
@@ -60,6 +61,9 @@ func _ready() -> void:
 	# Set up signals from pitcher
 	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
 	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
+	
+	# Set up signals from batter
+	batter.connect('start_runner', _on_batter_3d_start_runner)
 	
 	# Set up signals from ball
 	ball.connect("ball_over_wall_signal", _on_ball_over_wall_signal)
@@ -670,7 +674,7 @@ func _process(delta: float) -> void:
 						ball.set_state("ball_in_play")
 						
 						# Start running after .5 seconds
-						var batter = get_node("Headon/Batter3D")
+						#var batter = get_node("Headon/Batter3D")
 						batter.timer_action = "start_running_after_hit"
 						batter.get_node("Timer").wait_time = 0.5
 						batter.get_node("Timer").start()
@@ -1363,6 +1367,7 @@ func _on_batter_3d_start_runner() -> void:
 	runner_node.running_progress = 0.04
 	runner_node.max_running_progress = 0.04
 	runner_node.set_animation('running')
+	runner_node.set_state('running')
 	
 	# Turn off batter
 	get_node("Headon/Batter3D").visible = false
