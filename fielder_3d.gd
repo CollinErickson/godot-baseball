@@ -1450,3 +1450,7 @@ func reach_cover_info(base_position:Vector3) -> float:
 	if state == 'catching':
 		timetoreach += $Char3D.time_left_in_current_anim() / 2.5
 	return timetoreach
+
+func time_for_throw_to_reach(from_pos:Vector3, to_pos:Vector3) -> float:
+	return distance_xz(from_pos, to_pos) / max_throw_speed + \
+		time_throw_animation_release_point

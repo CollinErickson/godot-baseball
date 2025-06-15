@@ -649,7 +649,7 @@ func _process(delta: float) -> void:
 					vla = max(-50, min(80, vla))
 					printt('pci is', pci, ball.position, pci_distance_from_ball, vla)
 					# Debugging exitvelo/vla/hla
-					if true:
+					if !true:
 						vla = 45
 						hla = 10
 						exitvelo = 28.8
@@ -1631,7 +1631,7 @@ func decide_automatic_runners_actions():
 	# 7. Go to previous base if possible.
 	# 8. Go to closer of next and previous base.
 	# After, make sure that the decisions make sense as a whole, to 
-	#  avoid runners trying to pass others.
+	#  avoid runners trying to pass others or go to same base.
 	
 	var fielders_with_ball = get_tree().get_nodes_in_group('fielder_holding_ball')
 	var decisions = [null, null, null, null]
@@ -1667,49 +1667,50 @@ func decide_automatic_runners_actions():
 	#  b. Else, go as far as is safe and stop.
 	if fielder_with_ball == null:
 		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5 and outs_on_play < 0.5:
-				for i in range(len(runners)):
-					if i > .5 and runners[i].is_active() and decisions[i]==null:
-						#printt('SENDING BACK, CAN CATCH!!!', i)
-						# Check if can tag up
-						var time_for_throw_to_get_to_next_base = (
-							fielders[fftib[2]].distance_xz(
-								fftib[3], # intercept position
-								runners[i].base_positions[runners[i].start_base]
-							) / fielders[fftib[2]].max_throw_speed
-						) + fielders[fftib[2]].time_throw_animation_release_point
-						#printt('ON DECISION STEP 2', i, time_for_throw_to_get_to_next_base > 30./runners[i].SPEED,
-								#time_for_throw_to_get_to_next_base , 30./runners[i].SPEED)
-						if time_for_throw_to_get_to_next_base > 30./runners[i].SPEED:
-							decisions[i] = coalesce(decisions[i], -1)
-							decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
-							# TODO: Make sure runner can get back to tag up in time
-						
-						# Not really using decisions anymore, but something will be set here
-						decisions[i] = coalesce(decisions[i], -1)
-						#decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
-						# Send proportion of the way that they can make it safely back
-						var prop_to_run:float = 0
-						var time_for_ball_to_get_to_start_base = (
-							max(seconds_to_intercept - 1./60, 0) +
-							fielders[fftib[2]].distance_xz(
-								fftib[3], # intercept position
-								runners[i].base_positions[runners[i].start_base-1]
-							) / fielders[fftib[2]].max_throw_speed +
-							fielders[fftib[2]].time_throw_animation_release_point
+			for i in range(len(runners)):
+				if i > .5 and runners[i].is_active() and decisions[i]==null:
+					#printt('SENDING BACK, CAN CATCH!!!', i)
+					# Check if can tag up
+					var time_for_throw_to_get_to_next_base = (
+						fielders[fftib[2]].time_for_throw_to_reach(
+							fftib[3], # intercept position
+							runners[i].base_positions[runners[i].start_base]
 						)
-						# This calculates how far they could be right now and be safe,
-						#  but not where they should go to while remaining safe.
-						# Baserunner decision is every 0.1 seconds, so calculate where they should
-						#  be at that time plus a small margin
-						prop_to_run = max(0, time_for_ball_to_get_to_start_base - 0.13) * runners[i].SPEED / 30.
-						#if abs(runners[i].start_base-3)<1e-9:
-							#printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
-								#seconds_to_intercept, runners[i].SPEED,
-								#'progress:', runners[i].running_progress - runners[i].start_base,
-								#Time.get_ticks_msec())
-						# Times 0.9 makes them a little conservative
-						prop_to_run = min(prop_to_run, 1) * 0.9
-						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + prop_to_run)
+					)
+					#printt('ON DECISION STEP 2', i, time_for_throw_to_get_to_next_base > 30./runners[i].SPEED,
+							#time_for_throw_to_get_to_next_base , 30./runners[i].SPEED)
+					if time_for_throw_to_get_to_next_base > 30./runners[i].SPEED:
+						decisions[i] = coalesce(decisions[i], -1)
+						decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
+						# TODO: Make sure runner can get back to tag up in time
+					
+					# Not really using decisions anymore, but something will be set here
+					decisions[i] = coalesce(decisions[i], -1)
+					#decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base)
+					# Send proportion of the way that they can make it safely back
+					var prop_to_run:float = 0
+					var time_for_ball_to_get_to_start_base = (
+						max(seconds_to_intercept - 1./60, 0) +
+						fielders[fftib[2]].time_for_throw_to_reach(
+							fftib[3], # intercept position
+							runners[i].base_positions[runners[i].start_base-1]
+						)
+					)
+					# This calculates how far they could be right now and be safe,
+					#  but not where they should go to while remaining safe.
+					# Baserunner decision is every 0.1 seconds, so calculate where they should
+					#  be at that time plus a small margin
+					prop_to_run = max(0,
+									  time_for_ball_to_get_to_start_base - 0.13
+									) * runners[i].SPEED / 30.
+					#if abs(runners[i].start_base-3)<1e-9:
+						#printt('calculated prop_to_run', prop_to_run, time_for_ball_to_get_to_start_base,
+							#seconds_to_intercept, runners[i].SPEED,
+							#'progress:', runners[i].running_progress - runners[i].start_base,
+							#Time.get_ticks_msec())
+					# Times 0.9 makes them a little conservative
+					prop_to_run = min(prop_to_run, 1) * 0.9
+					decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + prop_to_run)
 		
 	# 3. If they are a force out and not at next base, go there
 	for i in range(len(runners)):
