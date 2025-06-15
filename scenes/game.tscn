@@ -30,5 +30,3 @@ layout_mode = 1
 layout_mode = 1
 
 [node name="Field3D" parent="." instance=ExtResource("2_f7g2t")]
-
-[connection signal="signal_play_done" from="Field3D" to="." method="_on_field_3d_signal_play_done"]

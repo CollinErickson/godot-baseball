@@ -52,6 +52,8 @@ func _ready() -> void:
 		user_is_away_team = true
 		user_is_home_team = false
 	
+	# Connect signals
+	$Field3D.connect('signal_play_done', _on_field_3d_signal_play_done)
 	$PauseMenu.connect("return_index_selected", _on_return_index_selected_from_pause_menu)
 
 	if this_is_root:
