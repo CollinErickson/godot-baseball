@@ -94,7 +94,7 @@ func reset(color) -> void:
 	
 	$Char3D.reset() # Resets rotation
 	set_look_at()
-	set_animation("idle")
+	set_animation("idle", true)
 	$Char3D.set_color(color)
 
 	
@@ -503,14 +503,11 @@ func can_be_force_out() -> bool:
 		max_running_progress < start_base + 1)
 
 
-func set_animation(new_anim):
-	if new_anim == animation:
+func set_animation(new_anim:String, force:bool=false) -> void:
+	if new_anim == animation and not force:
 		set_look_at() # Running but can change direction
 		return
 	animation = new_anim
-	#if new_anim == "idle":
-		#pass
-	#if new_anim == "moving":
 	$Char3D.start_animation(new_anim, false, false)
 	set_look_at()
 
