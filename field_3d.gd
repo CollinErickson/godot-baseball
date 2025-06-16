@@ -1850,7 +1850,7 @@ func update_minifield() -> void:
 									fielder.position)
 	
 	for runner in runners:
-		if runner.is_active():
+		if runner.is_active() or runner.force_to_base != null:
 			#printt('in field update_minifield runner:', runner.name)
 			$MiniField.get_node(str(runner.name)).visible = true
 			$MiniField.update_position($MiniField.get_node(str(runner.name)),

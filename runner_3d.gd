@@ -147,9 +147,9 @@ func sort_runners(a,b) -> bool:
 
 signal tag_up_signal
 func _physics_process(delta: float) -> void:
-	#if start_base == 2 and randf() < .1:
+	#if start_base == 1 and randf() < .1:
 		#printt('in runner pp', start_base, state, animation, is_running,
-			#running_progress, target_base, able_to_score)
+			#running_progress, target_base, able_to_score, force_to_base)
 	if is_frozen:
 		return
 	
@@ -302,6 +302,7 @@ func check_scored() -> void:
 	if (running_progress >= 4 and not scored_on_play):
 		running_progress = 4
 		if (able_to_score and
+			(force_to_base == null or force_to_base > 3.5) and
 			(not needs_to_tag_up or tagged_up_after_catch)):
 			# Runner scores
 			is_running = false
@@ -310,7 +311,12 @@ func check_scored() -> void:
 			signal_scored_on_play.emit()
 			set_state('scored_running_to_sideline')
 			$ScoredLabel3D.visible = true
-			printt('RUNNER SCORED, SHOULDNT BE VISIBLE', start_base)
+		elif force_to_base != null:
+			# Needs to go back to specified base
+			assert(force_to_base < 3.5, str(force_to_base))
+			is_running = true
+			set_animation('running')
+			set_state('running')
 		elif needs_to_tag_up and not tagged_up_after_catch:
 			# Doesn't score, needs to go back, stays in play
 			set_state('standing_on_base')
@@ -556,9 +562,11 @@ func ball_over_wall(base:int) -> bool:
 	# base: which base they should end up at
 	# Returns bool of whether they scored on play but shouldn't have
 	#  Field needs to know if it needs to take away a run
+	printt('in runner ball_over_wall', start_base, base, is_active(), scored_on_play)
 	if is_active():
 		force_to_base = base
 		send_runner_to_base(force_to_base)
+		printt('in runner ball_over_wall p1', start_base, target_base, state)
 		return false
 	elif scored_on_play and base < 3.5:
 		# They already scored on play but shouldn't have been allowed to
