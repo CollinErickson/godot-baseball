@@ -1720,7 +1720,7 @@ func decide_automatic_runners_actions():
 			decision_bases[i] = coalesce(decision_bases[i], runners[i].start_base + 1)
 	
 	# 4-8: Decide base to go to.
-	var min_time_fielder_release_throw:float # Time for fielder to release throw after acquiring ball
+	#var min_time_fielder_release_throw:float # Time for fielder to release throw after acquiring ball
 	if fielder_with_ball == null:
 		#printt('in field decide runners', fftib)
 		# Can have bug where no fielder is found
@@ -1728,13 +1728,13 @@ func decide_automatic_runners_actions():
 			fielder_with_ball = fielders[0]
 		else:
 			fielder_with_ball = fielders[fftib[2]]
-		min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
+		#min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
 	else:
 		# A fielder already has it, they may already have started animation
-		min_time_fielder_release_throw = 0
-		if fielder_with_ball.state != "throwing":
-			min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
-	
+		#min_time_fielder_release_throw = 0
+		#if fielder_with_ball.state != "throwing":
+			#min_time_fielder_release_throw = fielder_with_ball.time_throw_animation_release_point
+		pass
 	for i in range(len(runners)):
 		if runners[i].is_active() and decisions[i]==null:
 			# 4. Go to next next base if possible.
@@ -1744,17 +1744,15 @@ func decide_automatic_runners_actions():
 				var time_to_next_next_base = (next_next_base - runners[i].running_progress
 					) * 30 / runners[i].SPEED
 				var time_throw_next_next_base = (
-					fielder_with_ball.distance_xz(
+					fielder_with_ball.time_for_throw_to_reach(
 						intercept_position,
 						fielder_with_ball.base_positions[next_next_base-1]
-					) / fielder_with_ball.max_throw_speed +
-					min_time_fielder_release_throw
-				) + seconds_to_intercept
+					)) + seconds_to_intercept
 				var time_fielder_run_next_next_base = (
-					fielder_with_ball.distance_xz(
+					fielder_with_ball.time_to_run_to_pos(
 						intercept_position,
 						fielder_with_ball.base_positions[next_next_base-1]
-					) / fielder_with_ball.SPEED
+					)
 				) + seconds_to_intercept
 				var time_fielder_next_next_base = min(time_throw_next_next_base,
 												time_fielder_run_next_next_base)
@@ -1766,17 +1764,16 @@ func decide_automatic_runners_actions():
 			if next_base < 4.5:
 				var time_to_next_base = (next_base - runners[i].running_progress) * 30 / runners[i].SPEED
 				var time_throw_next_base = (
-					fielder_with_ball.distance_xz(
+					fielder_with_ball.time_for_throw_to_reach(
 						intercept_position,
 						fielder_with_ball.base_positions[next_base-1]
-					) / fielder_with_ball.max_throw_speed +
-					min_time_fielder_release_throw
+					)
 				) + seconds_to_intercept
 				var time_fielder_run_next_base = (
-					fielder_with_ball.distance_xz(
+					fielder_with_ball.time_to_run_to_pos(
 						intercept_position,
 						fielder_with_ball.base_positions[next_base-1]
-					) / fielder_with_ball.SPEED 
+					)
 				) + seconds_to_intercept
 				var time_fielder_next_base = min(time_throw_next_base,
 												time_fielder_run_next_base)
@@ -1794,13 +1791,14 @@ func decide_automatic_runners_actions():
 					var prev_base = floor(runners[i].running_progress)
 					var time_to_prev_base = abs(prev_base - runners[i].running_progress
 						) * 30 / runners[i].SPEED
-					var time_throw_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-						intercept_position,
-						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.max_throw_speed +
-						min_time_fielder_release_throw)
-					var time_fielder_run_prev_base = (seconds_to_intercept + fielder_with_ball.distance_xz(
-						intercept_position,
-						fielder_with_ball.base_positions[prev_base-1]) / fielder_with_ball.SPEED)
+					var time_throw_prev_base = (seconds_to_intercept +
+						fielder_with_ball.time_for_throw_to_reach(
+							intercept_position,
+							fielder_with_ball.base_positions[prev_base-1]))
+					var time_fielder_run_prev_base = (seconds_to_intercept +
+						fielder_with_ball.time_to_run_to_pos(
+							intercept_position,
+							fielder_with_ball.base_positions[prev_base-1]))
 					var time_fielder_prev_base = min(time_throw_prev_base,
 													 time_fielder_run_prev_base)
 					# Only go forward if can't go back safely and if it's closer with margin boost

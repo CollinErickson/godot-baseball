@@ -1452,5 +1452,15 @@ func reach_cover_info(base_position:Vector3) -> float:
 	return timetoreach
 
 func time_for_throw_to_reach(from_pos:Vector3, to_pos:Vector3) -> float:
-	return distance_xz(from_pos, to_pos) / max_throw_speed + \
+	# Air time
+	var out = distance_xz(from_pos, to_pos) / max_throw_speed + \
 		time_throw_animation_release_point
+	# Release time
+	if holding_ball and state == 'throwing':
+		pass
+	else:
+		out += time_throw_animation_release_point
+	return out
+
+func time_to_run_to_pos(from_pos:Vector3, to_pos:Vector3) -> float:
+	return distance_xz(from_pos, to_pos) / SPEED
