@@ -984,7 +984,7 @@ func _process(delta: float) -> void:
 			if check_if_play_done():
 				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
-				if time_since_play_done_consecutive > 10.6:
+				if time_since_play_done_consecutive > 0.6:
 					#play_done_fully = true
 					#get_node("FlashText").new_text("Play is done!", 3)
 					#get_tree().reload_current_scene()
@@ -1543,9 +1543,14 @@ func _on_ball_over_wall_signal():
 	if ball.is_foul:
 		_on_ball_3d_foul_ball()
 	else: # fair
-		if ball.hit_bounced: # Ground rule double
+		if ball.hit_bounced: # Automatic double
 			for runner in runners:
-				runner.ball_over_wall(runner.start_base + 2)
+				var bow:bool = runner.ball_over_wall(runner.start_base + 2)
+				# There's a rare case where a runner could have scored from 1st
+				#  but actually need to go back to 3rd.
+				# bow is bool of whether they already scored but shouldn't have
+				if bow:
+					runs_on_play -= 1
 		else: # Home run
 			# Tell all runners to run home
 			for runner in runners:

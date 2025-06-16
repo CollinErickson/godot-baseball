@@ -206,14 +206,11 @@ func _physics_process(delta: float) -> void:
 			min($Char3D.time_left_in_current_anim(), slide_anim_duration))
 		# Update position
 		if sliding_to_base > running_progress:
-			printt('in runner sliding forward rprog before is', running_progress, slide_anim_duration,
-				slide_prop, time_left_in_slide, slide_anim_duration)
 			# Sliding forward
 			var next_running_progress = sliding_to_base - \
 				slide_prop * time_left_in_slide / slide_anim_duration
 			check_will_reach_next_base(next_running_progress)
 			running_progress = next_running_progress
-			printt('in runner sliding forward rprog after is', running_progress, slide_anim_duration, slide_prop)
 		else:
 			# Sliding backward
 			running_progress = sliding_to_base + \
@@ -555,10 +552,24 @@ var base_positions = [
 	Vector3(0,0,0) # Home
 ]
 
-func ball_over_wall(base:int) -> void:
+func ball_over_wall(base:int) -> bool:
+	# base: which base they should end up at
+	# Returns bool of whether they scored on play but shouldn't have
+	#  Field needs to know if it needs to take away a run
 	if is_active():
 		force_to_base = base
 		send_runner_to_base(force_to_base)
+		return false
+	elif scored_on_play and base < 3.5:
+		# They already scored on play but shouldn't have been allowed to
+		scored_on_play = false
+		force_to_base = base
+		# Need to put them back in play
+		running_progress = 3.9 # Can't be 4, it'll think they scored 
+		set_state('standing_not_on_base')
+		send_runner_to_base(force_to_base)
+		return true
+	return false
 
 func set_click_arrow(mpos:Vector3, just_clicked:bool) -> int:
 	# Returns:
