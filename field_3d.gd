@@ -183,7 +183,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	
 	# Setup fielders
 	for fielder in fielders:
-		fielder.reset(throw_mode_)
+		fielder.reset(throw_mode_, defense_control_, user_is_pitching_team_)
 		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
 		#printt('setup fielder', fielder.posnum, fielding_team.defense_order, fielding_team.roster)
 		# Change speed of a fielder for testing (200 is super fast)

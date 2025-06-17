@@ -30,6 +30,9 @@ const possible_states:Array = ['free', 'throwing', 'catching']
 var state:String = "free"
 var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
+var defense_control:String = "" # "Automatic", "Throwing", "Manual"
+var user_fields:bool # If user is defense, whether they are controlling fielding
+var user_throws:bool # If user is defense, whether they are controlling throwing
 var prev_position:Vector3
 var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
@@ -68,7 +71,8 @@ func unpause() -> void:
 		timer.start()
 	timers_to_restart_on_unpause = []
 
-func reset(throw_mode_:String) -> void:
+func reset(throw_mode_:String, defense_control_:String,
+			user_is_pitching_team_:bool) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -102,7 +106,14 @@ func reset(throw_mode_:String) -> void:
 	timer_action = null
 	timer_args = null
 	timers_to_restart_on_unpause = []
+	
+	user_is_pitching_team = user_is_pitching_team_
 	throw_mode = throw_mode_
+	defense_control = defense_control_
+	assert(defense_control_ in ['Automatic', 'Throwing', 'Manual'])
+	user_fields = user_is_pitching_team_ and (defense_control_ in ['Manual'])
+	user_throws = user_is_pitching_team_ and (defense_control_ in ['Throwing', 'Manual'])
+	
 	$BadThrowLabel3D.visible = false
 	turn_off_bad_throw_label_timer = 0
 	turn_off_bad_catch_label_timer = 0
@@ -235,7 +246,7 @@ func _physics_process(delta: float) -> void:
 		if turn_off_bad_catch_label_timer <= 0:
 			$BadThrowLabel3D.visible = false
 			turn_off_bad_catch_label_timer = 0
-			if not user_is_pitching_team:
+			if not user_is_pitching_team or !user_fields:
 				if len(get_tree().get_nodes_in_group('fielder_holding_ball')) < 0.5:
 					fielder_dropped_catch_reassign_fielders_signal.emit(self)
 	
@@ -277,6 +288,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Check if user changed to alt fielder (only check from current selected fielder)
 	if user_is_pitching_team and Input.is_action_just_pressed("alt_fielder") \
+		and user_fields \
 		and is_selected_fielder:
 		var alt_fielders = get_tree().get_nodes_in_group("alt_fielder")
 		if (len(alt_fielders) > 0.5 and
@@ -290,7 +302,7 @@ func _physics_process(delta: float) -> void:
 	
 	# Move fielder to their assignment
 	if (((assignment in ["cover", "ball_click", "ball_carry"]) or
-		(assignment == 'ball' and not user_is_pitching_team)) and 
+		(assignment == 'ball' and (not user_is_pitching_team or !user_fields))) and 
 		assignment_pos != null and 
 		turn_off_bad_catch_label_timer <= 0):
 		var distance_from_target = distance_xz(position, assignment_pos)
@@ -518,7 +530,7 @@ func _physics_process(delta: float) -> void:
 			position_holding_ball_reassigned_fielders = position
 		
 		# CPU defense
-		if not user_is_pitching_team:
+		if not user_is_pitching_team or not user_fields:
 			if assignment != "ball_carry" or assignment == "ball_carry":
 				# Adding this for ball_carry so that they rethink regularly
 				#   Avoids issue of fielder running long distance when they shouldn't
@@ -538,12 +550,14 @@ func _physics_process(delta: float) -> void:
 						var run_it = decision_out[1]
 						
 						if run_it:
+							# Run somewhere
 							assignment_pos = base_positions[throw_to-1]
 							set_assignment("ball_carry")
 							add_to_group("fielder_running_with_ball_to_base")
 							running_with_ball_to_base = throw_to
 							#printt('fielder running to base', throw_to, posname)
-						else:
+						elif !user_is_pitching_team or !user_throws:
+							# Throw somewhere
 							remove_from_group("fielder_running_with_ball_to_base")
 							running_with_ball_to_base = null
 							if throw_to > 4.5:
@@ -566,7 +580,8 @@ func _physics_process(delta: float) -> void:
 			position_assignment_ball_reassigned_fielders = position
 	
 	# Check for click to move selected player or change selected player
-	if user_is_pitching_team and not click_used and Input.is_action_just_pressed("click") and is_selected_fielder:
+	if user_is_pitching_team and user_fields and not click_used and \
+		Input.is_action_just_pressed("click") and is_selected_fielder:
 		#printt('unused click')
 		var click_y0_pos = get_parent().get_parent().get_parent().get_mouse_y0_pos()
 		# Find nearest fielder (besides selected fielder), maybe change to them
@@ -874,7 +889,7 @@ func set_cutoff_fielder():
 		fielder.set_not_cutoff_fielder()
 
 	add_to_group("cutoff_fielder")
-	if user_is_pitching_team:
+	if user_is_pitching_team and user_fields:
 		if $AltFielderLabel3D.visible:
 			$AltFielderAndCutLabel3D.visible = true
 			$AltFielderLabel3D.visible = false
@@ -883,7 +898,7 @@ func set_cutoff_fielder():
 
 func set_not_cutoff_fielder():
 	remove_from_group("cutoff_fielder")
-	if user_is_pitching_team:
+	if user_is_pitching_team and user_fields:
 		if $AltFielderAndCutLabel3D.visible:
 			$AltFielderAndCutLabel3D.visible = false
 			$AltFielderLabel3D.visible = true
@@ -898,7 +913,7 @@ func set_alt_fielder():
 	
 	time_set_alt_fielder = Time.get_ticks_msec()
 	add_to_group("alt_fielder")
-	if user_is_pitching_team:
+	if user_is_pitching_team and user_fields:
 		if $CutoffLabel3D.visible:
 			$AltFielderAndCutLabel3D.visible = true
 			$CutoffLabel3D.visible = false
@@ -1021,6 +1036,7 @@ func set_holding_ball(hb:bool) -> void:
 		position_holding_ball_reassigned_fielders = null
 		time_last_began_holding_ball = null
 		if !user_is_pitching_team:
+			# Why do I need this here?
 			$Annulus.visible = false
 
 func setup_player(player_, team, is_home_team:bool) -> void:
@@ -1267,7 +1283,7 @@ func progress_on_line(p:Vector3, l1:Vector3, l2:Vector3) -> float:
 	return q_proj_on_l.length() / l.length()
 
 func ball_over_wall() -> void:
-	if not user_is_pitching_team:
+	if not user_is_pitching_team or not user_fields:
 		# Set assignment to have them stand
 		set_assignment('over_wall')
 		# Set animation to sad
@@ -1372,7 +1388,7 @@ func check_user_throw_input() -> bool:
 	# Check if user is starting throw. Can be done before holding ball, but only by selected fielder
 	if is_selected_fielder or is_targeted_fielder:
 		# Check for throw
-		if user_is_pitching_team:
+		if user_is_pitching_team and user_throws:
 			# Check for throwing ball end, this will start throw
 			if start_throw_started:
 				if Input.is_action_just_pressed("cancel_throw"):

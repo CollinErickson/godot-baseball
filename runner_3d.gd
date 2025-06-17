@@ -649,7 +649,7 @@ func angle_between(a:Vector3, b:Vector3) -> float:
 	return acos((a.dot(b)) / (a.length() * b.length()))
 
 func _on_animation_finished_from_char3d(anim_name) -> void:
-	printt('in runner anim finished', anim_name)
+	#printt('in runner anim finished', anim_name)
 	if anim_name == 'slide':
 		set_animation('idle')
 		running_progress = sliding_to_base
