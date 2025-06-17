@@ -4,6 +4,8 @@ extends Control
 var throw_mode:String = "BarOneWay" # "Button", "Bar", "BarOneWay"
 var bat_mode:String = "Target" # "Timing", "Target"
 var pitch_mode:String = "Button" # "Button", "Bar", "BarOneWay", "BarTwoWay", "Recenter"
+var baserunning_control:String = "Manual" # "Manual", "Automatic"
+var defense_control:String = "Manual" # "Manual", "Throwing", "Automatic"
 
 # Game variables
 var innings_per_game:int = 1
@@ -268,6 +270,8 @@ func reset_field() -> void:
 		throw_mode,
 		bat_mode,
 		pitch_mode,
+		baserunning_control,
+		defense_control,
 		user_input_method,
 		strikes + 1 >= strikes_per_pa - 0.5, # potential strikeout
 		balls + 1 >= balls_per_pa - 0.5 # potential walk
@@ -309,6 +313,8 @@ func set_settings(s:Dictionary) -> void:
 	bat_mode = s.bat_mode
 	pitch_mode = s.pitch_mode
 	throw_mode = s.throw_mode
+	baserunning_control = s.baserunning_control
+	defense_control = s.defense_control
 
 func set_vis(val:bool) -> void:
 	visible = val

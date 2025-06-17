@@ -21,6 +21,8 @@ var potential_walk:bool
 var user_is_pitching_team = true
 var user_is_batting_team = !true
 var bat_mode:String
+var baserunning_control:String
+var defense_control:String
 
 var is_frozen: bool = false
 var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
@@ -166,6 +168,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 			throw_mode_:String,
 			bat_mode_:String,
 			pitch_mode_:String,
+			baserunning_control_:String,
+			defense_control_:String,
 			user_input_method:String,
 			potential_strikeout_:bool,
 			potential_walk_:bool):
@@ -284,6 +288,8 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	runs_on_play = 0
 	user_is_batting_team = user_is_batting_team_
 	user_is_pitching_team = user_is_pitching_team_
+	baserunning_control = baserunning_control_
+	defense_control = defense_control_
 	potential_strikeout = potential_strikeout_
 	potential_walk = potential_walk_
 	rotate_camera_inertia = Vector2(0,0)
@@ -754,7 +760,7 @@ func _process(delta: float) -> void:
 	
 	# Move baserunners
 	if ball_in_play and not ball_over_wall:
-		if user_is_batting_team:
+		if user_is_batting_team and baserunning_control == 'Manual':
 			if Input.is_action_just_pressed("send_all_runners_forward"):
 				# Move all forward
 				for runner in runners:

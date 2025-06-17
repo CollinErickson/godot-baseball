@@ -77,6 +77,24 @@ func _on_settings_menu_selection(out_array:Array):
 			main_menu_settings['throw_mode'] = 'BarTwoWay'
 		_:
 			push_warning('Bad throw_mode from main menu settings')
+	# Baserunning control
+	match out_array[8]:
+		'Manual':
+			main_menu_settings['baserunning_control'] = 'manual'
+		'Automatic':
+			main_menu_settings['baserunning_control'] = 'automatic'
+		_:
+			push_warning('Bad baserunning_control from main menu settings')
+	# Defense control
+	match out_array[9]:
+		'Manual':
+			main_menu_settings['defense_control'] = 'manual'
+		'Throwing':
+			main_menu_settings['defense_control'] = 'throwing'
+		'Automatic':
+			main_menu_settings['defense_control'] = 'automatic'
+		_:
+			push_warning('Bad defense_control from main menu settings')
 	
 	# Restart main menu
 	$StartMenu.set_active(true)
