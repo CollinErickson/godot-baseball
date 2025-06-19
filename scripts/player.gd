@@ -15,6 +15,7 @@ var height_mult:float # 1 is average. Scales all dimensions of body
 var speed:float
 var throwspeed:float
 var throwaccuracy:float
+var catching:float
 var contact:float
 var power:float
 var pitching:float
@@ -40,6 +41,7 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	pitching = 0.
 	throwaccuracy = round(randf_range(40, 100))*1.
 	pitching_stamina = round(randf_range(40, 100))*1./20
+	catching = round(randf_range(40, 100))*1./20
 	current_game_pitching_stamina = pitching_stamina
 	
 	skin_color = skin_colors.pick_random()

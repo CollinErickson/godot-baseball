@@ -37,7 +37,9 @@ var prev_position:Vector3
 var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
 var turn_off_bad_catch_label_timer:float = 0
-var player
+
+const Player_tscn = preload("res://scripts/player.gd")
+var player: Player_tscn
 
 var timers_to_restart_on_unpause:Array = []
 var timer_action
@@ -361,11 +363,19 @@ func _physics_process(delta: float) -> void:
 						catch_prob_mult *= 2
 				# Hard hits/throws harder to catch
 				catch_prob -= (ball.velocity.length() - 5) * .001 * catch_prob_mult
+				var catch_prob_avg_fielder:float = catch_prob
+				# Player fielding skill
+				catch_prob = logit_adjust(catch_prob, (player.catching - 50) / 100)
+				
+				var catch_success:bool = randf() <= catch_prob
 				printt('in fielder: catch prob = ', catch_prob,
+					'catch_success=', catch_success,
+					'catch prob avg fielder = ', catch_prob_avg_fielder,
 					ball.velocity.length(),
 					ball.previous_bounce_pos,
+					player.catching,
 					catch_prob_mult)
-				if randf() <= catch_prob:
+				if catch_success:
 					# Catch successful
 					printt('In fielder, caught ball', posname,
 						distance_from_ball_xz, position,
@@ -1480,3 +1490,29 @@ func time_for_throw_to_reach(from_pos:Vector3, to_pos:Vector3) -> float:
 
 func time_to_run_to_pos(from_pos:Vector3, to_pos:Vector3) -> float:
 	return distance_xz(from_pos, to_pos) / SPEED
+
+func logit(x:float) -> float:
+	# x is between 0 and 1
+	x = max(1e-16, min(1 - 1e-16, x))
+	# Output is -Inf to Inf (actually capped to avoid Inf)
+	x = log(x / (1-x))
+	return x
+
+func invlogit(x:float) -> float:
+	# x is between -Inf and Inf, but not actually Inf
+	# Output is 0 to 1
+	x = 1 / (1 + exp(-x))
+	return x
+
+func logit_adjust(x:float, y:float) -> float:
+	# x is probability
+	# y is how much to adjust it on the logit scale
+	#   +/-0.5 moves 50% to 62.2% / 37.8%
+	#   +/-  1 moves 50% to 73.1% / 26.9%
+	#   +/-  2 moves 50% to 88.1% / 11.9%
+	# Avoid NaN/Inf issues, 0 and 1 don't get adjusted
+	if x <= 0:
+		return 0
+	if x >= 1:
+		return 1
+	return invlogit(logit(x) + y)
