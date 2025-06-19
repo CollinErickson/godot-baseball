@@ -448,7 +448,7 @@ func end_state() -> String:
 func setup_player(player, team, is_home_team:bool) -> void:
 	if player != null:
 		exists_at_start = true
-		SPEED = player.speed_mps()
+		SPEED = player.speed_yps()
 		slide_prop = slide_speed_multiplier * SPEED * slide_anim_duration / \
 			(30 * slide_anim_play_speed)
 	else: # x is null, no runner

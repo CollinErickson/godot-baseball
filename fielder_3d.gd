@@ -1052,8 +1052,8 @@ func set_holding_ball(hb:bool) -> void:
 func setup_player(player_, team, is_home_team:bool) -> void:
 	player = player_
 	throws = player.throws
-	SPEED = player.speed_mps()
-	max_throw_speed = player.throwspeed_mps()
+	SPEED = player.speed_yps()
+	max_throw_speed = player.throwspeed_yps()
 	catch_max_y = player.height_mult * 2.5
 	$Char3D.set_color_from_team(player, team, is_home_team)
 	$Char3D.set_glove_visible(throws)

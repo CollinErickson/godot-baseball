@@ -63,19 +63,19 @@ func create_random(speed_:float=randi_range(20,80)):
 	#p.print_()
 	return self
 
-func speed_mps() -> float:
+func speed_yps() -> float:
 	var SPEED = max(1e-8, speed / 10. + 3)
 	return SPEED
 
-func throwspeed_mps() -> float:
-	# Meter per second
-	var throwspeed_mps_ = 40
-	return throwspeed_mps_
+func throwspeed_yps() -> float:
+	# Yards per second
+	var throwspeed_yps_ = 40
+	return throwspeed_yps_
 
-func pitchspeed_mps() -> float:
-	# Meter per second
-	var pitchspeed_mps_ = 40
-	return pitchspeed_mps_
+func pitchspeed_yps() -> float:
+	# Yards per second
+	var pitchspeed_yps_ = 40
+	return pitchspeed_yps_
 	
 var skin_colors = [Color( .79, .46, .42),
 					Color(.24, .14, .08),
@@ -92,5 +92,5 @@ func update_pitcher_stamina() -> void:
 	#printt('in player update_pitcher_stamina after:', first, last, current_game_pitching_stamina)
 
 func height() -> float:
-	# Return player height in meters
+	# Return player height in yards
 	return 1.7 * height_mult
