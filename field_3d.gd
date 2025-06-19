@@ -438,8 +438,10 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success:bool,
 	assign_fielders_to_cover_bases([], target, [])
 	
 	# Set new targeted fielder
+	#  This happens after ball is thrown so they can prepare to catch
+	var target_fielder
 	if to_fielder != null:
-		to_fielder.set_targeted_fielder()
+		target_fielder = to_fielder
 	else:
 		# Thrown to base. Find nearest fielder to target. Should
 		var nearest_fielder = null
@@ -448,7 +450,10 @@ func _on_throw_ball_by_fielder(base, fielder, to_fielder, success:bool,
 			if fielder_.distance_xz(fielder_.position, target) < nearest_fielder_dist:
 				nearest_fielder_dist = fielder_.distance_xz(fielder_.position, target)
 				nearest_fielder = fielder_
-		nearest_fielder.set_targeted_fielder()
+		target_fielder = nearest_fielder
+	assert(target_fielder != null)
+	var time_until_catch = time_until_fielder_catches_throw(target_fielder)
+	target_fielder.set_targeted_fielder(time_until_catch)
 
 
 func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
@@ -990,7 +995,7 @@ func _process(delta: float) -> void:
 			if check_if_play_done():
 				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
-				if time_since_play_done_consecutive > 0.6:
+				if time_since_play_done_consecutive > 10.6:
 					#play_done_fully = true
 					#get_node("FlashText").new_text("Play is done!", 3)
 					#get_tree().reload_current_scene()
@@ -1863,3 +1868,52 @@ func update_minifield() -> void:
 										runner.position)
 		else:
 			$MiniField.get_node(str(runner.name)).visible = false
+
+
+func time_until_fielder_catches_throw(fielder):
+	# Returns time until catch (float) or null if can't catch
+	printt('in field starting time_until_fielder_catches_throw')
+	# Set up temp ball
+	tmp_ball = ball_3d_scene.instantiate()
+	tmp_ball.name = "tmp_ball_from_time_until_fielder_catches_throw"
+	tmp_ball.is_sim = true
+	tmp_ball.set_state(ball.state)
+	assert(tmp_ball.state == 'thrown')
+	get_node("Headon").add_child(tmp_ball)
+	tmp_ball.position = ball.position
+	tmp_ball.velocity = ball.velocity
+	tmp_ball.pitch_already_done = true 
+	tmp_ball.hit_bounced_position = ball.hit_bounced_position
+	tmp_ball.hit_bounced_time = ball.hit_bounced_time
+	tmp_ball.frame_rotation = ball.frame_rotation
+	
+	#printt('pos before', tmp_ball.position)
+	#tmp_ball._physics_process(1)
+	#printt('pos after', tmp_ball.position)
+	var take_steps = func(nsteps, delta_):
+		for istep in range(nsteps):
+			tmp_ball._physics_process(delta_)
+	
+	var numsteps = 1
+	var delta = 1./30
+	var elapsed_time = 0
+	var found_catch:bool = false
+	while elapsed_time < 5:
+		# Take step
+		take_steps.call(numsteps, delta)
+		elapsed_time += numsteps * delta
+		# Check if ball is catchable
+		var distance_from_ball_xz = fielder.distance_xz(
+			fielder.position, tmp_ball.position)
+		if distance_from_ball_xz < fielder.catch_radius_xz and \
+			tmp_ball.position.y < fielder.catch_max_y:
+			found_catch = true
+			break
+	
+	get_node("Headon").remove_child(tmp_ball)
+	tmp_ball.queue_free()
+	
+	if found_catch:
+		return elapsed_time
+	# Doesn't enter catch radius, leave it
+	return null

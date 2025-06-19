@@ -24,9 +24,10 @@ var running_with_ball_to_base = null
 var start_position = Vector3()
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
 @onready var runners = get_tree().get_nodes_in_group("runners")
-@onready var ball = get_tree().get_first_node_in_group("ball")
+const BallClass = preload("res://ball_3d.gd")
+@onready var ball:BallClass = get_tree().get_first_node_in_group("ball")
 var animation:String = "idle"
-const possible_states:Array = ['free', 'throwing', 'catching']
+const possible_states:Array = ['free', 'throwing', 'precatch', 'catching']
 var state:String = "free"
 var time_in_state:float = 0
 var throw_mode:String = "" # "Button", "Bar"
@@ -37,6 +38,7 @@ var prev_position:Vector3
 var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
 var turn_off_bad_catch_label_timer:float = 0
+var target_fielder_info:Dictionary = {}
 
 const Player_tscn = preload("res://scripts/player.gd")
 var player: Player_tscn
@@ -119,6 +121,7 @@ func reset(throw_mode_:String, defense_control_:String,
 	$BadThrowLabel3D.visible = false
 	turn_off_bad_throw_label_timer = 0
 	turn_off_bad_catch_label_timer = 0
+	target_fielder_info = {}
 	running_with_ball_to_base = null
 	remove_from_group("fielder_running_with_ball_to_base")
 	$Arrow2DOffscreenDirection.visible = false
@@ -225,8 +228,9 @@ signal alt_fielder_selected_signal
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
 	#printt('selected fielder', posname, assignment)
-	#if randf_range(0,1)<.01 and posname == '2B':
-		#printt('fielder user pit team', posname, user_is_pitching_team, state, is_selected_fielder)
+	#if randf_range(0,1)<.1 and posname == '2B':
+		#printt('fielder user pit team', posname, user_is_pitching_team, state,
+			#assignment, animation, is_selected_fielder, is_targeted_fielder)
 	if is_frozen:
 		return
 	#if posname == 'SS':
@@ -277,6 +281,7 @@ func _physics_process(delta: float) -> void:
 		check_tagging_runner()
 		# Need to update ball's position every frame for camera
 		ball.global_position = $Char3D.get_hand_global_position(throws)
+		# Check for throw loading
 		check_user_throw_input()
 		# Exit state if there's a bug
 		if time_in_state > 5000:
@@ -284,8 +289,34 @@ func _physics_process(delta: float) -> void:
 			push_error('error in fielder, was in catching state too long', posname)
 		# Remain in catching state until anim finishes
 		return
+	
+	if state == 'precatch':
+		# Check for throw loading
+		check_user_throw_input()
+		# Exit state if there's a bug
+		if time_in_state > 5000:
+			set_state('free')
+			push_error('error in fielder, was in precatch state too long', posname)
+		# Switch to catch if is catchable, even if didn't catch it
+		if check_for_catch()[0]:
+			set_state('catching')
+		return
 
 	assert(state == 'free')
+	
+	# Check if targeted fielder should change to precatch state
+	if is_targeted_fielder and target_fielder_info['time_until_catch'] != null:
+		#printt('in fielder targeted time until catch is',
+			#target_fielder_info['time_until_catch'], state)
+		target_fielder_info['time_until_catch'] = \
+			target_fielder_info['time_until_catch'] - delta
+		if target_fielder_info['time_until_catch'] <= .20:
+			# Catch will start soon, so start precatch now for animation
+			# Start precatch
+			set_state('precatch')
+			set_animation('catch')
+			return
+	
 	var moved_this_process = false
 	
 	# Check if user changed to alt fielder (only check from current selected fielder)
@@ -343,87 +374,10 @@ func _physics_process(delta: float) -> void:
 	
 	# Check if they caught the ball
 	if assignment in ["ball", "cover", "wait_to_receive", "ball_click"]:
-		if ball.can_be_caught():
-			var distance_from_ball_xz = distance_xz(position, ball.position)
-			#if posname == '2B':
-				#printt('in fielder 2B checking catch', distance_from_ball_xz,
-				#1)
-			if (distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
-				Time.get_ticks_msec() - ball.time_last_thrown > 250 and
-				(ball.throw_start_pos==null or ball.throw_progress >= .9) and
-				turn_off_bad_catch_label_timer <= 0):
-				# Catch prob depends on throw speed and distance since last bounce
-				var catch_prob:float = 1
-				var catch_prob_mult:float = 1
-				# Bounces are harder to catch
-				if ball.previous_bounce_pos != null:
-					if ball.previous_bounce_pos.distance_to(ball.position) < 4:
-						catch_prob_mult *= 4
-					else:
-						catch_prob_mult *= 2
-				# Hard hits/throws harder to catch
-				catch_prob -= (ball.velocity.length() - 5) * .001 * catch_prob_mult
-				var catch_prob_avg_fielder:float = catch_prob
-				# Player fielding skill
-				catch_prob = logit_adjust(catch_prob, (player.catching - 50) / 100)
-				
-				var catch_success:bool = randf() <= catch_prob
-				printt('in fielder: catch prob = ', catch_prob,
-					'catch_success=', catch_success,
-					'catch prob avg fielder = ', catch_prob_avg_fielder,
-					ball.velocity.length(),
-					ball.previous_bounce_pos,
-					player.catching,
-					catch_prob_mult)
-				if catch_success:
-					# Catch successful
-					printt('In fielder, caught ball', posname,
-						distance_from_ball_xz, position,
-						ball.position,
-						Time.get_ticks_msec() - ball.time_last_thrown,
-						ball.throw_progress, Time.get_ticks_msec())
-					var ball_position_before_fielded = ball.position
-					ball.global_position = $Char3D.get_hand_global_position(throws)
-					set_holding_ball(true)
-					set_assignment("holding_ball")
-					printt('in fielder, caught ball, set anim to catch and state to catching')
-					var anim_name:String = ''
-					if Time.get_ticks_msec() -  ball.time_last_thrown < 3000 and \
-						 ball_position_before_fielded.y > player.height()*.25 and \
-						 ball_position_before_fielded.y < player.height()*.95:
-						# If ball was thrown and in chest region, do 1B style catch
-						anim_name = 'catch'
-					elif ball_position_before_fielded.y < player.height()*.5:
-						anim_name = 'catch_grounder'
-					elif ball_position_before_fielded.y < player.height()*1.05:
-						anim_name = 'catch_chest'
-					else:
-						anim_name = 'catch_jump'
-					set_animation(anim_name)
-					set_state('catching')
-					assignment_pos = null
-					ball_fielded.emit(self, ball_position_before_fielded)
-					if user_is_pitching_team:
-						set_selected_fielder()
-					# Since new state, return (avoid movement anim change)
-					return
-				else:
-					# Catch dropped
-					printt('in fielder: catch dropped')
-					# Move ball in random direction
-					ball.velocity = Vector3(randfn(0,1),randfn(0,1),randfn(0,1)
-						).normalized() * max_throw_speed / 10
-					turn_off_bad_catch_label_timer = 1
-					$BadThrowLabel3D.visible = true
-					# Stop them
-					set_animation('idle')
-					if not user_is_pitching_team:
-						set_assignment("wait_to_receive")
-						assignment_pos = null
-						# Reassign fielders since no one is chasing ball
-						#fielder_moved_reassign_fielders_signal.emit(self)
-
-					
+		var check_catch_out = check_for_catch()
+		if check_catch_out[0] and check_catch_out[1]:
+			# Change of state, don't check for movement and other stuff
+			return
 
 	# Check if user moves
 	if (user_is_pitching_team and
@@ -865,8 +819,10 @@ func set_selected_fielder() -> void:
 	else:
 		$Annulus2.visible = true
 
-func set_targeted_fielder() -> void:
+func set_targeted_fielder(time_until_catch) -> void:
 	printt('in fielder, set_targeted_fielder', posname)
+	# Store info
+	target_fielder_info = {'time_until_catch':time_until_catch}
 	# Unselect all other players
 	var selected_fielders = get_tree().get_nodes_in_group("selected_fielder")
 	for fielder in selected_fielders:
@@ -1349,7 +1305,8 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 		set_animation('idle')
 	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump']:
 		# End of catch: change state and anim.
-		# Should already have assignment holding_ball
+		# Should already have assignment holding_ball if they caught it
+		# If they didn't catch, they should have assignment too?
 		set_state('free')
 		set_animation('idle')
 	elif anim_name == 'pitch':
@@ -1516,3 +1473,104 @@ func logit_adjust(x:float, y:float) -> float:
 	if x >= 1:
 		return 1
 	return invlogit(logit(x) + y)
+
+
+func check_for_catch() -> Array:
+	# Returns array
+	# If can't catch [false]
+	# If dropped [true, false]
+	# If caught ball [true,true]
+	if !ball.can_be_caught():
+		return [false]
+	
+	var distance_from_ball_xz = distance_xz(position, ball.position)
+	#if posname == '2B':
+		#printt('in fielder 2B checking catch', distance_from_ball_xz,
+		#1)
+	if !(distance_from_ball_xz < catch_radius_xz and ball.position.y < catch_max_y and 
+		Time.get_ticks_msec() - ball.time_last_thrown > 250 and
+		(ball.throw_start_pos==null or ball.throw_progress >= .9) and
+		turn_off_bad_catch_label_timer <= 0):
+		# Not within reach
+		return [false]
+	# Catchable ball and within catch box
+	# Catch prob depends on throw speed and distance since last bounce
+	var catch_prob:float = 1
+	var catch_prob_mult:float = 1
+	# Bounces are harder to catch
+	if ball.previous_bounce_pos != null:
+		if ball.previous_bounce_pos.distance_to(ball.position) < 4:
+			catch_prob_mult *= 4
+		else:
+			catch_prob_mult *= 2
+	# Hard hits/throws harder to catch
+	catch_prob -= (ball.velocity.length() - 5) * .001 * catch_prob_mult
+	var catch_prob_avg_fielder:float = catch_prob
+	# Player fielding skill
+	catch_prob = logit_adjust(catch_prob, (player.catching - 50) / 100)
+	
+	var catch_success:bool = randf() <= catch_prob
+	printt('in fielder: catch prob = ', catch_prob,
+		'catch_success=', catch_success,
+		'catch prob avg fielder = ', catch_prob_avg_fielder,
+		ball.velocity.length(),
+		ball.previous_bounce_pos,
+		player.catching,
+		catch_prob_mult)
+	if catch_success:
+		# Catch successful
+		printt('In fielder, caught ball', posname,
+			distance_from_ball_xz, position,
+			ball.position,
+			Time.get_ticks_msec() - ball.time_last_thrown,
+			ball.throw_progress, Time.get_ticks_msec())
+		var ball_position_before_fielded = ball.position
+		ball.global_position = $Char3D.get_hand_global_position(throws)
+		set_holding_ball(true)
+		set_assignment("holding_ball")
+		if state == 'precatch':
+			# Already in animation
+			printt('in fielder, caught ball from precatch, dont change anim, do change state to catching')
+			pass
+		else:
+			printt('in fielder, caught ball but not precatch, set anim to catch and state to catching')
+			var anim_name:String = ''
+			if Time.get_ticks_msec() -  ball.time_last_thrown < 3000 and \
+				 ball_position_before_fielded.y > player.height()*.25 and \
+				 ball_position_before_fielded.y < player.height()*.95:
+				# If ball was thrown and in chest region, do 1B style catch
+				anim_name = 'catch'
+			elif ball_position_before_fielded.y < player.height()*.5:
+				anim_name = 'catch_grounder'
+			elif ball_position_before_fielded.y < player.height()*1.05:
+				anim_name = 'catch_chest'
+			else:
+				anim_name = 'catch_jump'
+			set_animation(anim_name)
+		set_state('catching')
+		assignment_pos = null
+		ball_fielded.emit(self, ball_position_before_fielded)
+		if user_is_pitching_team:
+			set_selected_fielder()
+		# Since new state, return (avoid movement anim change)
+		return [true, true]
+	else:
+		# Catch dropped
+		printt('in fielder: catch dropped')
+		# Move ball in random direction
+		ball.velocity = Vector3(randfn(0,1),randfn(0,1),randfn(0,1)
+			).normalized() * max_throw_speed / 10
+		turn_off_bad_catch_label_timer = 1
+		$BadThrowLabel3D.visible = true
+		# Stop them
+		if state != 'precatch':
+			set_animation('idle')
+		if user_is_pitching_team and user_fields:
+			set_assignment('ball')
+		else:
+			set_assignment("wait_to_receive")
+			assignment_pos = null
+			# Reassign fielders since no one is chasing ball
+			#fielder_moved_reassign_fielders_signal.emit(self)
+		# Catchable but dropped
+		return [true, false]
