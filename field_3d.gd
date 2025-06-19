@@ -226,6 +226,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	# Reset after setup since player info is needed to set up handedness
 	$Headon/Batter3D.reset(bat_mode, user_is_batting_team_)
 	$PrepitchFieldOverlay.setup_batter(batter_)
+	setup_strike_zone(batter_)
 
 	# Setup pitcher
 	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method, user_is_pitching_team_)
@@ -1917,3 +1918,15 @@ func time_until_fielder_catches_throw(fielder):
 		return elapsed_time
 	# Doesn't enter catch radius, leave it
 	return null
+
+func setup_strike_zone(batter_) -> void:
+	# Set up strike zone height for batter
+	var top:float = batter_.strike_zone_top()
+	var bottom:float = batter_.strike_zone_bottom()
+	assert(top > bottom)
+	$Headon/StrikeZone/StrikeZoneTop.position.y = top
+	$Headon/StrikeZone/StrikeZoneBottom.position.y = bottom
+	$Headon/StrikeZone/StrikeZoneLeft.position.y = .5*(top + bottom)
+	$Headon/StrikeZone/StrikeZoneRight.position.y = .5*(top + bottom)
+	printt('mesh size', $Headon/StrikeZone/StrikeZoneLeft.mesh.size)
+	$Headon/StrikeZone/StrikeZoneLeft.mesh.size.y = top - bottom + 0.03

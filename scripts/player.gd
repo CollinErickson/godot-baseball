@@ -94,3 +94,11 @@ func update_pitcher_stamina() -> void:
 func height() -> float:
 	# Return player height in yards
 	return 1.7 * height_mult
+
+func strike_zone_top() -> float:
+	# Return height of the top of the strike zone in yards
+	return .58 * height()
+	
+func strike_zone_bottom() -> float:
+	# Return height of the top of the strike zone in yards
+	return .22 * height()
