@@ -670,6 +670,8 @@ func _process(delta: float) -> void:
 					
 					if actual_contact:
 						print('In field: CONTACT')
+						# Play sound
+						AudioManager.play_sound('hit_contact')
 						# PS4 controllers don't vibrate, can't test this
 						#Input.start_joy_vibration(0,1,1,1)
 						contact_done = true
