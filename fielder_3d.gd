@@ -1303,7 +1303,8 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 		# Should already have assignment wait_to_receive or assigned to base
 		set_state('free')
 		set_animation('idle')
-	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump']:
+	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump',
+		'catch_high']:
 		# End of catch: change state and anim.
 		# Should already have assignment holding_ball if they caught it
 		# If they didn't catch, they should have assignment too?
@@ -1542,9 +1543,12 @@ func check_for_catch() -> Array:
 				anim_name = 'catch'
 			elif ball_position_before_fielded.y < player.height()*.5:
 				anim_name = 'catch_grounder'
-			elif ball_position_before_fielded.y < player.height()*1.05:
+			elif ball_position_before_fielded.y < player.height()*0.9:
 				anim_name = 'catch_chest'
+			elif ball_position_before_fielded.y < player.height()*1.9:
+				anim_name = 'catch_high'
 			else:
+				# Avoiding jump for now, looks bad
 				anim_name = 'catch_jump'
 			set_animation(anim_name)
 		set_state('catching')

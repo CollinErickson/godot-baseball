@@ -99,6 +99,11 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 		return 'Goalkeeper Catch Face'
 	elif anim_name == "catch_jump":
 		return 'Goalkeeper Catch Jump Straight'
+	elif anim_name == "catch_high":
+		if throwsR:
+			return 'Body Block R'
+		else:
+			return 'Body Block L'
 	elif anim_name == "slide":
 		return 'Running Slide'
 	else:
@@ -129,6 +134,8 @@ func map_anim_name_back(anim_name:String) -> String:
 		return 'catch_chest'
 	if anim_name == 'Goalkeeper Catch Jump Straight':
 		return 'catch_jump'
+	if anim_name in ['Body Block R', 'Body Block L']:
+		return 'catch_high'
 	if anim_name == 'Running Slide':
 		return 'slide'
 	#if anim_name == '':
@@ -139,7 +146,8 @@ func map_anim_name_back(anim_name:String) -> String:
 func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 	var anim_speed:float = 1.
 	if map_anim_name(anim_name, batsR, throwsR).begins_with("Rifle") or \
-		map_anim_name(anim_name, batsR, throwsR).begins_with("Goalkeeper"):
+		map_anim_name(anim_name, batsR, throwsR).begins_with("Goalkeeper") or \
+		map_anim_name(anim_name, batsR, throwsR).begins_with("Body Block"):
 			anim_speed = 2.5
 	if map_anim_name(anim_name, batsR, throwsR) == 'Running Slide':
 		anim_speed = 2.
