@@ -7,6 +7,8 @@ var wall_color:Color = Color(0,0,1,1)
 var warning_track_color:Color = Color("#2b2b00")
 var stands_color:Color = Color(1,0,0)
 
+const gs1 = preload("res://resources/stadium/grandstand_1.tscn")
+
 # wall_array is array with:
 # (angle: 0 is LF, 90 is RF, distance from home in YD, height in YD)
 # To connect back to starting point, duplicate first element at end
@@ -35,6 +37,8 @@ var wall_array:Array = [
 	#[90, 400*sqrt(3)/2., 100]
 #]
 
+var grandstand_nodes:Array = []
+var grandstand_normals:Array = []
 var wall_coords:Array = []
 var along_walls:Array = []
 var normal_outs:Array = []
@@ -101,16 +105,19 @@ func make_wall():
 	#var indices = PackedInt32Array()
 	var colors = PackedColorArray()
 	
+	grandstand_nodes = []
+	grandstand_normals = []
+	
 	# Vertices
 	for i in range(len(wall_array) - 1):
 		#if wall_array[i][0] >= wall_array[i+1][0]:
 			#printerr("Bad angle in wall\t", wall_array[i], wall_array[i+1])
-		var v1 = wall_array[i][1] * Vector3(0,0,1).rotated(
+		var v1:Vector3 = wall_array[i][1] * Vector3(0,0,1).rotated(
 			Vector3(0,1,0), (90-wall_array[i][0])*PI/180)
-		var v1up = v1 + Vector3(0, wall_array[i][2],0)
-		var v2 = wall_array[i+1][1] * Vector3(0,0,1).rotated(
+		var v1up:Vector3 = v1 + Vector3(0, wall_array[i][2],0)
+		var v2:Vector3 = wall_array[i+1][1] * Vector3(0,0,1).rotated(
 			Vector3(0,1,0), (90-wall_array[i+1][0])*PI/180)
-		var v2up = v2 + Vector3(0, wall_array[i+1][2],0)
+		var v2up:Vector3 = v2 + Vector3(0, wall_array[i+1][2],0)
 		#if wall_array[i][0] >= wall_array[i+1][0]:
 			#printt('WALL VERTEXES', v1, v1up, v2, v2up)
 		
@@ -128,6 +135,30 @@ func make_wall():
 		var norm_vec:Vector3 = (v1 - v2).cross(v1up - v1).normalized()
 		for j in range(6):
 			normals.push_back(norm_vec)
+		
+		# Add stadium section
+		# Add multiple sections if needed
+		# Each section is about 13m wide
+		var n_sections:int = max(1, floori(v1.distance_to(v2) / 36))
+		#printt('in wall gs n_sections', n_sections)
+		for j in range(n_sections):
+			var gs2 = gs1.instantiate()
+			add_child(gs2)
+			# Set rotation
+			gs2.rotate_y(atan((v2.x - v1.x) / (v2.z - v1.z)) + PI)
+			if wall_array[i][0] > 90 and wall_array[i][0] < 270:
+				gs2.rotate_y(PI)
+			gs2.position = (v1 + v2) / 2.
+			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
+			gs2.position -= norm_vec * 17
+			gs2.position.y = min(v1up.y, v2up.y)
+			grandstand_nodes.push_back(gs2)
+			
+			# Store normal vector to know when to hide sections
+			var gs_norm:Vector3 = norm_vec
+			# Rotate to match the face of the seats?
+			#gs_norm.rotated(v2 - v1, -PI/4)
+			grandstand_normals.push_back(gs_norm)
 		
 	# Colors
 	for i in range(len(verts)):
@@ -592,3 +623,14 @@ func mirror_vector_across_plane(v: Vector3, u1: Vector3, u2: Vector3, u3: Vector
 	#printt('MIRRORING lengths', (tangent_v - normal_v).length(), v.length())
 	return tangent_v - normal_v
 	
+func set_vis_based_on_camera(cam:Camera3D) -> void:
+	# Set grandstand sections to only be visible if facing the camera
+	# Not great for ones that are near perpendicular
+	# Should instead use if it's facing the slant of seats
+	#print('in wall set_vis_based_on_camera')
+	var camdir = cam.get_global_transform().basis.z
+	#printt('in wall set gs nodes are', grandstand_nodes, camdir)
+	for i in range(len(grandstand_nodes)):
+		var gsn = grandstand_nodes[i]
+		#printt('in wall set gs', normal_outs[i].dot(camdir))
+		gsn.visible = grandstand_normals[i].dot(camdir) < 0

@@ -990,7 +990,10 @@ func _process(delta: float) -> void:
 		if cam_rotated:
 			# TODO: Not sure this does anything usefuL
 			transform = transform.orthonormalized()
-
+	
+	# Hide/show walls based on camera position
+	$Ground/Wall.set_vis_based_on_camera(cam)
+	
 	# Check if play is done, but not every time
 	if ball_in_play:
 		time_since_check_if_play_done_checked += delta

@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=64 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" uid="uid://bl3nlh5ft1jhu" path="res://field_3d.gd" id="1_pctx6"]
@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://ccbr5gjhlqkux" path="res://scenes/prepitch_field_overlay.tscn" id="18_opycq"]
 [ext_resource type="Texture2D" uid="uid://bk56gldhalnup" path="res://sprites/baseball320.png" id="19_uw0wu"]
 [ext_resource type="PackedScene" uid="uid://ekrl3y0l42kb" path="res://scenes/mini_field.tscn" id="20_fgd4v"]
+[ext_resource type="PackedScene" uid="uid://byo8otr1j0s4q" path="res://resources/stadium/grandstand_1.tscn" id="23_tdydm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
@@ -495,3 +496,8 @@ script = ExtResource("14_g2qjr")
 
 [node name="MiniField" parent="." instance=ExtResource("20_fgd4v")]
 position = Vector2(1200, 100)
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="grandstand4" parent="Node3D" instance=ExtResource("23_tdydm")]
+visible = false

@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://byo8otr1j0s4q"]
+
+[ext_resource type="PackedScene" uid="uid://jg778nw3fq8v" path="res://resources/stadium/grandstand1.fbx" id="1_6no1q"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6no1q"]
+albedo_color = Color(0.442911, 0.442911, 0.442911, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1wehv"]
+material = SubResource("StandardMaterial3D_6no1q")
+size = Vector3(5.5, 30, 13)
+
+[node name="grandstand1" instance=ExtResource("1_6no1q")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="11"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.25, -15, 0)
+mesh = SubResource("BoxMesh_1wehv")
