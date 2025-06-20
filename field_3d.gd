@@ -1516,6 +1516,27 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 	elif pitch_is_strike and potential_strikeout:
 		get_node("FlashText").new_text("Strike out!", 3)
 	
+	# If baserunner is stealing, switch cam, put ball in catcher, play on
+	runners[1].start_stealing()
+	for runner in runners:
+		if runner.is_active() and runner.state == 'running':
+			runners[0].set_state('not_exist')
+			runners[0].exists_at_start = false
+			
+			ball_in_play = true
+			var catcher = get_fielder_with_posname('C')
+			catcher.set_state('free')
+			catcher.set_holding_ball(true)
+			catcher.visible = true
+			catcher.set_assignment('ball_carry')
+			assign_fielders_to_cover_bases([], catcher.position, ["C"])
+			
+			$TimerCameraChange.wait_time = .3
+			next_camera = $Headon/Cameras/Camera3DHigherHome
+			$TimerCameraChange.start()
+			return
+	# No one is stealing, play can end
+	
 	# Start end of play timer
 	$PlayOverTimer.wait_time = 1
 	$PlayOverTimer.start()

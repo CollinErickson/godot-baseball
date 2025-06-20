@@ -347,7 +347,8 @@ func update_position():
 func send_runner(direction: int, can_go_past:bool=true) -> void:
 	# direction: 1 if forward, -1 if backward
 	# can_go_past: If near next base, should they go to following base?
-	#printt('In runner send_runner', start_base, direction, can_go_past)
+	printt('In runner send_runner', start_base, direction, can_go_past,
+		running_progress, target_base, state)
 	if not is_active():
 		return
 	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
@@ -371,7 +372,7 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 				new_target_base = ceil(running_progress)
 			elif can_go_past and running_progress > floor(running_progress) + 1 - .3:
 				# If already going forward and near next base, send to following base
-				new_target_base = floor(running_progress)
+				new_target_base = floor(running_progress) + 2
 			else:
 				# Can't go past, only go to next
 				new_target_base = floor(running_progress) + 1
@@ -707,3 +708,9 @@ func check_will_reach_next_base(next_running_progress:float) -> void:
 	if max_running_progress < start_base + 1 and next_running_progress >= start_base + 1:
 		reached_next_base = true
 		reached_next_base_signal.emit()
+
+func start_stealing() -> void:
+	set_animation('running')
+	runners[1].set_state('running')
+	runners[1].is_running = true
+	runners[1].target_base = start_base + 1

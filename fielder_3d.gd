@@ -228,9 +228,10 @@ signal alt_fielder_selected_signal
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
 	#printt('selected fielder', posname, assignment)
-	#if randf_range(0,1)<.1 and posname == '2B':
-		#printt('fielder user pit team', posname, user_is_pitching_team, state,
-			#assignment, animation, is_selected_fielder, is_targeted_fielder)
+	if randf_range(0,1)<1.1 and posname == '2B':
+		printt('in fielder process:', posname, user_is_pitching_team, state,
+			assignment, animation, is_selected_fielder, is_targeted_fielder,
+			Time.get_ticks_msec()/1000.)
 	if is_frozen:
 		return
 	#if posname == 'SS':
@@ -315,6 +316,8 @@ func _physics_process(delta: float) -> void:
 			# Start precatch
 			set_state('precatch')
 			set_animation('catch')
+			# Don't let it repeat this
+			target_fielder_info['time_until_catch'] = null
 			return
 	
 	var moved_this_process = false
@@ -928,7 +931,8 @@ func time_to_reach_point(to:Vector3):
 		time += delta
 
 func set_animation(new_anim):
-	#printt('in fielder setting animation', new_anim)
+	if posname == '2B':
+		printt('in fielder setting animation', new_anim, state)
 	if new_anim == animation:
 		return
 	animation = new_anim

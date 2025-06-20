@@ -353,6 +353,7 @@ func _physics_process(delta: float) -> void:
 			if not is_sim:
 				get_node("AnimatedSprite3D").stop()
 				print('in ball: emitting that pitch completed without hit')
+				spin_acceleration = Vector3(0,0,0)
 				pitch_completed_unhit.emit(pitch_is_ball, pitch_is_strike)
 	
 
