@@ -50,7 +50,7 @@ func _ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	if !true:
+	if true:
 		user_is_away_team = true
 		user_is_home_team = false
 	
@@ -81,7 +81,7 @@ func start_game() -> void:
 	#batter = get_player(50)
 	batter = away_team.roster[away_team.batting_order[0]]
 	#batter.speed = 1.80
-	#runner1 = get_player(50)
+	runner1 = get_player(50)
 	#runner2 = get_player(50)
 	#runner3 = get_player(99)
 	reset_field()
@@ -119,7 +119,7 @@ func update_scorebug() -> void:
 
 signal game_over
 func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike: bool,
-									is_foul_ball: bool,
+									is_foul_ball: bool, steal_on_play: bool,
 									outs_on_play: int, runs_on_play: int,
 									runner0state: String, runner1state: String,
 									runner2state: String, runner3state: String) -> void:
@@ -131,7 +131,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	var was_inning:int = inning
 	var was_top:bool = is_top
 	
-	if ball_in_play:
+	if ball_in_play and not steal_on_play:
 		# Ball must have been in play
 		if is_foul_ball:
 			if strikes < strikes_per_pa - 1.5:
@@ -214,6 +214,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		runner2 = null
 		runner3 = null
 	if new_batter:
+		printt('in game new batter')
 		balls = 0
 		strikes = 0
 		#batter = get_player()

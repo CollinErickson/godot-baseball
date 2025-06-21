@@ -34,6 +34,7 @@ const slide_anim_duration:float = 1.2
 const slide_anim_play_speed:float = 2.
 const slide_speed_multiplier:float = 1.1
 var sliding_to_base = -1 # -1 if not, otherwise int to base
+var force_end_state:String = 'null'
 
 const possible_states:Array = [
 	# Done for play states
@@ -88,6 +89,7 @@ func reset(color) -> void:
 	able_to_score = false
 	force_to_base = null
 	sliding_to_base = -1
+	force_end_state = 'null'
 	$ClickToRunArrow.visible = false
 	$OutLabel3D.visible = false
 	$ScoredLabel3D.visible = false
@@ -434,6 +436,8 @@ func send_runner_to_base(base:float) -> void:
 func end_state() -> String:
 	# Not related to the state variable, maybe need to rename
 	#printt('checking runner end_state', start_base, scored_on_play, out_on_play, running_progress)
+	if force_end_state != 'null':
+		return force_end_state
 	if not exists_at_start:
 		return ''
 	if scored_on_play:

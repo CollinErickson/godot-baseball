@@ -228,10 +228,10 @@ signal alt_fielder_selected_signal
 func _physics_process(delta: float) -> void:
 	#if is_selected_fielder:
 	#printt('selected fielder', posname, assignment)
-	if randf_range(0,1)<1.1 and posname == '2B':
-		printt('in fielder process:', posname, user_is_pitching_team, state,
-			assignment, animation, is_selected_fielder, is_targeted_fielder,
-			Time.get_ticks_msec()/1000.)
+	#if randf_range(0,1)<1.1 and posname == '2B':
+		#printt('in fielder process:', posname, user_is_pitching_team, state,
+			#assignment, animation, is_selected_fielder, is_targeted_fielder,
+			#Time.get_ticks_msec()/1000.)
 	if is_frozen:
 		return
 	#if posname == 'SS':

@@ -4,6 +4,7 @@ var contact_done = false
 var ball_in_play = false
 var ball_in_play_state = null
 var ball_in_play_state_time = 0
+var steal_on_play:bool = false
 const sz_z = 0.6
 var is_foul_ball:bool = false
 var ball_touched_by_fielder:bool = false
@@ -279,6 +280,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	ball_in_play = false
 	ball_in_play_state = null
 	ball_in_play_state_time = 0
+	steal_on_play = false
 	ball_hit_bounced = false
 	ball_caught_in_air = false
 	ball_touched_by_fielder = false
@@ -1001,7 +1003,7 @@ func _process(delta: float) -> void:
 			if check_if_play_done():
 				printt('ball in play and play is done', Time.get_ticks_msec()/1e3)
 				time_since_play_done_consecutive += .5
-				if time_since_play_done_consecutive > 10.6:
+				if time_since_play_done_consecutive > 0.6:
 					#play_done_fully = true
 					#get_node("FlashText").new_text("Play is done!", 3)
 					#get_tree().reload_current_scene()
@@ -1482,6 +1484,7 @@ func play_done(flash=null) -> void:
 	
 	# Return play results to game
 	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, is_foul_ball,
+		steal_on_play,
 		outs_on_play, runs_on_play,
 		$Headon/Runners/Runner3DHome.end_state(),
 		$Headon/Runners/Runner3D1B.end_state(),
@@ -1517,13 +1520,18 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 		get_node("FlashText").new_text("Strike out!", 3)
 	
 	# If baserunner is stealing, switch cam, put ball in catcher, play on
-	runners[1].start_stealing()
+	#runners[1].start_stealing()
 	for runner in runners:
 		if runner.is_active() and runner.state == 'running':
+			steal_on_play = true
+			# Deactivate hitter
 			runners[0].set_state('not_exist')
 			runners[0].exists_at_start = false
+			runners[0].force_end_state = '0'
 			
+			# Put ball in play in catcher's hand
 			ball_in_play = true
+			ball.visible = false
 			var catcher = get_fielder_with_posname('C')
 			catcher.set_state('free')
 			catcher.set_holding_ball(true)
