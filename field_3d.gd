@@ -1473,6 +1473,10 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 			catcher.set_assignment('ball_carry')
 			assign_fielders_to_cover_bases([], catcher.position, ["C"])
 			
+			# No need for runners to tag up
+			for runner2 in runners:
+				runner2.may_need_to_tag_up = false
+			
 			$TimerCameraChange.wait_time = .3
 			next_camera = $Headon/Cameras/Camera3DHigherHome
 			$TimerCameraChange.start()
@@ -1924,6 +1928,10 @@ func manage_baserunners() -> void:
 				if runner.is_active():
 					runner.send_runner(-1)
 					break
+		# TODO: Stealing doesn't work with click or other buttons
+		if not ball_in_play:
+			return
+		
 		# Check for user click
 		var mpos = get_mouse_y0_pos()
 		var just_clicked = Input.is_action_just_pressed('click')
