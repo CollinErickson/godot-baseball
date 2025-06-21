@@ -1147,7 +1147,10 @@ func decide_what_to_do_with_ball() -> Array:
 	#  c. If can beat them to next base, run ahead.
 	for i in range(len(runners_)):
 		# Only do something if they are off base
-		if abs(runners_[i].running_progress - round(runners_[i].running_progress)) > .02:
+		if abs(runners_[i].running_progress - round(runners_[i].running_progress)
+			) > .02 and not (
+				runners_[i].safe_passage_after_walk and
+				runners_[i].running_progress <= runners_[i].start_base + 1):
 			# If ahead of them in path to next base, run them back
 			if distance_to_line(position, base_behind_pos[i], base_front_pos[i]) < 0.5:
 				var fielder_progress = progress_on_line(position,
