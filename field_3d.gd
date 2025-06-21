@@ -768,73 +768,7 @@ func _process(delta: float) -> void:
 			$Headon/BallBounceAnnulus.position.z = fftib[5].z
 			$Headon/BallBounceAnnulus.visible = true
 	
-	# Move baserunners
-	if ball_in_play and not ball_over_wall:
-		if user_is_batting_team and baserunning_control == 'Manual':
-			if Input.is_action_just_pressed("send_all_runners_forward"):
-				# Move all forward
-				for runner in runners:
-					runner.send_runner(1)
-			elif Input.is_action_just_pressed("send_all_runners_backward"):
-				# Move all backward
-				for runner in runners:
-					runner.send_runner(-1)
-			elif Input.is_action_just_pressed("send_lead_runner_forward"):
-				for i in range(3,-1,-1):
-					if runners[i].is_active():
-						runners[i].send_runner(1)
-						break
-			elif Input.is_action_just_pressed("send_trail_runner_backward"):
-				for runner in runners:
-					if runner.is_active():
-						runner.send_runner(-1)
-						break
-			# Check for user click
-			var mpos = get_mouse_y0_pos()
-			var just_clicked = Input.is_action_just_pressed('click')
-			for runner in runners:
-				var out:int = runner.set_click_arrow(mpos, just_clicked)
-				if out != 0:
-					# Click was used by that runner
-					# Don't break since it needs to update all runners
-					just_clicked = false
-			
-			# Check for buttons/left stick to send single runner
-			var ax1 = Input.get_axis("moveleft", "moveright")
-			var ax2 = Input.get_axis("movedown", "moveup")
-			if ax1*ax1 + ax2*ax2 > 0.5:
-				var angle_deg = atan(ax2 / ax1) * 180/PI
-				if ax1 < 0:
-					angle_deg += 180
-				if angle_deg < 0:
-					angle_deg += 360
-				#printt('runner axis', ax1, ax2, angle_deg)
-				# Find nearest runner in direction
-				var min_runner = null
-				var min_angle_deg_diff = 36000
-				for runner in runners:
-					if runner.is_active():
-						var runner_angle_deg = (runner.running_progress - 1) * 90
-						if runner_angle_deg < 0:
-							runner_angle_deg += 360
-						var angle_deg_diff = abs(angle_deg - runner_angle_deg)
-						if angle_deg_diff < min_angle_deg_diff:
-							min_angle_deg_diff = angle_deg_diff
-							min_runner = runner
-				# If runner is in direction close enough, send them
-				if min_angle_deg_diff < 135:
-					if Input.is_action_just_pressed("throwfirst"):
-						min_runner.send_runner_to_base(1)
-					elif Input.is_action_just_pressed("throwsecond"):
-						min_runner.send_runner_to_base(2)
-					elif Input.is_action_just_pressed("throwthird"):
-						min_runner.send_runner_to_base(3)
-					elif Input.is_action_just_pressed("throwhome"):
-						min_runner.send_runner_to_base(4)
-		else:
-			# Redo runner decisions every 0.166 sec (10 frames)
-			if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
-				decide_automatic_runners_actions()
+	manage_baserunners()
 	
 	# Adjust camera
 	var cam = get_viewport().get_camera_3d()
@@ -1964,3 +1898,78 @@ func setup_strike_zone(batter_) -> void:
 	$Headon/StrikeZone/StrikeZoneRight.position.y = .5*(top + bottom)
 	printt('mesh size', $Headon/StrikeZone/StrikeZoneLeft.mesh.size)
 	$Headon/StrikeZone/StrikeZoneLeft.mesh.size.y = top - bottom + 0.03
+
+func manage_baserunners() -> void:
+	#if not ball_in_play or 
+	if ball_over_wall:
+		return
+	
+	# Move baserunners
+	if user_is_batting_team and baserunning_control == 'Manual':
+		if Input.is_action_just_pressed("send_all_runners_forward"):
+			# Move all forward
+			for runner in runners:
+				runner.send_runner(1)
+		elif Input.is_action_just_pressed("send_all_runners_backward"):
+			# Move all backward
+			for runner in runners:
+				runner.send_runner(-1)
+		elif Input.is_action_just_pressed("send_lead_runner_forward"):
+			for i in range(3,-1,-1):
+				if runners[i].is_active():
+					runners[i].send_runner(1)
+					break
+		elif Input.is_action_just_pressed("send_trail_runner_backward"):
+			for runner in runners:
+				if runner.is_active():
+					runner.send_runner(-1)
+					break
+		# Check for user click
+		var mpos = get_mouse_y0_pos()
+		var just_clicked = Input.is_action_just_pressed('click')
+		for runner in runners:
+			var out:int = runner.set_click_arrow(mpos, just_clicked)
+			if out != 0:
+				# Click was used by that runner
+				# Don't break since it needs to update all runners
+				just_clicked = false
+		
+		# Check for buttons/left stick to send single runner
+		var ax1 = Input.get_axis("moveleft", "moveright")
+		var ax2 = Input.get_axis("movedown", "moveup")
+		if ax1*ax1 + ax2*ax2 > 0.5:
+			var angle_deg = atan(ax2 / ax1) * 180/PI
+			if ax1 < 0:
+				angle_deg += 180
+			if angle_deg < 0:
+				angle_deg += 360
+			#printt('runner axis', ax1, ax2, angle_deg)
+			# Find nearest runner in direction
+			var min_runner = null
+			var min_angle_deg_diff = 36000
+			for runner in runners:
+				if runner.is_active():
+					var runner_angle_deg = (runner.running_progress - 1) * 90
+					if runner_angle_deg < 0:
+						runner_angle_deg += 360
+					var angle_deg_diff = abs(angle_deg - runner_angle_deg)
+					if angle_deg_diff < min_angle_deg_diff:
+						min_angle_deg_diff = angle_deg_diff
+						min_runner = runner
+			# If runner is in direction close enough, send them
+			if min_angle_deg_diff < 135:
+				if Input.is_action_just_pressed("throwfirst"):
+					min_runner.send_runner_to_base(1)
+				elif Input.is_action_just_pressed("throwsecond"):
+					min_runner.send_runner_to_base(2)
+				elif Input.is_action_just_pressed("throwthird"):
+					min_runner.send_runner_to_base(3)
+				elif Input.is_action_just_pressed("throwhome"):
+					min_runner.send_runner_to_base(4)
+	else:
+		if not ball_in_play:
+			return
+		# Redo runner decisions every 0.166 sec (10 frames)
+		if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
+			decide_automatic_runners_actions()
+	
