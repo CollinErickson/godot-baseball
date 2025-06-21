@@ -174,21 +174,21 @@ func set_look_at_position(pos) -> void:
 	$Char3D.look_at(pos, Vector3.UP, true)
 
 func setup_player(player, team, is_home_team:bool) -> void:
-	if player != null:
-		bats = player.bats
-		assert(['R', 'L'].has(bats))
-		printt('in batter setting bats', bats, player.bats)
-		position = Vector3(1, 0, 0.5)
-		if bats == 'R':
-			#set_look_at_position(Vector3(0,0,-100))
-			# Make bat visible
-			get_node('Char3D').set_bat_visible('R')
-		else:
-			position.x *= -1
-			#set_look_at_position(Vector3(0,0,100))
-			
-			# Make bat visible
-			get_node('Char3D').set_bat_visible('L')
+	assert(player != null)
+	bats = player.bats
+	assert(['R', 'L'].has(bats))
+	#printt('in batter setting bats', bats, player.bats)
+	position = Vector3(1, 0, 0.5)
+	if bats == 'R':
+		#set_look_at_position(Vector3(0,0,-100))
+		# Make bat visible
+		get_node('Char3D').set_bat_visible('R')
+	else:
+		position.x *= -1
+		#set_look_at_position(Vector3(0,0,100))
+		
+		# Make bat visible
+		get_node('Char3D').set_bat_visible('L')
 	if team != null:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 
