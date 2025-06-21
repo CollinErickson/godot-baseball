@@ -4,7 +4,7 @@ var contact_done = false
 var ball_in_play = false
 var ball_in_play_state = null
 var ball_in_play_state_time = 0
-var steal_on_play:bool = false
+var steal_on_play:bool = false # Whether the play is a steal. False if run+hit.
 const sz_z = 0.6
 var is_foul_ball:bool = false
 var ball_touched_by_fielder:bool = false
@@ -1572,8 +1572,8 @@ func _on_tag_up_by_runner() -> void:
 
 func update_max_force_outs_left() -> void:
 	#printt('In update_max_force_outs_left...')
-	if runners[0].safe_passage_after_walk:
-		# If there's a walk, no force outs left
+	if steal_on_play:
+		# There's no force outs on steals
 		max_force_outs_left = 0
 	elif ball_caught_in_air:
 		#print('.... ball caught in air')
