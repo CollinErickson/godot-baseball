@@ -743,3 +743,4 @@ func start_after_walk() -> void:
 		set_state('running')
 		is_running = true
 		target_base = start_base + 1
+		set_animation('running')
