@@ -505,12 +505,19 @@ func is_done_for_play() -> bool:
 	return true
 
 func can_be_force_out() -> bool:
+	# Runners in front must be active
 	for runner in runners_before:
 		if !runner.is_active():
 			return false
-	return (can_be_force_out_before_play and
-		running_progress < start_base + 1 and
-		max_running_progress < start_base + 1)
+	if not can_be_force_out_before_play:
+		return false
+	if safe_passage_after_walk:
+		return false
+	if running_progress > start_base + 1:
+		return false
+	if max_running_progress > start_base + 1:
+		return false
+	return true
 
 
 func set_animation(new_anim:String, force:bool=false) -> void:
