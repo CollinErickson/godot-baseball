@@ -480,7 +480,8 @@ func _on_stepped_on_base_with_ball_by_fielder(_fielder, base):
 			runner.start_base == base - 1 and
 			not runner.out_on_play and 
 			runner.is_active() and 
-			runner.max_running_progress < base - 1e-8):
+			runner.max_running_progress < base - 1e-8 and
+			not runner.safe_passage_after_walk):
 			printt('in field_3d recording force out', runner.start_base, base,
 				runner.state, runner.max_running_progress)
 			# Would be out, need to make sure that all previous runners are still active
@@ -1454,14 +1455,32 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 		get_node("FlashText").new_text("Strike out!", 3)
 	
 	# If baserunner is stealing, switch cam, put ball in catcher, play on
-	#runners[1].start_stealing()
+	#runners[2].start_stealing()
 	for runner in runners:
 		if runner.is_active() and runner.state == 'running':
 			steal_on_play = true
-			# Deactivate hitter
-			runners[0].set_state('not_exist')
-			runners[0].exists_at_start = false
-			runners[0].force_end_state = '0'
+			
+			# Manage batter/runners
+			# No need for runners to tag up
+			for runner2 in runners:
+				runner2.may_need_to_tag_up = false
+			# Start moving them and give safe passage
+			if pitch_is_ball and potential_walk:
+				# If walk, runners get free passage for next base, 
+				if runners[1].is_active():
+					runners[1].start_after_walk()
+					if runners[2].is_active():
+						runners[2].start_after_walk()
+						if runners[3].is_active():
+							runners[3].start_after_walk()
+				# and batter starts running
+				runners[0].start_after_walk()
+				batter.visible = false
+			else:
+				# Deactivate hitter's runner
+				runners[0].set_state('not_exist')
+				runners[0].exists_at_start = false
+				runners[0].force_end_state = '0'
 			
 			# Put ball in play in catcher's hand
 			ball_in_play = true
@@ -1475,10 +1494,6 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 			catcher.visible = true
 			catcher.set_assignment('ball_carry')
 			assign_fielders_to_cover_bases([], catcher.position, ["C"])
-			
-			# No need for runners to tag up
-			for runner2 in runners:
-				runner2.may_need_to_tag_up = false
 			
 			$TimerCameraChange.wait_time = .3
 			next_camera = $Headon/Cameras/Camera3DHigherHome

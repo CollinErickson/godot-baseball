@@ -20,6 +20,7 @@ var may_need_to_tag_up:bool = false
 var able_to_score:bool = false
 var reached_next_base:bool = false
 var can_be_force_out_before_play:bool = false
+var safe_passage_after_walk:bool = false
 var runners :Array = []
 var runners_before :Array = []
 var runners_after :Array = []
@@ -90,6 +91,7 @@ func reset(color) -> void:
 	force_to_base = null
 	sliding_to_base = -1
 	force_end_state = 'null'
+	safe_passage_after_walk = false
 	$ClickToRunArrow.visible = false
 	$OutLabel3D.visible = false
 	$ScoredLabel3D.visible = false
@@ -721,10 +723,23 @@ func start_stealing() -> void:
 
 func can_be_tagged_out() -> bool:
 	# Can the runner be tagged out right now?
+	# Must be active
 	if not is_active():
+		return false
+	# Can't be after walk unless passed next base
+	if safe_passage_after_walk and running_progress <= start_base + 1:
 		return false
 	if (abs(running_progress - round(running_progress)) > 1e-4 or
 				(needs_to_tag_up and not tagged_up_after_catch and
 					running_progress - start_base > .15)):
 		return true
 	return false
+
+func start_after_walk() -> void:
+	visible = true # Needed for runner starting at home
+	safe_passage_after_walk = true
+	# Don't start them if they already next base (rare but plausible)
+	if running_progress < start_base + 1:
+		set_state('running')
+		is_running = true
+		target_base = start_base + 1
