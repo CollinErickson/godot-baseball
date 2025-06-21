@@ -1053,7 +1053,7 @@ func decide_what_to_do_with_ball() -> Array:
 				if (fielder.assignment == 'cover' and
 					distance_xz(fielder.assignment_pos, base_positions[base - 1]) < 1 and
 					distance_xz(fielder.position, base_positions[base - 1]) / fielder.SPEED < 
-						distance_xz(fielder.position, base_positions[base - 1]
+						distance_xz(position, base_positions[base - 1]
 							) / max_throw_speed + time_throw_animation_release_point):
 					base_will_be_covered[base-1] = true
 					base_will_be_covered_by[base-1] = fielder
