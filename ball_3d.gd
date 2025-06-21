@@ -19,6 +19,8 @@ var frame_rotation:Vector2 = Vector2.ZERO
 
 var ball_sz_dot_scene = load("res://ball_sz_dot.tscn")
 const sz_z = 0.6
+var sz_top:float
+var sz_bottom:float
 var already_crossed_sz = false
 
 var pitch_in_progress = false
@@ -67,7 +69,7 @@ func pause() -> void:
 func unpause() -> void:
 	set_physics_process(true)
 
-func reset() -> void:
+func reset(sz_top_:float, sz_bottom_:float) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
@@ -76,6 +78,8 @@ func reset() -> void:
 	velocity = Vector3()
 	spin_acceleration = Vector3()
 	frame_rotation = Vector2()
+	sz_top = sz_top_
+	sz_bottom = sz_bottom_
 	
 	already_crossed_sz = false
 
@@ -128,7 +132,7 @@ func pow_vec_components(x, a=2) :
 
 func is_strike(pos):
 	return (abs(pos.x) < .25 + ball_radius and 
-		pos.y < 1.05 + ball_radius and pos.y > 0.45 - ball_radius and
+		pos.y < sz_top + ball_radius and pos.y > sz_bottom - ball_radius and
 		not delivery_bounced)
 
 signal pitch_completed_unhit

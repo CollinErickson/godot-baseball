@@ -180,7 +180,7 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	# Unpause
 	unpause()
 	# Reset children
-	ball.reset()
+	ball.reset(batter_.strike_zone_top(), batter_.strike_zone_bottom())
 	
 	# Setup fielders
 	for fielder in fielders:
