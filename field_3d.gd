@@ -1466,6 +1466,9 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 			# Put ball in play in catcher's hand
 			ball_in_play = true
 			ball.visible = false
+			ball.fair_foul_determined = true
+			ball.is_foul = false
+			ball.set_state('fielded')
 			var catcher = get_fielder_with_posname('C')
 			catcher.set_state('free')
 			catcher.set_holding_ball(true)
