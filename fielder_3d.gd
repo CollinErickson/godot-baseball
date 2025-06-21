@@ -511,7 +511,9 @@ func _physics_process(delta: float) -> void:
 						# No decision, keep holding
 						remove_from_group("fielder_running_with_ball_to_base")
 						running_with_ball_to_base = null
-						pass
+						# Prevent them from running aimlessly
+						assignment_pos = null
+						set_animation('idle')
 					else: # Throw or run ball
 						var throw_to = decision_out[0]
 						var run_it = decision_out[1]
@@ -1029,6 +1031,9 @@ func decide_what_to_do_with_ball() -> Array:
 	# Runners that are active, first one should be furthest ahead
 	var runners_ = runners.filter(func(r): return r.is_active())
 	runners_.sort_custom(func(r1, r2): return r1.start_base > r2.start_base)
+	# If no runners, return no instructions
+	if len(runners_) < 0.5:
+		return [null]
 	
 	# Check which bases are covered for throws
 	var base_covered:Array = [false, false, false, false] # 1B, 2B, 3B, Home
