@@ -933,8 +933,8 @@ func time_to_reach_point(to:Vector3):
 		time += delta
 
 func set_animation(new_anim):
-	if posname == '2B':
-		printt('in fielder setting animation', new_anim, state)
+	#if posname == '2B':
+		#printt('in fielder setting animation', new_anim, state)
 	if new_anim == animation:
 		return
 	animation = new_anim
@@ -1350,10 +1350,7 @@ func check_tagging_runner() -> void:
 	
 	# Check if tagging active runner not on base
 	for runner in runners:
-		if (runner.is_active() and
-			(abs(runner.running_progress - round(runner.running_progress)) > 1e-4 or
-				(runner.needs_to_tag_up and not runner.tagged_up_after_catch and
-					runner.running_progress - runner.start_base > .15)) and
+		if (runner.can_be_tagged_out() and
 			distance_xz(position, runner.position) < 1):
 			#runner.runner_is_out()
 			tagged_runner.emit(self, runner)

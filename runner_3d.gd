@@ -349,8 +349,8 @@ func update_position():
 func send_runner(direction: int, can_go_past:bool=true) -> void:
 	# direction: 1 if forward, -1 if backward
 	# can_go_past: If near next base, should they go to following base?
-	printt('In runner send_runner', start_base, direction, can_go_past,
-		running_progress, target_base, state)
+	#printt('In runner send_runner', start_base, direction, can_go_past,
+		#running_progress, target_base, state)
 	if not is_active():
 		return
 	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
@@ -718,3 +718,13 @@ func start_stealing() -> void:
 	runners[1].set_state('running')
 	runners[1].is_running = true
 	runners[1].target_base = start_base + 1
+
+func can_be_tagged_out() -> bool:
+	# Can the runner be tagged out right now?
+	if not is_active():
+		return false
+	if (abs(running_progress - round(running_progress)) > 1e-4 or
+				(needs_to_tag_up and not tagged_up_after_catch and
+					running_progress - start_base > .15)):
+		return true
+	return false
