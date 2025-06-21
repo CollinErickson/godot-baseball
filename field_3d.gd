@@ -1481,6 +1481,8 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 				runners[0].set_state('not_exist')
 				runners[0].exists_at_start = false
 				runners[0].force_end_state = '0'
+			# Update force outs left so that runners can score
+			update_max_force_outs_left()
 			
 			# Put ball in play in catcher's hand
 			ball_in_play = true
@@ -1570,7 +1572,10 @@ func _on_tag_up_by_runner() -> void:
 
 func update_max_force_outs_left() -> void:
 	#printt('In update_max_force_outs_left...')
-	if ball_caught_in_air:
+	if runners[0].safe_passage_after_walk:
+		# If there's a walk, no force outs left
+		max_force_outs_left = 0
+	elif ball_caught_in_air:
 		#print('.... ball caught in air')
 		max_force_outs_left = 0
 		# Number of active runners that haven't tagged up
@@ -1608,7 +1613,7 @@ func check_runners_able_to_score():
 	#  max number of force outs left isn't enough to negate their scoring.
 	printt('In check_runners_able_to_score, ', outs_before_play, outs_on_play, max_force_outs_left, ball_hit_bounced)
 	if (outs_before_play + outs_on_play + max_force_outs_left < outs_per_inning - 0.5 and
-		(ball_hit_bounced or ball_caught_in_air)):
+		(ball_hit_bounced or ball_caught_in_air or steal_on_play)):
 		printt('In check_runners_able_to_score, RUNNERS CAN SCORE NOW')
 		for runner in runners:
 			runner.now_able_to_score()
