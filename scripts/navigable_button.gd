@@ -3,6 +3,8 @@ extends Control
 @export var text:String = 'test123'
 @export var page_id:String = 'null'
 @export var id:String = ''
+@export var row:int = 0
+@export var col:int = 0
 var is_hover:bool = false
 
 func _ready() -> void:
@@ -30,7 +32,7 @@ func clicked() -> void:
 func disconnect_all_signals() -> void:
 	#get_signal_list()
 	var signal_list = get_signal_connection_list('signal_clicked')
-	printt('signal list is', signal_list)
+	#printt('signal list is', signal_list)
 	for signal_info in signal_list:
 		#var signal_name = signal_info["signal"]
 		var target_callable = signal_info["callable"]
@@ -49,9 +51,10 @@ func set_hover(val:bool) -> void:
 	# Hover status changed, so change color
 	if val:
 		change_panel_color(Color("#760076"))
+		add_to_group("button_hover-" + page_id)
 	else:
 		change_panel_color(Color("#990099"))
-
+		remove_from_group("button_hover-" + page_id)
 
 func change_panel_color(new_color: Color):
 	var panel_node:Panel = get_node("Panel")

@@ -51,6 +51,7 @@ offset_bottom = 331.0
 text = "Franchise"
 page_id = "home"
 id = "franchise"
+col = 1
 
 [node name="About" parent="This" instance=ExtResource("2_3tjiu")]
 layout_mode = 1
@@ -61,6 +62,7 @@ offset_bottom = 523.0
 text = "About"
 page_id = "home"
 id = "about"
+row = 1
 
 [node name="Quit" parent="This" instance=ExtResource("2_3tjiu")]
 layout_mode = 1
@@ -71,6 +73,8 @@ offset_bottom = 526.0
 text = "Quit"
 page_id = "home"
 id = "quit"
+row = 1
+col = 1
 
 [node name="Panel" type="Panel" parent="This"]
 layout_mode = 1
