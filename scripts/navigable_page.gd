@@ -69,8 +69,15 @@ func get_navigable_buttons() -> void:
 	#printt('in nav page nav buttons after filter is', nav_buttons)
 	connect_buttons(nav_buttons)
 
-func connect_buttons(_nav_buttons) -> void:
-	assert(false, "Child navigable page needs to implement connect_buttons")
+#func connect_buttons(_nav_buttons) -> void:
+	#assert(false, "Child navigable page needs to implement connect_buttons")
+func handle_nav_button_click(_id:String) -> void:
+	assert(false, "Child navigable page needs to implement handle_nav_button_click")
+
+func connect_buttons(nav_buttons_) -> void:
+	printt('in nav home page connect buttons', nav_buttons_)
+	for button in nav_buttons_:
+		button.connect('signal_clicked', handle_nav_button_click)
 
 func unhandled_nav_button_click(page_id_:String, id_:String):
 	push_error("Unhandled nav button click on page_id = ", page_id_,
