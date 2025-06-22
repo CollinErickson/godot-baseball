@@ -54,7 +54,15 @@ func _process(_delta: float) -> void:
 				return
 
 func set_active(new_is_active:bool) -> void:
+	#printt('in set_active', page_id, new_is_active)
 	is_active = new_is_active
+	# Set visibility
+	visible = true
+	if get_node_or_null("This") != null:
+		get_node_or_null("This").visible = new_is_active
+	else:
+		push_warning("Navigable page doesn't have 'This' child node", page_id)
+	# Update buttons
 	if new_is_active:
 		get_navigable_buttons()
 	else:
@@ -63,7 +71,7 @@ func set_active(new_is_active:bool) -> void:
 
 func get_navigable_buttons() -> void:
 	nav_buttons = get_tree().get_nodes_in_group("navigable_button")
-	printt('in nav page nav buttons is', nav_buttons)
+	#printt('in nav page nav buttons is', page_id, nav_buttons)
 	# Filter out buttons from other sub-pages
 	nav_buttons = nav_buttons.filter(func(r): return r.page_id == page_id)
 	#printt('in nav page nav buttons after filter is', nav_buttons)
@@ -75,7 +83,7 @@ func handle_nav_button_click(_id:String) -> void:
 	assert(false, "Child navigable page needs to implement handle_nav_button_click")
 
 func connect_buttons(nav_buttons_) -> void:
-	printt('in nav home page connect buttons', nav_buttons_)
+	#printt('in nav home page connect buttons', nav_buttons_)
 	for button in nav_buttons_:
 		button.connect('signal_clicked', handle_nav_button_click)
 
@@ -86,3 +94,18 @@ func unhandled_nav_button_click(page_id_:String, id_:String):
 func disconnect_nav_button_signals() -> void:
 	for button in nav_buttons:
 		button.disconnect_all_signals()
+
+func nav_to(subpage_name:String) -> void:
+	# Stop this page
+	set_active(false)
+	# Make sure that subpages are visible (turned off when editing)
+	get_node("Subpages").visible = true
+	# Move to next page
+	get_node("Subpages/" + subpage_name).set_active(true)
+
+func nav_up() -> void:
+	#printt('in nav up', get_parent())
+	# Stop this page
+	set_active(false)
+	# Return control to page
+	get_parent().get_parent().set_active(true)

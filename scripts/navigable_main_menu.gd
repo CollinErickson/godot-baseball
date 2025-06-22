@@ -19,6 +19,7 @@ func handle_nav_button_click(id:String) -> void:
 			printt('clicked on franchise')
 		'about':
 			printt('clicked on about')
+			nav_to("NavigableAbout")
 		'quit':
 			printt('clicked on quit')
 		_:

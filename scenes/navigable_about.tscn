@@ -12,42 +12,48 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_n6lac")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="This" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This"]
 layout_mode = 1
 anchors_preset = 13
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -52.5
-offset_right = 52.5
+offset_left = 313.5
+offset_right = 926.5
+offset_bottom = 128.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LabelAbout" type="Label" parent="VBoxContainer"]
+[node name="LabelAbout" type="Label" parent="This/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 36
 text = "About"
 
-[node name="LabelARR" type="Label" parent="VBoxContainer"]
+[node name="LabelARR" type="Label" parent="This/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Copyright © 2025 Collin Erickson. All Rights Reserved."
 
-[node name="LabelGodot" type="Label" parent="VBoxContainer"]
+[node name="LabelGodot" type="Label" parent="This/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Made with Godot Engine."
 
-[node name="LabelOther" type="Label" parent="VBoxContainer"]
+[node name="LabelOther" type="Label" parent="This/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Thanks to Mixamo for animations."
 
-[node name="Back" parent="VBoxContainer" instance=ExtResource("2_teu52")]
+[node name="Back" parent="This/VBoxContainer" instance=ExtResource("2_teu52")]
 layout_mode = 2
 text = "Back"
 page_id = "about"
