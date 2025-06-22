@@ -1,0 +1,53 @@
+[gd_scene load_steps=3 format=3 uid="uid://ddv6mxquqv4vh"]
+
+[ext_resource type="Script" uid="uid://c1a4e1g5ry0hx" path="res://scripts/navigable_main_menu.gd" id="1_vs2qf"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="2_3tjiu"]
+
+[node name="NavigableMainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vs2qf")
+
+[node name="PlayNow" parent="." instance=ExtResource("2_3tjiu")]
+layout_mode = 1
+offset_left = 141.0
+offset_top = 48.0
+offset_right = 141.0
+offset_bottom = 48.0
+text = "Play now!"
+page_id = "home"
+id = "play_now"
+
+[node name="Franchise" parent="." instance=ExtResource("2_3tjiu")]
+layout_mode = 1
+offset_left = 382.0
+offset_top = 27.0
+offset_right = 382.0
+offset_bottom = 27.0
+text = "Franchise"
+page_id = "home"
+id = "franchise"
+
+[node name="About" parent="." instance=ExtResource("2_3tjiu")]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 134.0
+offset_right = 32.0
+offset_bottom = 134.0
+text = "About"
+page_id = "home"
+id = "about"
+
+[node name="Quit" parent="." instance=ExtResource("2_3tjiu")]
+layout_mode = 1
+offset_left = 493.0
+offset_top = 278.0
+offset_right = 493.0
+offset_bottom = 278.0
+text = "Quit"
+page_id = "home"
+id = "quit"
