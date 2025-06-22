@@ -12,6 +12,7 @@ func handle_nav_button_click(id:String) -> void:
 			printt('clicked on play now')
 		'franchise':
 			printt('clicked on franchise')
+			nav_to('NavFranchiseLoad')
 		'about':
 			printt('clicked on about')
 			nav_to("NavigableAbout")

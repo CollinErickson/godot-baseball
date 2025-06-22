@@ -8,6 +8,7 @@ extends Control
 var is_hover:bool = false
 
 func _ready() -> void:
+	printt('in failing ready', $Panel)
 	$Panel/MarginContainer/Label.text = text
 	#change_panel_color(Color("green"))
 	pass
@@ -68,3 +69,11 @@ func change_panel_color(new_color: Color):
 	# Apply the modified StyleBox as an override.
 	# The first argument "panel" refers to the style name.
 	panel_node.add_theme_stylebox_override("panel", stylebox_flat)
+
+func setup(text_:String, page_id_:String, id_:String, row_:int, col_:int
+	) -> void:
+	text = text_
+	page_id = page_id_
+	id = id_
+	row = row_
+	col = col_

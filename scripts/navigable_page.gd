@@ -9,6 +9,8 @@ var buttons_by_row:Array = []
 var buttons_by_col:Array = []
 var page_id:String = '' # Should be overwritten when extended in _ready()
 var prev_mouse_pos:Vector2
+const navigable_button = preload("res://scripts/navigable_button.gd")
+const navigable_button_scene = preload("res://scenes/navigable_button.tscn")
 
 func _ready() -> void:
 	pass
@@ -58,7 +60,7 @@ func _process(_delta: float) -> void:
 		var mpos = get_local_mouse_position()
 		#printt('in navigable page found click', mpos)
 		for i in range(len(nav_buttons)):
-			var button = nav_buttons[i]
+			var button:navigable_button = nav_buttons[i]
 			if button.holds_pos(mpos):
 				print('click in rect', button, button.position, button.size)
 				button.clicked()
@@ -73,9 +75,12 @@ func _process(_delta: float) -> void:
 			button.set_hover(button.holds_pos(mpos2))
 	prev_mouse_pos = mpos2
 
-func set_active(new_is_active:bool) -> void:
-	#printt('in set_active', page_id, new_is_active)
+func set_active(new_is_active:bool, args:Dictionary={}) -> void:
+	printt('in set_active', page_id, new_is_active)
 	is_active = new_is_active
+	# Update the page as needed, needs to happen before getting buttons
+	if new_is_active:
+		setup(args)
 	# Set visibility
 	visible = true
 	if get_node_or_null("This") != null:
@@ -88,6 +93,10 @@ func set_active(new_is_active:bool) -> void:
 	else:
 		disconnect_nav_button_signals()
 	set_process(new_is_active)
+
+func setup(_args:Dictionary={}) -> void:
+	# Any class that inherits this needs to implement it if needed
+	return
 
 func get_navigable_buttons() -> void:
 	nav_buttons = get_tree().get_nodes_in_group("navigable_button")
@@ -137,8 +146,8 @@ func get_navigable_buttons() -> void:
 		buttons_by_row[i].sort_custom(sort_row)
 	for i in range(len(buttons_by_col)):
 		buttons_by_col[i].sort_custom(sort_col)
-	printt('buttons by row is', buttons_by_row)
-	printt('buttons by col is', buttons_by_col)
+	#printt('buttons by row is', buttons_by_row)
+	#printt('buttons by col is', buttons_by_col)
 
 func sort_row(a,b) -> bool:
 	return a.col < b.col
@@ -174,7 +183,8 @@ func nav_up() -> void:
 	#printt('in nav up', get_parent())
 	# Check if nav up is possible
 	if get_parent() == null or get_parent().get_parent() == null:
-		print("Can't nav_up from", page_id, "staying on current page")
+		print("Can't nav_up from page_id = ", page_id,
+			", staying on current page")
 		return
 	
 	# Stop this page
@@ -231,6 +241,8 @@ func traverse_buttons(hov, val):
 	return null
 
 func nearest_button_in_1d(arr:Array, index:int):
+	# TODO: Actually check the row/col values.
+	#  A row could have buttons in cols 1 and 3, but not 2.
 	if index < len(arr):
 		return arr[index]
 	return arr[len(arr) - 1]
