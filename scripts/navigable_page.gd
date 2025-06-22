@@ -29,29 +29,22 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("movedown"):
 		printt('in navigable page action just pressed down')
 	
-	
+	# Check for click
 	if Input.is_action_just_pressed("click"):
 		var mpos = get_local_mouse_position()
 		#printt('in navigable page found click', mpos)
-		#printt($VBoxContainer/NameRect1.position, $VBoxContainer/NameRect1.size)
-		#var rects = [
-			#$VBoxContainer/NameRect1,
-			#$VBoxContainer/NameRect2,
-			#$VBoxContainer/NameRect3,
-			#$VBoxContainer/NameRect4,
-		#]
 		for i in range(len(nav_buttons)):
 			var button = nav_buttons[i]
-			if (
-				mpos.x >= button.left() and
-				mpos.y >= button.top() and
-				mpos.x <= button.right() and
-				mpos.y <= button.bottom()
-			):
+			if button.holds_pos(mpos):
 				print('click in rect', button, button.position, button.size)
-				#click_in_rect.emit(i)
 				button.clicked()
 				return
+	# Check for mouse hover
+	var mpos2 = get_local_mouse_position()
+	# Run on every button to make sure they turn off
+	for i in range(len(nav_buttons)):
+		var button = nav_buttons[i]
+		button.set_hover(button.holds_pos(mpos2))
 
 func set_active(new_is_active:bool) -> void:
 	#printt('in set_active', page_id, new_is_active)
@@ -105,7 +98,11 @@ func nav_to(subpage_name:String) -> void:
 
 func nav_up() -> void:
 	#printt('in nav up', get_parent())
+	# Check if nav up is possible
+	if get_parent() == null or get_parent().get_parent() == null:
+		print("Can't nav_up from", page_id, "staying on current page")
+		return
+	
 	# Stop this page
 	set_active(false)
-	# Return control to page
 	get_parent().get_parent().set_active(true)

@@ -22,5 +22,6 @@ func handle_nav_button_click(id:String) -> void:
 			nav_to("NavigableAbout")
 		'quit':
 			printt('clicked on quit')
+			get_tree().quit()
 		_:
 			unhandled_nav_button_click(page_id, id)

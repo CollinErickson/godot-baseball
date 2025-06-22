@@ -1,8 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://ddv6mxquqv4vh"]
+[gd_scene load_steps=6 format=3 uid="uid://ddv6mxquqv4vh"]
 
 [ext_resource type="Script" uid="uid://c1a4e1g5ry0hx" path="res://scripts/navigable_main_menu.gd" id="1_vs2qf"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="2_3tjiu"]
 [ext_resource type="PackedScene" uid="uid://bn1c2ckna4mex" path="res://scenes/navigable_about.tscn" id="3_3tjiu"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="3_efu3c"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_efu3c"]
+bg_color = Color(0.6, 0.215686, 0.960784, 1)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
 
 [node name="NavigableMainMenu" type="Control"]
 layout_mode = 3
@@ -14,9 +22,15 @@ grow_vertical = 2
 script = ExtResource("1_vs2qf")
 
 [node name="This" type="Control" parent="."]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("3_efu3c")]
+layout_mode = 1
 
 [node name="PlayNow" parent="This" instance=ExtResource("2_3tjiu")]
 layout_mode = 1
@@ -58,11 +72,38 @@ text = "Quit"
 page_id = "home"
 id = "quit"
 
+[node name="Panel" type="Panel" parent="This"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -404.0
+offset_top = 47.0
+offset_right = 404.0
+offset_bottom = 212.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_efu3c")
+
+[node name="Label" type="Label" parent="This/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 100
+text = "MOP Baseball"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Subpages" type="Control" parent="."]
 visible = false
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="NavigableAbout" parent="Subpages" instance=ExtResource("3_3tjiu")]
 layout_mode = 1

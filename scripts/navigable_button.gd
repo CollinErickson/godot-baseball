@@ -3,9 +3,11 @@ extends Control
 @export var text:String = 'test123'
 @export var page_id:String = 'null'
 @export var id:String = ''
+var is_hover:bool = false
 
 func _ready() -> void:
 	$Panel/MarginContainer/Label.text = text
+	#change_panel_color(Color("green"))
 	pass
 
 func top() -> int:
@@ -16,6 +18,12 @@ func left() -> int:
 	return $Panel.global_position.x
 func right() -> int:
 	return $Panel.global_position.x + $Panel.size.x
+func holds_pos(pos:Vector2) -> bool:
+	return pos.x >= left() and \
+			pos.y >= top() and \
+			pos.x <= right() and \
+			pos.y <= bottom()
+
 signal signal_clicked
 func clicked() -> void:
 	signal_clicked.emit(id)
@@ -28,3 +36,32 @@ func disconnect_all_signals() -> void:
 		var target_callable = signal_info["callable"]
 		#printt('trying to disconnect', signal_name, target_callable)
 		disconnect('signal_clicked', target_callable)
+
+func set_hover(val:bool) -> void:
+	#printt('in button set_hover', page_id, id)
+	#get_node("Panel")
+	#var p = Panel.new()
+	#p.stylebox
+	#p.add_theme_color_override(Color('red'))
+	if is_hover == val:
+		return
+	is_hover = val
+	# Hover status changed, so change color
+	if val:
+		change_panel_color(Color("#760076"))
+	else:
+		change_panel_color(Color("#990099"))
+
+
+func change_panel_color(new_color: Color):
+	var panel_node:Panel = get_node("Panel")
+	# Get the current StyleBox for the panel
+	# 'panel' is the default name for the Panel's background style.
+	var current_stylebox: StyleBox = panel_node.get_theme_stylebox("panel")
+	# Duplicate
+	var stylebox_flat = current_stylebox.duplicate() as StyleBoxFlat
+	# Set the background color
+	stylebox_flat.bg_color = new_color
+	# Apply the modified StyleBox as an override.
+	# The first argument "panel" refers to the style name.
+	panel_node.add_theme_stylebox_override("panel", stylebox_flat)
