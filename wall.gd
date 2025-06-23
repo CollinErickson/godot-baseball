@@ -92,6 +92,9 @@ func _ready() -> void:
 		var normal_out:Vector3 = along_wall.rotated(
 			Vector3(0,1,0), 90.*PI/180).normalized()
 		normal_outs.push_back(normal_out)
+	
+	# Place foul poles (do after since need wall_coords)
+	place_foul_poles()
 
 
 func make_wall():
@@ -253,6 +256,47 @@ func make_warning_track():
 	meshnode.mesh.surface_set_material(0, your_material)   # will need uvs if using a texture
 	your_material.vertex_color_use_as_albedo = true # will need this for the array of colors
 	#print("Finished make warning track")
+
+func place_foul_poles() -> void:
+	# Move foul pole mesh nodes to correct wall location
+	# j==0 is left foul pole, j==1 is right
+	for j in range(2):
+		var target = null
+		if j == 0:
+			target = 0
+		else:
+			target = 90
+		# Wall array has the first value copied as the last value, so no need
+		#  to worry about wrap around
+		for i in range(len(wall_array) - 1):
+			var theta1 = wall_array[i][0]
+			var theta2 = wall_array[i+1][0]
+			var d1 = fposmod(target - theta1, 360)
+			d1 = min(d1, 360 - d1)
+			var d2 = fposmod(target - theta2, 360)
+			d2 = min(d2, 360 - d2)
+			var d12 = fposmod(theta2 - theta1, 360)
+			if d1 + d2 <= d12 + 1e-12:
+				var pole = get_parent().get_node("FoulPoleLeft" if j==0 else "FoulPoleRight")
+				var x = intersect_two_lines(
+					Vector2(0,0),
+					Vector2(1,0) if j==0 else Vector2(0,1),
+					Vector2(wall_coords[i].x,wall_coords[i].z),
+					Vector2(wall_coords[i+1].x,wall_coords[i+1].z)
+				)
+				var target_dist = x[j]
+				# Put it a hair in front of the wall so it goes from ground up
+				target_dist -= 1e-6
+				if target_dist > 30:
+					if j==0:
+						pole.position.x = target_dist
+					else:
+						pole.position.z = target_dist
+				else:
+					# Can't find foul pole location
+					pole.visible = false
+					push_error("Couldn't place foul pole", str(target_dist), x)
+				break
 
 func make_stands():
 	print("Running make_stands")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=68 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" uid="uid://bl3nlh5ft1jhu" path="res://field_3d.gd" id="1_pctx6"]
@@ -131,6 +131,20 @@ orientation = 1
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_whjik"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tdydm"]
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_3lu60"]
+material = SubResource("StandardMaterial3D_tdydm")
+size = Vector3(0.1, 20, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uyt8g"]
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_v5ljp"]
+material = SubResource("StandardMaterial3D_uyt8g")
+size = Vector3(0.5, 20, 0.1)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n67bh"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_v6v7y"]
@@ -252,6 +266,14 @@ visible = false
 mesh = SubResource("ArrayMesh_whjik")
 
 [node name="Wall" parent="Ground" instance=ExtResource("2_hfxba")]
+
+[node name="FoulPoleLeft" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 10, 0.25)
+mesh = SubResource("BoxMesh_3lu60")
+
+[node name="FoulPoleRight" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 10, 1)
+mesh = SubResource("BoxMesh_v5ljp")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -5.96046e-08, 1, 0, -1, -5.96046e-08, 0, 3, 0)
