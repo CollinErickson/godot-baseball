@@ -683,6 +683,7 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 			else:
 				# Input was given to update target base
 				set_state('running')
+				set_animation('running')
 				is_running = true
 		else:
 			assert(false, 'runner state cannot be here')
