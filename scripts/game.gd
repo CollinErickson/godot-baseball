@@ -145,15 +145,19 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			strikes += 1
 		if balls > balls_per_pa - 0.5:
 			# Walk
-			# Move runners, it isn't done in field
-			runner0state = '1'
-			if runner1state == '1':
-				runner1state = '2'
-				if runner2state == '2':
-					runner2state = '3'
-					if runner3state == '3':
-						runner3state = 'scored'
-						runs_on_play += 1
+			if steal_on_play:
+				# Results of play include walk if there was steal on play
+				pass
+			else:
+				# Move runners, it isn't done in field
+				runner0state = '1'
+				if runner1state == '1':
+					runner1state = '2'
+					if runner2state == '2':
+						runner2state = '3'
+						if runner3state == '3':
+							runner3state = 'scored'
+							runs_on_play += 1
 			
 			# Prepare for next
 			balls = 0
