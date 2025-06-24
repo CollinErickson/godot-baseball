@@ -1,8 +1,8 @@
-[gd_scene load_steps=66 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=67 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" uid="uid://bl3nlh5ft1jhu" path="res://field_3d.gd" id="1_pctx6"]
-[ext_resource type="Shader" uid="uid://bixocloauje23" path="res://shaders/grass_pattern_crisscross.gdshader" id="2_3lu60"]
+[ext_resource type="Shader" uid="uid://c0hhhr2ktn5t0" path="res://shaders/grass_pattern_crisscross_noise.gdshader" id="2_3lu60"]
 [ext_resource type="PackedScene" uid="uid://c7xao527v2us8" path="res://pitcher_3d.tscn" id="2_57wgl"]
 [ext_resource type="PackedScene" uid="uid://dmcetu0b5itrl" path="res://wall.tscn" id="2_hfxba"]
 [ext_resource type="PackedScene" uid="uid://d3vo8o7aa5kqp" path="res://fielder_3d.tscn" id="4_386e5"]
@@ -28,13 +28,17 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
 
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_uyt8g"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3lu60"]
 render_priority = 0
 shader = ExtResource("2_3lu60")
-shader_parameter/light_grass_color = Color(0.157407, 0.526388, 0.0833914, 1)
+shader_parameter/light_grass_color = Color(0.155852, 0.521836, 0.0824799, 1)
 shader_parameter/dark_grass_color = Color(0.15, 0.5, 0.08, 1)
 shader_parameter/stripe_width = 5.0
-shader_parameter/vertical_stripes = false
+shader_parameter/variation_color = Color(0.25, 0.6, 0.05, 1)
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_uyt8g")
+shader_parameter/noise_strength = 0.6
 
 [sub_resource type="BoxMesh" id="BoxMesh_i5ps3"]
 material = SubResource("ShaderMaterial_3lu60")

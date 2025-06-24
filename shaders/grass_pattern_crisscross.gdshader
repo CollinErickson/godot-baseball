@@ -5,8 +5,6 @@ shader_type spatial;
 uniform vec4 light_grass_color : source_color = vec4(0.2, 0.6, 0.1, 1.0);
 uniform vec4 dark_grass_color : source_color = vec4(0.15, 0.5, 0.08, 1.0);
 uniform float stripe_width : hint_range(0.1, 50.0) = 5.0;
-uniform bool vertical_stripes = false;
-
 
 varying vec3 world_position;
 
