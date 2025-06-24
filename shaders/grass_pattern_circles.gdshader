@@ -4,7 +4,7 @@ shader_type spatial;
 // These are variables you can edit directly in the Inspector!
 uniform vec4 light_grass_color : source_color = vec4(0.2, 0.6, 0.1, 1.0);
 uniform vec4 dark_grass_color : source_color = vec4(0.15, 0.5, 0.08, 1.0);
-uniform float stripe_width : hint_range(0.1, 50.0) = 5.0;
+uniform float stripe_width : hint_range(0.1, 50.0) = 3.0;
 uniform bool vertical_stripes = false;
 
 
@@ -29,12 +29,13 @@ void fragment() {
     // Check both X and Z axes
     //float stripe_check_z = mod(floor(WORLD_POSITION.z / stripe_width), 2.0);
     //float stripe_check_x = mod(floor(WORLD_POSITION.x / stripe_width), 2.0);
-    float stripe_check_x = mod(floor(world_position.x / stripe_width), 2.0);
-    float stripe_check_z = mod(floor(world_position.z / stripe_width), 2.0);
+    float stripe_check = mod(floor(sqrt(
+		pow(world_position.x - 14.26, 2) + pow(world_position.z - 14.26, 2)
+		) / stripe_width), 2.0);
 
 
     // If the stripe_check is 0.0, use the light color. Otherwise, use the dark color.
-    if (mod(stripe_check_x + stripe_check_z, 2.0) < 0.5) {
+    if (stripe_check < 0.5) {
         ALBEDO = light_grass_color.rgb;
     } else {
         ALBEDO = dark_grass_color.rgb;
