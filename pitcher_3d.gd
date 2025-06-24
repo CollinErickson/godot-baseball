@@ -32,6 +32,7 @@ var pitch_input_modifiers:Array = []
 @onready var catchers_mitt = get_parent().get_node("CatchersMitt")
 var catchers_mitt_frozen:bool = false
 @onready var ball_recenter = get_parent().get_node("BallSprite3DRecenter")
+var timers_to_restart_on_unpause:Array = []
 
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
@@ -46,10 +47,23 @@ func freeze() -> void:
 func pause() -> void:
 	$Char3D.pause()
 	set_physics_process(false)
+	
+	# Pause timers
+	for timer in [$Timer]:
+		if timer.time_left > 0:
+			timers_to_restart_on_unpause += [[$Timer, timer.time_left]]
+			timer.stop()
 
 func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
+	
+	# Unpause timers
+	for i in range(len(timers_to_restart_on_unpause)):
+		var timer = timers_to_restart_on_unpause[i][0]
+		timer.wait_time = timers_to_restart_on_unpause[i][1]
+		timer.start()
+	timers_to_restart_on_unpause = []
 
 func _ready() -> void:
 	$PitchSelectClick.connect("click_in_rect", _on_click_in_rect_by_mouse)
@@ -66,6 +80,7 @@ func reset(pitch_mode_:String, user_input_method_:String,
 	time_since_pitch_start = 0
 	pitch_frame = 0
 	pitch_type = null
+	timers_to_restart_on_unpause = []
 	$AnimatedSprite3D.set_frame(0)
 	$AnimatedSprite3D.visible = false
 	pitch_mode = pitch_mode_
