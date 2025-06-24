@@ -771,165 +771,7 @@ func _process(delta: float) -> void:
 	
 	manage_baserunners()
 	
-	# Adjust camera
-	var cam = get_viewport().get_camera_3d()
-	if get_viewport():
-		# Move current camera
-		var cam_move_speed = 10
-		var cam_rotate_speed = 0.3
-		if Input.is_key_pressed(KEY_5):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_y(delta*cam_rotate_speed)
-			else:
-				cam.position.x += delta * cam_move_speed
-		if Input.is_key_pressed(KEY_6):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_y(-delta*cam_rotate_speed)
-			else:
-				cam.position.x -= delta * cam_move_speed
-		if Input.is_key_pressed(KEY_7):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_x(delta*cam_rotate_speed)
-			else:
-				cam.position.y += delta * cam_move_speed
-		if Input.is_key_pressed(KEY_8):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_x(-delta*cam_rotate_speed)
-			else:
-				cam.position.y -= delta * cam_move_speed
-		if Input.is_key_pressed(KEY_9):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_z(delta*cam_rotate_speed)
-			else:
-				cam.position.z += delta * cam_move_speed
-		if Input.is_key_pressed(KEY_0):
-			if Input.is_key_pressed(KEY_SHIFT):
-				cam.rotate_z(-delta*cam_rotate_speed)
-			else:
-				cam.position.z -= delta * cam_move_speed
-		
-		# Set different camera
-		if Input.is_key_pressed(KEY_1):
-			if Input.is_key_pressed(KEY_SHIFT):
-				get_node("Headon/Cameras/Camera3DPitchSideView").current = true
-			else:
-				get_node("Headon/Cameras/Camera3DBatting").current = true
-		elif Input.is_key_pressed(KEY_2):
-			if Input.is_key_pressed(KEY_SHIFT):
-				get_node("Headon/Cameras/Camera3DHigherHome").current = true
-			else:
-				get_node("Headon/Cameras/Camera3DHighHome").current = true
-		elif Input.is_key_pressed(KEY_3):
-			if Input.is_key_pressed(KEY_SHIFT):
-				get_node("Headon/Cameras/Camera3DBallOverhead").current = true
-				get_node("Headon/Cameras/Camera3DBallOverhead").position = ball.position
-				get_node("Headon/Cameras/Camera3DBallOverhead").position.y = 30
-			else:
-				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
-		elif Input.is_key_pressed(KEY_4):
-			get_node("Headon/Cameras/Camera3DAll22").current = true
-	
-	# Move camera so that the ball stays in view
-	cam = get_viewport().get_camera_3d()
-	# Target position is the ball's position
-	var target_position:Vector3 = ball.global_position
-	# Tried setting to fielder position to avoid animation jitter, but not better
-	#var fielders_holding_ball:Array = get_tree().get_nodes_in_group("fielder_holding_ball")
-	#if len(fielders_holding_ball) > 0.5:
-		#printt('in field_3d, changing cam target pos', target_position,
-			#fielders_holding_ball[0].global_position)
-		#target_position = fielders_holding_ball[0].global_position
-	#target_position.y = 0
-	var ball_viewport_2d_position = cam.unproject_position(target_position)
-	var viewport_size = get_viewport().size
-	
-	# Move camera to follow ball
-	if ball_in_play:
-		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
-		# Camera follows ball by placing itself between ball and point z1.
-		#  Unless behind z2, then it is adjusted to be smoother.
-		# Put 20 yards behind home plate (prev -10)
-		var z1:float = -20
-		# Stop rotating once past 0 (prev -5)
-		var z2:float = 0
-		var cam_center = Vector3(1, 0, 1).normalized() * z1
-		if ball.position.z > z2:
-			# Put cam 60 yards behind the ball toward cam center.
-			camhh.global_position = ball.global_position + 60 * (
-				cam_center - 
-				ball.global_position * Vector3(1,0,1)).normalized()
-		else:
-			# Since ball is behind z2, move camera straight back.
-			#  This avoids sharp rotations when the ball is near z1.
-			# Move ball up to z=z2
-			var baltp:Vector3 = ball.position + Vector3(0,0,z2-ball.position.z)
-			var balgp:Vector3 = baltp.rotated(Vector3(0,1,0), 45.*PI/180)
-			# Find camera center if ball were at that point
-			var camgp:Vector3 = balgp + 60 * (
-				cam_center - 
-				balgp * Vector3(1,0,1)).normalized()
-			var camtp:Vector3 = camgp.rotated(Vector3(0,1,0), -45.*PI/180)
-			# Move camera straight back from there
-			camtp.z -= (z2 - ball.position.z)
-			var camgp2 = camtp.rotated(Vector3(0,1,0), 45.*PI/180)
-			camhh.global_position = camgp2
-		camhh.global_position.y = 15
-		camhh.look_at(Vector3(ball.global_position.x, 0, ball.global_position.z))
-	
-	# Auto adjust cam to keep ball in view
-	# Removing, this never worked well
-	if ball_in_play and false:
-		# Using inertia instead of changing angle based on single frames reduces jitter
-		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
-		# .98 is high. If too high, it goes too far. If too low, it jerks.
-		var rotate_camera_inertia_decay = 0.9
-		#rotate_camera_inertia = (1 - rotate_camera_inertia_increment) * rotate_camera_inertia
-		rotate_camera_inertia = rotate_camera_inertia_decay * rotate_camera_inertia
-		var rotate_speed = 0.1*3
-		# To rotate up/down (y), need to get direction of x and z for camera
-		var rot_axis_y = cam.rotation
-		var cam_global_basis_z = cam.get_global_transform().basis.z
-		rot_axis_y = cam_global_basis_z
-		rot_axis_y.y = 0
-		rot_axis_y = rot_axis_y.rotated(Vector3(0,1,0), 45.*PI/180.)
-		rot_axis_y = rot_axis_y.normalized()
-		var cam_rotated = false
-		if ball_viewport_2d_position.x < viewport_size.x*.2: # Rotate left
-			#cam.rotate(Vector3(0,1,0), delta * rotate_speed)
-			#cam_rotated = true
-			rotate_camera_inertia.x -= rotate_camera_inertia_increment
-		if ball_viewport_2d_position.x > viewport_size.x*.8: # Rotate right
-			#cam.rotate(Vector3(0,1,0), -delta * rotate_speed)
-			#cam_rotated = true
-			rotate_camera_inertia.x += rotate_camera_inertia_increment
-		if ball_viewport_2d_position.y < viewport_size.y*.1: # Rotate up
-			#cam.rotate(rot_axis_y, delta * rotate_speed)
-			#cam_rotated = true
-			rotate_camera_inertia.y += rotate_camera_inertia_increment
-		if ball_viewport_2d_position.y > viewport_size.y*.5: # Rotate down
-			#cam.rotate(rot_axis_y, -delta * rotate_speed)
-			#cam_rotated = true
-			rotate_camera_inertia.y -= rotate_camera_inertia_increment
-		if abs(rotate_camera_inertia.x) > 1e-8:
-			rotate_camera_inertia.x = min(rotate_camera_inertia.x, 1)
-			cam.rotate(Vector3(0,1,0), -delta * rotate_speed * rotate_camera_inertia.x)
-			cam_rotated = true
-		if abs(rotate_camera_inertia.y) > 1e-8:
-			rotate_camera_inertia.y = min(rotate_camera_inertia.y, 1)
-			# Only rotate up to level, not above
-			cam_global_basis_z = -cam_global_basis_z.rotated(Vector3(0,1,0), -45.*PI/180)
-			if cam_global_basis_z.y > 0 and rotate_camera_inertia.y > 0:
-				rotate_camera_inertia.y = 0
-			else:
-				cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
-				cam_rotated = true
-			
-		if cam_rotated:
-			# TODO: Not sure this does anything usefuL
-			transform = transform.orthonormalized()
-	
-	# Hide/show walls based on camera position
-	$Ground/Wall.set_vis_based_on_camera(cam)
+	update_camera(delta)
 	
 	# Check if play is done, but not every time
 	if ball_in_play:
@@ -2003,4 +1845,165 @@ func manage_baserunners() -> void:
 		# Redo runner decisions every 0.166 sec (10 frames)
 		if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
 			decide_automatic_runners_actions()
+
+func update_camera(delta:float) -> void:
+	# Adjust camera
+	var cam = get_viewport().get_camera_3d()
+	if get_viewport():
+		# Move current camera
+		var cam_move_speed = 10
+		var cam_rotate_speed = 0.3
+		if Input.is_key_pressed(KEY_5):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_y(delta*cam_rotate_speed)
+			else:
+				cam.position.x += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_6):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_y(-delta*cam_rotate_speed)
+			else:
+				cam.position.x -= delta * cam_move_speed
+		if Input.is_key_pressed(KEY_7):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_x(delta*cam_rotate_speed)
+			else:
+				cam.position.y += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_8):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_x(-delta*cam_rotate_speed)
+			else:
+				cam.position.y -= delta * cam_move_speed
+		if Input.is_key_pressed(KEY_9):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_z(delta*cam_rotate_speed)
+			else:
+				cam.position.z += delta * cam_move_speed
+		if Input.is_key_pressed(KEY_0):
+			if Input.is_key_pressed(KEY_SHIFT):
+				cam.rotate_z(-delta*cam_rotate_speed)
+			else:
+				cam.position.z -= delta * cam_move_speed
+		
+		# Set different camera
+		if Input.is_key_pressed(KEY_1):
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DPitchSideView").current = true
+			else:
+				get_node("Headon/Cameras/Camera3DBatting").current = true
+		elif Input.is_key_pressed(KEY_2):
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DHigherHome").current = true
+			else:
+				get_node("Headon/Cameras/Camera3DHighHome").current = true
+		elif Input.is_key_pressed(KEY_3):
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DBallOverhead").current = true
+				get_node("Headon/Cameras/Camera3DBallOverhead").position = ball.position
+				get_node("Headon/Cameras/Camera3DBallOverhead").position.y = 30
+			else:
+				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
+		elif Input.is_key_pressed(KEY_4):
+			get_node("Headon/Cameras/Camera3DAll22").current = true
+	
+	# Move camera so that the ball stays in view
+	cam = get_viewport().get_camera_3d()
+	# Target position is the ball's position
+	var target_position:Vector3 = ball.global_position
+	# Tried setting to fielder position to avoid animation jitter, but not better
+	#var fielders_holding_ball:Array = get_tree().get_nodes_in_group("fielder_holding_ball")
+	#if len(fielders_holding_ball) > 0.5:
+		#printt('in field_3d, changing cam target pos', target_position,
+			#fielders_holding_ball[0].global_position)
+		#target_position = fielders_holding_ball[0].global_position
+	#target_position.y = 0
+	var ball_viewport_2d_position = cam.unproject_position(target_position)
+	var viewport_size = get_viewport().size
+	
+	# Move camera to follow ball
+	if ball_in_play:
+		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
+		# Camera follows ball by placing itself between ball and point z1.
+		#  Unless behind z2, then it is adjusted to be smoother.
+		# Put 20 yards behind home plate (prev -10)
+		var z1:float = -20
+		# Stop rotating once past 0 (prev -5)
+		var z2:float = 0
+		var cam_center = Vector3(1, 0, 1).normalized() * z1
+		if ball.position.z > z2:
+			# Put cam 60 yards behind the ball toward cam center.
+			camhh.global_position = ball.global_position + 60 * (
+				cam_center - 
+				ball.global_position * Vector3(1,0,1)).normalized()
+		else:
+			# Since ball is behind z2, move camera straight back.
+			#  This avoids sharp rotations when the ball is near z1.
+			# Move ball up to z=z2
+			var baltp:Vector3 = ball.position + Vector3(0,0,z2-ball.position.z)
+			var balgp:Vector3 = baltp.rotated(Vector3(0,1,0), 45.*PI/180)
+			# Find camera center if ball were at that point
+			var camgp:Vector3 = balgp + 60 * (
+				cam_center - 
+				balgp * Vector3(1,0,1)).normalized()
+			var camtp:Vector3 = camgp.rotated(Vector3(0,1,0), -45.*PI/180)
+			# Move camera straight back from there
+			camtp.z -= (z2 - ball.position.z)
+			var camgp2 = camtp.rotated(Vector3(0,1,0), 45.*PI/180)
+			camhh.global_position = camgp2
+		camhh.global_position.y = 15
+		camhh.look_at(Vector3(ball.global_position.x, 0, ball.global_position.z))
+	
+	# Auto adjust cam to keep ball in view
+	# Removing, this never worked well
+	if ball_in_play and false:
+		# Using inertia instead of changing angle based on single frames reduces jitter
+		var rotate_camera_inertia_increment = .05 # .02 too low, .05 too high
+		# .98 is high. If too high, it goes too far. If too low, it jerks.
+		var rotate_camera_inertia_decay = 0.9
+		#rotate_camera_inertia = (1 - rotate_camera_inertia_increment) * rotate_camera_inertia
+		rotate_camera_inertia = rotate_camera_inertia_decay * rotate_camera_inertia
+		var rotate_speed = 0.1*3
+		# To rotate up/down (y), need to get direction of x and z for camera
+		var rot_axis_y = cam.rotation
+		var cam_global_basis_z = cam.get_global_transform().basis.z
+		rot_axis_y = cam_global_basis_z
+		rot_axis_y.y = 0
+		rot_axis_y = rot_axis_y.rotated(Vector3(0,1,0), 45.*PI/180.)
+		rot_axis_y = rot_axis_y.normalized()
+		var cam_rotated = false
+		if ball_viewport_2d_position.x < viewport_size.x*.2: # Rotate left
+			#cam.rotate(Vector3(0,1,0), delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.x -= rotate_camera_inertia_increment
+		if ball_viewport_2d_position.x > viewport_size.x*.8: # Rotate right
+			#cam.rotate(Vector3(0,1,0), -delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.x += rotate_camera_inertia_increment
+		if ball_viewport_2d_position.y < viewport_size.y*.1: # Rotate up
+			#cam.rotate(rot_axis_y, delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.y += rotate_camera_inertia_increment
+		if ball_viewport_2d_position.y > viewport_size.y*.5: # Rotate down
+			#cam.rotate(rot_axis_y, -delta * rotate_speed)
+			#cam_rotated = true
+			rotate_camera_inertia.y -= rotate_camera_inertia_increment
+		if abs(rotate_camera_inertia.x) > 1e-8:
+			rotate_camera_inertia.x = min(rotate_camera_inertia.x, 1)
+			cam.rotate(Vector3(0,1,0), -delta * rotate_speed * rotate_camera_inertia.x)
+			cam_rotated = true
+		if abs(rotate_camera_inertia.y) > 1e-8:
+			rotate_camera_inertia.y = min(rotate_camera_inertia.y, 1)
+			# Only rotate up to level, not above
+			cam_global_basis_z = -cam_global_basis_z.rotated(Vector3(0,1,0), -45.*PI/180)
+			if cam_global_basis_z.y > 0 and rotate_camera_inertia.y > 0:
+				rotate_camera_inertia.y = 0
+			else:
+				cam.rotate(rot_axis_y, delta * rotate_speed * rotate_camera_inertia.y)
+				cam_rotated = true
+			
+		if cam_rotated:
+			# TODO: Not sure this does anything usefuL
+			transform = transform.orthonormalized()
+	
+	# Hide/show walls based on camera position
+	$Ground/Wall.set_vis_based_on_camera(cam)
 	
