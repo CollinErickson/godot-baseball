@@ -13,6 +13,7 @@ var swing_inzone_duration = 0.15
 var animation = "idle"
 var bats:String # "L", "R"
 var bat_mode:String
+var timers_to_restart_on_unpause:Array = []
 
 var user_is_batting_team
 var is_frozen:bool = false
@@ -28,11 +29,24 @@ func pause() -> void:
 	$Char3D.pause()
 	set_physics_process(false)
 	set_process(false)
+	
+	# Pause timers
+	for timer in [$Timer]:
+		if timer.time_left > 0:
+			timers_to_restart_on_unpause += [[$Timer, timer.time_left]]
+			timer.stop()
 
 func unpause() -> void:
 	$Char3D.unpause()
 	set_physics_process(true)
 	set_process(true)
+	
+	# Unpause timers
+	for i in range(len(timers_to_restart_on_unpause)):
+		var timer = timers_to_restart_on_unpause[i][0]
+		timer.wait_time = timers_to_restart_on_unpause[i][1]
+		timer.start()
+	timers_to_restart_on_unpause = []
 
 func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 	is_frozen = false
@@ -56,6 +70,7 @@ func reset(bat_mode_:String, user_is_batting_team_:bool) -> void:
 			enable_minibat()
 	else:
 		disable_minibat()
+	timers_to_restart_on_unpause = []
 	
 	get_node('AnimatedSprite3D').set_frame(0)
 	get_node('AnimatedSprite3D').visible = false
