@@ -285,8 +285,10 @@ func place_foul_poles() -> void:
 					Vector2(wall_coords[i+1].x,wall_coords[i+1].z)
 				)
 				var target_dist = x[j]
-				# Put it a hair in front of the wall so it goes from ground up
-				target_dist -= 1e-6
+				# Put it in front of the wall so it goes from ground up
+				# It's 0.1 thick, so put it half in front. Also helps in case
+				# wall is angled there.
+				target_dist -= .05
 				if target_dist > 30:
 					if j==0:
 						pole.position.x = target_dist
@@ -669,12 +671,22 @@ func mirror_vector_across_plane(v: Vector3, u1: Vector3, u2: Vector3, u3: Vector
 	
 func set_vis_based_on_camera(cam:Camera3D) -> void:
 	# Set grandstand sections to only be visible if facing the camera
-	# Not great for ones that are near perpendicular
-	# Should instead use if it's facing the slant of seats
-	#print('in wall set_vis_based_on_camera')
+	# Updated to use the slant of the seats as the face
+	# Issue when roof is in the way, but I think it's good	#print('in wall set_vis_based_on_camera')
 	var camdir = cam.get_global_transform().basis.z
 	#printt('in wall set gs nodes are', grandstand_nodes, camdir)
 	for i in range(len(grandstand_nodes)):
 		var gsn = grandstand_nodes[i]
-		#printt('in wall set gs', normal_outs[i].dot(camdir))
-		gsn.visible = grandstand_normals[i].dot(camdir) < 0
+		# Find vector along wall
+		var gs_along:Vector3 = grandstand_normals[i].rotated(Vector3(0,1,0), PI/2)
+		# Find the vector pointing into the face of the seats
+		var gs_norm_face:Vector3 = grandstand_normals[i].rotated(gs_along, PI/4)
+		#if randf() < .0001:
+			#printt('in wall set gs', i, camdir, grandstand_normals[i],
+				#gs_along, gs_norm_face,
+				#grandstand_normals[i].dot(camdir), gs_norm_face.dot(camdir))
+		# Old way just used the front
+		#gsn.visible = grandstand_normals[i].dot(camdir) < 0
+		# New way uses the face
+		gsn.visible = gs_norm_face.dot(camdir) < 0
+	#assert(false)
