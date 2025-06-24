@@ -1846,7 +1846,8 @@ func manage_baserunners() -> void:
 		if Time.get_ticks_msec() - time_last_decide_automatic_runners_actions > 166:
 			decide_automatic_runners_actions()
 
-func update_camera(delta:float) -> void:
+func update_camera(delta:float) -> bool:
+	var camera_changed:bool = false
 	# Adjust camera
 	var cam = get_viewport().get_camera_3d()
 	if get_viewport():
@@ -1858,31 +1859,37 @@ func update_camera(delta:float) -> void:
 				cam.rotate_y(delta*cam_rotate_speed)
 			else:
 				cam.position.x += delta * cam_move_speed
+			camera_changed = true
 		if Input.is_key_pressed(KEY_6):
 			if Input.is_key_pressed(KEY_SHIFT):
 				cam.rotate_y(-delta*cam_rotate_speed)
 			else:
 				cam.position.x -= delta * cam_move_speed
+			camera_changed = true
 		if Input.is_key_pressed(KEY_7):
 			if Input.is_key_pressed(KEY_SHIFT):
 				cam.rotate_x(delta*cam_rotate_speed)
 			else:
 				cam.position.y += delta * cam_move_speed
+			camera_changed = true
 		if Input.is_key_pressed(KEY_8):
 			if Input.is_key_pressed(KEY_SHIFT):
 				cam.rotate_x(-delta*cam_rotate_speed)
 			else:
 				cam.position.y -= delta * cam_move_speed
+			camera_changed = true
 		if Input.is_key_pressed(KEY_9):
 			if Input.is_key_pressed(KEY_SHIFT):
 				cam.rotate_z(delta*cam_rotate_speed)
 			else:
 				cam.position.z += delta * cam_move_speed
+			camera_changed = true
 		if Input.is_key_pressed(KEY_0):
 			if Input.is_key_pressed(KEY_SHIFT):
 				cam.rotate_z(-delta*cam_rotate_speed)
 			else:
 				cam.position.z -= delta * cam_move_speed
+			camera_changed = true
 		
 		# Set different camera
 		if Input.is_key_pressed(KEY_1):
@@ -1890,11 +1897,13 @@ func update_camera(delta:float) -> void:
 				get_node("Headon/Cameras/Camera3DPitchSideView").current = true
 			else:
 				get_node("Headon/Cameras/Camera3DBatting").current = true
+			camera_changed = true
 		elif Input.is_key_pressed(KEY_2):
 			if Input.is_key_pressed(KEY_SHIFT):
 				get_node("Headon/Cameras/Camera3DHigherHome").current = true
 			else:
 				get_node("Headon/Cameras/Camera3DHighHome").current = true
+			camera_changed = true
 		elif Input.is_key_pressed(KEY_3):
 			if Input.is_key_pressed(KEY_SHIFT):
 				get_node("Headon/Cameras/Camera3DBallOverhead").current = true
@@ -1902,8 +1911,10 @@ func update_camera(delta:float) -> void:
 				get_node("Headon/Cameras/Camera3DBallOverhead").position.y = 30
 			else:
 				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
+			camera_changed = true
 		elif Input.is_key_pressed(KEY_4):
 			get_node("Headon/Cameras/Camera3DAll22").current = true
+			camera_changed = true
 	
 	# Move camera so that the ball stays in view
 	cam = get_viewport().get_camera_3d()
@@ -1921,6 +1932,7 @@ func update_camera(delta:float) -> void:
 	
 	# Move camera to follow ball
 	if ball_in_play:
+		camera_changed = true
 		var camhh = get_node("Headon/Cameras/Camera3DHigherHome")
 		# Camera follows ball by placing itself between ball and point z1.
 		#  Unless behind z2, then it is adjusted to be smoother.
@@ -2005,5 +2017,7 @@ func update_camera(delta:float) -> void:
 			transform = transform.orthonormalized()
 	
 	# Hide/show walls based on camera position
-	$Ground/Wall.set_vis_based_on_camera(cam)
+	if camera_changed:
+		$Ground/Wall.set_vis_based_on_camera(cam)
 	
+	return camera_changed
