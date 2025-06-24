@@ -38,6 +38,8 @@ var sliding_to_base = -1 # -1 if not, otherwise int to base
 var force_end_state:String = 'null'
 
 const possible_states:Array = [
+	# Not started
+	'batter',
 	# Done for play states
 	'not_exist', 'out_done', 'out_running_to_sideline',
 	'scored_done', 'scored_running_to_sideline', 'sliding_out',
@@ -109,6 +111,7 @@ func is_active():
 	return (exists_at_start and
 			not out_on_play and
 			not scored_on_play and
+			not state == 'batter' and
 			not (force_to_base != null and
 				abs(force_to_base - running_progress) < 1e-8))
 
@@ -159,6 +162,7 @@ func _physics_process(delta: float) -> void:
 	
 	# States that do nothing
 	if state in [
+		'batter',
 		'not_exist', 
 		'waiting_to_score_may_need_to_tag',
 		'standing_not_on_base'
@@ -466,7 +470,10 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		$Char3D.set_color_from_team(player, team, is_home_team)
 	if is_home_team and post_play_target_position.x > 0:
 		post_play_target_position.x *= 1
-	if exists_at_start:
+	if start_base == 0:
+		set_state('batter')
+		set_animation('idle')
+	elif exists_at_start:
 		set_state('standing_not_on_base')
 		set_animation('idle')
 	else:
