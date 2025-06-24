@@ -338,6 +338,7 @@ func _physics_process(delta: float) -> void:
 			alt_fielders[0].set_selected_fielder()
 			alt_fielders[0].set_assignment("ball")
 			alt_fielder_selected_signal.emit(alt_fielders[0], self)
+			cancel_throw()
 			return
 	
 	# Move fielder to their assignment
