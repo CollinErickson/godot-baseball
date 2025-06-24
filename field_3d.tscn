@@ -1,7 +1,8 @@
-[gd_scene load_steps=68 format=3 uid="uid://cvloyxg0g0o58"]
+[gd_scene load_steps=66 format=3 uid="uid://cvloyxg0g0o58"]
 
 [ext_resource type="PackedScene" uid="uid://cluomdr4nxc7v" path="res://batter_3d.tscn" id="1_f3rg8"]
 [ext_resource type="Script" uid="uid://bl3nlh5ft1jhu" path="res://field_3d.gd" id="1_pctx6"]
+[ext_resource type="Shader" uid="uid://bixocloauje23" path="res://shaders/grass_pattern_crisscross.gdshader" id="2_3lu60"]
 [ext_resource type="PackedScene" uid="uid://c7xao527v2us8" path="res://pitcher_3d.tscn" id="2_57wgl"]
 [ext_resource type="PackedScene" uid="uid://dmcetu0b5itrl" path="res://wall.tscn" id="2_hfxba"]
 [ext_resource type="PackedScene" uid="uid://d3vo8o7aa5kqp" path="res://fielder_3d.tscn" id="4_386e5"]
@@ -27,25 +28,16 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_yxhqg"]
 size = Vector3(60, 2, 60)
 
-[sub_resource type="Gradient" id="Gradient_8rhyr"]
-offsets = PackedFloat32Array(0, 0.52381, 1)
-colors = PackedColorArray(0, 0.768935, 0, 1, 0, 0.90773, 0, 1, 1, 1, 1, 1)
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_gcaba"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_s72fw"]
-width = 1024
-height = 1024
-color_ramp = SubResource("Gradient_8rhyr")
-noise = SubResource("FastNoiseLite_gcaba")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tww2n"]
-albedo_color = Color(0.0590808, 0.369669, 0.0503423, 1)
-albedo_texture = SubResource("NoiseTexture2D_s72fw")
-subsurf_scatter_strength = 1.0
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3lu60"]
+render_priority = 0
+shader = ExtResource("2_3lu60")
+shader_parameter/light_grass_color = Color(0.157407, 0.526388, 0.0833914, 1)
+shader_parameter/dark_grass_color = Color(0.15, 0.5, 0.08, 1)
+shader_parameter/stripe_width = 5.0
+shader_parameter/vertical_stripes = false
 
 [sub_resource type="BoxMesh" id="BoxMesh_i5ps3"]
-material = SubResource("StandardMaterial3D_tww2n")
+material = SubResource("ShaderMaterial_3lu60")
 size = Vector3(300, 2, 300)
 
 [sub_resource type="BoxMesh" id="BoxMesh_s3y8d"]
@@ -207,25 +199,30 @@ shape = SubResource("BoxShape3D_yxhqg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, -1, 70)
 mesh = SubResource("BoxMesh_i5ps3")
 
+[node name="GreenGround2" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, -1, 70)
+visible = false
+mesh = SubResource("BoxMesh_i5ps3")
+
 [node name="HomePlate" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.175, 0.01, 0.175)
 mesh = SubResource("BoxMesh_s3y8d")
-skeleton = NodePath("../GreenGround")
+skeleton = NodePath("")
 
 [node name="FirstBase" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.75, 0.01, 0.25)
 mesh = SubResource("BoxMesh_ehdc6")
-skeleton = NodePath("../GreenGround")
+skeleton = NodePath("")
 
 [node name="SecondBase" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0.01, 30)
 mesh = SubResource("BoxMesh_ehdc6")
-skeleton = NodePath("../GreenGround")
+skeleton = NodePath("")
 
 [node name="ThirdBase" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 0.01, 29.75)
 mesh = SubResource("BoxMesh_ehdc6")
-skeleton = NodePath("../GreenGround")
+skeleton = NodePath("")
 
 [node name="WallCenter" type="MeshInstance3D" parent="Ground"]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 70, 0, 70)
@@ -285,7 +282,7 @@ transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 
 [node name="HomePlate2" type="MeshInstance3D" parent="Headon"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0.5)
 mesh = SubResource("BoxMesh_v6v7y")
-skeleton = NodePath("../../Ground/GreenGround")
+skeleton = NodePath("")
 
 [node name="Batter3D" parent="Headon" instance=ExtResource("1_f3rg8")]
 transform = Transform3D(-1, 2.10734e-08, 1.49012e-07, -7.8232e-09, 1, 2.98023e-08, 0, 2.10734e-08, -1, 1, 0, 0.5)
