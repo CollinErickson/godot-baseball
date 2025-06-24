@@ -104,6 +104,11 @@ func map_anim_name(anim_name:String, batsR:bool, throwsR:bool) -> String:
 			return 'Body Block R'
 		else:
 			return 'Body Block L'
+	elif anim_name == "catcher_idle":
+		if throwsR:
+			return 'Baseball Catcher Idle L'
+		else:
+			return 'Baseball Catcher Idle R'
 	elif anim_name == "slide":
 		return 'Running Slide'
 	else:
@@ -136,6 +141,8 @@ func map_anim_name_back(anim_name:String) -> String:
 		return 'catch_jump'
 	if anim_name in ['Body Block R', 'Body Block L']:
 		return 'catch_high'
+	if anim_name in ['Baseball Catcher Idle R', 'Baseball Catcher Idle L']:
+		return 'catcher_idle'
 	if anim_name == 'Running Slide':
 		return 'slide'
 	#if anim_name == '':
@@ -151,6 +158,8 @@ func start_animation(anim_name:String, batsR:bool, throwsR:bool) -> void:
 			anim_speed = 2.5
 	if map_anim_name(anim_name, batsR, throwsR) == 'Running Slide':
 		anim_speed = 2.
+	if anim_name == 'catcher_idle':
+		printt("in char 3d start anim catcher_idle", map_anim_name(anim_name, batsR, throwsR))
 	anim_player.play(ap(map_anim_name(anim_name, batsR, throwsR)),
 		-1, anim_speed)
 

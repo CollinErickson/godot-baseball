@@ -39,6 +39,7 @@ var prev_global_position:Vector3
 var turn_off_bad_throw_label_timer:float = 0
 var turn_off_bad_catch_label_timer:float = 0
 var target_fielder_info:Dictionary = {}
+var can_be_invisible:bool = false # Should catcher be invisible to not block cam
 
 const Player_tscn = preload("res://scripts/player.gd")
 var player: Player_tscn
@@ -79,6 +80,7 @@ func reset(throw_mode_:String, defense_control_:String,
 			user_is_pitching_team_:bool) -> void:
 	is_frozen = false
 	visible = true
+	can_be_invisible = posname == "C"
 	set_physics_process(true)
 	# Reset vars
 	position = start_position
@@ -133,8 +135,10 @@ func reset(throw_mode_:String, defense_control_:String,
 		set_look_at_position(Vector3(0,0,0))
 	else:
 		set_look_at_position(Vector3(0,0,0))
-	set_animation("idle")
-	force_animation_idle()
+	if posname == "C":
+		set_animation("catcher_idle", true)
+	else:
+		set_animation("idle", true)
 	#$Char3D.set_color(color)
 	
 	set_not_selected_fielder()
@@ -932,15 +936,20 @@ func time_to_reach_point(to:Vector3):
 		pos += delta * vel
 		time += delta
 
-func set_animation(new_anim):
+func set_animation(new_anim, force:bool = false) -> void:
 	#if posname == '2B':
-		#printt('in fielder setting animation', new_anim, state)
-	if new_anim == animation:
+		#printt('in fielder setting animation', posname, new_anim, state, force)
+	# Some anims should only be interrupted when resetting
+	if !force and (animation == "throw" or animation == "toss"):
+		push_warning("In fielder setting new anim over throw or toss ", posname,
+			" ", state, " ", animation, " ", new_anim)
+	if new_anim == animation and not force:
 		return
 	animation = new_anim
 	$Char3D.start_animation(new_anim, false, throws=='R')
 
 func force_animation_idle() -> void:
+	printt('in fielder forcing animation idle', posname)
 	animation = 'idle'
 	$Char3D.force_animation_idle()
 
@@ -1314,6 +1323,7 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 		# End of throw: change state and anim.
 		# Should already have assignment wait_to_receive or assigned to base
 		set_state('free')
+		animation = "finished" # So that it has no issue setting new anim
 		set_animation('idle')
 	elif anim_name in ["catch", 'catch_grounder', 'catch_chest', 'catch_jump',
 		'catch_high']:

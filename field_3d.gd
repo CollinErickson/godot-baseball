@@ -35,6 +35,7 @@ var time_last_decide_automatic_runners_actions = Time.get_ticks_msec() - 10*1e3
 	get_node('Headon/Runners/Runner3D3B')
 ]
 @onready var fielders = get_tree().get_nodes_in_group('fielders')
+@onready var catcher = $Headon/Defense/Fielder3DC
 @onready var pitcher = $Headon/Pitcher3D
 @onready var batter = $Headon/Batter3D
 @onready var ball = $Headon/Ball3D
@@ -713,10 +714,11 @@ func _process(delta: float) -> void:
 						#$Headon/Camera3DHighHome.current = true
 						
 						# Make catcher visible
-						var catcher = get_node("Headon/Defense/Fielder3DC")
+						#var catcher = get_node("Headon/Defense/Fielder3DC")
 						catcher.get_node("Timer").wait_time = .5
 						catcher.timer_action = "set_visible_true"
 						catcher.get_node("Timer").start()
+						catcher.can_be_invisible = false
 						
 						# Make mouse circle on ground visible
 						var mgl = get_node("Headon/MouseGroundLocation")
@@ -1332,10 +1334,11 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 			ball.fair_foul_determined = true
 			ball.is_foul = false
 			ball.set_state('fielded')
-			var catcher = get_fielder_with_posname('C')
+			#var catcher = get_fielder_with_posname('C')
 			catcher.set_state('free')
 			catcher.set_holding_ball(true)
 			catcher.visible = true
+			catcher.can_be_invisible = false
 			catcher.set_assignment('ball_carry')
 			assign_fielders_to_cover_bases([], catcher.position, ["C"])
 			
@@ -2019,5 +2022,10 @@ func update_camera(delta:float) -> bool:
 	# Hide/show walls based on camera position
 	if camera_changed:
 		$Ground/Wall.set_vis_based_on_camera(cam)
+	
+	# Hide/show catcher if before pitch
+	if camera_changed and not ball_in_play:
+		if catcher.can_be_invisible:
+			catcher.visible = cam.position.z > 1
 	
 	return camera_changed
