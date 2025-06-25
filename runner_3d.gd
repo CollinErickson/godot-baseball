@@ -34,6 +34,7 @@ var slide_prop:float = -1
 const slide_anim_duration:float = 1.2
 const slide_anim_play_speed:float = 2.
 const slide_speed_multiplier:float = 1.1
+var slide_cooldown_duration:float = 0.3 # seconds
 var sliding_to_base = -1 # -1 if not, otherwise int to base
 var force_end_state:String = 'null'
 
@@ -44,12 +45,13 @@ const possible_states:Array = [
 	'not_exist', 'out_done', 'out_running_to_sideline',
 	'scored_done', 'scored_running_to_sideline', 'sliding_out',
 	# Active states (except sliding could be out, check after anim done)
-	'standing_on_base', 'standing_not_on_base',
+	'standing_on_base', 'standing_not_on_base', 'sliding_cooldown',
 	'running', 'sliding_not_out', 'changing_direction',
 	# Waiting to score states: if may have to tag up, then potentially active
 	'waiting_to_score_done', 'waiting_to_score_running_to_sideline',
 	'waiting_to_score_may_need_to_tag']
 var state:String = 'standing_on_base'
+var time_in_state:float = 0
 
 signal signal_scored_on_play
 signal reached_next_base_signal
@@ -118,7 +120,8 @@ func is_active():
 func runner_is_out() -> void:
 	assert(state in [
 		'standing_on_base', 'standing_not_on_base', 'running',
-		'sliding_not_out', 'changing_direction', 'waiting_to_score_may_need_to_tag'
+		'sliding_not_out', 'sliding_cooldown',
+		'changing_direction', 'waiting_to_score_may_need_to_tag'
 	])
 	out_on_play = true
 	is_running = false
@@ -160,6 +163,8 @@ func _physics_process(delta: float) -> void:
 	if is_frozen:
 		return
 	
+	time_in_state += delta
+	
 	# States that do nothing
 	if state in [
 		'batter',
@@ -172,6 +177,23 @@ func _physics_process(delta: float) -> void:
 	if state == 'standing_on_base':
 		check_tag_up()
 		return
+	if state == "sliding_cooldown":
+		# If slide back to start base, could have tagged up
+		check_tag_up()
+		# If cooldown period is over, switch to running or standing
+		if time_in_state > slide_cooldown_duration:
+			if abs(target_base - running_progress) > 1e-8:
+				# If sent, start running
+				set_state("running")
+				set_animation("running")
+				is_running = true
+			else:
+				# Switch to standing on base
+				set_state('standing_on_base')
+				return
+		else:
+			# Stay in cooldown longer
+			return
 	# States that watch ball but don't ever move
 	if state in ['out_done',
 		'scored_done', 'waiting_to_score_done']:
@@ -209,6 +231,7 @@ func _physics_process(delta: float) -> void:
 	assert(state in ['running', 'sliding_not_out', 'sliding_out', 'changing_direction'])
 	
 	if state in ['sliding_not_out', 'sliding_out']:
+		# Move them along in the slide
 		assert(sliding_to_base > 0.5)
 		var time_left_in_slide = max(0,
 			min($Char3D.time_left_in_current_anim(), slide_anim_duration))
@@ -360,7 +383,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 	if not is_active():
 		return
 	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
-		'sliding_not_out', 'waiting_to_score_may_need_to_tag'])
+		'sliding_not_out', 'sliding_cooldown',
+		'waiting_to_score_may_need_to_tag'])
 	var new_target_base:int = -1
 	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)
@@ -389,7 +413,8 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 		if running_progress > 1 and running_progress > start_base:
 			# Can't go back to home or if standing where started
 			# Standing on base, go to previous
-			if state in ['standing_on_base', 'waiting_to_score_may_need_to_tag']:
+			if state in ['standing_on_base', 'waiting_to_score_may_need_to_tag',
+						 'sliding_cooldown']:
 				# Go to previous base, unless reached home and no reason to return
 				assert(abs(running_progress - round(running_progress)) < 1e-8)
 				new_target_base = roundi(running_progress)
@@ -409,7 +434,7 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 func send_runner_to_base(base:float) -> void:
 	#printt('in runner send_runner_to_base', start_base, base, Time.get_ticks_msec())
 	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
-		'sliding_not_out',
+		'sliding_not_out', 'sliding_cooldown',
 		'waiting_to_score_may_need_to_tag'], state)
 	if base < .9999 or base > 4.0001:
 		push_warning('in runner send_runner_to_base bad value for base', base)
@@ -430,11 +455,12 @@ func send_runner_to_base(base:float) -> void:
 			assert(state in
 				['standing_on_base', 'standing_not_on_base',
 				'waiting_to_score_may_need_to_tag',
-				'running', 'sliding_not_out'],
+				'running', 'sliding_not_out', 'sliding_cooldown'],
 				state)
 	else:
 		#printt('in runner send_runner_to_base changing state to running')
-		if state != 'sliding_not_out':
+		# Start running unless in state that can't change now
+		if state not in ['sliding_not_out', 'sliding_cooldown']:
 			is_running = true 
 			set_animation('running')
 			set_state('running')
@@ -681,17 +707,13 @@ func _on_animation_finished_from_char3d(anim_name) -> void:
 		if state == 'sliding_out':
 			set_state('out_running_to_sideline')
 		elif state == 'sliding_not_out':
+			# Update to slide cooldown if not scored
 			if running_progress > 3.5:
 				# Standing on home, maybe scored, let this func figure it out
-				set_state('standing_on_base')
+				set_state('sliding_cooldown')
 				check_scored()
-			elif abs(target_base - running_progress) < 1e-8:
-				set_state('standing_on_base')
 			else:
-				# Input was given to update target base
-				set_state('running')
-				set_animation('running')
-				is_running = true
+				set_state('sliding_cooldown')
 		else:
 			assert(false, 'runner state cannot be here')
 
@@ -700,6 +722,7 @@ func set_state(new_state:String) -> void:
 		printt('in runner set_state error with new state', new_state)
 	assert(possible_states.has(new_state))
 	state = new_state
+	time_in_state = 0
 
 func look_at_ball() -> void:
 	set_look_at_pos(ball.position * Vector3(1,0,1))
