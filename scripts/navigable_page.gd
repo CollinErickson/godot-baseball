@@ -39,7 +39,7 @@ func _process(_delta: float) -> void:
 		if len(hov) == 0:
 			printt('button pressed but no hover button')
 		elif len(hov) == 1:
-			printt('button pressed, exactly one hover button')
+			#printt('button pressed, exactly one hover button')
 			hov[0].clicked()
 			return # Don't process anything else after click
 		else:
@@ -131,7 +131,7 @@ func get_navigable_buttons() -> void:
 			buttons_by_col.push_back([])
 		buttons_by_col[nb.col].push_back(nb)
 	
-	# TODO: Make sure that there aren't empty rows/cols
+	# Make sure that there aren't empty rows/cols
 	for i in range(len(buttons_by_row)):
 		if len(buttons_by_row[i]) == 0:
 			push_error("In nav page " + page_id +
@@ -179,7 +179,7 @@ func nav_to(subpage_name:String) -> void:
 	# Move to next page
 	get_node("Subpages/" + subpage_name).set_active(true)
 
-func nav_up() -> void:
+func nav_up(args) -> void:
 	#printt('in nav up', get_parent())
 	# Check if nav up is possible
 	if get_parent() == null or get_parent().get_parent() == null:
@@ -189,7 +189,7 @@ func nav_up() -> void:
 	
 	# Stop this page
 	set_active(false)
-	get_parent().get_parent().set_active(true)
+	get_parent().get_parent().set_active(true, args)
 
 func handle_keyboard_input(val:String) -> void:
 	var hov = get_tree().get_nodes_in_group("button_hover-" + page_id)
@@ -199,7 +199,7 @@ func handle_keyboard_input(val:String) -> void:
 		# Pick a button to set to hover
 		nav_buttons[0].set_hover(true)
 	elif len(hov) == 1:
-		printt('button pressed, exactly one hover button')
+		#printt('button pressed, exactly one hover button')
 		# Move to next button
 		hov = hov[0]
 		var new_hov = traverse_buttons(hov, val)

@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://by13efjiunnxr"
+
+[deps]
+
+files=["res://data/teams/teams.location.translation", "res://data/teams/teams.name.translation", "res://data/teams/teams.stadium.translation"]
+
+source_file="res://data/teams/teams.csv"
+dest_files=["res://data/teams/teams.location.translation", "res://data/teams/teams.name.translation", "res://data/teams/teams.stadium.translation"]
+
+[params]
+
+compress=true
+delimiter=0

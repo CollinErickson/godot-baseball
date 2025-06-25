@@ -1,0 +1,85 @@
+[gd_scene load_steps=4 format=3 uid="uid://byl01x4md05"]
+
+[ext_resource type="Script" uid="uid://dbvh5xygd0y0k" path="res://scripts/nav_select_team.gd" id="1_qugvd"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_g8cfq"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_7tq6k"]
+
+[node name="NavSelectTeam" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qugvd")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_g8cfq")]
+layout_mode = 1
+
+[node name="Up" parent="This" instance=ExtResource("3_7tq6k")]
+offset_left = 140.0
+offset_top = 330.0
+offset_right = 140.0
+offset_bottom = 330.0
+text = "<"
+page_id = "select_team"
+id = "up"
+
+[node name="Down" parent="This" instance=ExtResource("3_7tq6k")]
+offset_left = 1027.0
+offset_top = 307.0
+offset_right = 1027.0
+offset_bottom = 307.0
+text = ">"
+page_id = "select_team"
+id = "down"
+col = 1
+
+[node name="Accept" parent="This" instance=ExtResource("3_7tq6k")]
+offset_left = 1027.0
+offset_top = 651.0
+offset_right = 1027.0
+offset_bottom = 651.0
+text = "Accept"
+page_id = "select_team"
+id = "accept"
+row = 1
+col = 1
+
+[node name="Back" parent="This" instance=ExtResource("3_7tq6k")]
+offset_left = 150.0
+offset_top = 637.0
+offset_right = 150.0
+offset_bottom = 637.0
+text = "Back"
+page_id = "select_team"
+id = "back"
+row = 1
+
+[node name="Panel" type="Panel" parent="This"]
+custom_minimum_size = Vector2(400, 500)
+layout_mode = 0
+offset_left = 409.0
+offset_top = 198.0
+offset_right = 971.0
+offset_bottom = 669.0
+
+[node name="Label" type="Label" parent="This/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "(team name)"
+horizontal_alignment = 1
+vertical_alignment = 1
