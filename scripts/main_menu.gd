@@ -9,6 +9,8 @@ var main_menu_settings:Dictionary = {
 	'bat_mode': 'Timing',
 	'pitch_mode': 'BarTwoWay',
 	'throw_mode': 'BarOneWay',
+	'baserunning_control': 'Manual',
+	'defense_control': 'Manual',
 }
 
 func _ready() -> void:
@@ -80,19 +82,19 @@ func _on_settings_menu_selection(out_array:Array):
 	# Baserunning control
 	match out_array[8]:
 		'Manual':
-			main_menu_settings['baserunning_control'] = 'manual'
+			main_menu_settings['baserunning_control'] = 'Manual'
 		'Automatic':
-			main_menu_settings['baserunning_control'] = 'automatic'
+			main_menu_settings['baserunning_control'] = 'Automatic'
 		_:
 			push_warning('Bad baserunning_control from main menu settings')
 	# Defense control
 	match out_array[9]:
 		'Manual':
-			main_menu_settings['defense_control'] = 'manual'
+			main_menu_settings['defense_control'] = 'Manual'
 		'Throwing':
-			main_menu_settings['defense_control'] = 'throwing'
+			main_menu_settings['defense_control'] = 'Throwing'
 		'Automatic':
-			main_menu_settings['defense_control'] = 'automatic'
+			main_menu_settings['defense_control'] = 'Automatic'
 		_:
 			push_warning('Bad defense_control from main menu settings')
 	

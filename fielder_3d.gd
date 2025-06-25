@@ -116,7 +116,7 @@ func reset(throw_mode_:String, defense_control_:String,
 	user_is_pitching_team = user_is_pitching_team_
 	throw_mode = throw_mode_
 	defense_control = defense_control_
-	assert(defense_control_ in ['Automatic', 'Throwing', 'Manual'])
+	assert(defense_control_ in ['Automatic', 'Throwing', 'Manual'], defense_control_)
 	user_fields = user_is_pitching_team_ and (defense_control_ in ['Manual'])
 	user_throws = user_is_pitching_team_ and (defense_control_ in ['Throwing', 'Manual'])
 	
