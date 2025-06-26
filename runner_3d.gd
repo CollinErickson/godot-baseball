@@ -35,6 +35,7 @@ const slide_anim_duration:float = 1.2
 const slide_anim_play_speed:float = 2.
 const slide_speed_multiplier:float = 1.1
 var slide_cooldown_duration:float = 0.3 # seconds
+var slide_time_save:float = -100
 var sliding_to_base = -1 # -1 if not, otherwise int to base
 var force_end_state:String = 'null'
 
@@ -417,7 +418,12 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 						 'sliding_cooldown']:
 				# Go to previous base, unless reached home and no reason to return
 				assert(abs(running_progress - round(running_progress)) < 1e-8)
-				new_target_base = roundi(running_progress)
+				if (needs_to_tag_up and not tagged_up_after_catch):
+					# Can go back to previous base
+					new_target_base = roundi(running_progress - 1)
+				else:
+					# No reason to go back, just stay
+					new_target_base = roundi(running_progress)
 			else:
 				# In between bases, go back
 				assert(state in ['running', 'sliding_not_out',
@@ -488,6 +494,7 @@ func setup_player(player, team, is_home_team:bool) -> void:
 		SPEED = player.speed_yps()
 		slide_prop = slide_speed_multiplier * SPEED * slide_anim_duration / \
 			(30 * slide_anim_play_speed)
+		#slide_time_save = (slide_speed_multiplier - 1)
 	else: # x is null, no runner
 		exists_at_start = false
 		set_physics_process(false)
