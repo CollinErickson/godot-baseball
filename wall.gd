@@ -71,6 +71,9 @@ func _ready() -> void:
 	# Close the wall
 	wall_array.push_back(wall_array[0])
 	
+	# Calculate values to be used later
+	calculate_wall_info()
+	
 	# Create the mesh for the wall
 	make_wall()
 	
@@ -79,7 +82,12 @@ func _ready() -> void:
 	
 	# Create the stands
 	#make_stands()
+	make_grandstands()
 	
+	# Place foul poles (do after since need wall_coords)
+	place_foul_poles()
+
+func calculate_wall_info():
 	# Find min distance to each wall segment
 	for i in range(len(wall_array)-1):
 		var u1 = Vector2(cosd(wall_array[i][0]), sind(wall_array[i][0])) * wall_array[i][1]
@@ -103,17 +111,12 @@ func _ready() -> void:
 		))
 	for iwall in range(len(wall_array) - 1):
 		# vector in direction of wall
-		# TODO: store along_walls and normal_outs so it's not recalculated every time
 		var along_wall:Vector3 = wall_coords[iwall+1] - wall_coords[iwall]
 		along_wall.y = 0
 		along_walls.push_back(along_wall)
 		var normal_out:Vector3 = along_wall.rotated(
 			Vector3(0,1,0), 90.*PI/180).normalized()
 		normal_outs.push_back(normal_out)
-	
-	# Place foul poles (do after since need wall_coords)
-	place_foul_poles()
-
 
 func make_wall():
 	#print("Running make_wall")
@@ -156,34 +159,6 @@ func make_wall():
 		var norm_vec:Vector3 = (v1 - v2).cross(v1up - v1).normalized()
 		for j in range(6):
 			normals.push_back(norm_vec)
-		
-		# Add stadium section
-		# Add multiple sections if needed
-		# Each section is about 13m wide
-		var n_sections:int = max(1, floori(v1.distance_to(v2) / 36))
-		#printt('in wall gs n_sections', n_sections)
-		for j in range(n_sections):
-			var gs2 = gs1.instantiate()
-			add_child(gs2)
-			# Set rotation
-			var rotate_angle_radians:float
-			var vdiffnorm:Vector3 = (v2 - v1).normalized()
-			if vdiffnorm.z >= 0:
-				rotate_angle_radians = PI + asin(vdiffnorm.x)
-			else:
-				rotate_angle_radians = asin(-vdiffnorm.x)
-			gs2.rotate_y(rotate_angle_radians)
-			gs2.position = (v1 + v2) / 2.
-			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
-			gs2.position -= norm_vec * 17
-			gs2.position.y = min(v1up.y, v2up.y)
-			grandstand_nodes.push_back(gs2)
-			
-			# Store normal vector to know when to hide sections
-			var gs_norm:Vector3 = norm_vec
-			# Rotate to match the face of the seats?
-			#gs_norm.rotated(v2 - v1, -PI/4)
-			grandstand_normals.push_back(gs_norm)
 		
 	# Colors
 	for i in range(len(verts)):
@@ -712,3 +687,40 @@ func set_vis_based_on_camera(cam:Camera3D) -> void:
 		# New way uses the face
 		gsn.visible = gs_norm_face.dot(camdir) < 0
 	#assert(false)
+
+func make_grandstands():
+	# Create and place stands around entire field
+	for i in range(len(wall_array) - 1):
+		var v1:Vector3 = wall_coords[i]
+		var v2:Vector3 = wall_coords[i + 1]
+		var v1up:Vector3 = v1 + Vector3(0, wall_array[i][2],0)
+		var v2up:Vector3 = v2 + Vector3(0, wall_array[i+1][2],0)
+		var norm_vec:Vector3 = normal_outs[i]
+	
+		# Add stadium section
+		# Add multiple sections if needed
+		# Each section is about 13m wide
+		var n_sections:int = max(1, floori(v1.distance_to(v2) / 36))
+		#printt('in wall gs n_sections', n_sections)
+		for j in range(n_sections):
+			var gs2 = gs1.instantiate()
+			add_child(gs2)
+			# Set rotation
+			var rotate_angle_radians:float
+			var vdiffnorm:Vector3 = (v2 - v1).normalized()
+			if vdiffnorm.z >= 0:
+				rotate_angle_radians = PI + asin(vdiffnorm.x)
+			else:
+				rotate_angle_radians = asin(-vdiffnorm.x)
+			gs2.rotate_y(rotate_angle_radians)
+			gs2.position = (v1 + v2) / 2.
+			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
+			gs2.position -= norm_vec * 17
+			gs2.position.y = min(v1up.y, v2up.y)
+			grandstand_nodes.push_back(gs2)
+			
+			# Store normal vector to know when to hide sections
+			var gs_norm:Vector3 = norm_vec
+			# Rotate to match the face of the seats?
+			#gs_norm.rotated(v2 - v1, -PI/4)
+			grandstand_normals.push_back(gs_norm)
