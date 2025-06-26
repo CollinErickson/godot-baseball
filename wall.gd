@@ -713,8 +713,8 @@ func make_grandstands():
 	
 		# Add stadium section
 		# Add multiple sections if needed
-		# Each section is about 13m wide
-		var n_sections:int = max(1, floori(v1.distance_to(v2) / 36))
+		# Each section should be 13m wide, but they're scale 4, so actually 52
+		var n_sections:int = max(1, ceili(v1.distance_to(v2) / 52))
 		if distance_xz(v1, v2) < 3:
 			# No objects for very short sections, such as ones that are
 			#  just added to change the height of the wall
@@ -735,8 +735,9 @@ func make_grandstands():
 			gs2.position = (v1 + v2) / 2.
 			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
 			gs2.position -= norm_vec * 17
-			gs2.position.y = min(v1up.y, v2up.y)
+			gs2.position.y = min(v1up.y, v2up.y) / 2. - 1
 			grandstand_nodes.push_back(gs2)
+			#printt('gs2', gs2.scale) # 4, not sure where that's set?
 			
 			# Store normal vector to know when to hide sections
 			var gs_norm:Vector3 = norm_vec
