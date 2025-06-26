@@ -1087,8 +1087,15 @@ func decide_what_to_do_with_ball() -> Array:
 	var base_start_pos = []
 	for i in range(len(runners_)):
 		var runner = runners_[i]
-		base_front.push_back(min(floor(runner.running_progress) + 1, 4))
-		base_behind.push_back(floor(runner.running_progress))
+		if floor(runner.running_progress) > runner.start_base and \
+			runner.needs_to_tag_up and not runner.tagged_up_after_catch:
+			# Handle rare edge case where runner passed base but needs to go back
+			base_front.push_back(runner.start_base + 1)
+			base_behind.push_back(runner.start_base)
+		else:
+			# 99.99% of cases
+			base_front.push_back(min(floor(runner.running_progress) + 1, 4))
+			base_behind.push_back(floor(runner.running_progress))
 		base_front_pos.push_back(base_positions[base_front[i] - 1])
 		base_behind_pos.push_back(base_positions[base_behind[i] - 1])
 		base_start_pos.push_back(base_positions[runner.start_base - 1])
