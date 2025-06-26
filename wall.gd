@@ -12,7 +12,7 @@ const gs1 = preload("res://resources/stadium/grandstand_1.tscn")
 # wall_array is array with:
 # (angle: 0 is LF, 90 is RF, distance from home in YD, height in YD)
 # To connect back to starting point, duplicate first element at end
-var wall_array:Array = [
+var wall_array1:Array = [
 	[-15, 270./3, 20./3],
 	[0, 320./3, 10./3],
 	[30, 370./3, 15./3],
@@ -22,6 +22,24 @@ var wall_array:Array = [
 	[105, 250./3, 20./3],
 	[180, 90./3, 10./3],
 	[270, 90./3, 10./3]
+]
+var wall_array:Array = [
+	[-5, 150./3, 4./3],
+	[0, 310./3, 37./3],
+	[37, 380./3, 37./3],
+	[37.01, 380./3, 18./3],
+	[39, 375./3, 18./3],
+	[50, 400./3, 18./3],
+	[55, 380./3, 6./3],
+	[83, 370./3, 6./3],
+	[87, 355./3, 4./3],
+	[90, 302./3, 4./3],
+	[93, 230./3, 6./3],
+	[96, 120./3, 6./3],
+	[215, 40./3, 6./3],
+	[225, 40./3, 6./3],
+	[235, 40./3, 6./3],
+	[330, 110./3, 6./3]
 ]
 
 # Aligned with coordinates, for testing
@@ -148,9 +166,13 @@ func make_wall():
 			var gs2 = gs1.instantiate()
 			add_child(gs2)
 			# Set rotation
-			gs2.rotate_y(atan((v2.x - v1.x) / (v2.z - v1.z)) + PI)
-			if wall_array[i][0] > 90 and wall_array[i][0] < 270:
-				gs2.rotate_y(PI)
+			var rotate_angle_radians:float
+			var vdiffnorm:Vector3 = (v2 - v1).normalized()
+			if vdiffnorm.z >= 0:
+				rotate_angle_radians = PI + asin(vdiffnorm.x)
+			else:
+				rotate_angle_radians = asin(-vdiffnorm.x)
+			gs2.rotate_y(rotate_angle_radians)
 			gs2.position = (v1 + v2) / 2.
 			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
 			gs2.position -= norm_vec * 17
