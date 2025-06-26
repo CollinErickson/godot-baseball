@@ -561,6 +561,7 @@ func check_ball_cross(pos:Vector3, vel, cor, prev_pos:Vector3, _prev_vel,
 	return [true, is_over, reflect_pos, new_vel]
 
 func check_fielder_cross(pos, prev_pos) -> Array:
+	# Not being used anymore
 	var wall_cross_info = check_object_cross(pos, prev_pos)
 	if !wall_cross_info[0]:
 		return [false]
@@ -586,6 +587,8 @@ func check_fielder_cross(pos, prev_pos) -> Array:
 func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) -> Array:
 	## Check if fielder is on the correct side of the walls
 	##
+	## buffer: closest distance fielder can get to wall (if 0 then half of their
+	##   body would go through)
 	## Returns array: [bool whether on correct side, position where they should be]
 	if sqrt(pos.x**2 + pos.z**2) < mindist:
 		return [true]
@@ -599,12 +602,23 @@ func check_fielder_correct_side(pos:Vector3, _prev_pos:Vector3, buffer:float=0) 
 		# Check which side of wall player position is on 
 		if normal_out.dot(f) > 0:
 			# They are on the wrong side
-			# Find where they should be
-			pos = (f.dot(along_wall) * along_wall /
-					along_wall.length_squared()
-				) + wall_coords[iwall] - buffer*normal_out
-			pos.y = 0
-			adjusted_position = true
+			# Check if they are within the wall section
+			# Project onto line from v1 to v2
+			var v1:Vector3 = wall_coords[iwall] * Vector3(1,0,1)
+			var v2:Vector3 = wall_coords[iwall + 1] * Vector3(1,0,1)
+			var dot_:float = (pos - v1).dot(v2 - v1)
+			var proj:Vector3 = dot_ * (v2 - v1) / (v2 - v1).length_squared()
+			if dot_ < 0 or proj.length() > (v2 - v1).length():
+				#printt('fielder cross wall outside of length')
+				pass
+			else:
+				# They crossed the wall within its length
+				# Find where they should be
+				pos = (f.dot(along_wall) * along_wall /
+						along_wall.length_squared()
+					) + wall_coords[iwall] - buffer*normal_out
+				pos.y = 0
+				adjusted_position = true
 	if adjusted_position:
 		return [false, pos]
 	return [true]
