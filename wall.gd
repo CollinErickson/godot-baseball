@@ -701,7 +701,12 @@ func make_grandstands():
 		# Add multiple sections if needed
 		# Each section is about 13m wide
 		var n_sections:int = max(1, floori(v1.distance_to(v2) / 36))
-		#printt('in wall gs n_sections', n_sections)
+		if distance_xz(v1, v2) < 3:
+			# No objects for very short sections, such as ones that are
+			#  just added to change the height of the wall
+			n_sections = 0
+		#printt('in wall gs n_sections', n_sections, i, v1, v2,
+			#distance_xz(v1, v2))
 		for j in range(n_sections):
 			var gs2 = gs1.instantiate()
 			add_child(gs2)
@@ -724,3 +729,6 @@ func make_grandstands():
 			# Rotate to match the face of the seats?
 			#gs_norm.rotated(v2 - v1, -PI/4)
 			grandstand_normals.push_back(gs_norm)
+
+func distance_xz(a:Vector3, b:Vector3) -> float:
+	return (a * Vector3(1,0,1)).distance_to(b * Vector3(1,0,1))
