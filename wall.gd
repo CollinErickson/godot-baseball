@@ -57,7 +57,7 @@ var wall_array:Array = [
 
 var grandstand_nodes:Array = []
 var grandstand_normals:Array = []
-var wall_coords:Array = []
+var wall_coords:Array = [] # Coords for the top of wall
 var along_walls:Array = []
 var normal_outs:Array = []
 var mindist:float = 1e9
@@ -705,22 +705,39 @@ func set_vis_based_on_camera(cam:Camera3D) -> void:
 func make_grandstands():
 	# Create and place stands around entire field
 	for i in range(len(wall_array) - 1):
-		var v1:Vector3 = wall_coords[i]
-		var v2:Vector3 = wall_coords[i + 1]
-		var v1up:Vector3 = v1 + Vector3(0, wall_array[i][2],0)
-		var v2up:Vector3 = v2 + Vector3(0, wall_array[i+1][2],0)
+		#if i != 0:continue
+		var v1up:Vector3 = wall_coords[i]
+		var v2up:Vector3 = wall_coords[i + 1]
+		var v1:Vector3 = v1up * Vector3(1,0,1)
+		var v2:Vector3 = v2up * Vector3(1,0,1)
 		var norm_vec:Vector3 = normal_outs[i]
 	
 		# Add stadium section
 		# Add multiple sections if needed
 		# Each section should be 13m wide, but they're scale 4, so actually 52
-		var n_sections:int = max(1, ceili(v1.distance_to(v2) / 52))
+		var section_length:float = 52
+		var n_sections:int = max(1, ceili(v1.distance_to(v2) / section_length))
 		if distance_xz(v1, v2) < 3:
 			# No objects for very short sections, such as ones that are
 			#  just added to change the height of the wall
 			n_sections = 0
 		#printt('in wall gs n_sections', n_sections, i, v1, v2,
 			#distance_xz(v1, v2))
+		# Use len - 2 and 1 since index 0 is repeated at len - 2
+		var v0:Vector3 = wall_coords[
+			i - 1 if i - 1 >= 0 else len(wall_coords) - 2
+			] * Vector3(1,0,1)
+		var v3:Vector3 = wall_coords[
+			i + 2 if i + 2 < len(wall_coords) else 1
+			] * Vector3(1,0,1)
+		# Check if the intersection with neighbor walls is concave (>180 deg)
+		# We need to make sure that stands don't extend into the field
+		var concave_cw:bool = (v1 - v0).cross(v2 - v1).y > 0
+		var concave_ccw:bool = (v2 - v1).cross(v3 - v2).y > 0
+		#printt('  n_sect', concave_cw, concave_ccw, v0, v3)
+		# If no way to fit it in, skip it
+		if concave_cw and concave_ccw and (v2 - v1).length() > section_length:
+			continue
 		for j in range(n_sections):
 			var gs2 = gs1.instantiate()
 			add_child(gs2)
@@ -732,12 +749,32 @@ func make_grandstands():
 			else:
 				rotate_angle_radians = asin(-vdiffnorm.x)
 			gs2.rotate_y(rotate_angle_radians)
-			gs2.position = (v1 + v2) / 2.
-			gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
+			#printt('     subsection n_sect', i, j, vdiffnorm, rotate_angle_radians)
+			#gs2.position = (v1 + v2) / 2.
+			# Space it out so that
+			# if n_sect = 1, it's in the middle
+			# if n_sect = 2, they are centered
+			#gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
+			# Place it depending on concavity
+			if concave_cw and concave_ccw:
+				# We know at least 1 full section will fit in
+				# Need to keep it within both edges
+				gs2.position = v1 + (v2 - v1).normalized()*section_length/2. * (
+					n_sections - 1 - j) + \
+				 v2 + (v1 - v2).normalized()*section_length/2. * (j)
+			elif concave_cw:
+				# Can extend past v2
+				gs2.position = v1 + (v2 - v1).normalized()*section_length/2. * (1 + 2*j)
+			elif concave_ccw:
+				# Can extend past v1
+				gs2.position = v2 + (v1 - v2).normalized()*section_length/2. * (1 + 2*j)
+			else: # no issues
+				gs2.position = v1 + (2*j+1) * (v2 - v1) / 2. / n_sections
+			
+			# Move back from wall
 			gs2.position -= norm_vec * 17
-			gs2.position.y = min(v1up.y, v2up.y) / 2. - 1
+			gs2.position.y = min(v1up.y, v2up.y)
 			grandstand_nodes.push_back(gs2)
-			#printt('gs2', gs2.scale) # 4, not sure where that's set?
 			
 			# Store normal vector to know when to hide sections
 			var gs_norm:Vector3 = norm_vec
