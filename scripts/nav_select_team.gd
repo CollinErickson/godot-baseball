@@ -60,3 +60,26 @@ func set_team(index:int) -> void:
 
 func setup(_args:Dictionary={}) -> void:
 	set_team(current_index)
+
+func json_rows_to_cols(x:Array) -> Dictionary:
+	#printt('in nav select team json_rows_to_cols', x)
+	var y:Dictionary = {}
+	for i in range(len(x)):
+		var xi:Dictionary = x[i]
+		for key in xi.keys():
+			if i == 0:
+				y[key] = [xi[key]]
+			else:
+				y[key].push_back(xi[key])
+	return y
+
+func json_cols_to_rows(x:Dictionary) -> Array:
+	#printt('in nav select team json_cols_to_rows', x)
+	var y:Array = []
+	var ks:Array = x.keys()
+	for i in range(len(x[ks[0]])):
+		var yi:Dictionary = {}
+		for k in ks:
+			yi[k] = x[k][i]
+		y.push_back(yi)
+	return y

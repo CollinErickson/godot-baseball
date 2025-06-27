@@ -179,7 +179,7 @@ func nav_to(subpage_name:String) -> void:
 	# Move to next page
 	get_node("Subpages/" + subpage_name).set_active(true)
 
-func nav_up(args) -> void:
+func nav_up(args:Dictionary={}) -> void:
 	#printt('in nav up', get_parent())
 	# Check if nav up is possible
 	if get_parent() == null or get_parent().get_parent() == null:
