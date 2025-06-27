@@ -64,6 +64,7 @@ func _ready() -> void:
 	# Set up signals from pitcher
 	pitcher.connect("pitch_started", _on_pitcher_3d_pitch_started)
 	pitcher.connect("pitch_released_signal", _on_pitcher_3d_pitch_released)
+	pitcher.connect("start_pickoff_signal", _on_pitcher_3d_start_pickoff)
 	
 	# Set up signals from batter
 	batter.connect('start_runner', _on_batter_3d_start_runner)
@@ -1210,10 +1211,14 @@ func _on_pitcher_3d_pitch_released(_pitch_x, _pitch_y, pitch_t) -> void:
 			0.5 * $Headon/Batter3D.swing_inzone_duration )
 		get_node("Headon/Batter3D/Timer").start()
 
+func _on_pitcher_3d_start_pickoff() -> void:
+	switch_from_pitch_to_play("pickoff")
+
 var time_since_check_if_play_done_checked = 0
 var time_since_play_done_consecutive = 0
 #var play_done_fully = false
 func check_if_play_done():
+	#printt('in field check_if_play_done', Time.get_ticks_msec())
 	time_since_check_if_play_done_checked = 0
 	
 	# Check if 3 outs
@@ -1231,6 +1236,7 @@ func check_if_play_done():
 			n_runners_active += 1
 	if n_runners_active == 0:
 		return true
+	
 	# None are running, all are near base
 	# Check if fielder is holding ball
 	var holding_ball = false
@@ -1305,9 +1311,6 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 			steal_on_play = true
 			
 			# Manage batter/runners
-			# No need for runners to tag up
-			for runner2 in runners:
-				runner2.may_need_to_tag_up = false
 			# Start moving them and give safe passage
 			if pitch_is_ball and potential_walk:
 				# If walk, runners get free passage for next base, 
@@ -1325,26 +1328,8 @@ func _on_ball_3d_pitch_completed_unhit(pitch_is_ball_:bool, pitch_is_strike_:boo
 				runners[0].set_state('not_exist')
 				runners[0].exists_at_start = false
 				runners[0].force_end_state = '0'
-			# Update force outs left so that runners can score
-			update_max_force_outs_left()
 			
-			# Put ball in play in catcher's hand
-			ball_in_play = true
-			ball.visible = false
-			ball.fair_foul_determined = true
-			ball.is_foul = false
-			ball.set_state('fielded')
-			#var catcher = get_fielder_with_posname('C')
-			catcher.set_state('free')
-			catcher.set_holding_ball(true)
-			catcher.visible = true
-			catcher.can_be_invisible = false
-			catcher.set_assignment('ball_carry')
-			assign_fielders_to_cover_bases([], catcher.position, ["C"])
-			
-			$TimerCameraChange.wait_time = .3
-			next_camera = $Headon/Cameras/Camera3DHigherHome
-			$TimerCameraChange.start()
+			switch_from_pitch_to_play("steal_after_pitch")
 			return
 	# No one is stealing, play can end
 	
@@ -1474,7 +1459,7 @@ func coalesce(x1, x2=null, x3=null, x4=null, x5=null, x6=null, x7=null, x8=null,
 
 func decide_automatic_runners_actions():
 	time_last_decide_automatic_runners_actions = Time.get_ticks_msec()
-	#printt("Running decide_automatic_runners_actions\t",
+	#printt("in field Running decide_automatic_runners_actions\t",
 		#time_last_decide_automatic_runners_actions/1000.)
 	
 	# 1. If fielded and need to tag up, do that.
@@ -1523,7 +1508,9 @@ func decide_automatic_runners_actions():
 	#  a. If can reach next base safely, wait on start base to tag up.
 	#  b. Else, go as far as is safe and stop.
 	if fielder_with_ball == null:
-		if not ball_hit_bounced and not fftib[1] and outs_before_play < outs_per_inning - 1.5 and outs_on_play < 0.5:
+		if not ball_hit_bounced and not fftib[1] and \
+		outs_before_play < outs_per_inning - 1.5 and outs_on_play < 0.5 \
+		and not steal_on_play:
 			for i in range(len(runners)):
 				if i > .5 and runners[i].is_active() and decisions[i]==null:
 					#printt('SENDING BACK, CAN CATCH!!!', i)
@@ -2029,3 +2016,51 @@ func update_camera(delta:float) -> bool:
 			catcher.visible = cam.position.z > 1
 	
 	return camera_changed
+
+
+func switch_from_pitch_to_play(event) -> void:
+	printt('in field switch_from_pitch_to_play')
+	# Update ball
+	ball_in_play = true
+	ball.visible = false
+	ball.fair_foul_determined = true
+	ball.is_foul = false
+	ball.set_state('fielded')
+	
+	# Update catcher
+	catcher.set_state('free')
+	catcher.visible = true
+	catcher.can_be_invisible = false
+	
+	# Give ball to pitcher or catcher
+	if event == "pickoff":
+		steal_on_play = true
+		# Manage batter/runners
+		# No need for runners to tag up
+		# Steal does this separately
+		for runner2 in runners:
+			runner2.may_need_to_tag_up = false
+		
+		var fielderP = get_fielder_with_posname("P")
+		#fielderP.visible = true
+		fielderP.set_state('free')
+		fielderP.set_holding_ball(true)
+		#fielderP.set_assignment('ball_carry')
+		fielderP.set_assignment('ball')
+		fielderP.set_selected_fielder()
+		assign_fielders_to_cover_bases([], fielderP.position, ["P"])
+	elif event == "steal_after_pitch":
+		pass
+		catcher.set_holding_ball(true)
+		catcher.set_assignment('ball_carry')
+		assign_fielders_to_cover_bases([], catcher.position, ["C"])
+	else:
+		assert(false)
+	
+	# Update force outs left so that runners can score
+	update_max_force_outs_left()
+	
+	# Update camera
+	$TimerCameraChange.wait_time = .03
+	next_camera = $Headon/Cameras/Camera3DHigherHome
+	$TimerCameraChange.start()

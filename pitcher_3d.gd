@@ -176,6 +176,10 @@ func _physics_process(delta: float) -> void:
 			if user_input_method=="mouse" and pitch_type==null:
 				# Can't start pitch yet
 				pass
+			# Check for pickoff
+			elif Input.is_action_just_pressed("cancel_throw"):
+				start_pickoff()
+				return
 			# Check for pitch start buttons/clicks
 			elif pitch_mode == "Button":
 				# Single press starts pitch
@@ -480,12 +484,7 @@ func _physics_process(delta: float) -> void:
 		#print(ball.find_starting_velocity_vector(40, ball.position, 0, 1))
 		
 		# Hide pitcher and activate Fielder3DP
-		visible = false
-		set_physics_process(false)
-		set_process(false)
-		var fielderP = get_parent().get_node("Defense/Fielder3DP")
-		fielderP.visible = true
-		fielderP.position = position
+		switch_to_fielder()
 		
 	
 	# Place catcher's mitt for pitch target
@@ -565,3 +564,22 @@ func _on_click_in_rect_by_mouse(num:int) -> void:
 		print('in pitcher _on_click_in_rect_by_mouse', num)
 		assert(false)
 	$PitchSelectClick.visible = false
+
+signal start_pickoff_signal
+func start_pickoff() -> void:
+	# Cancel pitch in progress
+	
+	# Switch to fielder
+	switch_to_fielder()
+	
+	# Emit to field
+	start_pickoff_signal.emit()
+
+func switch_to_fielder() -> void:
+	
+	visible = false
+	set_physics_process(false)
+	set_process(false)
+	var fielderP = get_parent().get_node("Defense/Fielder3DP")
+	fielderP.visible = true
+	fielderP.position = position

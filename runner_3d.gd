@@ -530,6 +530,9 @@ func is_done_for_play() -> bool:
 		return true
 	if out_on_play or scored_on_play:
 		return true
+	if state == 'batter':
+		# If batter never ran, play can end (pick off, stolen base)
+		return true
 	if force_to_base != null and abs(force_to_base - running_progress) < 1e-8:
 		return true
 	if needs_to_tag_up and not tagged_up_after_catch:
@@ -782,6 +785,7 @@ func can_be_tagged_out() -> bool:
 
 func start_after_walk() -> void:
 	visible = true # Needed for runner starting at home
+	may_need_to_tag_up = false
 	safe_passage_after_walk = true
 	# Don't start them if they already next base (rare but plausible)
 	if running_progress < start_base + 1:
