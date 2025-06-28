@@ -269,11 +269,11 @@ mesh = SubResource("ArrayMesh_whjik")
 [node name="Wall" parent="Ground" instance=ExtResource("2_hfxba")]
 
 [node name="FoulPoleLeft" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 10, 0.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 10, 0.25)
 mesh = SubResource("BoxMesh_3lu60")
 
 [node name="FoulPoleRight" type="MeshInstance3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 10, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 10, 100)
 mesh = SubResource("BoxMesh_v5ljp")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -442,6 +442,10 @@ fov = 37.7
 [node name="Camera3DBallOverhead" type="Camera3D" parent="Headon/Cameras"]
 transform = Transform3D(-1, 8.74228e-08, 3.82137e-15, 0, -4.37114e-08, 1, 8.74228e-08, 1, 4.37114e-08, 0, 30, 0)
 fov = 26.3
+
+[node name="Camera3DHighCF" type="Camera3D" parent="Headon/Cameras"]
+transform = Transform3D(1, 0, 0, 0, 0.920505, 0.390731, 0, -0.390731, 0.920505, 0, 60, 200)
+fov = 17.0
 
 [node name="Ball3D" parent="Headon" groups=["ball"] instance=ExtResource("11_faris")]
 visible = false

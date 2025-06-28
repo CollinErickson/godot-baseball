@@ -1905,7 +1905,10 @@ func update_camera(delta:float) -> bool:
 				get_node("Headon/Cameras/Camera3DPitcherShoulderRight").current = true
 			camera_changed = true
 		elif Input.is_key_pressed(KEY_4):
-			get_node("Headon/Cameras/Camera3DAll22").current = true
+			if Input.is_key_pressed(KEY_SHIFT):
+				get_node("Headon/Cameras/Camera3DHighCF").current = true
+			else:
+				get_node("Headon/Cameras/Camera3DAll22").current = true
 			camera_changed = true
 	
 	# Move camera so that the ball stays in view
