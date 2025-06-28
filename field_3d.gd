@@ -1268,7 +1268,9 @@ func play_done(flash=null) -> void:
 	
 	
 	# Return play results to game
-	signal_play_done.emit(ball_in_play, pitch_is_ball, pitch_is_strike, is_foul_ball,
+	signal_play_done.emit(ball_in_play, pitch_is_ball,
+		pitch_is_strike and (not ball_in_play or steal_on_play), # is_strike
+		is_foul_ball,
 		steal_on_play,
 		outs_on_play, runs_on_play,
 		$Headon/Runners/Runner3DHome.end_state(),

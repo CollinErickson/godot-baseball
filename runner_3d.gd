@@ -383,9 +383,10 @@ func send_runner(direction: int, can_go_past:bool=true) -> void:
 		#running_progress, target_base, state)
 	if not is_active():
 		return
-	assert(state in ['standing_on_base', 'standing_not_on_base', 'running',
+	if state not in ['standing_on_base', 'standing_not_on_base', 'running',
 		'sliding_not_out', 'sliding_cooldown',
-		'waiting_to_score_may_need_to_tag'])
+		'waiting_to_score_may_need_to_tag']:
+			push_error("Error in runner send_runner, bad state, ", state)
 	var new_target_base:int = -1
 	if direction == 1:
 		#printt('In runner, sending forward!!!', start_base, direction, can_go_past)

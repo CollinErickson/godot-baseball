@@ -127,6 +127,23 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		outs_on_play, runs_on_play, runner0state)
 	#assert(int(ball_in_play) + int(is_ball) + int(is_strike) == 1) fails
 	
+	var commentary_dict:Dictionary = {
+		'strike':is_strike,
+		'ball':is_ball,
+		'outs_on_play_0': outs_on_play == 0,
+		'outs_on_play_1': outs_on_play == 1,
+		'outs_on_play_2': outs_on_play == 2,
+		'outs_on_play_3': outs_on_play == 3,
+		'runs_on_play_0': runs_on_play == 0,
+		'runs_on_play_1': runs_on_play == 1,
+		'runs_on_play_2': runs_on_play == 2,
+		'runs_on_play_3': runs_on_play == 3,
+		'runs_on_play_4': runs_on_play == 4,
+		#'swing_miss': ,
+		#'hit': ,
+		'end_half_inning': false, # Will be switched to true later
+		'home_run': runner0state == 'scored'
+	}
 	var new_batter:bool = false
 	var was_inning:int = inning
 	var was_top:bool = is_top
@@ -145,6 +162,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			strikes += 1
 		if balls > balls_per_pa - 0.5:
 			# Walk
+			commentary_dict['walk'] = true
 			if steal_on_play:
 				# Results of play include walk if there was steal on play
 				pass
@@ -163,6 +181,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			balls = 0
 			new_batter = true
 		elif strikes > strikes_per_pa - 0.5:
+			# Strikeout
+			commentary_dict['strikeout'] = true
 			strikes = 0
 			outs_on_play += 1
 			new_batter = true
@@ -197,6 +217,7 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 	
 	# End of half inning, change side and clear bases
 	if outs > outs_per_inning - 0.5:
+		commentary_dict['end_half_inning'] = true
 		if is_top:
 			if inning == 1:
 				game_data.away_score_by_inning.push_back(away_runs)
@@ -253,6 +274,9 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		$PostGame.set_values(game_data)
 		
 		return
+	
+	# Have commentator say something
+	AudioManager.play_commentator_post_play(commentary_dict)
 	
 	# Otherwise continue the game
 	printt('\n\n\n\n\n\n\n\n\n\n\n\n\nin game, about to reset field')

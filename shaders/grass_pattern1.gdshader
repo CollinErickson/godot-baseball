@@ -19,7 +19,7 @@ void fragment() {
     // Determine which world axis to use for the stripes.
     // WORLD_POSITION is the position of the pixel in 3D space.
     float axis_pos = vertical_stripes ? world_position.x : world_position.z;
-    
+
     // This is the core logic for the alternating pattern.
     // 1. Divide the position by the stripe width to get a "stripe number".
     // 2. Use floor() to get a whole number for the current stripe.

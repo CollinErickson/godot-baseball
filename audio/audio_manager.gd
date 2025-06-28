@@ -121,15 +121,15 @@ func play_commentator_post_play(x:Dictionary) -> void:
 	# valid has the index if valid, -1 if invalid
 	var valid:Array = range(len(commentator_json['text']))
 	var points:Array = rep(0, len(commentator_json['text']))
-	printt('valid after creating is', valid)
-	printt('commentator_json is', commentator_json)
-	printt('commentator_json keys are', commentator_json.keys())
+	#printt('valid after creating is', valid)
+	#printt('commentator_json is', commentator_json)
+	#printt('commentator_json keys are', commentator_json.keys())
 	# x is dictionary with play results
 	for k in x.keys():
 		assert(k in commentator_json.keys(), k)
 		assert(x[k] is bool)
 		for i in range(len(commentator_json[k])):
-			printt('checking', k, i, x[k], commentator_json[k])
+			#printt('checking', k, i, x[k], commentator_json[k])
 			# Disallowed event happened, so invalid
 			if x[k] and commentator_json[k][i] != null \
 			and commentator_json[k][i] < -0.5:
@@ -157,9 +157,9 @@ func play_commentator_post_play(x:Dictionary) -> void:
 	var best_ind:int = valid[i]
 	var max_points = array_max(points)
 	var all_max:Array = []
-	for j in valid:
-		if points[i] >= max_points:
-			all_max.push_back(j)
+	for k in range(len(points)):
+		if points[k] >= max_points:
+			all_max.push_back(valid[k])
 	best_ind = all_max.pick_random()
 	# Skip if most points is 0? No, some generic statements always get 0
 	# TODO: pick among all the best
