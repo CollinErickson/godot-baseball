@@ -4,21 +4,22 @@ const BAT_HIT_SOUND: AudioStream = preload("res://audio/sounds/thud1.wav")
 var commentator_json:Dictionary
 
 func _ready() -> void:
-	printt('in audio_manager running ready')
+	#printt('in audio_manager running ready')
 	load_commentator()
 	
-	# Test commentator
-	play_commentator_post_play({
-		'strike':true,
-		'ball':false,
-		'strikeout':false,
-		'walk':false,
-		'home_run':false,
-		'swing_miss':false,
-		'hit':false,
-	})
-	
-	play_sound("thud1")
+	if false:
+		# Test commentator
+		play_commentator_post_play({
+			'strike':true,
+			'ball':false,
+			'strikeout':false,
+			'walk':false,
+			'home_run':false,
+			'swing_miss':false,
+			'hit':false,
+		})
+		
+		play_sound("thud1")
 
 func play_sound(_name:String) -> void:
 	var x:AudioStreamPlayer = AudioStreamPlayer.new()
@@ -55,12 +56,12 @@ func load_commentator() -> void:
 func read_csv(path:String) -> Dictionary:
 	var file = FileAccess.open(path, FileAccess.READ)
 	#var content = file.get_as_text() # Gets whole file as text
-	printt('file is', file)
+	#printt('file is', file)
 	#printt('content is', content)
 	var types:Array = file.get_csv_line()
-	print('types', types)
+	#print('types', types)
 	var colnames:Array = file.get_csv_line()
-	printt('colnames', colnames)
+	#printt('colnames', colnames)
 	var x:Dictionary = {}
 	#printt(file.get_csv_line())
 	#return content
@@ -73,7 +74,7 @@ func read_csv(path:String) -> Dictionary:
 		if file.eof_reached():
 			break
 		var row:Array = file.get_csv_line()
-		printt('iii is', iii, row)
+		#printt('iii is', iii, row)
 		#if len(row) == 1 and row[0] == "":
 			#printt('breaking on iii', iii, row)
 			#break
