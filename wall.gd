@@ -706,7 +706,9 @@ func make_grandstands():
 	# Make sure that no grandstands currently exist
 	var gss = get_tree().get_nodes_in_group("grandstand")
 	if len(gss) != 0:
-		push_warning("Grandstands already exist, they should be deleted")
+		printt('in wall gss is', gss)
+		push_warning("Grandstands already exist, they should be deleted" +
+			str(len(gss)))
 	
 	# Create and place stands around entire field
 	for i in range(len(wall_array) - 1):
