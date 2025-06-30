@@ -703,6 +703,11 @@ func set_vis_based_on_camera(cam:Camera3D) -> void:
 	#assert(false)
 
 func make_grandstands():
+	# Make sure that no grandstands currently exist
+	var gss = get_tree().get_nodes_in_group("grandstand")
+	if len(gss) != 0:
+		push_warning("Grandstands already exist, they should be deleted")
+	
 	# Create and place stands around entire field
 	for i in range(len(wall_array) - 1):
 		#if i != 0:continue
