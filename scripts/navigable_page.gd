@@ -9,7 +9,7 @@ var buttons_by_row:Array = []
 var buttons_by_col:Array = []
 var page_id:String = '' # Should be overwritten when extended in _ready()
 var prev_mouse_pos:Vector2
-const navigable_button = preload("res://scripts/navigable_button.gd")
+#const navigable_button = preload("res://scripts/navigable_button.gd")
 const navigable_button_scene = preload("res://scenes/navigable_button.tscn")
 
 func _ready() -> void:

@@ -1,4 +1,5 @@
 extends Control
+class_name navigable_button
 
 @export var text:String = 'test123'
 @export var page_id:String = 'null'
@@ -8,10 +9,9 @@ extends Control
 var is_hover:bool = false
 
 func _ready() -> void:
-	printt('in failing ready', $Panel)
-	$Panel/MarginContainer/Label.text = text
+	#printt('in failing ready', $Panel)
+	set_text(text)
 	#change_panel_color(Color("green"))
-	pass
 
 func top() -> int:
 	return $Panel.global_position.y
@@ -31,14 +31,17 @@ signal signal_clicked
 func clicked() -> void:
 	signal_clicked.emit(id)
 func disconnect_all_signals() -> void:
+	disconnect_signal('signal_clicked')
+	
+func disconnect_signal(signal_name:String) -> void:
 	#get_signal_list()
-	var signal_list = get_signal_connection_list('signal_clicked')
+	var signal_list = get_signal_connection_list(signal_name)
 	#printt('signal list is', signal_list)
 	for signal_info in signal_list:
 		#var signal_name = signal_info["signal"]
 		var target_callable = signal_info["callable"]
 		#printt('trying to disconnect', signal_name, target_callable)
-		disconnect('signal_clicked', target_callable)
+		disconnect(signal_name, target_callable)
 
 func set_hover(val:bool) -> void:
 	#printt('in button set_hover', page_id, id)
@@ -77,3 +80,6 @@ func setup(text_:String, page_id_:String, id_:String, row_:int, col_:int
 	id = id_
 	row = row_
 	col = col_
+
+func set_text(text_:String) -> void:
+	$Panel/MarginContainer/Label.text = text_
