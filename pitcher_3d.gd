@@ -37,6 +37,7 @@ var timers_to_restart_on_unpause:Array = []
 var ball_3d_scene = load("res://ball_3d.tscn")
 @onready var pitcher_fielder_node = get_parent().get_node('Defense/Fielder3DP/')
 var player = null
+var runners_on_base_before_pitch:int = -1
 
 var is_frozen:bool = false
 func freeze() -> void:
@@ -69,12 +70,14 @@ func _ready() -> void:
 	$PitchSelectClick.connect("click_in_rect", _on_click_in_rect_by_mouse)
 
 func reset(pitch_mode_:String, user_input_method_:String,
-			user_is_pitching_team_:bool) -> void:
+			user_is_pitching_team_:bool,
+			runners_on_base_before_pitch_:int) -> void:
 	is_frozen = false
 	visible = true
 	set_physics_process(true)
 	# Reset vars
 	user_is_pitching_team = user_is_pitching_team_
+	runners_on_base_before_pitch = runners_on_base_before_pitch_
 	pitch_in_progress = false
 	pitch_done = false
 	time_since_pitch_start = 0
@@ -178,8 +181,11 @@ func _physics_process(delta: float) -> void:
 				pass
 			# Check for pickoff
 			elif Input.is_action_just_pressed("cancel_throw"):
-				start_pickoff()
-				return
+				if runners_on_base_before_pitch > 0:
+					start_pickoff()
+					return
+				else:
+					printt('pitcher cannot pickoff, no runners')
 			# Check for pitch start buttons/clicks
 			elif pitch_mode == "Button":
 				# Single press starts pitch

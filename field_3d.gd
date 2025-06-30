@@ -232,9 +232,11 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	setup_strike_zone(batter_)
 
 	# Setup pitcher
-	$Headon/Pitcher3D.reset(pitch_mode_, user_input_method, user_is_pitching_team_)
+	pitcher.reset(pitch_mode_, user_input_method, user_is_pitching_team_,
+		int(runner1!=null) + int(runner2!=null) + int(runner3!=null) # num runners
+	)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
-	$Headon/Pitcher3D.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
+	pitcher.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
 	$PrepitchFieldOverlay.setup_pitcher(fielding_team.roster[fielding_team.defense_order[1 - 1]])
 	
