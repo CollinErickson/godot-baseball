@@ -140,7 +140,8 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 		'runs_on_play_3': runs_on_play == 3,
 		'runs_on_play_4': runs_on_play == 4,
 		#'swing_miss': ,
-		#'hit': ,
+		'hit': runner0state in ["1", "2", "3", "scored"] and ball_in_play
+			and not is_ball and not is_foul_ball,
 		'end_half_inning': false, # Will be switched to true later
 		'home_run': runner0state == 'scored'
 	}
