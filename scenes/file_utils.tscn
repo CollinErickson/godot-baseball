@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfa7mps0fq5cc"]
+
+[ext_resource type="Script" uid="uid://rnk3sjgn53gy" path="res://scripts/file_utils.gd" id="1_vptml"]
+
+[node name="FileUtils" type="Node"]
+script = ExtResource("1_vptml")

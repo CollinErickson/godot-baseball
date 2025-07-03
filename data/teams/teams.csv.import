@@ -6,10 +6,10 @@ uid="uid://by13efjiunnxr"
 
 [deps]
 
-files=["res://data/teams/teams.location.translation", "res://data/teams/teams.name.translation", "res://data/teams/teams.stadium.translation"]
+files=["res://data/teams/teams.int.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.int.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation"]
 
 source_file="res://data/teams/teams.csv"
-dest_files=["res://data/teams/teams.location.translation", "res://data/teams/teams.name.translation", "res://data/teams/teams.stadium.translation"]
+dest_files=["res://data/teams/teams.int.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.int.translation", "res://data/teams/teams.String.translation", "res://data/teams/teams.String.translation"]
 
 [params]
 

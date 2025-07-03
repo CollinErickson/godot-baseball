@@ -47,75 +47,11 @@ func play_sound_from_path(path:String) -> void:
 
 func load_commentator() -> void:
 	commentator_json = \
-		read_csv("res://audio/sounds/commentator/commentator.csv")
+		FileUtils.read_csv("res://audio/sounds/commentator/commentator.csv")
 	
 	#printt("commentator_json before", commentator_json)
-	json_filter_out(commentator_json, "file", null)
+	FileUtils.json_filter_out(commentator_json, "file", null)
 	#printt("commentator_json after", commentator_json)
-
-func read_csv(path:String) -> Dictionary:
-	var file = FileAccess.open(path, FileAccess.READ)
-	#var content = file.get_as_text() # Gets whole file as text
-	#printt('file is', file)
-	#printt('content is', content)
-	var types:Array = file.get_csv_line()
-	#print('types', types)
-	var colnames:Array = file.get_csv_line()
-	#printt('colnames', colnames)
-	var x:Dictionary = {}
-	#printt(file.get_csv_line())
-	#return content
-	# Create empty array for each col
-	for c in colnames:
-		x[c] = []
-	
-	# Read all rows
-	for iii in range(20000):
-		if file.eof_reached():
-			break
-		var row:Array = file.get_csv_line()
-		#printt('iii is', iii, row)
-		#if len(row) == 1 and row[0] == "":
-			#printt('breaking on iii', iii, row)
-			#break
-		# Loop over each column in the row
-		for i in range(len(row)):
-			if row[i] == "":
-				x[colnames[i]].push_back(null)
-			elif types[i] == "String":
-				x[colnames[i]].push_back(row[i])
-			elif types[i] == "int":
-				x[colnames[i]].push_back(int(row[i]))
-			else:
-				push_error("Error in read csv ", types[i])
-	#print('read csv x is', x)
-	return x
-
-func json_filter_out(x:Dictionary, colname:String, value) -> void:
-	# x is dictionary from json in column form with column colname
-	# value is the value to filter out from all rows when found in colname
-	var ks:Array = x.keys()
-	var remove_inds:Array = []
-	for i in range(len(x[colname])):
-		if x[colname][i] == value:
-			remove_inds.push_back(i)
-	remove_inds.reverse()
-	for k in ks:
-		for i in remove_inds:
-			x[k].remove_at(i)
-
-func json_filter_in(x:Dictionary, colname:String, value) -> void:
-	# x is dictionary from json in column form with column colname
-	# value is the value to filter for from all rows when found in colname
-	var ks:Array = x.keys()
-	var remove_inds:Array = []
-	for i in range(len(x[colname])):
-		if x[colname][i] != value:
-			remove_inds.push_back(i)
-	remove_inds.reverse()
-	for k in ks:
-		for i in remove_inds:
-			x[k].remove_at(i)
 
 func play_commentator_post_play(x:Dictionary) -> void:
 	#commentator_json.duplicate()

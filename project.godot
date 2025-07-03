@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 AudioManager="*res://audio/audio_manager.tscn"
+FileUtils="*res://scenes/file_utils.tscn"
 
 [display]
 

@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://brd042epitqv2"
+
+[deps]
+
+files=["res://audio/sounds/commentator/commentator.String.translation", "res://audio/sounds/commentator/commentator.String.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation"]
+
+source_file="res://audio/sounds/commentator/commentator.csv"
+dest_files=["res://audio/sounds/commentator/commentator.String.translation", "res://audio/sounds/commentator/commentator.String.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation", "res://audio/sounds/commentator/commentator.int.translation"]
+
+[params]
+
+compress=true
+delimiter=0

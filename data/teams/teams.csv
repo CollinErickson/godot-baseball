@@ -1,5 +1,32 @@
-team_id,location,name,stadium
-1,Bronx,Porchers,bronx
-2,Queens,Polar Bears,queens
-3,Minnesota,Neighbors,minnesota
-4,Boston,Beans,boston
+int,int,String,String,String,int,String,String
+row_num,team_id,location,name,stadium,level_id,abbr,Notes
+1,1,Baltimore,Warblers,,1,BAL,Blackburnian Warbler
+2,2,Boston,Beans,boston,1,BOS,
+3,3,Bronx,Porchers,bronx,1,BRX,
+4,4,Tampa,Skates,,1,TPA,
+5,5,Toronto,Lazuli Buntings,,1,TOR,
+6,6,South Side,Slammers,,1,SS,
+7,7,Cleveland,Spiders,,1,CLE,
+8,8,Detroit,Dingoes,,1,DET,
+9,9,Kansas City,Construction Workers,,1,KC,
+10,10,Minnesota,Icebergs,minnesota,1,MIN,
+11,11,Anaheim,Armadillos,,1,ANA,
+12,12,Oakland,Otters,,1,OAK,
+13,13,Seattle,Baristas,,1,SEA,
+14,14,Texas,Horsemen,,1,TEX,
+15,15,Houston,Garbagemen,,1,HOU,
+16,16,Atlanta,Atlatls,,1,ATL,
+17,17,Miami,Tricycles,,1,MIA,
+18,18,Queens,Polar Bears,queens,1,QNS,
+19,19,Philadelphia,Foghorms,,1,PHI,
+20,20,DC,Swamps,,1,DC,
+21,21,Chicago,Weasels,,1,CHI,
+22,22,Cincinnati,Woodpeckers,,1,CIN,
+23,23,Milwaukee,Bubblers,,1,MIL,
+24,24,Pittsburgh,Swashbucklers,,1,PIT,
+25,25,St. Louis,Hoopoes,,1,STL,
+26,26,Arizona,Rattlesnakes,,1,ARI,
+27,27,Colorado,Catastrophe,,1,COL,
+28,28,Los Angeles,Traffic,,1,LA,
+29,29,San Diego,Surfers,,1,SD,
+30,30,San Francisco,Burritos,,1,SF,
