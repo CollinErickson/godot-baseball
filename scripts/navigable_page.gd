@@ -93,10 +93,19 @@ func set_active(new_is_active:bool, args:Dictionary={}) -> void:
 	else:
 		disconnect_nav_button_signals()
 	set_process(new_is_active)
+	
+	# Some pages will immediately navigate to a subpage
+	if new_is_active:
+		after_set_active_true(args)
 
 func setup(_args:Dictionary={}) -> void:
 	# Any class that inherits this needs to implement it if needed
 	return
+
+func after_set_active_true(_args:Dictionary={}) -> void:
+	# Any class that inherits this needs to implement it if needed
+	return
+	
 
 func get_navigable_buttons() -> void:
 	nav_buttons = get_tree().get_nodes_in_group("navigable_button")
@@ -174,9 +183,14 @@ func disconnect_nav_button_signals() -> void:
 func nav_to(subpage_name:String) -> void:
 	# Stop this page
 	set_active(false)
+	# Make sure that the subpage exists
+	if get_node_or_null("Subpages") == null:
+		push_error("No Subpages node on page_id = ", page_id)
 	# Make sure that subpages are visible (turned off when editing)
 	get_node("Subpages").visible = true
 	# Move to next page
+	if get_node_or_null("Subpages/" + subpage_name) == null:
+		push_error("No Subpage with name", subpage_name, "on page", page_id)
 	get_node("Subpages/" + subpage_name).set_active(true)
 
 func nav_up(args:Dictionary={}) -> void:
@@ -253,6 +267,8 @@ func traverse_buttons(hov, val):
 func nearest_button_in_1d(arr:Array, index:int):
 	# TODO: Actually check the row/col values.
 	#  A row could have buttons in cols 1 and 3, but not 2.
+	if len(arr) == 0:
+		printt('error in nearest_button_in_1d', arr, index)
 	if index < len(arr):
 		return arr[index]
 	return arr[len(arr) - 1]

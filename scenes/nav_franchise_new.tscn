@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://t03b10d3hus5"]
+
+[ext_resource type="Script" uid="uid://bfamxaak7ch86" path="res://scripts/nav_franchise_new.gd" id="1_qb7iv"]
+[ext_resource type="PackedScene" uid="uid://byl01x4md05" path="res://scenes/nav_select_team.tscn" id="2_jwngj"]
+
+[node name="NavFranchiseNew" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qb7iv")
+
+[node name="This" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Subpages" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NavSelectTeam" parent="Subpages" instance=ExtResource("2_jwngj")]
+layout_mode = 1

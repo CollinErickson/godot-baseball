@@ -11,7 +11,7 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 		'create':
 			printt('clicked on create')
 			#cleanup()
-			#nav_to("NavFranchiseCreate")
+			nav_to("NavFranchiseNew")
 		'back':
 			printt('clicked on back')
 			cleanup()
@@ -27,16 +27,17 @@ func setup(_args:Dictionary={}) -> void:
 		pass
 	
 	# Create new franchise
-	var nb = navigable_button_scene.instantiate()
-	nb.setup(
-		"Create new franchise",
-		page_id,
-		"create",
-		0,
-		0
-	)
-	nb.name = "Create"
-	$This/StandardBackground/CenterContainer/VBoxContainer.add_child(nb)
+	#var nb = navigable_button_scene.instantiate()
+	#nb.setup(
+		#"Create new franchise",
+		#page_id,
+		#"create",
+		#0,
+		#0
+	#)
+	#nb.name = "Create"
+	#nb.grow_vertical = true
+	#$This/StandardBackground/CenterContainer/VBoxContainer.add_child(nb)
 	
 	# Move the back button to the bottom
 	var back_button:navigable_button = $This/StandardBackground/CenterContainer/VBoxContainer/Back
@@ -52,7 +53,7 @@ func cleanup() -> void:
 	for nb in nbs:
 		printt('\tnb', page_id, nb.id, nb.page_id, nb)
 	nbs = nbs.filter(func(x): return x.page_id == page_id)
-	nbs = nbs.filter(func(x): return x.id != "back")
+	nbs = nbs.filter(func(x): return x.id != "back" and x.id != 'create')
 	for nb in nbs:
 		nb.queue_free()
 	#printt('in cleanup nbs is', nbs)

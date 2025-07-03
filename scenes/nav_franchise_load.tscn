@@ -1,19 +1,20 @@
-[gd_scene load_steps=5 format=3 uid="uid://c4kjtkw7bpfh1"]
+[gd_scene load_steps=6 format=3 uid="uid://c4kjtkw7bpfh1"]
 
 [ext_resource type="Script" uid="uid://d1yykci5ell42" path="res://scripts/nav_franchise_load.gd" id="1_qyx1v"]
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_1kuy6"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_2dr1d"]
+[ext_resource type="PackedScene" uid="uid://t03b10d3hus5" path="res://scenes/nav_franchise_new.tscn" id="4_m4q5t"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2dr1d"]
 bg_color = Color(0.6, 0.215686, 0.960784, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+expand_margin_left = 20.0
+expand_margin_top = 4.0
+expand_margin_right = 20.0
+expand_margin_bottom = 4.0
 
 [node name="NavFranchiseLoad" type="Control"]
 layout_mode = 3
@@ -47,28 +48,52 @@ grow_vertical = 2
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 
-[node name="Panel" type="Panel" parent="This/StandardBackground/CenterContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="This/StandardBackground/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="PanelContainer" parent="This/StandardBackground/CenterContainer/VBoxContainer/MarginContainer"]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_2dr1d")
 
-[node name="Label" type="Label" parent="This/StandardBackground/CenterContainer/VBoxContainer/Panel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 24
+[node name="Label" type="Label" parent="This/StandardBackground/CenterContainer/VBoxContainer/MarginContainer/Panel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 100
 text = "Create/Load Franchise"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Back" parent="This/StandardBackground/CenterContainer/VBoxContainer" instance=ExtResource("3_2dr1d")]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 1
 size_flags_vertical = 3
 text = "Back"
 page_id = "franchise_load"
 id = "back"
+
+[node name="Create" parent="This/StandardBackground/CenterContainer/VBoxContainer" instance=ExtResource("3_2dr1d")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 3
+text = "Create new"
+page_id = "franchise_load"
+id = "create"
+
+[node name="Subpages" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NavFranchiseNew" parent="Subpages" instance=ExtResource("4_m4q5t")]
+layout_mode = 1

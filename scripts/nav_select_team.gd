@@ -4,6 +4,9 @@ class_name nav_select_team
 var current_index:int = 0
 
 func _ready() -> void:
+	# Test new class
+	var x = ArrayNum.new().init([1,3,5,6])
+	printt('array num is', x)
 	
 	read_in_teams()
 	
@@ -24,9 +27,12 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 				current_index = 0
 			set_team(current_index)
 		'accept':
-			nav_up({'result': 'accept', 'team_index': current_index})
+			nav_up({'from': 'nav_select_team',
+					'result': 'accept',
+					'team_index': current_index})
 		'back':
-			nav_up({'result': 'back'})
+			nav_up({'from': 'nav_select_team',
+					'result': 'back'})
 	pass
 
 var teams:Array

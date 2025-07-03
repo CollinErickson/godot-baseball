@@ -61,7 +61,7 @@ func set_hover(val:bool) -> void:
 		remove_from_group("button_hover-" + page_id)
 
 func change_panel_color(new_color: Color):
-	var panel_node:Panel = get_node("Panel")
+	var panel_node:PanelContainer = get_node("Panel")
 	# Get the current StyleBox for the panel
 	# 'panel' is the default name for the Panel's background style.
 	var current_stylebox: StyleBox = panel_node.get_theme_stylebox("panel")
