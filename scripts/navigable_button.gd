@@ -28,7 +28,7 @@ func holds_pos(pos:Vector2) -> bool:
 			pos.y <= bottom()
 
 signal signal_clicked
-func clicked() -> void:
+func clicked(_mpos:Vector2=Vector2.ZERO) -> void:
 	signal_clicked.emit(id)
 func disconnect_all_signals() -> void:
 	disconnect_signal('signal_clicked')
@@ -83,3 +83,9 @@ func setup(text_:String, page_id_:String, id_:String, row_:int, col_:int
 
 func set_text(text_:String) -> void:
 	$Panel/MarginContainer/Label.text = text_
+
+func uses_move_left() -> bool:
+	return false
+
+func uses_move_right() -> bool:
+	return false

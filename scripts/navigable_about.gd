@@ -5,7 +5,7 @@ func _ready() -> void:
 	page_id = 'about'
 	parent_ready()
 
-func handle_nav_button_click(id:String) -> void:
+func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	match id:
 		"back":
 			printt('clicked back on about page')

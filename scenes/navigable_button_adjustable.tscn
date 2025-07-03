@@ -13,7 +13,7 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[node name="NavigableButtonAdjustable" type="Control"]
+[node name="NavigableButtonAdjustable" type="Control" groups=["navigable_button"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,6 +23,7 @@ grow_vertical = 2
 script = ExtResource("1_q1wke")
 
 [node name="Panel" type="Panel" parent="."]
+layout_mode = 0
 offset_right = 202.0
 offset_bottom = 90.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_5wag5")

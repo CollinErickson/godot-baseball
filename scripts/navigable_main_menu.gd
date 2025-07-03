@@ -5,7 +5,7 @@ func _ready() -> void:
 	page_id = 'home'
 	parent_ready()
 
-func handle_nav_button_click(id:String) -> void:
+func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	printt('in nav main menu handle nav button click', id)
 	match id:
 		'play_now':

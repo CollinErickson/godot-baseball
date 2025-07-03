@@ -11,7 +11,7 @@ func _ready() -> void:
 	
 	parent_ready()
 
-func handle_nav_button_click(id:String) -> void:
+func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	match id:
 		'up':
 			current_index -= 1
@@ -33,6 +33,7 @@ var teams:Array
 
 func read_in_teams():
 	teams = load_from_file("res://data/teams/teams.json")
+	#teams = read_csv("res://data/teams/teams.csv")
 func load_from_file(path:String):
 	var file = FileAccess.open(path, FileAccess.READ)
 	var content = file.get_as_text()

@@ -45,7 +45,7 @@ func _process(_delta: float) -> void:
 		else:
 			push_error("button pressed on nav page, but multiple hover buttons")
 	if Input.is_action_just_pressed("movedown"):
-		printt('in navigable page action just pressed down')
+		#printt('in navigable page action just pressed down')
 		handle_keyboard_input('movedown')
 	elif Input.is_action_just_pressed("moveup"):
 		handle_keyboard_input('moveup')
@@ -63,7 +63,7 @@ func _process(_delta: float) -> void:
 			var button:navigable_button = nav_buttons[i]
 			if button.holds_pos(mpos):
 				print('click in rect', button, button.position, button.size)
-				button.clicked()
+				button.clicked(mpos)
 				return
 	# Check for mouse hover
 	var mpos2 = get_local_mouse_position()
@@ -154,7 +154,7 @@ func sort_row(a,b) -> bool:
 func sort_col(a,b) -> bool:
 	return a.row < b.row
 
-func handle_nav_button_click(_id:String) -> void:
+func handle_nav_button_click(_id:String, _args:Dictionary) -> void:
 	assert(false, "Child navigable page needs to implement handle_nav_button_click")
 
 func connect_buttons(nav_buttons_) -> void:
@@ -202,6 +202,15 @@ func handle_keyboard_input(val:String) -> void:
 		#printt('button pressed, exactly one hover button')
 		# Move to next button
 		hov = hov[0]
+		if val == "moveleft":
+			if hov.uses_move_left():
+				hov.use_move_left()
+				return
+		if val == "moveright":
+			if hov.uses_move_right():
+				hov.use_move_right()
+				return
+		# Button didn't use it, so traverse buttons
 		var new_hov = traverse_buttons(hov, val)
 		if new_hov != null:
 			# Remove this button from hover
@@ -216,6 +225,7 @@ func handle_keyboard_input(val:String) -> void:
 			h.set_hover(false)
 
 func traverse_buttons(hov, val):
+	printt('in traverse_buttons', hov, val, hov.row, buttons_by_row)
 	var new_row:int = hov.row
 	var new_col:int = hov.col
 	if val == "movedown":

@@ -5,7 +5,7 @@ func _ready() -> void:
 	page_id = 'franchise_load'
 	parent_ready()
 
-func handle_nav_button_click(id:String) -> void:
+func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	#printt('in nav franchise load handle nav button click', id)
 	match id:
 		'create':
