@@ -179,7 +179,7 @@ func disconnect_nav_button_signals() -> void:
 	for button in nav_buttons:
 		button.disconnect_all_signals()
 
-func nav_to(subpage_name:String) -> void:
+func nav_to(subpage_name:String, args:Dictionary={}) -> void:
 	# Stop this page
 	set_active(false)
 	# Make sure that the subpage exists
@@ -190,7 +190,7 @@ func nav_to(subpage_name:String) -> void:
 	# Move to next page
 	if get_node_or_null("Subpages/" + subpage_name) == null:
 		push_error("No Subpage with name", subpage_name, "on page", page_id)
-	get_node("Subpages/" + subpage_name).set_active(true)
+	get_node("Subpages/" + subpage_name).set_active(true, args)
 
 func nav_up(args:Dictionary={}) -> void:
 	#printt('in nav up', get_parent())

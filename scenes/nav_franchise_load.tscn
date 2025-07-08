@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://c4kjtkw7bpfh1"]
+[gd_scene load_steps=7 format=3 uid="uid://c4kjtkw7bpfh1"]
 
 [ext_resource type="Script" uid="uid://d1yykci5ell42" path="res://scripts/nav_franchise_load.gd" id="1_qyx1v"]
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_1kuy6"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_2dr1d"]
 [ext_resource type="PackedScene" uid="uid://t03b10d3hus5" path="res://scenes/nav_franchise_new.tscn" id="4_m4q5t"]
+[ext_resource type="PackedScene" uid="uid://b7uhvnowt2eiy" path="res://scenes/nav_franchise.tscn" id="5_gyj8y"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2dr1d"]
 bg_color = Color(0.6, 0.215686, 0.960784, 1)
@@ -92,4 +93,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="NavFranchiseNew" parent="Subpages" instance=ExtResource("4_m4q5t")]
+layout_mode = 1
+
+[node name="NavFranchise" parent="Subpages" instance=ExtResource("5_gyj8y")]
 layout_mode = 1

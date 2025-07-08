@@ -18,5 +18,7 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 				'from':'franchise_preseason_options',
 				'result':'back'
 			})
+		'games_per_season':
+			pass
 		_:
 			push_error('bad ID', id)

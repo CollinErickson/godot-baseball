@@ -10,5 +10,5 @@ func serialize() -> String:
 	
 	return FileUtils.dict_to_JSON_string(d)
 
-func deserialize(x:Dictionary) -> void:
-	return
+#func deserialize(x:Dictionary) -> void:
+	#return

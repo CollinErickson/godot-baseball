@@ -9,18 +9,22 @@ enum Stage {
 
 var year:int
 var stage:Stage
-var team_location:String
-var team_name:String
+#var team_location:String
+#var team_name:String
 var team_index:int
 var gameplay_settings:GameplaySettings = GameplaySettings.new()
-var teams:Array[Team]
+var teams:Array[Team] = []
 
-func generate() -> void:
-	team_location = "Abc"
-	team_name = 'Def'
+#func generate() -> void:
+	#team_location = "Abc"
+	#team_name = 'Def'
 
-func create_from_team_index(_team_index) -> void:
-	pass
+func create_from_team_index(team_index_) -> void:
+	team_index = team_index_
+	year = 2025
+	stage = Stage.FRANCHISE_YEAR_OPTIONS
+	teams.push_back(Team.new())
+	teams[0].create_random()
 
 func serialize() -> String:
 	# Converts this object to a string that can be written to file
@@ -49,7 +53,7 @@ func serialize() -> String:
 func deserialize(x:String) -> void:
 	# Converts a string (saved to file) back into a full franchise object
 	
-	var d:Dictionary = JSON.parse_string(x)
+	var _d:Dictionary = JSON.parse_string(x)
 	
 	# Assert that the version is right
 	
