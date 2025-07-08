@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://b7uhvnowt2eiy"]
+
+[ext_resource type="Script" uid="uid://dwlrw6ck1ait0" path="res://scripts/nav_franchise.gd" id="1_a5j7j"]
+[ext_resource type="PackedScene" uid="uid://qcps3kh36oi7" path="res://scenes/nav_franchise_preseason_options.tscn" id="2_ywuah"]
+
+[node name="NavFranchise" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_a5j7j")
+
+[node name="This" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Subpages" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="NavFranchisePreseasonOptions" parent="Subpages" instance=ExtResource("2_ywuah")]
+layout_mode = 1

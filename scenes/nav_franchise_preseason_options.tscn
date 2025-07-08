@@ -1,0 +1,94 @@
+[gd_scene load_steps=6 format=3 uid="uid://qcps3kh36oi7"]
+
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="1_erfep"]
+[ext_resource type="Script" uid="uid://ddrwl0tnks852" path="res://scripts/nav_franchise_preseason_options.gd" id="1_wceve"]
+[ext_resource type="PackedScene" uid="uid://whisd5xtcv6s" path="res://scenes/navigable_button_adjustable.tscn" id="2_wceve"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="4_83xta"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wceve"]
+bg_color = Color(0.155852, 0.521836, 0.0824799, 1)
+
+[node name="NavFranchisePreseasonOptions" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wceve")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("1_erfep")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -90.0
+offset_right = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="PanelContainer" type="PanelContainer" parent="This/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_wceve")
+
+[node name="Label" type="Label" parent="This/VBoxContainer/MarginContainer/PanelContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 100
+text = "Settings for this season"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="Label" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Games this season"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Games" parent="This/VBoxContainer/GridContainer" instance=ExtResource("2_wceve")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["14", "29", "58", "162"]
+page_id = "franchise_preseason_options"
+id = "games_per_season"
+
+[node name="Back" parent="This/VBoxContainer/GridContainer" instance=ExtResource("4_83xta")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Back"
+page_id = "franchise_preseason_options"
+row = 1
+
+[node name="Accept" parent="This/VBoxContainer/GridContainer" instance=ExtResource("4_83xta")]
+layout_mode = 2
+text = "Accept"
+page_id = "franchise_preseason_options"
+id = "accept"
+row = 1
+col = 1

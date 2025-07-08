@@ -71,8 +71,6 @@ vertical_alignment = 1
 [node name="Back" parent="This/StandardBackground/CenterContainer/VBoxContainer" instance=ExtResource("3_2dr1d")]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
-size_flags_horizontal = 1
-size_flags_vertical = 3
 text = "Back"
 page_id = "franchise_load"
 id = "back"
@@ -80,8 +78,6 @@ id = "back"
 [node name="Create" parent="This/StandardBackground/CenterContainer/VBoxContainer" instance=ExtResource("3_2dr1d")]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
-size_flags_horizontal = 1
-size_flags_vertical = 3
 text = "Create new"
 page_id = "franchise_load"
 id = "create"

@@ -105,7 +105,6 @@ func setup(_args:Dictionary={}) -> void:
 func after_set_active_true(_args:Dictionary={}) -> void:
 	# Any class that inherits this needs to implement it if needed
 	return
-	
 
 func get_navigable_buttons() -> void:
 	nav_buttons = get_tree().get_nodes_in_group("navigable_button")

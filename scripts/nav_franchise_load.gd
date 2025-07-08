@@ -57,3 +57,13 @@ func cleanup() -> void:
 	for nb in nbs:
 		nb.queue_free()
 	#printt('in cleanup nbs is', nbs)
+
+func after_set_active_true(args:Dictionary={}) -> void:
+	# Check if returned from creating new franchise
+	if 'from' in args.keys():
+		if args['from'] == 'franchise_new':
+			if 'team_index' in args.keys():
+				printt('need to implement team_index')
+			else:
+				push_error('Error in nav_franchise_load, came from',
+				' franchise_new, but no team_index')

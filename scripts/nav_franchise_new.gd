@@ -26,6 +26,12 @@ func after_set_active_true(args:Dictionary={}) -> void:
 		elif args['result'] == 'accept':
 			printt('select team here', args['team_index'])
 			state = State.PREOPTIONS
-			nav_to('NavFranchiseNewOptions')
+			#nav_to('NavFranchiseNewOptions')
+			# Done, return up
+			state = State.BEFORE
+			nav_up({
+				'from':'nav_franchise_new',
+				'team_index':args['team_index']
+			})
 		else:
 			push_error('bad option in select team', args['result'])

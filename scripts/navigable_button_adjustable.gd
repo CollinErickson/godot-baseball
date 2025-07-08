@@ -18,6 +18,8 @@ func set_text(_text:String="ignored") -> void:
 	#set_text(text)
 	$Panel/MarginContainer/Label.text = text
 
+func current_value():
+	return values[current_index]
 #signal signal_clicked_left
 #signal signal_clicked_right
 #func clicked_left() -> void:

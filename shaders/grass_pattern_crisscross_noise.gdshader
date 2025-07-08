@@ -43,14 +43,14 @@ void fragment() {
         //ALBEDO = dark_grass_color.rgb;
 		base_color = dark_grass_color;
     }
-	
-	
+
+
     // --- Part 2: Apply the noise variation ---
     // We sample the noise texture using the world position as coordinates.
     // This ensures the noise pattern covers the entire field without repeating like a tile.
     // We divide by a number (e.g., 50.0) to scale the noise pattern.
     float noise_value = texture(noise_texture, world_position.xz / 50.0).r;
-    
+
     // The mix() function blends between two values.
     // When noise_value is 0, we get 100% base_color.
     // When noise_value is 1, we get 100% variation_color.
@@ -62,5 +62,5 @@ void fragment() {
 
     // Make the noisier parts less shiny for extra realism
     ROUGHNESS = 0.5 + noise_value * 0.4;
-	
+
 }
