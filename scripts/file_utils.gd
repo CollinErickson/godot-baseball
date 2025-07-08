@@ -108,3 +108,74 @@ func json_filter_in(x:Dictionary, colname:String, value) -> void:
 	for k in ks:
 		for i in remove_inds:
 			x[k].remove_at(i)
+
+func dict_to_JSON_string(x:Dictionary) -> String:
+	return JSON.stringify(x)
+
+func JSON_string_to_dict(s:String) -> Dictionary:
+	return JSON.parse_string(s)
+
+func serialize(obj, s_map_=null) -> String:
+	if s_map_ == null:
+		s_map_ = obj.serialize_map
+	var s_map:Array = s_map_
+	var d:Dictionary = {}
+	for row in s_map:
+		d[row[0]] = obj.get(row[1])
+		# Modify complicated objects
+		if row[2] == 'color':
+			var c:Color = d[row[0]]
+			d[row[0]] = str(c.r) + ',' + str(c.g) + ',' + str(c.b) + ',' +\
+				str(c.a)
+		if row[2] in ['a_i', 'a_f', 'a_i']:
+			# Array of basic type
+			#print('ser a_i', d[row[0]], JSON.stringify(d[row[0]]))
+			d[row[0]] = JSON.stringify(d[row[0]])
+		if row[2] == 'a_player':
+			printt('in fu ser a_p')
+			# Array of player objects
+			var a:Array[String] = []
+			for p in d[row[0]]:
+				#printt('p is', p)
+				#printt('serialized is', FileUtils.serialize(p))
+				a.push_back(FileUtils.serialize(p))
+			d[row[0]] = JSON.stringify(a)
+			
+	var s:String = dict_to_JSON_string(d)
+	printt('in fileutils serialize s at end is:', s)
+	return s
+
+func deserialize(obj, s:String, s_map_=null) -> void:
+	if s_map_ == null:
+		s_map_ = obj.serialize_map
+	var s_map:Array = s_map_
+	var d:Dictionary = JSON_string_to_dict(s)
+	printt('in file util deserialize, d:', d)
+	for row in s_map:
+		if row[2] == 'color':
+			var c:String = d[row[0]]
+			var c2:Array = c.split(',')
+			if len(c2) == 4:
+				var col:Color = Color(float(c2[0]), float(c2[1]),
+					float(c2[2]), float(c2[3]))
+				obj.set(row[1], col)
+			else:
+				# Push error, skip it
+				push_error("Unable to deserialize color", c, c2)
+		elif row[2] in ['a_i', 'a_f', 'a_s']:
+			#printt('deser a_i', row, d[row[0]], JSON.parse_string(d[row[0]]))
+			var x:Array = JSON.parse_string(d[row[0]])
+			obj.set(row[1], x)
+		elif row[2] == 'a_player':
+			var x:Array = JSON.parse_string(d[row[0]])
+			# Deserialize each element
+			var p:Array[Player] = []
+			for y in x:
+				var pl:Player = Player.new()
+				FileUtils.deserialize(pl, y)
+				p.push_back(pl)
+			obj.set(row[1], p)
+		else:
+			assert(row[2] in ['s', 'i', 'f'])
+			# String, int, float
+			obj.set(row[1], d[row[0]])

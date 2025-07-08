@@ -1,5 +1,5 @@
 extends navigable_page
-class_name franchise
+class_name nav_franchise
 
 enum State {PRELOAD, WAITING_FOR_PRESEASON_OPTIONS}
 var state:State = State.PRELOAD

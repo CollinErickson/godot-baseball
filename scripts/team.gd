@@ -13,16 +13,23 @@ var hat_style:String
 
 # Roster
 var roster:Array = []
-var batting_order:Array = []
-var defense_order:Array = []
+var batting_order:Array[int] = []
+var defense_order:Array[int] = []
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
-	
-	# If this is root, test is
+	# If this is root, test it
 	if get_tree().root == get_parent():
 		create("New York City", "Buildings", "NYC", "green", "orange")
+		print_()
+		var ser:String = FileUtils.serialize(self, serialize_map)
+		printt('serialized is', ser)
+		# Randomize it
+		create_random()
+		print_()
+		# Reload original
+		FileUtils.deserialize(self, ser, serialize_map)
+		# Check if it worked
+		print_()
 
 func create(city_name_,
 			team_name_,
@@ -47,14 +54,15 @@ func create(city_name_,
 
 func create_roster():
 	# Create roster
+	roster = []
 	for i in range(9):
 		roster.push_back(get_player())
 	
 	# Index i equals j means that roster[j] bats i+1 in batting order
-	batting_order = range(9)
+	batting_order = [0,1,2,3,4,5,6,7,8] # range(9)
 	batting_order.shuffle()
 	# Index i equals j means that roster[j] plays position i+1
-	defense_order = range(9)
+	defense_order = [0,1,2,3,4,5,6,7,8] #range(9)
 	defense_order.shuffle()
 
 #const sample_colors = ["red", "yellow", "blue", "green", "white", "black",
@@ -94,6 +102,7 @@ func print_():
 	print("Roster:")
 	for player in roster:
 		player.print_()
+	printt('\tBatting order', batting_order)
 
 func randomize_jersey() -> void:
 	# Randomize jersey/hat style
@@ -107,3 +116,19 @@ func prepare_for_game() -> bool:
 		player.current_game_pitching_stamina = player.pitching_stamina
 	# Return true if everything worked
 	return true
+
+var serialize_map:Array = [
+	['c', 'city_name', 's'],
+	['t', 'team_name', 's'],
+	['a', 'abbr', 's'],
+	['cp', 'color_primary', 'color'],
+	['cs', 'color_secondary', 'color'],
+	['j', 'jersey_style', 's'],
+	['h', 'hat_style', 's'],
+	['r', 'roster', 'a_player'],
+	['b', 'batting_order', 'a_i'],
+	['d', 'defense_order', 'a_i']
+]
+
+func serialize() -> String:
+	return ''

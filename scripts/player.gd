@@ -23,6 +23,39 @@ var pitchspeed:float
 var pitching_stamina:float
 var current_game_pitching_stamina:float
 
+var serialize_map:Array = [
+	['f', 'first', 's'],
+	['l', 'last', 's'],
+	['a', 'age', 'i'],
+	['b', 'bats', 's'],
+	['t', 'throws', 's'],
+	['sk', 'skin_color', 'color'],
+	['hm', 'height_mult', 'f'],
+	['s', 'speed', 'f'],
+	['ts', 'throwspeed', 'f'],
+	['ta', 'throwaccuracy', 'f'],
+	['c', 'catching', 'f'],
+	['co', 'contact', 'f'],
+	['p', 'power', 'f'],
+	['pi', 'pitching', 'f'],
+	['ps', 'pitchspeed', 'f'],
+	['st', 'pitching_stamina', 'f'],
+	#['', '']
+]
+
+func _ready() -> void:
+	# If this is root, debugging/testing
+	if get_tree().root == get_parent():
+		printt('in player as root')
+		create_random()
+		var s:String = FileUtils.serialize(self, serialize_map)
+		printt('serialized:', s)
+		print_()
+		first = 'Hober'
+		print_()
+		FileUtils.deserialize(self, s, serialize_map)
+		print_()
+
 func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 			bats_:String, throws_:String):
 	first = first_

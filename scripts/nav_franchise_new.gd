@@ -27,11 +27,15 @@ func after_set_active_true(args:Dictionary={}) -> void:
 			printt('select team here', args['team_index'])
 			state = State.PREOPTIONS
 			#nav_to('NavFranchiseNewOptions')
+			# Create franchise with selected team_index
+			var franchise:Franchise = Franchise.new()
+			franchise.create_from_team_index(args['team_index'])
 			# Done, return up
 			state = State.BEFORE
 			nav_up({
 				'from':'nav_franchise_new',
-				'team_index':args['team_index']
+				'team_index':args['team_index'],
+				'franchise':franchise
 			})
 		else:
 			push_error('bad option in select team', args['result'])
