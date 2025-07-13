@@ -14,6 +14,7 @@ var stage:Stage
 var team_index:int
 var gameplay_settings:GameplaySettings = GameplaySettings.new()
 var teams:Array[Team] = []
+var games_this_season:int
 
 #func generate() -> void:
 	#team_location = "Abc"
@@ -21,7 +22,7 @@ var teams:Array[Team] = []
 
 func create_from_team_index(team_index_) -> void:
 	team_index = team_index_
-	year = 2025
+	year = 0
 	stage = Stage.FRANCHISE_YEAR_OPTIONS
 	teams.push_back(Team.new())
 	teams[0].create_random()
@@ -58,3 +59,10 @@ func deserialize(x:String) -> void:
 	# Assert that the version is right
 	
 	# Deserialize all components
+
+func set_preseason_options(games_this_season_:int) -> void:
+	games_this_season = games_this_season_
+
+func setup_season() -> void:
+	# Create schedule for each team
+	pass

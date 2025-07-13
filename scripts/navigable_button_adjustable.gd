@@ -14,7 +14,7 @@ func set_text(_text:String="ignored") -> void:
 	if !self_update:
 		return
 	printt('setting new text in nba', current_index)
-	text = values[current_index]
+	text = str(values[current_index])
 	#set_text(text)
 	$Panel/MarginContainer/Label.text = text
 

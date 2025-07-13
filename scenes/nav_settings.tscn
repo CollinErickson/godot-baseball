@@ -1,0 +1,194 @@
+[gd_scene load_steps=6 format=3 uid="uid://dmhjdoe5lmus0"]
+
+[ext_resource type="Script" uid="uid://xaf0xvrcdan6" path="res://scripts/nav_settings.gd" id="1_67t38"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_31sb3"]
+[ext_resource type="PackedScene" uid="uid://whisd5xtcv6s" path="res://scenes/navigable_button_adjustable.tscn" id="3_g5vje"]
+[ext_resource type="PackedScene" uid="uid://cp2xlt1q0hbua" path="res://scenes/navigable_button_adjustable_int_range.tscn" id="4_31sb3"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="5_g5vje"]
+
+[node name="NavSettings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_67t38")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_31sb3")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/StandardBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 100
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Difficulty"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Difficulty" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Easy", "Medium", "Hard"]
+text = "Difficulty"
+page_id = "settings"
+id = "difficulty"
+
+[node name="Label3" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Innings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Innings" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("4_31sb3")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+from = 1
+to = 9
+current_index = 8
+text = "Innings"
+page_id = "settings"
+id = "innings2"
+row = 1
+
+[node name="Label2" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Bat mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BatMode" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Timing", "Target"]
+text = "xx"
+page_id = "settings"
+id = "batmode"
+row = 2
+
+[node name="Label4" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Pitch mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PitchMode" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Bar two way", "Button", "Bar one way", "Recenter"]
+text = "xx"
+page_id = "settings"
+id = "pitchmode"
+row = 3
+
+[node name="Label5" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Throw mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ThrowMode" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Button", "Bar one way", "Recenter"]
+text = "xx"
+page_id = "settings"
+id = "throwmode"
+row = 4
+
+[node name="Label6" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Baserunning control"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BRControl" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Manual", "Automatic"]
+text = "xx"
+page_id = "settings"
+id = "baserunningcontrol"
+row = 5
+
+[node name="Label7" type="Label" parent="This/StandardBackground/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+text = "Defense control"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DefControl" parent="This/StandardBackground/VBoxContainer/GridContainer" instance=ExtResource("3_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Manual", "Automatic", "Throwing"]
+text = "xx"
+page_id = "settings"
+id = "defensecontrol"
+row = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Back" parent="This/StandardBackground/VBoxContainer/HBoxContainer" instance=ExtResource("5_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+page_id = "settings"
+id = "back"
+row = 7
+
+[node name="Accept" parent="This/StandardBackground/VBoxContainer/HBoxContainer" instance=ExtResource("5_g5vje")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Accept"
+page_id = "settings"
+id = "accept"
+row = 7
+col = 1

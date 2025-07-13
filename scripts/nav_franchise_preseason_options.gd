@@ -21,4 +21,4 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 		'games_per_season':
 			pass
 		_:
-			push_error('bad ID', id)
+			push_error('bad ID on page id = ', page_id, ' , id = ', id)

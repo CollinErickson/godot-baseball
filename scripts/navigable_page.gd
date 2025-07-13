@@ -189,7 +189,8 @@ func nav_to(subpage_name:String, args:Dictionary={}) -> void:
 	get_node("Subpages").visible = true
 	# Move to next page
 	if get_node_or_null("Subpages/" + subpage_name) == null:
-		push_error("No Subpage with name", subpage_name, "on page", page_id)
+		push_error("No Subpage with name: ", subpage_name,
+				   "  on page: ", page_id)
 	get_node("Subpages/" + subpage_name).set_active(true, args)
 
 func nav_up(args:Dictionary={}) -> void:

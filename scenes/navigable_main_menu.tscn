@@ -33,63 +33,20 @@ grow_vertical = 2
 [node name="StandardBackground" parent="This" instance=ExtResource("3_efu3c")]
 layout_mode = 1
 
-[node name="PlayNow" parent="This" instance=ExtResource("2_3tjiu")]
+[node name="VBoxContainer" type="VBoxContainer" parent="This"]
 layout_mode = 1
-offset_left = 306.0
-offset_top = 326.0
-offset_right = 306.0
-offset_bottom = 326.0
-text = "Play now!"
-page_id = "home"
-id = "play_now"
-
-[node name="Franchise" parent="This" instance=ExtResource("2_3tjiu")]
-layout_mode = 1
-offset_left = 745.0
-offset_top = 331.0
-offset_right = 745.0
-offset_bottom = 331.0
-text = "Franchise"
-page_id = "home"
-id = "franchise"
-col = 1
-
-[node name="About" parent="This" instance=ExtResource("2_3tjiu")]
-layout_mode = 1
-offset_left = 301.0
-offset_top = 523.0
-offset_right = 301.0
-offset_bottom = 523.0
-text = "About"
-page_id = "home"
-id = "about"
-row = 1
-
-[node name="Quit" parent="This" instance=ExtResource("2_3tjiu")]
-layout_mode = 1
-offset_left = 755.0
-offset_top = 526.0
-offset_right = 755.0
-offset_bottom = 526.0
-text = "Quit"
-page_id = "home"
-id = "quit"
-row = 1
-col = 1
-
-[node name="Panel" type="Panel" parent="This"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -404.0
-offset_top = 47.0
-offset_right = 404.0
-offset_bottom = 212.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="This/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_efu3c")
 
-[node name="Label" type="Label" parent="This/Panel"]
+[node name="Label" type="Label" parent="This/VBoxContainer/Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,6 +57,49 @@ theme_override_font_sizes/font_size = 100
 text = "MOP Baseball"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="This/VBoxContainer"]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 3.0
+columns = 2
+
+[node name="PlayNow" parent="This/VBoxContainer/GridContainer" instance=ExtResource("2_3tjiu")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Play now!"
+page_id = "home"
+id = "play_now"
+
+[node name="Franchise" parent="This/VBoxContainer/GridContainer" instance=ExtResource("2_3tjiu")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Franchise"
+page_id = "home"
+id = "franchise"
+col = 1
+
+[node name="About" parent="This/VBoxContainer/GridContainer" instance=ExtResource("2_3tjiu")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "About"
+page_id = "home"
+id = "about"
+row = 1
+
+[node name="Quit" parent="This/VBoxContainer/GridContainer" instance=ExtResource("2_3tjiu")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Quit"
+page_id = "home"
+id = "quit"
+row = 1
+col = 1
 
 [node name="Subpages" type="Control" parent="."]
 visible = false
