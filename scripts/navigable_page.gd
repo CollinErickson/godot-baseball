@@ -19,7 +19,7 @@ func parent_ready() -> void:
 	if get_tree().root == get_parent():
 		this_is_root = true
 	
-	set_active(this_is_root)
+	set_active(this_is_root, {'from':'root'})
 
 func _process(_delta: float) -> void:
 	assert(is_active)
@@ -132,6 +132,8 @@ func get_navigable_buttons() -> void:
 	
 	# Add buttons to grid for traversal later
 	for nb in nav_buttons:
+		assert(nb.row >= 0)
+		assert(nb.col >= 0)
 		while len(buttons_by_row) <= nb.row:
 			buttons_by_row.push_back([])
 		buttons_by_row[nb.row].push_back(nb)
@@ -180,6 +182,8 @@ func disconnect_nav_button_signals() -> void:
 		button.disconnect_all_signals()
 
 func nav_to(subpage_name:String, args:Dictionary={}) -> void:
+	args['from'] = page_id
+	
 	# Stop this page
 	set_active(false)
 	# Make sure that the subpage exists
@@ -194,6 +198,8 @@ func nav_to(subpage_name:String, args:Dictionary={}) -> void:
 	get_node("Subpages/" + subpage_name).set_active(true, args)
 
 func nav_up(args:Dictionary={}) -> void:
+	args['from'] = page_id
+	
 	#printt('in nav up', get_parent())
 	# Check if nav up is possible
 	if get_parent() == null or get_parent().get_parent() == null:

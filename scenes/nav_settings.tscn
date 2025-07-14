@@ -171,6 +171,7 @@ text = "xx"
 page_id = "settings"
 id = "defensecontrol"
 row = 6
+col = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
 custom_minimum_size = Vector2(0, 100)

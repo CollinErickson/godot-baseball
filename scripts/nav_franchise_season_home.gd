@@ -9,10 +9,11 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	match id:
 		'settings':
 			nav_to('NavSettings')
+		'quit':
+			nav_up({'result':'quit'})
 		_:
 			printt('unhandled nav click ', page_id, ' ', id)
 
 func setup(args:Dictionary={}) -> void:
-	if 'from' in args.keys():
-		if args['from'] == 'settings':
-			pass
+	if args['from'] == 'settings':
+			printt('TODO save settings')

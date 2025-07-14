@@ -7,11 +7,14 @@ class_name navigable_button
 @export var row:int = 0
 @export var col:int = 0
 var is_hover:bool = false
+var data:Dictionary = {}
 
 func _ready() -> void:
 	#printt('in failing ready', $Panel)
 	set_text(text)
 	#change_panel_color(Color("green"))
+	#custom_minimum_size.y = 100
+	#custom_minimum_size.y = $Panel.size.y
 
 func top() -> int:
 	return $Panel.global_position.y
@@ -82,10 +85,16 @@ func setup(text_:String, page_id_:String, id_:String, row_:int, col_:int
 	col = col_
 
 func set_text(text_:String) -> void:
+	text = text_
 	$Panel/MarginContainer/Label.text = text_
+	set_custom_min_size()
 
 func uses_move_left() -> bool:
 	return false
 
 func uses_move_right() -> bool:
 	return false
+
+func set_custom_min_size() -> void:
+	custom_minimum_size.x = $Panel.size.x
+	custom_minimum_size.y = $Panel.size.y

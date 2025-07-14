@@ -1,0 +1,78 @@
+[gd_scene load_steps=5 format=3 uid="uid://ddk8vm1b3iqxu"]
+
+[ext_resource type="Script" uid="uid://ccvqlg3cf2nnq" path="res://scripts/nav_roster.gd" id="1_41375"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_uf6gn"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_1vepe"]
+[ext_resource type="PackedScene" uid="uid://cyxo13054tbfq" path="res://scenes/nav_rotation.tscn" id="4_uf6gn"]
+
+[node name="NavRoster" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_41375")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_uf6gn")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/StandardBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+text = "Roster"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Pitching" parent="This/StandardBackground/VBoxContainer/VBoxContainer" instance=ExtResource("3_1vepe")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Pitching"
+page_id = "roster"
+id = "pitching"
+
+[node name="BattingOrder" parent="This/StandardBackground/VBoxContainer/VBoxContainer" instance=ExtResource("3_1vepe")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Batting Order"
+page_id = "roster"
+id = "batting_order"
+row = 1
+
+[node name="FreeAgents" parent="This/StandardBackground/VBoxContainer/VBoxContainer" instance=ExtResource("3_1vepe")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Free Agents"
+page_id = "roster"
+id = "free_agents"
+row = 2
+
+[node name="Subpages" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NavRotation" parent="Subpages" instance=ExtResource("4_uf6gn")]
+layout_mode = 1

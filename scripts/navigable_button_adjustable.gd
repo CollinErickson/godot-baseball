@@ -10,6 +10,12 @@ var self_update:bool = true
 		#text = values[current_index]
 		#set_text(text)
 
+func _ready() -> void:
+	#var pan:Panel
+	#var cn:Control = get_node('a')
+	#custom_minimum_size.y = 00
+	super._ready()
+
 func set_text(_text:String="ignored") -> void:
 	if !self_update:
 		return

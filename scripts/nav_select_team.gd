@@ -27,11 +27,11 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 				current_index = 0
 			set_team(current_index)
 		'accept':
-			nav_up({'from': 'nav_select_team',
+			nav_up({'from': 'select_team',
 					'result': 'accept',
 					'team_index': current_index})
 		'back':
-			nav_up({'from': 'nav_select_team',
+			nav_up({'from': 'select_team',
 					'result': 'back'})
 	pass
 

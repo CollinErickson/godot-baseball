@@ -68,7 +68,16 @@ page_id = "franchise_season_home"
 id = "settings"
 row = 2
 
+[node name="Quit" parent="This/VBoxContainer" instance=ExtResource("2_3p5hr")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Quit"
+page_id = "franchise_season_home"
+id = "quit"
+row = 3
+
 [node name="Subpages" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

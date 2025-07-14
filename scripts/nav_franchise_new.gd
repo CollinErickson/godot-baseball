@@ -18,7 +18,7 @@ func after_set_active_true(args:Dictionary={}) -> void:
 		state = State.WAITING_FOR_SELECT_TEAM
 		nav_to('NavSelectTeam')
 	elif state == State.WAITING_FOR_SELECT_TEAM:
-		if args['from'] != 'nav_select_team':
+		if args['from'] != 'select_team':
 			push_error(489124127, args)
 		if args['result'] == 'back':
 			state = State.BEFORE
@@ -33,7 +33,7 @@ func after_set_active_true(args:Dictionary={}) -> void:
 			# Done, return up
 			state = State.BEFORE
 			nav_up({
-				'from':'nav_franchise_new',
+				#'from':'franchise_new',
 				'team_index':args['team_index'],
 				'franchise':franchise
 			})

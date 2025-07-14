@@ -61,14 +61,18 @@ func cleanup() -> void:
 func after_set_active_true(args:Dictionary={}) -> void:
 	printt('in nav_f_l, after', args)
 	# Check if returned from creating new franchise
-	if 'from' in args.keys():
-		if args['from'] == 'nav_franchise_new':
-			if 'franchise' in args.keys():
-				#printt('need to implement franchise')
-				nav_to("NavFranchise", {
-					'from':'franchise_load',
-					'franchise': args['franchise']
-				})
-			else:
-				push_error('Error in nav_franchise_load, came from',
-				' franchise_new, but no team_index')
+	if args['from'] == 'franchise_new':
+		if 'franchise' in args.keys():
+			#printt('need to implement franchise')
+			nav_to("NavFranchise", {
+				'from':'franchise_load',
+				'franchise': args['franchise']
+			})
+		else:
+			push_error('Error in nav_franchise_load, came from',
+			' franchise_new, but no team_index')
+	elif args['from'] == 'franchise':
+		if args['result'] == 'quit':
+			nav_up({'result':'quit'})
+		else:
+			printt('unknown result from franchise', args)

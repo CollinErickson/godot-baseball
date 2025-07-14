@@ -10,6 +10,7 @@ var throws:String
 var pos:String
 var skin_color:Color = Color("green")
 var height_mult:float # 1 is average. Scales all dimensions of body
+var player_id:String
 
 # Skills
 var speed:float
@@ -60,11 +61,18 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 			bats_:String, throws_:String):
 	first = first_
 	last = last_
+	player_id = first + "-" + last + "-" + str(roundi(randf()*1000000))
+	
 	assert(bats_ in ["L", "R", "S"])
 	bats = bats_
 	assert(throws_ in ["L", "R"])
 	throws = throws_
-	pos = "?"
+	if randf() < 0.5:
+		pos = ['SP', 'RP'
+			].pick_random()
+	else:
+		pos = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'
+			].pick_random()
 	
 	speed = speed_
 	throwspeed = throwspeed_
@@ -135,3 +143,6 @@ func strike_zone_top() -> float:
 func strike_zone_bottom() -> float:
 	# Return height of the top of the strike zone in yards
 	return .22 * height()
+
+func is_pitcher() -> bool:
+	return pos in ['SP', 'RP', 'P']

@@ -19,6 +19,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Subpages" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

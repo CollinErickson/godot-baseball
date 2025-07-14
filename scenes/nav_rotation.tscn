@@ -1,0 +1,109 @@
+[gd_scene load_steps=4 format=3 uid="uid://cyxo13054tbfq"]
+
+[ext_resource type="Script" uid="uid://c6xif0acsi866" path="res://scripts/nav_rotation.gd" id="1_7ux3u"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_684iq"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_ed446"]
+
+[node name="NavRotation" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_7ux3u")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_684iq")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/StandardBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+text = "Pitching rotation"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+
+[node name="Rotation" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2
+
+[node name="SP1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "SP1"
+
+[node name="Control1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="SP2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "SP2"
+
+[node name="Control2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="SP3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "SP3"
+
+[node name="Control3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="SP4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "SP4"
+
+[node name="Control4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="SP5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "SP5"
+
+[node name="Control5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="Relievers" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxBottom" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+
+[node name="Cancel" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_ed446")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+page_id = "rotation"
+id = "cancel"
+row = 5
+
+[node name="Accept" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_ed446")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Accept"
+page_id = "rotation"
+id = "accept"
+row = 6

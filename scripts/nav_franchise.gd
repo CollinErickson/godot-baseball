@@ -16,8 +16,6 @@ func _ready() -> void:
 	parent_ready()
 
 func after_set_active_true(args:Dictionary={}) -> void:
-	if len(args.keys()) == 0:
-		return
 	# If just loaded, get set up
 	if args['from'] == 'franchise_load':
 		printt('in nav_franchise, loading franchise')
@@ -30,6 +28,11 @@ func after_set_active_true(args:Dictionary={}) -> void:
 				state = State.GOTO_PRESEASON_OPTIONS
 			_:
 				push_error('bad f stage', franchise.stage)
+	elif args['from'] == 'franchise_season_home':
+		if args['result'] == 'quit':
+			nav_up({'result':'quit'})
+		else:
+			printt('up from franch season home, no result', args['result'])
 	else:
 		# Handle input from previous page, prepare for next step
 		# state is where it is coming from
@@ -68,6 +71,6 @@ func after_set_active_true(args:Dictionary={}) -> void:
 			state = State.WAITING_FOR_SEASON
 			nav_to('NavFranchiseSeasonHome')
 		_:
-			push_error('bad state for go to', state)
+			push_error('bad state for go to: ', state)
 #func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	#pass
