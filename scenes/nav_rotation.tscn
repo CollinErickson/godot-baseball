@@ -107,3 +107,4 @@ text = "Accept"
 page_id = "rotation"
 id = "accept"
 row = 6
+col = 1

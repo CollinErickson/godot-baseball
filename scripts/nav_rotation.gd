@@ -60,6 +60,10 @@ func setup(args:Dictionary={}) -> void:
 		relieversnode.add_child(b)
 		
 		i += 1
+	
+	# Set correct row for back and accept buttons
+	$This/StandardBackground/VBoxContainer/HBoxBottom/Accept.row = max(5, i)
+	$This/StandardBackground/VBoxContainer/HBoxBottom/Cancel.row = max(5, i)
 
 func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	if id == 'cancel':
@@ -69,10 +73,13 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 		cleanup()
 		nav_up({'result':'accept'})
 	else:
+		# A pitcher button was pressed
 		#printt('unhandled nav click ', page_id, ' ', id)
 		if button_selected == null:
+			# No player selected
 			button_selected = id
 		elif button_selected == id:
+			# Reselected same player, cancel
 			button_selected = null
 		else:
 			# Need to switch two
@@ -83,11 +90,11 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 			var b1_sp = null
 			var b2_sp = null
 			if b1.id.substr(0,2) == "SP":
-				b1_sp = int(b1.id.substr(2))
+				b1_sp = int(b1.id.substr(2)) - 1
 			if b2.id.substr(0,2) == "SP":
-				b2_sp = int(b2.id.substr(2))
-			printt('team rotation before is', team.rotation)
-			printt(b1.data['player_id'], b2.data['player_id'], b1_sp, b2_sp)
+				b2_sp = int(b2.id.substr(2)) - 1
+			#printt('team rotation before is', team.rotation)
+			#printt(b1.data['player_id'], b2.data['player_id'], b1_sp, b2_sp, b1.id, b2.id)
 			if b1_sp == null and b2_sp == null:
 				# Nothing to do
 				pass
@@ -109,13 +116,13 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 				assert(b2_ind >= 0)
 				team.rotation[b1_ind] = b2.data['player_id']
 				team.rotation[b2_ind] = b1.data['player_id']
-			printt('team rotation after is', team.rotation)
+			#printt('team rotation after is', team.rotation)
 			# Switch the buttons
 			var b1_info = [b1.text, b1.data['player_id']]
 			b1.set_text(b2.text)
 			b1.data['player_id'] = b2.data['player_id']
 			b2.set_text(b1_info[0])
-			b1.data['player_id'] = b1_info[1]
+			b2.data['player_id'] = b1_info[1]
 			
 			# Clear selection
 			button_selected = null
@@ -138,8 +145,8 @@ func get_node_from_id(id:String):
 	return null
 
 func cleanup() -> void:
-	# Remove SP
-	# Remove Relievers
+	# TODO: Remove SP
+	# TODO: Remove Relievers
 	# Clear vars
 	button_selected = null
 	team = null
