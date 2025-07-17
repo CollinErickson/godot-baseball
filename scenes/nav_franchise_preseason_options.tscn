@@ -77,6 +77,7 @@ size_flags_vertical = 3
 values = ["14", "29", "58", "162"]
 page_id = "franchise_preseason_options"
 id = "games_per_season"
+col = 1
 
 [node name="Back" parent="This/VBoxContainer/GridContainer" instance=ExtResource("4_83xta")]
 layout_mode = 2

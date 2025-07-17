@@ -7,6 +7,8 @@ var time_active:int = Time.get_ticks_msec()
 var nav_buttons:Array = []
 var buttons_by_row:Array = []
 var buttons_by_col:Array = []
+#var buttons_by_row_dict:Dictionary = {}
+#var buttons_by_col_dict:Dictionary = {}
 var page_id:String = '' # Should be overwritten when extended in _ready()
 var prev_mouse_pos:Vector2
 #const navigable_button = preload("res://scripts/navigable_button.gd")
@@ -72,6 +74,7 @@ func _process(_delta: float) -> void:
 		# Run on every button to make sure they turn off
 		for i in range(len(nav_buttons)):
 			var button = nav_buttons[i]
+			
 			button.set_hover(button.holds_pos(mpos2))
 	prev_mouse_pos = mpos2
 
@@ -140,6 +143,8 @@ func get_navigable_buttons() -> void:
 		while len(buttons_by_col) <= nb.col:
 			buttons_by_col.push_back([])
 		buttons_by_col[nb.col].push_back(nb)
+		# Switching to dict
+		#if nb.row in 
 	
 	# Make sure that there aren't empty rows/cols
 	for i in range(len(buttons_by_row)):
@@ -180,6 +185,10 @@ func disconnect_nav_button_signals() -> void:
 	buttons_by_row = []
 	for button in nav_buttons:
 		button.disconnect_all_signals()
+
+func update_buttons() -> void:
+	disconnect_nav_button_signals()
+	get_navigable_buttons()
 
 func nav_to(subpage_name:String, args:Dictionary={}) -> void:
 	args['from'] = page_id
@@ -278,3 +287,8 @@ func nearest_button_in_1d(arr:Array, index:int):
 	if index < len(arr):
 		return arr[index]
 	return arr[len(arr) - 1]
+
+#func next_button_col(row:int, col:int, down:true) -> void:
+	#var min_button = null
+	#var min_dist = null
+	

@@ -7,11 +7,17 @@ class_name navigable_button
 @export var row:int = 0
 @export var col:int = 0
 var is_hover:bool = false
+var is_selected:bool = false
+var color_default:Color = Color("#990099")
+var color_hover:Color = Color("#760076")
+var color_selected:Color = Color('orange')
+var color_hover_selected:Color = Color('red')
 var data:Dictionary = {}
 
 func _ready() -> void:
 	#printt('in failing ready', $Panel)
 	set_text(text)
+	update_style()
 	#change_panel_color(Color("green"))
 	#custom_minimum_size.y = 100
 	#custom_minimum_size.y = $Panel.size.y
@@ -56,11 +62,10 @@ func set_hover(val:bool) -> void:
 		return
 	is_hover = val
 	# Hover status changed, so change color
+	update_style()
 	if val:
-		change_panel_color(Color("#760076"))
 		add_to_group("button_hover-" + page_id)
 	else:
-		change_panel_color(Color("#990099"))
 		remove_from_group("button_hover-" + page_id)
 
 func change_panel_color(new_color: Color):
@@ -98,3 +103,21 @@ func uses_move_right() -> bool:
 func set_custom_min_size() -> void:
 	custom_minimum_size.x = $Panel.size.x
 	custom_minimum_size.y = $Panel.size.y
+
+func set_selected(val:bool) -> void:
+	is_selected = val
+	update_style()
+	if val:
+		add_to_group("button_selected-" + page_id)
+	else:
+		remove_from_group("button_selected-" + page_id)
+
+func update_style() -> void:
+	if is_selected and is_hover:
+		change_panel_color(color_hover_selected)
+	elif is_selected:
+		change_panel_color(color_selected)
+	elif is_hover:
+		change_panel_color(color_hover)
+	else:
+		change_panel_color(color_default)

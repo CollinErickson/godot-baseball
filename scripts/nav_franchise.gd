@@ -69,7 +69,7 @@ func after_set_active_true(args:Dictionary={}) -> void:
 			nav_to('NavFranchisePreseasonOptions')
 		State.GOTO_SEASON:
 			state = State.WAITING_FOR_SEASON
-			nav_to('NavFranchiseSeasonHome')
+			nav_to('NavFranchiseSeasonHome', {'franchise':franchise})
 		_:
 			push_error('bad state for go to: ', state)
 #func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:

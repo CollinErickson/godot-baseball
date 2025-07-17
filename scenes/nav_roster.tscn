@@ -65,6 +65,14 @@ page_id = "roster"
 id = "free_agents"
 row = 2
 
+[node name="Back" parent="This/StandardBackground/VBoxContainer/VBoxContainer" instance=ExtResource("3_1vepe")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Back"
+page_id = "roster"
+id = "back"
+row = 3
+
 [node name="Subpages" type="Control" parent="."]
 visible = false
 layout_mode = 1

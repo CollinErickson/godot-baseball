@@ -34,6 +34,7 @@ grow_vertical = 2
 
 [node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 36
 text = "Pitching rotation"
 horizontal_alignment = 1
 
@@ -47,6 +48,7 @@ columns = 2
 
 [node name="SP1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "SP1"
 
 [node name="Control1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -55,6 +57,7 @@ text = "<empty>"
 
 [node name="SP2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "SP2"
 
 [node name="Control2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -63,6 +66,7 @@ text = "<empty>"
 
 [node name="SP3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "SP3"
 
 [node name="Control3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -71,6 +75,7 @@ text = "<empty>"
 
 [node name="SP4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "SP4"
 
 [node name="Control4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -79,6 +84,7 @@ text = "<empty>"
 
 [node name="SP5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "SP5"
 
 [node name="Control5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -92,19 +98,11 @@ size_flags_horizontal = 3
 [node name="HBoxBottom" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
 layout_mode = 2
 
-[node name="Cancel" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_ed446")]
+[node name="Back" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_ed446")]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Cancel"
+text = "Back"
 page_id = "rotation"
-id = "cancel"
-row = 5
-
-[node name="Accept" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_ed446")]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Accept"
-page_id = "rotation"
-id = "accept"
+id = "back"
 row = 6
 col = 1

@@ -1,6 +1,8 @@
 extends navigable_page
 class_name nav_roster
 
+var franchise:Franchise
+
 func _ready() -> void:
 	page_id = 'roster'
 	
@@ -9,5 +11,13 @@ func _ready() -> void:
 func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	#printt('in nav franchise load handle nav button click', id)
 	match id:
+		'pitching':
+			nav_to('NavRotation', {'team':franchise.teams[0]})
+		'back':
+			nav_up()
 		_:
 			push_error('unhandled nav button click ', page_id, ' , ', id)
+
+func setup(args:Dictionary={}):
+	if args['from'] == 'franchise_season_home':
+		franchise = args['franchise']
