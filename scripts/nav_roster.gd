@@ -12,7 +12,9 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	#printt('in nav franchise load handle nav button click', id)
 	match id:
 		'pitching':
-			nav_to('NavRotation', {'team':franchise.teams[0]})
+			nav_to('NavRotation', {'franchise':franchise})
+		'free_agents':
+			nav_to('NavFreeAgents', {'franchise':franchise})
 		'back':
 			nav_up()
 		_:

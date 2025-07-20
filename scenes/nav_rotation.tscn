@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cyxo13054tbfq"]
+[gd_scene load_steps=5 format=3 uid="uid://cyxo13054tbfq"]
 
 [ext_resource type="Script" uid="uid://c6xif0acsi866" path="res://scripts/nav_rotation.gd" id="1_7ux3u"]
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_684iq"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_ed446"]
+[ext_resource type="PackedScene" uid="uid://whisd5xtcv6s" path="res://scenes/navigable_button_adjustable.tscn" id="4_x3lj8"]
 
 [node name="NavRotation" type="Control"]
 layout_mode = 3
@@ -106,3 +107,18 @@ page_id = "rotation"
 id = "back"
 row = 6
 col = 1
+
+[node name="Team" parent="This/StandardBackground/VBoxContainer" instance=ExtResource("4_x3lj8")]
+layout_mode = 2
+text = "____"
+page_id = "rotation"
+id = "team"
+row = 7
+
+[node name="Level" parent="This/StandardBackground/VBoxContainer" instance=ExtResource("4_x3lj8")]
+layout_mode = 2
+values = ["MLB", "AAA", "AA", "A"]
+text = "____"
+page_id = "rotation"
+id = "level"
+row = 8

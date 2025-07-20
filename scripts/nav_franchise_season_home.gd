@@ -10,7 +10,8 @@ func _ready() -> void:
 func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	match id:
 		'settings':
-			nav_to('NavSettings')
+			nav_to('NavSettings',
+				{'GameplaySettings':franchise.gameplay_settings})
 		'roster':
 			nav_to('NavRoster', {'franchise':franchise})
 		'quit':
@@ -20,6 +21,8 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 
 func setup(args:Dictionary={}) -> void:
 	if args['from'] == 'settings':
-			printt('TODO save settings')
+		printt('TODO save settings')
+		if args['result'] == 'accept':
+			franchise.gameplay_settings = args['GameplaySettings']
 	if args['from'] == 'franchise':
 		franchise = args['franchise']

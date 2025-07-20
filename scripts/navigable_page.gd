@@ -73,9 +73,11 @@ func _process(_delta: float) -> void:
 	if mpos2 != prev_mouse_pos:
 		# Run on every button to make sure they turn off
 		for i in range(len(nav_buttons)):
-			var button = nav_buttons[i]
-			
-			button.set_hover(button.holds_pos(mpos2))
+			var button:navigable_button = nav_buttons[i]
+			var holds:bool = button.holds_pos(mpos2)
+			button.set_hover(holds)
+			if holds:
+				set_button_hover_true(button)
 	prev_mouse_pos = mpos2
 
 func set_active(new_is_active:bool, args:Dictionary={}) -> void:
@@ -184,7 +186,9 @@ func disconnect_nav_button_signals() -> void:
 	buttons_by_col = []
 	buttons_by_row = []
 	for button in nav_buttons:
-		button.disconnect_all_signals()
+		#printt('button', button)
+		if is_instance_valid(button):
+			button.disconnect_all_signals()
 
 func update_buttons() -> void:
 	disconnect_nav_button_signals()
@@ -221,16 +225,17 @@ func nav_up(args:Dictionary={}) -> void:
 	get_parent().get_parent().set_active(true, args)
 
 func handle_keyboard_input(val:String) -> void:
-	var hov = get_tree().get_nodes_in_group("button_hover-" + page_id)
-	printt('in nav page hov handle_keyboard_input on keyboard select', page_id, hov)
-	if len(hov) == 0:
+	var hovs = get_tree().get_nodes_in_group("button_hover-" + page_id)
+	printt('in nav page hov handle_keyboard_input on keyboard select', page_id, hovs)
+	if len(hovs) == 0:
 		printt('button pressed but no hover button')
 		# Pick a button to set to hover
 		nav_buttons[0].set_hover(true)
-	elif len(hov) == 1:
+		set_button_hover_true(nav_buttons[0])
+	elif len(hovs) == 1:
 		#printt('button pressed, exactly one hover button')
 		# Move to next button
-		hov = hov[0]
+		var hov:navigable_button = hovs[0]
 		if val == "moveleft":
 			if hov.uses_move_left():
 				hov.use_move_left()
@@ -246,15 +251,16 @@ func handle_keyboard_input(val:String) -> void:
 			hov.set_hover(false)
 			# Make new button the hover
 			new_hov.set_hover(true)
+			set_button_hover_true(new_hov)
 	else:
 		push_error("button pressed on nav page, but multiple hover buttons, " +
 			"in handle_keyboard_input")
 		# Remove all from the group, hope that it fixes itself
-		for h in hov:
+		for h in hovs:
 			h.set_hover(false)
 
 func traverse_buttons(hov, val):
-	printt('in traverse_buttons', hov, val, hov.row, buttons_by_row)
+	#printt('in traverse_buttons', hov, val, hov.row, buttons_by_row)
 	var new_row:int = hov.row
 	var new_col:int = hov.col
 	if val == "movedown":
@@ -291,4 +297,7 @@ func nearest_button_in_1d(arr:Array, index:int):
 #func next_button_col(row:int, col:int, down:true) -> void:
 	#var min_button = null
 	#var min_dist = null
-	
+
+func set_button_hover_true(_button:navigable_button) -> void:
+	# Child can overwrite if they need to make sure button is visible
+	pass

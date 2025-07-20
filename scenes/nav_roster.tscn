@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://ddk8vm1b3iqxu"]
+[gd_scene load_steps=6 format=3 uid="uid://ddk8vm1b3iqxu"]
 
 [ext_resource type="Script" uid="uid://ccvqlg3cf2nnq" path="res://scripts/nav_roster.gd" id="1_41375"]
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_uf6gn"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_1vepe"]
 [ext_resource type="PackedScene" uid="uid://cyxo13054tbfq" path="res://scenes/nav_rotation.tscn" id="4_uf6gn"]
+[ext_resource type="PackedScene" uid="uid://cu5hllnvaqwxh" path="res://scenes/nav_free_agents.tscn" id="5_1vepe"]
 
 [node name="NavRoster" type="Control"]
 layout_mode = 3
@@ -83,4 +84,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="NavRotation" parent="Subpages" instance=ExtResource("4_uf6gn")]
+layout_mode = 1
+
+[node name="NavFreeAgents" parent="Subpages" instance=ExtResource("5_1vepe")]
 layout_mode = 1

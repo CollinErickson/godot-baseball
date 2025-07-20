@@ -6,6 +6,9 @@ class_name navigable_button
 @export var id:String = ''
 @export var row:int = 0
 @export var col:int = 0
+#@export var is_active:bool = true
+@export var is_selectable:bool = true
+@export var is_clickable:bool = true
 var is_hover:bool = false
 var is_selected:bool = false
 var color_default:Color = Color("#990099")
@@ -100,8 +103,8 @@ func uses_move_left() -> bool:
 func uses_move_right() -> bool:
 	return false
 
-func set_custom_min_size() -> void:
-	custom_minimum_size.x = $Panel.size.x
+func set_custom_min_size(add_x:int=0) -> void:
+	custom_minimum_size.x = $Panel.size.x + add_x
 	custom_minimum_size.y = $Panel.size.y
 
 func set_selected(val:bool) -> void:

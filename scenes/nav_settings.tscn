@@ -130,7 +130,7 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-values = ["Button", "Bar one way", "Recenter"]
+values = ["Button", "Bar one way", "Bar"]
 text = "xx"
 page_id = "settings"
 id = "throwmode"
@@ -180,7 +180,7 @@ layout_mode = 2
 [node name="Back" parent="This/StandardBackground/VBoxContainer/HBoxContainer" instance=ExtResource("5_g5vje")]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Back"
+text = "Cancel"
 page_id = "settings"
 id = "back"
 row = 7

@@ -11,21 +11,32 @@ var year:int
 var stage:Stage
 #var team_location:String
 #var team_name:String
-var team_index:int
+var user_org_index:int
 var gameplay_settings:GameplaySettings = GameplaySettings.new()
-var teams:Array[Team] = []
+var orgs:Array[Org] = []
 var games_this_season:int
+var free_agents:Dictionary[String, Player] = {}
+var n_levels:int = 4
+var n_orgs:int = 30
 
 #func generate() -> void:
 	#team_location = "Abc"
 	#team_name = 'Def'
 
 func create_from_team_index(team_index_) -> void:
-	team_index = team_index_
+	user_org_index = team_index_
 	year = 0
 	stage = Stage.FRANCHISE_YEAR_OPTIONS
-	teams.push_back(Team.new())
-	teams[0].create_random()
+	for i in range(n_orgs):
+		orgs.push_back(Org.new())
+		orgs[i].n_levels = n_levels
+		orgs[i].create_random()
+		orgs[i].fix_roster()
+	# Create FAs
+	for i in range(100):
+		#free_agents.push_back(Player.new().create_random())
+		var player = Player.new().create_random()
+		free_agents[player.player_id] = player
 
 func serialize() -> String:
 	# Converts this object to a string that can be written to file

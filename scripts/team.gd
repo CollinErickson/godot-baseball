@@ -149,3 +149,7 @@ var serialize_map:Array = [
 
 func serialize() -> String:
 	return ''
+
+func fix_roster() -> void:
+	pass
+	# Make sure rotation, batting order, defense are set

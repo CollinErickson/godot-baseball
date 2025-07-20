@@ -23,6 +23,15 @@ func set_text(_text:String="ignored") -> void:
 	text = str(values[current_index])
 	#set_text(text)
 	$Panel/MarginContainer/Label.text = text
+	set_custom_min_size()
+
+func set_text2(text_) -> void:
+	printt('in set text 2', values, text_, values.find(text_))
+	var ind:int = values.find(text_)
+	if ind < 0:
+		ind = 0
+	current_index = ind
+	set_text()
 
 func current_value():
 	return values[current_index]
@@ -56,7 +65,6 @@ func uses_move_left() -> bool:
 
 func uses_move_right() -> bool:
 	printt('in nba use move right')
-	signal_clicked.emit(id, {'move':'right'})
 	return true
 
 func use_move_left() -> void:
@@ -65,6 +73,7 @@ func use_move_left() -> void:
 	if current_index < 0:
 		current_index = len(values) - 1
 	set_text()
+	signal_clicked.emit(id, {'move':'left'})
 
 func use_move_right() -> void:
 	#signal_clicked.emit(id, {'move':'right'})
@@ -72,6 +81,7 @@ func use_move_right() -> void:
 	if current_index >= len(values):
 		current_index = 0
 	set_text()
+	signal_clicked.emit(id, {'move':'right'})
 
 func holds_pos(pos:Vector2) -> bool:
 	return holds_pos_left(pos) or holds_pos_right(pos)

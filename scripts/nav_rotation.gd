@@ -3,33 +3,54 @@ class_name nav_rotation
 
 var button_selected = null
 var team:Team = null
+var franchise:Franchise
+var current_org_index:int = 0
+var current_level:int = 0
+
 @onready var rotationnode:GridContainer = \
 	$This/StandardBackground/VBoxContainer/HBoxContainer/Rotation
 @onready var relieversnode:GridContainer = \
 	$This/StandardBackground/VBoxContainer/HBoxContainer/Relievers
+@onready var level_button:navigable_button_adjustable = \
+	$This/StandardBackground/VBoxContainer/Level
+@onready var team_button:navigable_button_adjustable = \
+	$This/StandardBackground/VBoxContainer/Team
+@onready var back_button = \
+	$This/StandardBackground/VBoxContainer/HBoxBottom/Back
 var rp_buttons:Array = []
 var rp_row_dict:Dictionary[String,bool] = {}
 
 func _ready() -> void:
 	page_id = 'rotation'
-	
 	parent_ready()
 
 func setup(args:Dictionary={}) -> void:
 	if this_is_root:
 		# Debugging
-		args['team'] = Team.new().create_random()
-		args['team'].rotation[1] = ''
-		args['team'].rotation[2] = ''
-		args['team'].rotation[4] = ''
-	team = args['team']
+		#args['team'] = Team.new().create_random()
+		#args['team'].rotation[1] = ''
+		#args['team'].rotation[2] = ''
+		#args['team'].rotation[4] = ''
+		args['franchise'] = Franchise.new()
+		args['franchise'].create_from_team_index(0)
+	if len(args.keys()) > 0:
+		franchise = args['franchise']
+		team_button.values = []
+		for i in range(franchise.n_orgs):
+			team_button.values.push_back(
+				franchise.orgs[i].teams[current_level].city_name)
+		team_button.current_index = franchise.user_org_index
+		team_button.set_text()
+	# Start with MLB team of user team
+	printt('check args', args, franchise)
+	team = franchise.orgs[franchise.user_org_index].teams[0]
 	
 	# Put designated SPs on left
 	printt('team rotation is', team.rotation)
 	for i in range(len(team.rotation)):
 		var pid:String = team.rotation[i]
 		var b = navigable_button_scene.instantiate()
-		printt('new button is', b)
+		#printt('new button is', b)
 		if pid == '':
 			b.set_text("<empty>")
 			b.data['is_empty'] = true
@@ -58,7 +79,7 @@ func setup(args:Dictionary={}) -> void:
 		if !player.is_pitcher():
 			continue
 		var b = navigable_button_scene.instantiate()
-		printt('new button is', b)
+		#printt('new button is', b)
 		b.set_text(player.last)
 		b.row = i
 		b.col = 1
@@ -75,12 +96,38 @@ func setup(args:Dictionary={}) -> void:
 	# Set correct row for back and accept buttons
 	#$This/StandardBackground/VBoxContainer/HBoxBottom/Accept.row = max(5, i)
 	#$This/StandardBackground/VBoxContainer/HBoxBottom/Cancel.row = max(5, i)
-	$This/StandardBackground/VBoxContainer/HBoxBottom/Back.row = max(5, i)
+	back_button.row = max(5, i)
+	team_button.row = back_button.row + 1
+	level_button.row = back_button.row + 2
 
-func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
+func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 	if id == 'back':
 		cleanup()
 		nav_up({'result':'back'})
+	elif id == 'team':
+		if args['move'] == 'left':
+			current_org_index -= 1
+		else:
+			current_org_index += 1
+		current_org_index = maxi(0,
+								mini(franchise.n_orgs - 1,
+									current_org_index))
+		team = franchise.orgs[current_org_index].teams[current_level]
+		
+		cleanup()
+		setup()
+		update_buttons()
+	elif id == 'level':
+		# Change level
+		if args['move'] == 'left':
+			current_level -= 1
+		else:
+			current_level += 1
+		current_level = maxi(0, mini(franchise.n_levels - 1, current_level))
+		
+		cleanup()
+		setup()
+		update_buttons()
 	else:
 		# A pitcher button was pressed
 		#printt('unhandled nav click ', page_id, ' ', id)
@@ -229,10 +276,14 @@ func cleanup() -> void:
 		var c:Control = Control.new()
 		c.name = "Control" + str(i+1)
 		sp.replace_by(c)
+		sp.disconnect_all_signals()
 		sp.queue_free()
 	# Remove Relievers
 	var rps:Array = get_tree().get_nodes_in_group("nav_rotation_button_RP")
-	for rp in rps:
+	for i in range(len(rps)):
+		var rp:navigable_button = rps[i]
+		rp.disconnect_all_signals()
+		rp.remove_from_group('navigable_button')
 		rp.queue_free()
 	# Clear vars
 	button_selected = null
