@@ -1,26 +1,30 @@
 extends Node
 
-func read_json(path:String):
+func read_json(path:String) -> Dictionary:
+	printt('in file_utils, read_json', path)
 	var file = FileAccess.open(path, FileAccess.READ)
 	var content = file.get_as_text()
 	printt('file is', file)
-	printt('content is', content)
+	#printt('content is', content)
 	#return content
 	
 	var json_string = content
 	## Retrieve data
 	var json = JSON.new()
 	var error = json.parse(json_string)
-	if error == OK:
-		var data_received = json.data
-		if typeof(data_received) == TYPE_ARRAY:
-			printt('data array is', len(data_received), data_received) # Prints the array.
-			printt('element one', data_received[0], data_received[0]['name'])
-			return data_received
-		else:
-			print("Unexpected data")
-	else:
-		print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
+	if error != OK:
+		print("JSON Parse Error: ", json.get_error_message(), " in ",
+			json_string, " at line ", json.get_error_line())
+		assert(false, 'JSON Parse Error')
+		
+	var data_received = json.data
+	#if typeof(data_received) != TYPE_ARRAY:
+		#print("Unexpected data", typeof(data_received))
+		#assert(false, 'Unexpected data')
+	
+	#printt('data array is', len(data_received), data_received) # Prints the array.
+	#printt('element one', data_received[0], data_received[0]['name'])
+	return data_received
 
 func json_rows_to_cols(x:Array) -> Dictionary:
 	#printt('in nav select team json_rows_to_cols', x)
@@ -46,6 +50,7 @@ func json_cols_to_rows(x:Dictionary) -> Array:
 	return y
 
 func read_csv(path:String, _has_col_types:bool=true) -> Dictionary:
+	printt('in file_utils, read_csv', path)
 	var file = FileAccess.open(path, FileAccess.READ)
 	#var content = file.get_as_text() # Gets whole file as text
 	#printt('file is', file)
@@ -67,9 +72,9 @@ func read_csv(path:String, _has_col_types:bool=true) -> Dictionary:
 			break
 		var row:Array = file.get_csv_line()
 		#printt('iii is', iii, row)
-		#if len(row) == 1 and row[0] == "":
-			#printt('breaking on iii', iii, row)
-			#break
+		if len(row) == 1 and row[0] == "":
+			printt('breaking on iii', iii, row)
+			break
 		# Loop over each column in the row
 		for i in range(len(row)):
 			if row[i] == "":
@@ -78,6 +83,10 @@ func read_csv(path:String, _has_col_types:bool=true) -> Dictionary:
 				x[colnames[i]].push_back(row[i])
 			elif types[i] == "int":
 				x[colnames[i]].push_back(int(row[i]))
+			elif types[i] == "float":
+				x[colnames[i]].push_back(float(row[i]))
+			elif types[i] == "Color":
+				x[colnames[i]].push_back(Color(row[i]))
 			else:
 				push_error("Error in read csv, bad col type:", types[i])
 	#print('read csv x is', x)

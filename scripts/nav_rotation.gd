@@ -43,7 +43,7 @@ func setup(args:Dictionary={}) -> void:
 		team_button.set_text()
 	# Start with MLB team of user team
 	printt('check args', args, franchise)
-	team = franchise.orgs[franchise.user_org_index].teams[0]
+	team = franchise.orgs[current_org_index].teams[current_level]
 	
 	# Put designated SPs on left
 	printt('team rotation is', team.rotation)
@@ -68,7 +68,10 @@ func setup(args:Dictionary={}) -> void:
 		
 		# Replace existing node
 		#printt('rotation node is', rotationnode.get_node("Control1"))#.replace_by(b)
-		rotationnode.get_node("Control" + str(i+1)).replace_by(b)
+		printt("Is this Control i ?", rotationnode.get_node("Control" + str(i+1)))
+		var control_i:Control = rotationnode.get_node("Control" + str(i+1))
+		control_i.replace_by(b)
+		control_i.queue_free()
 	
 	# Put all remaining Ps on right
 	var i:int = 0
@@ -228,7 +231,10 @@ func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 					var bk = get_node_from_id(k)
 					if bk.row > del_row:
 						bk.row -= 1
-				$This/StandardBackground/VBoxContainer/HBoxBottom/Back.row -= 1
+				if len(rp_row_dict.keys()) >= 5:
+					back_button.row -= 1
+					level_button.row -= 1
+					team_button.row -= 1
 				update_buttons()
 			if b2_is_empty and not b1_is_empty and b1_sp==null:
 				# Already switched, so delete b1
@@ -241,7 +247,10 @@ func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 					var bk = get_node_from_id(k)
 					if bk.row > del_row:
 						bk.row -= 1
-				$This/StandardBackground/VBoxContainer/HBoxBottom/Back.row -= 1
+				if len(rp_row_dict.keys()) >= 5:
+					back_button.row -= 1
+					level_button.row -= 1
+					team_button.row -= 1
 				update_buttons()
 				#for bb in rp_buttons:
 					#printt('bbrp', bb)
@@ -251,15 +260,13 @@ func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 
 func get_node_from_id(id:String):
 	if id.substr(0,2) == "SP":
-		var cs:Array[Node] = \
-			$This/StandardBackground/VBoxContainer/HBoxContainer/Rotation.get_children()
+		var cs:Array[Node] = rotationnode.get_children()
 		for c in cs:
 			if c.is_in_group('navigable_button'):
 				if c.id == id:
 					return c
 	elif id.substr(0,2) == "RP":
-		var cs:Array[Node] = \
-			$This/StandardBackground/VBoxContainer/HBoxContainer/Relievers.get_children()
+		var cs:Array[Node] = relieversnode.get_children()
 		for c in cs:
 			if c.is_in_group('navigable_button'):
 				if c.id == id:
@@ -271,12 +278,16 @@ func cleanup() -> void:
 	# Remove SP
 	var sps:Array = get_tree().get_nodes_in_group("nav_rotation_button_SP")
 	sps.sort_custom(func (a,b): return a.id < b.id)
+	printt('sps are', sps)
 	for i in range(len(sps)):
 		var sp:navigable_button = sps[i]
-		var c:Control = Control.new()
+		var c:Label = Label.new()
 		c.name = "Control" + str(i+1)
+		# replace_by keeps children, so delete them first
+		sp.get_child(0).queue_free()
 		sp.replace_by(c)
 		sp.disconnect_all_signals()
+		sp.remove_from_group('navigable_button')
 		sp.queue_free()
 	# Remove Relievers
 	var rps:Array = get_tree().get_nodes_in_group("nav_rotation_button_RP")

@@ -44,7 +44,8 @@ func read_in_teams():
 	#printt('read teams', teams)
 
 func set_team(index:int) -> void:
-	$This/Panel/Label.text = teams[index]['location'] + "\n" + teams[index]['name']
+	#$This/Panel/Label.text = teams[index]['location'] + "\n" + teams[index]['name']
+	$This/VBoxContainer/Panel/Label.text = teams[index]['location'] + "\n" + teams[index]['name']
 
 func setup(_args:Dictionary={}) -> void:
 	set_team(current_index)

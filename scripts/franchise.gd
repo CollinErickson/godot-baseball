@@ -27,10 +27,25 @@ func create_from_team_index(team_index_) -> void:
 	user_org_index = team_index_
 	year = 0
 	stage = Stage.FRANCHISE_YEAR_OPTIONS
+	var teamsd:Dictionary = FileUtils.read_csv("res://data/teams/teams.csv")
+	var teams:DF = DF.new().init(teamsd)
+	printt('teams df is')
+	teams.print_()
+	#var playersd:Dictionary = FileUtils.read_json("res://data/players/players.json")
+	var playersd:Dictionary = FileUtils.read_csv("res://data/players/players.csv")
+	var players:DF = DF.new().init(playersd)
+	players.print_(5,'player df is')
 	for i in range(n_orgs):
 		orgs.push_back(Org.new())
 		orgs[i].n_levels = n_levels
-		orgs[i].create_random()
+		#orgs[i].create_random()
+		var org_teams:DF = teams.filter_val_copy('team_id', i + 1)
+		var org_players:DF = players.filter_val_copy('org_id', i + 1)
+		#printt('org_teams')
+		org_teams.print_(5, 'org_teams is')
+		org_players.print_(5, 'org_players is')
+		orgs[i].create_from_file(org_teams, org_players)
+		#assert(false)
 		orgs[i].fix_roster()
 	# Create FAs
 	for i in range(100):

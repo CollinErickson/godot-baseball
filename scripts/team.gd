@@ -45,7 +45,7 @@ func create(city_name_,
 	color_primary = color_primary_
 	color_secondary = color_secondary_
 	
-	create_roster()
+	#create_roster()
 	
 	randomize_jersey()
 	
@@ -153,3 +153,4 @@ func serialize() -> String:
 func fix_roster() -> void:
 	pass
 	# Make sure rotation, batting order, defense are set
+	rotation = [roster[0].player_id, '', '', '', '']
