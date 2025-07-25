@@ -23,6 +23,7 @@ var pitching:float
 var pitchspeed:float
 var pitching_stamina:float
 var current_game_pitching_stamina:float
+var overall:float
 
 var serialize_map:Array = [
 	['f', 'first', 's'],
@@ -89,6 +90,46 @@ func setup(first_:String, last_:String, speed_:float, throwspeed_:float,
 	height_mult = randfn(1,.1)
 	
 	return self
+
+func setup_from_row(df:DF) -> Player:
+	assert(df.nrows() == 1)
+	first = df.d['First'][0]
+	last = df.d['Last'][0]
+	player_id = first + "-" + last + "-" + str(roundi(randf()*1000000))
+	
+	
+	bats = df.d['Bats'][0]
+	assert(bats in ["L", "R", "S"])
+	throws = df.d['Throws'][0]
+	assert(throws in ["L", "R"])
+	
+	pos = df.d['First Position'][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	 #= df.d[''][0]
+	speed = df.d['Speed'][0]
+	throwspeed = df.d['Throwing Strength'][0]
+	pitchspeed = 0
+	contact = 0.
+	power = 0.
+	pitching = 0.
+	throwaccuracy = round(randf_range(40, 100))*1.
+	pitching_stamina = round(randf_range(40, 100))*1./20
+	catching = round(randf_range(40, 100))*1./20
+	current_game_pitching_stamina = pitching_stamina
+	
+	skin_color = skin_colors.pick_random()
+	height_mult = randfn(1,.1)
+	
+	return self
+	
+
+func _to_string() -> String:
+	return 'Player(' + first + ',' + last + ',' + str(roundi(speed)) + ')'
 
 func print_():
 	print('Player object:')

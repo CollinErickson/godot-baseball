@@ -2,6 +2,8 @@ extends Control
 class_name navigable_button
 
 @export var text:String = 'test123'
+@export var textL:String = ''
+@export var textR:String = ''
 @export var page_id:String = 'null'
 @export var id:String = ''
 @export var row:int = 0
@@ -96,6 +98,14 @@ func set_text(text_:String) -> void:
 	text = text_
 	$Panel/MarginContainer/Label.text = text_
 	set_custom_min_size()
+
+func set_textL(text_:String) -> void:
+	textL = text_
+	$Panel/MarginContainer/LabelL.text = text_
+
+func set_textR(text_:String) -> void:
+	textR = text_
+	$Panel/MarginContainer/LabelR.text = text_
 
 func uses_move_left() -> bool:
 	return false

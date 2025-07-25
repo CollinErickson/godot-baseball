@@ -41,14 +41,7 @@ func create_from_file(teams_:DF, players:DF) -> void:
 		#assert(false)
 		for j in range(players_level.nrows()):
 			var player_j:Player = Player.new()
-			player_j.setup(
-				players_level.get_row(j).d['First'][0],
-				players_level.get_row(j).d['Last'][0],
-				50, # speed
-				50, # throw speed
-				"R", # bats
-				'L', # throws
-			)
+			player_j.setup_from_row(players_level.get_row(j))
 			#printt('player after setup is')
 			#player_j.print_()
 			#assert(false)
@@ -60,6 +53,10 @@ func create_from_file(teams_:DF, players:DF) -> void:
 		printt('\n\nteam roster is', team.roster)
 		if len(team.roster) == 0:
 			team.create_random()
+		else:
+			team.optimize_lineup()
+			team.optimize_rotation()
+
 		#assert(false)
 		teams.push_back(team)
 

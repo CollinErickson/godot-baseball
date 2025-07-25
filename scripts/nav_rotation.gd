@@ -58,7 +58,10 @@ func setup(args:Dictionary={}) -> void:
 			var player:Player = team.rosterdict[pid]
 			# Create button for new player
 			#var b:navigable_button = navigable_button_scene.instantiate()
-			b.set_text(player.last)
+			#b.set_textL(player.pos)
+			#b.set_textR(str(roundi(player.contact)))
+			#b.set_text(player.last)
+			set_button_text(b, player)
 			b.data['player_id'] = player.player_id
 		b.row = i
 		b.col = 0
@@ -67,8 +70,6 @@ func setup(args:Dictionary={}) -> void:
 		b.add_to_group("nav_rotation_button_SP")
 		
 		# Replace existing node
-		#printt('rotation node is', rotationnode.get_node("Control1"))#.replace_by(b)
-		printt("Is this Control i ?", rotationnode.get_node("Control" + str(i+1)))
 		var control_i:Control = rotationnode.get_node("Control" + str(i+1))
 		control_i.replace_by(b)
 		control_i.queue_free()
@@ -83,7 +84,10 @@ func setup(args:Dictionary={}) -> void:
 			continue
 		var b = navigable_button_scene.instantiate()
 		#printt('new button is', b)
-		b.set_text(player.last)
+		#b.set_textL(player.pos)
+		#b.set_textR(str(roundi(player.contact)))
+		#b.set_text(player.last)
+		set_button_text(b, player)
 		b.row = i
 		b.col = 1
 		b.id = "RP" + str(i)
@@ -197,7 +201,10 @@ func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 			# Switch the buttons
 			var b1_info = [b1.text, '', true]
 			if not b1_is_empty:
-				b1_info = [b1.text, b1.data['player_id'], false]
+				b1_info = [b1.text, b1.data['player_id'], false,
+							b1.textL, b1.textR]
+			b1.set_textL(b2.textL)
+			b1.set_textR(b2.textR)
 			b1.set_text(b2.text)
 			if b2_is_empty:
 				b1.data.erase('player_id')
@@ -207,6 +214,8 @@ func handle_nav_button_click(id:String, args:Dictionary={}) -> void:
 				b1.data['is_empty'] = true
 			else:
 				b1.data.erase('is_empty')
+			b2.set_textL(b1_info[3])
+			b2.set_textR(b1_info[4])
 			b2.set_text(b1_info[0])
 			if b1_is_empty:
 				b2.data.erase('player_id')
@@ -278,7 +287,7 @@ func cleanup() -> void:
 	# Remove SP
 	var sps:Array = get_tree().get_nodes_in_group("nav_rotation_button_SP")
 	sps.sort_custom(func (a,b): return a.id < b.id)
-	printt('sps are', sps)
+	#printt('sps are', sps)
 	for i in range(len(sps)):
 		var sp:navigable_button = sps[i]
 		var c:Label = Label.new()
@@ -299,3 +308,8 @@ func cleanup() -> void:
 	# Clear vars
 	button_selected = null
 	team = null
+
+func set_button_text(b:navigable_button, player:Player) -> void:
+	b.set_textL(player.pos)
+	b.set_textR(str(roundi(player.speed)))
+	b.set_text(player.last)
