@@ -15,8 +15,14 @@ var hat_style:String
 var roster:Array[Player] = []
 var rosterdict:Dictionary[String, Player] = {}
 var batting_order:Array[String] = []
+var current_game_batting_order:Array[String] = []
 var defense_order:Array[String] = []
+var current_game_defense_order:Array[String] = []
 var rotation:Array[String] = []
+var rotation_next_starter_index:int = 0
+
+# Season data
+var games:Array[Game] = []
 
 func _ready() -> void:
 	# If this is root, test it
@@ -116,6 +122,12 @@ func prepare_for_game() -> bool:
 	# Reset pitcher stamina
 	for player in roster:
 		player.current_game_pitching_stamina = player.pitching_stamina
+	# Set lineups
+	current_game_defense_order = defense_order.duplicate()
+	current_game_defense_order[0] = rotation[rotation_next_starter_index]
+	rotation_next_starter_index = (rotation_next_starter_index + 1
+		) % len(rotation)
+	current_game_batting_order = batting_order.duplicate()
 	# Return true if everything worked
 	return true
 
@@ -160,7 +172,8 @@ func rotation_sort(p1:Player, p2:Player) -> bool:
 	if p1.pos != 'SP' and p2.pos == 'SP':
 		return false
 	# Both are same position
-	return p1.pitching > p2.pitching
+	#return p1.pitching > p2.pitching
+	return p1.speed > p2.speed
 
 func optimize_lineup() -> void:
 	# Copy roster

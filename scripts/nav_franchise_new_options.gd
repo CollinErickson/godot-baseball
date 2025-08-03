@@ -5,5 +5,9 @@ func _ready() -> void:
 	page_id = 'franchise_new_options'
 	parent_ready()
 
-#func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
-	#match
+func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
+	match id:
+		'accept':
+			nav_up()
+		'back':
+			nav_up({result='back'})

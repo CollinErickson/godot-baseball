@@ -1,0 +1,160 @@
+[gd_scene load_steps=5 format=3 uid="uid://clodl84nl57s0"]
+
+[ext_resource type="Script" uid="uid://c6xif0acsi866" path="res://scripts/nav_rotation.gd" id="1_m3ujt"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_abd27"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_umjox"]
+[ext_resource type="PackedScene" uid="uid://whisd5xtcv6s" path="res://scenes/navigable_button_adjustable.tscn" id="4_n4pcc"]
+
+[node name="NavLineup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_m3ujt")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_abd27")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/StandardBackground"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Lineup"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+
+[node name="Rotation" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+columns = 2
+
+[node name="L1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "1"
+
+[node name="Control1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "2	"
+
+[node name="Control2" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "3"
+
+[node name="Control3" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "4"
+
+[node name="Control4" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "5"
+
+[node name="Control5" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L6" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "6"
+
+[node name="Control6" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L7" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "7"
+
+[node name="Control7" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L8" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "8"
+
+[node name="Control8" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="L9" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "9"
+
+[node name="Control9" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
+layout_mode = 2
+text = "<empty>"
+
+[node name="Relievers" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+
+[node name="HBoxBottom" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
+layout_mode = 2
+
+[node name="Back" parent="This/StandardBackground/VBoxContainer/HBoxBottom" instance=ExtResource("3_umjox")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Back"
+page_id = "rotation"
+id = "back"
+row = 6
+col = 1
+
+[node name="Team" parent="This/StandardBackground/VBoxContainer" instance=ExtResource("4_n4pcc")]
+layout_mode = 2
+text = "____"
+page_id = "rotation"
+id = "team"
+row = 7
+
+[node name="Level" parent="This/StandardBackground/VBoxContainer" instance=ExtResource("4_n4pcc")]
+layout_mode = 2
+values = ["MLB", "AAA", "AA", "A"]
+text = "____"
+page_id = "rotation"
+id = "level"
+row = 8

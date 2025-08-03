@@ -42,7 +42,7 @@ func setup(args:Dictionary={}) -> void:
 		team_button.current_index = franchise.user_org_index
 		team_button.set_text()
 	# Start with MLB team of user team
-	printt('check args', args, franchise)
+	#printt('check args', args, franchise)
 	team = franchise.orgs[current_org_index].teams[current_level]
 	
 	# Put designated SPs on left

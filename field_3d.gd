@@ -160,13 +160,14 @@ func unpause() -> void:
 	# Unpause this
 	set_process(true)
 
-func reset(user_is_batting_team_, user_is_pitching_team_,
-			batter_,
+func reset(user_is_batting_team_:bool,
+			user_is_pitching_team_:bool,
+			batter_:Player,
 			runner1, runner2, runner3,
-			outs_before_play_,
+			outs_before_play_:int,
 			outs_per_inning_:int,
-			fielding_team,
-			batting_team,
+			fielding_team:Team,
+			batting_team:Team,
 			fielding_team_is_home:bool,
 			throw_mode_:String,
 			bat_mode_:String,
@@ -188,15 +189,16 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 	for fielder in fielders:
 		fielder.reset(throw_mode_, defense_control_, user_is_pitching_team_)
 		#fielder.setup_player(fielding_team.roster[0], fielding_team, fielding_team_is_home)
-		#printt('setup fielder', fielder.posnum, fielding_team.defense_order, fielding_team.roster)
+		#printt('setup fielder', fielder.posnum, fielding_team.current_game_defense_order, fielding_team.roster)
 		# Change speed of a fielder for testing (200 is super fast)
 		#if fielder.posnum == 1:
-			#fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]].speed = 200
+			#fielding_team.roster[fielding_team.current_game_defense_order[fielder.posnum - 1]].speed = 200
 		# Change size of a fielder for testing
 		#if fielder.posnum == 3:
-			#fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]].height_mult = 3
+			#fielding_team.roster[fielding_team.current_game_defense_order[fielder.posnum - 1]].height_mult = 3
 		fielder.setup_player(
-			fielding_team.roster[fielding_team.defense_order[fielder.posnum - 1]],
+			fielding_team.rosterdict[
+				fielding_team.current_game_defense_order[fielder.posnum - 1]],
 			fielding_team,
 			fielding_team_is_home
 		)
@@ -236,9 +238,9 @@ func reset(user_is_batting_team_, user_is_pitching_team_,
 		int(runner1!=null) + int(runner2!=null) + int(runner3!=null) # num runners
 	)
 	#$Headon/Pitcher3D.setup_player(pitcher_, fielding_team, fielding_team_is_home)
-	pitcher.setup_player(fielding_team.roster[fielding_team.defense_order[1 - 1]],
+	pitcher.setup_player(fielding_team.rosterdict[fielding_team.current_game_defense_order[1 - 1]],
 									fielding_team, fielding_team_is_home)
-	$PrepitchFieldOverlay.setup_pitcher(fielding_team.roster[fielding_team.defense_order[1 - 1]])
+	$PrepitchFieldOverlay.setup_pitcher(fielding_team.rosterdict[fielding_team.current_game_defense_order[1 - 1]])
 	
 	if user_is_batting_team_ or true:
 		$Headon/Cameras/Camera3DBatting.current = true

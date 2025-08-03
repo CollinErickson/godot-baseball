@@ -18,6 +18,8 @@ var games_this_season:int
 var free_agents:Dictionary[String, Player] = {}
 var n_levels:int = 4
 var n_orgs:int = 30
+enum salary_cap_options {None, Realistic, Equal}
+var salary_cap_option:salary_cap_options
 
 #func generate() -> void:
 	#team_location = "Abc"
@@ -88,7 +90,29 @@ func deserialize(x:String) -> void:
 
 func set_preseason_options(games_this_season_:int) -> void:
 	games_this_season = games_this_season_
+	games_this_season = 29
 
 func setup_season() -> void:
 	# Create schedule for each team
-	pass
+	# Clear each teams games
+	for i in range(n_levels):
+		for j in range(n_orgs):
+			orgs[j].teams[i].games = []
+	
+	# For each level
+	var games_by_level:Array = []
+	for i in range(n_levels):
+		# Clear games
+		var games_this_level:Array[Game] = []
+		games_this_level.resize(roundi(games_this_season * n_orgs / 2.))
+		var l:int = 0
+		# Add game between each pair of teams
+		for j in range(n_orgs - 1):
+			for k in range(j+1, n_orgs):
+				games_this_level[l] = Game.new()
+				games_this_level[l].init(j, k, i)
+				orgs[j].teams[i].games.push_back(games_this_level[l])
+				orgs[k].teams[i].games.push_back(games_this_level[l])
+				l += 1
+		assert(l == roundi(games_this_season * n_orgs / 2.))
+		games_this_level.shuffle()

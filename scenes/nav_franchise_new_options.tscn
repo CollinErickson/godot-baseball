@@ -1,6 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://dc45j23wqgtak"]
+[gd_scene load_steps=6 format=3 uid="uid://dc45j23wqgtak"]
 
 [ext_resource type="Script" uid="uid://2y76yn0368tr" path="res://scripts/nav_franchise_new_options.gd" id="1_5tagf"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_3ji5p"]
+[ext_resource type="PackedScene" uid="uid://whisd5xtcv6s" path="res://scenes/navigable_button_adjustable.tscn" id="3_c8rol"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="4_wnqs1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_velmk"]
+bg_color = Color(0.155852, 0.521836, 0.0824799, 1)
 
 [node name="NavFranchiseNewOptions" type="Control"]
 layout_mode = 3
@@ -10,3 +16,116 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_5tagf")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_3ji5p")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -90.0
+offset_right = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="PanelContainer" type="PanelContainer" parent="This/VBoxContainer/MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_velmk")
+
+[node name="Label" type="Label" parent="This/VBoxContainer/MarginContainer/PanelContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 100
+text = "Franchise settings"
+horizontal_alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="Label" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Salary cap"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SalaryCap" parent="This/VBoxContainer/GridContainer" instance=ExtResource("3_c8rol")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+values = ["Off", "Equal", "Realistic"]
+page_id = "franchise_new_options"
+id = "salary_cap"
+col = 1
+
+[node name="Label2" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Rosters"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rosters" parent="This/VBoxContainer/GridContainer" instance=ExtResource("3_c8rol")]
+layout_mode = 2
+values = ["Current", "Draft"]
+page_id = "franchise_new_options"
+id = "rosters"
+row = 1
+col = 1
+
+[node name="Label3" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Draft order"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Draft" parent="This/VBoxContainer/GridContainer" instance=ExtResource("3_c8rol")]
+layout_mode = 2
+values = ["Random", "Random + Snake", "User first", "User first + Snake"]
+page_id = "franchise_new_options"
+id = "draft"
+row = 2
+col = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Back" parent="This/VBoxContainer/HBoxContainer" instance=ExtResource("4_wnqs1")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Back"
+page_id = "franchise_new_options"
+row = 3
+
+[node name="Accept" parent="This/VBoxContainer/HBoxContainer" instance=ExtResource("4_wnqs1")]
+layout_mode = 2
+text = "Accept"
+page_id = "franchise_new_options"
+id = "accept"
+row = 3
+col = 1

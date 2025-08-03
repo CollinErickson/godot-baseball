@@ -79,7 +79,7 @@ func start_game() -> void:
 	home_team.prepare_for_game()
 	away_team.prepare_for_game()
 	#batter = get_player(50)
-	batter = away_team.roster[away_team.batting_order[0]]
+	batter = away_team.rosterdict[away_team.batting_order[0]]
 	#batter.speed = 1.80
 	runner1 = get_player(50)
 	#runner2 = get_player(50)
@@ -253,9 +253,9 @@ func _on_field_3d_signal_play_done(ball_in_play: bool, is_ball: bool, is_strike:
 			if home_team_batting_order_index > 8.5:
 				home_team_batting_order_index = 0
 		if is_top:
-			batter = away_team.roster[away_team.batting_order[away_team_batting_order_index]]
+			batter = away_team.rosterdict[away_team.batting_order[away_team_batting_order_index]]
 		else:
-			batter = home_team.roster[home_team.batting_order[home_team_batting_order_index]]
+			batter = home_team.rosterdict[home_team.batting_order[home_team_batting_order_index]]
 	#get_node('Field3D').freeze()
 	update_scorebug()
 	

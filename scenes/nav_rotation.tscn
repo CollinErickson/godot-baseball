@@ -44,7 +44,7 @@ layout_mode = 2
 
 [node name="Rotation" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 6
 columns = 2
 
 [node name="SP1" type="Label" parent="This/StandardBackground/VBoxContainer/HBoxContainer/Rotation"]
@@ -94,7 +94,7 @@ text = "<empty>"
 
 [node name="Relievers" type="GridContainer" parent="This/StandardBackground/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 6
 
 [node name="HBoxBottom" type="HBoxContainer" parent="This/StandardBackground/VBoxContainer"]
 layout_mode = 2

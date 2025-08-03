@@ -1,0 +1,80 @@
+[gd_scene load_steps=4 format=3 uid="uid://dkwudgntdw5b2"]
+
+[ext_resource type="Script" uid="uid://cd16d0pbb0jey" path="res://scripts/nav_player.gd" id="1_bxt7j"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_sshe4"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_sshe4"]
+
+[node name="NavPlayer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bxt7j")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_sshe4")]
+layout_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This"]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GridContainer" type="GridContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 2
+
+[node name="NameL" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Name:"
+horizontal_alignment = 2
+
+[node name="NameR" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "<name>"
+
+[node name="PosL" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Pos:"
+horizontal_alignment = 2
+
+[node name="PosR" type="Label" parent="This/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "<pos>"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="This/VBoxContainer"]
+layout_mode = 2
+
+[node name="Sign" parent="This/VBoxContainer/VBoxContainer" instance=ExtResource("3_sshe4")]
+layout_mode = 2
+text = "Sign"
+page_id = "NavPlayer"
+id = "sign"
+
+[node name="Cut" parent="This/VBoxContainer/VBoxContainer" instance=ExtResource("3_sshe4")]
+layout_mode = 2
+text = "Cut"
+page_id = "NavPlayer"
+id = "cut"
+row = 1
+
+[node name="Back" parent="This/VBoxContainer/VBoxContainer" instance=ExtResource("3_sshe4")]
+layout_mode = 2
+text = "Back"
+page_id = "NavPlayer"
+id = "back"
+row = 2
