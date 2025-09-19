@@ -63,3 +63,6 @@ func create_from_file(teams_:DF, players:DF) -> void:
 func fix_roster() -> void:
 	for team in teams:
 		team.fix_roster()
+
+func sign_player(player:Player) -> void:
+	teams[0].add_player(player)

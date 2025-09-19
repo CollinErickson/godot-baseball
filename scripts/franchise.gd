@@ -25,7 +25,7 @@ var salary_cap_option:salary_cap_options
 	#team_location = "Abc"
 	#team_name = 'Def'
 
-func create_from_team_index(team_index_) -> void:
+func create_from_team_index(team_index_) -> Franchise:
 	user_org_index = team_index_
 	year = 0
 	stage = Stage.FRANCHISE_YEAR_OPTIONS
@@ -54,6 +54,8 @@ func create_from_team_index(team_index_) -> void:
 		#free_agents.push_back(Player.new().create_random())
 		var player = Player.new().create_random()
 		free_agents[player.player_id] = player
+	
+	return self
 
 func serialize() -> String:
 	# Converts this object to a string that can be written to file
@@ -116,3 +118,9 @@ func setup_season() -> void:
 				l += 1
 		assert(l == roundi(games_this_season * n_orgs / 2.))
 		games_this_level.shuffle()
+		games_by_level.push_back(games_this_level)
+
+func sign_player(player:Player) -> void:
+	assert(free_agents.has(player.player_id))
+	free_agents.erase(player.player_id)
+	orgs[user_org_index].sign_player(player)

@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cu5hllnvaqwxh"]
+[gd_scene load_steps=5 format=3 uid="uid://cu5hllnvaqwxh"]
 
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="1_4lq6f"]
 [ext_resource type="Script" uid="uid://dv6ac41pokk42" path="res://scripts/nav_free_agents.gd" id="1_c7t5a"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="2_c7t5a"]
+[ext_resource type="PackedScene" uid="uid://dkwudgntdw5b2" path="res://scenes/nav_player.tscn" id="4_vlgrl"]
 
 [node name="NavFreeAgents" type="Control"]
 layout_mode = 3
@@ -76,3 +77,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="NavPlayer" parent="Subpages" instance=ExtResource("4_vlgrl")]
+layout_mode = 1

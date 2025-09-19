@@ -41,7 +41,9 @@ func setup(args:Dictionary={}) -> void:
 				franchise.orgs[i].teams[current_level].city_name)
 		team_button.current_index = franchise.user_org_index
 		team_button.set_text()
-	# Start with MLB team of user team
+		
+		# Start with MLB team of user team
+		current_org_index = franchise.user_org_index
 	#printt('check args', args, franchise)
 	team = franchise.orgs[current_org_index].teams[current_level]
 	

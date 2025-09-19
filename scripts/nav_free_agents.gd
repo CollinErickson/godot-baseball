@@ -5,7 +5,6 @@ var franchise:Franchise
 @onready var FAs:VBoxContainer = \
 	$This/StandardBackground/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer
 
-
 func _ready() -> void:
 	page_id = 'NavFreeAgents'
 	
@@ -14,17 +13,27 @@ func _ready() -> void:
 func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 	match id:
 		'back':
+			if this_is_root:
+				return
 			cleanup()
 			nav_up({'result':'back'})
 		_:
-			printt('unhandled nav click ', page_id, ' ', id)
+			cleanup()
+			nav_to('NavPlayer',{
+				'player':franchise.free_agents[id],
+				'franchise':franchise
+			})
 
 func setup(args:Dictionary={}):
 	if this_is_root:
-		var f:Franchise = Franchise.new()
-		f.create_from_team_index(1)
-		args['franchise'] = f
-	franchise = args['franchise']
+		if franchise == null:
+			var f:Franchise = Franchise.new()
+			f.create_from_team_index(1)
+			args['franchise'] = f
+		else:
+			args['franchise'] = franchise
+	if args.has('franchise'):
+		franchise = args['franchise']
 	var FA_array:Array = franchise.free_agents.values()
 	FA_array.sort_custom(func(a,b): return a.speed > b.speed)
 	var custom_x:int = 0
@@ -66,4 +75,8 @@ func set_button_hover_true(button:navigable_button) -> void:
 
 func cleanup() -> void:
 	for node in FAs.get_children():
+		var nb = node.get_child(0)
+		printt('nb is', nb)
+		remove_from_group('navigable_button')
+		nb.queue_free()
 		node.queue_free()

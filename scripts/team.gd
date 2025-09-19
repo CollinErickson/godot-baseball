@@ -208,9 +208,7 @@ func optimize_lineup() -> void:
 		#put in defense
 		defense_order[pos_ind] = p.player_id
 	# Sort by hitting to get batting order
-	printt('lineup_set before sort', lineup_set)
 	lineup_set.sort_custom(func(a,b):return a.speed > b.speed)
-	printt('lineup_set after sort', lineup_set)
 	batting_order = []
 	for i in range(len(lineup_set)):
 		batting_order.push_back(lineup_set[i].player_id)
@@ -226,3 +224,7 @@ func lineup_sort(p1:Player, p2:Player, pos:String) -> bool:
 		return false
 	# Matching position, so pick best
 	return p1.overall > p2.overall
+
+func add_player(player:Player) -> void:
+	roster.push_back(player)
+	rosterdict[player.player_id] = player

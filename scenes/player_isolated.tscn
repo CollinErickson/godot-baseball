@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dh1aqlmpd8ksa"]
+
+[ext_resource type="PackedScene" uid="uid://c61aqyd7i1lni" path="res://characters3D/char_3d.tscn" id="1_1s8oc"]
+[ext_resource type="Script" uid="uid://c15honochrma1" path="res://scripts/player_isolated.gd" id="1_y7tid"]
+
+[node name="PlayerIsolated" type="Node3D"]
+script = ExtResource("1_y7tid")
+
+[node name="Char3D" parent="." instance=ExtResource("1_1s8oc")]
+character = 2
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)

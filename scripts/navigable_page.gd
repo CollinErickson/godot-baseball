@@ -80,16 +80,17 @@ func _process(_delta: float) -> void:
 				set_button_hover_true(button)
 	prev_mouse_pos = mpos2
 
-func set_active(new_is_active:bool, args:Dictionary={}) -> void:
+func set_active(new_is_active:bool, args:Dictionary={},
+				keep_visible:bool=false) -> void:
 	printt('in set_active', page_id, new_is_active)
 	is_active = new_is_active
 	# Update the page as needed, needs to happen before getting buttons
 	if new_is_active:
 		setup(args)
 	# Set visibility
-	visible = true
+	visible = true # Needs to be visible for subpage to be visible
 	if get_node_or_null("This") != null:
-		get_node_or_null("This").visible = new_is_active
+		get_node_or_null("This").visible = new_is_active or keep_visible
 	else:
 		push_warning("Navigable page doesn't have 'This' child node", page_id)
 	# Update buttons
@@ -194,11 +195,12 @@ func update_buttons() -> void:
 	disconnect_nav_button_signals()
 	get_navigable_buttons()
 
-func nav_to(subpage_name:String, args:Dictionary={}) -> void:
+func nav_to(subpage_name:String, args:Dictionary={},
+			keep_visible:bool = false) -> void:
 	args['from'] = page_id
 	
 	# Stop this page
-	set_active(false)
+	set_active(false, {}, keep_visible)
 	# Make sure that the subpage exists
 	if get_node_or_null("Subpages") == null:
 		push_error("No Subpages node on page_id = ", page_id)
