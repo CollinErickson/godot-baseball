@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://vionyj8egtdc"]
+
+[ext_resource type="Script" uid="uid://b8sx7woyn66ya" path="res://scripts/nav_game.gd" id="1_lo2kg"]
+[ext_resource type="PackedScene" uid="uid://5d25lmj2aoqh" path="res://scenes/game.tscn" id="2_xl7ev"]
+
+[node name="NavGame" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lo2kg")
+
+[node name="This" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Game" parent="This" instance=ExtResource("2_xl7ev")]
+layout_mode = 1
+
+[node name="Subpages" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0

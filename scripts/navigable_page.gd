@@ -13,6 +13,7 @@ var page_id:String = '' # Should be overwritten when extended in _ready()
 var prev_mouse_pos:Vector2
 #const navigable_button = preload("res://scripts/navigable_button.gd")
 const navigable_button_scene = preload("res://scenes/navigable_button.tscn")
+var skip_nav_page_process = false
 
 func _ready() -> void:
 	pass
@@ -24,6 +25,8 @@ func parent_ready() -> void:
 	set_active(this_is_root, {'from':'root'})
 
 func _process(_delta: float) -> void:
+	if skip_nav_page_process:
+		return
 	assert(is_active)
 	
 	# Don't allow quick clicks

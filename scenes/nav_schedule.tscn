@@ -1,0 +1,62 @@
+[gd_scene load_steps=5 format=3 uid="uid://dirmi5vxuao2g"]
+
+[ext_resource type="Script" uid="uid://pnybvrbju8jg" path="res://scripts/nav_schedule.gd" id="1_kdkle"]
+[ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="2_101fw"]
+[ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="3_1ikgs"]
+[ext_resource type="PackedScene" uid="uid://vionyj8egtdc" path="res://scenes/nav_game.tscn" id="4_lgosc"]
+
+[node name="NavSchedule" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kdkle")
+
+[node name="This" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StandardBackground" parent="This" instance=ExtResource("2_101fw")]
+layout_mode = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="This/StandardBackground"]
+layout_mode = 2
+offset_left = 539.0
+offset_right = 741.0
+offset_bottom = 112.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="This/StandardBackground/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 36
+text = "Schedule"
+horizontal_alignment = 1
+
+[node name="PlayNextGame" parent="This/StandardBackground/VBoxContainer2" instance=ExtResource("3_1ikgs")]
+layout_mode = 2
+text = "Play next game"
+page_id = "NavSchedule"
+id = "play"
+
+[node name="Back" parent="This/StandardBackground/VBoxContainer2" instance=ExtResource("3_1ikgs")]
+layout_mode = 2
+text = "Back"
+page_id = "NavSchedule"
+id = "back"
+row = 1
+
+[node name="Subpages" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="NavGame" parent="Subpages" instance=ExtResource("4_lgosc")]
+layout_mode = 1

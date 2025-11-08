@@ -16,6 +16,8 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 			nav_to('NavRoster', {'franchise':franchise})
 		'quit':
 			nav_up({'result':'quit'})
+		'schedule':
+			nav_to('NavSchedule', {'franchise':franchise})
 		_:
 			printt('unhandled nav click ', page_id, ' ', id)
 

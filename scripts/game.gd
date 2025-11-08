@@ -1,4 +1,5 @@
 extends Control
+class_name GameNode
 
 # Settings
 var throw_mode:String = "BarOneWay" # "Button", "Bar", "BarOneWay"

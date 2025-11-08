@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://buhfe3ak5q66w"]
+[gd_scene load_steps=7 format=3 uid="uid://buhfe3ak5q66w"]
 
 [ext_resource type="PackedScene" uid="uid://cmhbnpjdaufux" path="res://scenes/standard_background.tscn" id="1_2l5un"]
 [ext_resource type="Script" uid="uid://cre4ms6ocpkyg" path="res://scripts/nav_franchise_season_home.gd" id="1_3p5hr"]
 [ext_resource type="PackedScene" uid="uid://bc2457841gwv6" path="res://scenes/navigable_button.tscn" id="2_3p5hr"]
 [ext_resource type="PackedScene" uid="uid://dmhjdoe5lmus0" path="res://scenes/nav_settings.tscn" id="4_6aj1x"]
 [ext_resource type="PackedScene" uid="uid://ddk8vm1b3iqxu" path="res://scenes/nav_roster.tscn" id="5_2kcly"]
+[ext_resource type="PackedScene" uid="uid://dirmi5vxuao2g" path="res://scenes/nav_schedule.tscn" id="6_n105e"]
 
 [node name="NavFranchiseSeasonHome" type="Control"]
 layout_mode = 3
@@ -90,4 +91,7 @@ grow_vertical = 2
 layout_mode = 1
 
 [node name="NavRoster" parent="Subpages" instance=ExtResource("5_2kcly")]
+layout_mode = 1
+
+[node name="NavSchedule" parent="Subpages" instance=ExtResource("6_n105e")]
 layout_mode = 1
