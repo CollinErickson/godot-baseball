@@ -874,12 +874,12 @@ func set_cutoff_fielder():
 
 func set_not_cutoff_fielder():
 	remove_from_group("cutoff_fielder")
-	if user_is_pitching_team and user_fields:
-		if $AltFielderAndCutLabel3D.visible:
-			$AltFielderAndCutLabel3D.visible = false
-			$AltFielderLabel3D.visible = true
-		else:
-			$CutoffLabel3D.visible = false
+	
+	if $AltFielderAndCutLabel3D.visible:
+		$AltFielderAndCutLabel3D.visible = false
+		$AltFielderLabel3D.visible = true
+	else:
+		$CutoffLabel3D.visible = false
 
 var time_set_alt_fielder #= Time.get_ticks_msec() - 1000
 func set_alt_fielder():
