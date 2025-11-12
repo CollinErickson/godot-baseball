@@ -40,7 +40,7 @@ func play_sound_from_path(path:String) -> void:
 	var SOUND: AudioStream = load(path)
 	x.stream = SOUND
 	add_child(x)
-	printt('playing something')
+	#printt('playing something')
 	
 	x.finished.connect(x.queue_free)
 	x.play()
@@ -82,13 +82,13 @@ func play_commentator_post_play(x:Dictionary) -> void:
 				points[i] += 1. / points_dict[k]
 			if k not in points_dict.keys():
 				push_warning("key not found in points_dict ", k)
-	printt('text is', commentator_json['text'])
-	printt('valid after key loop is', valid)
-	printt('points after key loop is', points)
+	#printt('text is', commentator_json['text'])
+	#printt('valid after key loop is', valid)
+	#printt('points after key loop is', points)
 	points = array_index_bool(points, valid.map(func(xx):return xx>-0.5))
-	printt('points after filter valid', points)
+	#printt('points after filter valid', points)
 	valid = valid.filter(func(xx): return xx > -0.5)
-	printt('valid after filter is', valid)
+	#printt('valid after filter is', valid)
 	assert(len(points) == len(valid))
 	var i:int = which_max(points)
 	var best_ind:int = valid[i]
@@ -100,11 +100,11 @@ func play_commentator_post_play(x:Dictionary) -> void:
 	best_ind = all_max.pick_random()
 	# Skip if most points is 0? No, some generic statements always get 0
 	# TODO: pick among all the best
-	printt('best ind is', i, best_ind)
+	#printt('best ind is', i, best_ind)
 	printt('commentator line is:', commentator_json['text'][best_ind])
 	var path:String = "res://audio/sounds/commentator/" + \
 		commentator_json['file'][best_ind] + ".wav"
-	printt('path for commentator sound is', path)
+	#printt('path for commentator sound is', path)
 	play_sound_from_path(path)
 
 # Points are based on how frequent the event occurs

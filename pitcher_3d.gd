@@ -544,7 +544,7 @@ func set_look_at_position(pos) -> void:
 	$Char3D.look_at(pos, Vector3.UP, true)
 
 func setup_player(player_, team, is_home_team:bool) -> void:
-	printt('in pitcher: setup_player')
+	#printt('in pitcher: setup_player')
 	if player_ == null:
 		push_error("no player in pitcher")
 	player = player_

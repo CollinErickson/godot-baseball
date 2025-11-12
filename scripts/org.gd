@@ -28,8 +28,8 @@ func create_from_file(teams_:DF, players:DF) -> void:
 			team_row.d['location'][0],
 			team_row.d['name'][0],
 			team_row.d['abbr'][0],
-			'red',
-			'white'
+			team_row.d['primary_color'][0],
+			team_row.d['secondary_color'][0]
 		)
 		# Put players on team
 		var players_level:DF = players.filter_val_copy('level_id', i + 1)

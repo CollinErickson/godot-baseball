@@ -16,9 +16,8 @@ func handle_nav_button_click(id:String, _args:Dictionary={}) -> void:
 		"play":
 			nav_to('NavGame', {
 				'away_team':franchise.orgs[1].teams[0],
-				'home_team':franchise.orgs[1].teams[1]
+				'home_team':franchise.orgs[2].teams[0]
 			})
-
 
 func setup(args:Dictionary={}):
 	if args['from'] == 'franchise_season_home':
@@ -26,3 +25,4 @@ func setup(args:Dictionary={}):
 	if this_is_root:
 		franchise = Franchise.new()
 		franchise.create_from_team_index(0)
+	#printt('in nav_schedule setup', franchise.orgs[1].teams)

@@ -192,6 +192,8 @@ func set_look_at_position(pos) -> void:
 func setup_player(player, team, is_home_team:bool) -> void:
 	assert(player != null)
 	bats = player.bats
+	if bats == 'S':
+		bats = 'R'
 	assert(['R', 'L'].has(bats))
 	#printt('in batter setting bats', bats, player.bats)
 	position = Vector3(1, 0, 0.5)
